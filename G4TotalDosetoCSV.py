@@ -4,6 +4,8 @@ import numpy as np
 
 # ---------------------- Deprecated -------- DONT USE -----------------------
 
+# ---------------------- Deprecated -------- DONT USE -----------------------
+
 FolderName = "MulasSolarProton2e9Full"
 NORM_Spec = 3.798797E+11
 N = 2000000000
