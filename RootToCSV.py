@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 # ---------------------- Dont Modify -------- Dont break compatability -----------------------
 
-Folder = "/scratch/work/fetzera1/MULASS/MulasSolarProton2e910MeV/"
+Folder = "/scratch/work/fetzera1/MULASS/MulasCosmicProton1e8Full/"
 
 # Find all files ending with .root
 FileList = glob.glob(Folder + "root/*.root")
