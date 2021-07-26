@@ -21,7 +21,7 @@ for file in FileList:
     print("Number of Data points", "{:,}".format(Length))
     Len = int(Length / 100)
 
-    Samples = np.zeros((3, 100), dtype=np.double)
+    Samples = np.zeros((3, 100))
 
     for i in range(100):
         Samples[0, i] = sum(Data[0, Len * i:Len * (i + 1) - 1])

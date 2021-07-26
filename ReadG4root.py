@@ -20,7 +20,7 @@ def readG4root(fileName):
 
     Temp = tree["Gun_energy_MeV"].array(library="np")
 
-    Data = np.zeros((3, len(Temp)), dtype=np.double)
+    Data = np.zeros((3, len(Temp)))
 
     Data[0] = Temp
     Data[1] = tree["Sivol_Edep_MeV"].array(library="np")
@@ -33,6 +33,7 @@ if __name__ == "__main__":
     DataTest = readG4root(
         "/home/anton/Desktop/triton_work/TEST/SiChip in 1cm cube for Spenvis Test/root/electrons500kev1mm2SiChip.root")
     print(type(DataTest))
+    print(type(DataTest[0][0]))
     plt.hist(DataTest[0], bins=1000)
     plt.yscale("log")
     plt.xlabel("Primary particle energy [MeV]")

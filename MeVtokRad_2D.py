@@ -27,9 +27,9 @@ def MeVtokRad_2D(MeV, NORM_FACTOR_SPECTRUM, Npart):
     print("MissionJoule", MissionJoule)  # J
 
     Grays = MissionJoule / MassPerArea
-    print("Grays", Grays)  # 37763 J/kg
+    print("Grays", Grays)  # J/kg
 
     kRads = Grays / 10
-    print("kRads", kRads)  # 3776 krad
+    print("kRads", kRads)  # krad
 
     return kRads

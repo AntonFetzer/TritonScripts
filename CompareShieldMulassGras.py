@@ -1,8 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from ReadSD2Q import readSDQ2
-from G4TotalDosetoCSV import G4TotalDose
-
 
 
 ####### Import and Plot SHIELDOSE Data #########
