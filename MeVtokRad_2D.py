@@ -1,13 +1,9 @@
 def MeVtokRad_2D(MeV, NORM_FACTOR_SPECTRUM, Npart):
+
     # ----------- Norm factors from GPS spectrum ------------
-    # NORM_FACTOR_SPECTRUM = 8.003046E+14  # ***************************************************************************
     NORM_FACTOR_ANGULAR = 2.500000E-01
     Norm = NORM_FACTOR_SPECTRUM * NORM_FACTOR_ANGULAR
     # -----------------------------------------
-
-    # --------- Simulated Particle Fluence --------
-    # Npart = 2e9  # ***************************************************************************************************
-    # ------------------------------------
 
     # --------- Mission MeV --------
     MissionMeV = MeV / Npart * Norm
