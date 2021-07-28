@@ -13,6 +13,7 @@ def readMultipleRoot(fileName):
     # tree.show()
 
     Branches = tree.keys()
+    print("Branches:", Branches)
     NumVols = int((len(Branches)/2)-1)
 
     GunEnergy = tree["Gun_energy_MeV"].array(library="np")
@@ -23,8 +24,8 @@ def readMultipleRoot(fileName):
     Esec = np.zeros((NumVols, NumPoints))
 
     for i in range(NumVols):
-        Edep[i] = tree[Branches[2*i]].array(library="np")
-        Esec[i] = tree[Branches[2*i+1]].array(library="np")
+        Edep[i] = tree[Branches[i]].array(library="np")
+        Esec[i] = tree[Branches[i+NumVols]].array(library="np")
 
     return GunEnergy, Edep, Esec  # 0: Gun_energy; 1: SiVol_0_Edep; 2: SiVol_0_Esec; 3: SiVol_1_Edep; 4: SiVol_1_Esec etc...
 
