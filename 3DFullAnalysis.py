@@ -1,73 +1,58 @@
 import numpy as np
 from ReadMultipleRoot import readMultipleRoot
 from MeVtokRad_3D import MeVtokRad_3D
+import matplotlib.pyplot as plt
 
-Path = "/home/anton/Desktop/triton_work/3D/SiChipTestModular/root/"
-File = "1mmal3dmultichip2e9electrons500kev.root"
+Path = "/home/anton/Desktop/triton_work/3D/MultiChipTest/root/Electron/"
+File = "1-mmal3dmultichip2e9electrons500kev.root"
 NORM_FACTOR_SPECTRUM = 5.886798E+14
 Npart = 2e9
 Radius = 10  # cm
 
-GunEnergy, Edep, Esec = readMultipleRoot(Path + File)
+Data = readMultipleRoot(
+    Path + File)  # ['Sivol_0_Edep_MeV', ... , 'Sivol_0_Esec_MeV', ... , 'Gun_energy_MeV', 'Gun_angle_deg']
 
-GunEnergyTotalMeV = sum(GunEnergy)
+NumDataSets = len(Data)
 
-NumberVolumes = len(Edep)
+TotalMeV = []
 
-EdepTotalMeV = []
-EsecTotalMeV = []
+for i in range(NumDataSets):
+    TotalMeV.append(sum(Data[i]))
 
-for i in range(NumberVolumes):
-    EdepTotalMeV.append(sum(Edep[i]))
-    EsecTotalMeV.append(sum(Esec[i]))
+print("Edep1TotalMeV:", TotalMeV[0])
 
-print("GunEnergyTotalMeV:", GunEnergyTotalMeV)
-print("EdepTotalMeV:", EdepTotalMeV[0])
-print("EsecTotalMeV:", EsecTotalMeV[0])
-
-NumPoints = len(GunEnergy)
+# -------------------------- Standard Deviation ---------------------------
+NumPoints = len(Data[0])
 SampleLen = int(NumPoints / 100)
 
-GunEnergySamples = np.zeros(100)
-EdepSamples = np.zeros((NumberVolumes, 100))
-EsecSamples = np.zeros((NumberVolumes, 100))
+Samples = np.zeros(100)
+StdMeV = []
 
-for i in range(100):
-    GunEnergySamples[i] = sum(GunEnergy[SampleLen * i:SampleLen * (i + 1) - 1])
-
-    for j in range(NumberVolumes):
-        EdepSamples[j][i] = sum(Edep[j][SampleLen * i:SampleLen * (i + 1) - 1])
-        EsecSamples[j][i] = sum(Esec[j][SampleLen * i:SampleLen * (i + 1) - 1])
+for j in range(NumDataSets):
+    for i in range(100):
+        Samples[i] = sum(Data[j][SampleLen * i:SampleLen * (i + 1) - 1])
     # print("From:", SampleLen*i)
     # print("To:", SampleLen*(i+1)-1)
+    # print("Samples:", Samples)
+    StdMeV.append(np.std(Samples))
 
-GunEnergyStdMeV = np.std(GunEnergySamples)
-EdepStdMeV = []
-EsecStdMeV = []
+print("Edep1StdMeV:", StdMeV[0])
 
-for j in range(NumberVolumes):
-    EdepStdMeV.append(np.std(EdepSamples[j][:]))
-    EsecStdMeV.append(np.std(EsecSamples[j][:]))
+# --------- Conversion ##############
+TotalKRAD = []
+StdKRAD = []
 
-print("GunEnergyStdMeV %:", 100 * GunEnergyStdMeV / GunEnergyTotalMeV)
-print("EdepStdMeV %:", 100 * EdepStdMeV[0] / EdepTotalMeV[0])
-print("EsecStdMeV %:", 100 * EsecStdMeV[0] / EsecTotalMeV[0])
+for i in range(NumDataSets):
+    TotalKRAD.append(MeVtokRad_3D(TotalMeV[i], NORM_FACTOR_SPECTRUM, Npart, Radius))
+    StdKRAD.append(MeVtokRad_3D(StdMeV[i], NORM_FACTOR_SPECTRUM, Npart, Radius))
 
-GunEnergyTotalKRAD = MeVtokRad_3D(GunEnergyTotalMeV, NORM_FACTOR_SPECTRUM, Npart, Radius)
-GunEnergyStdKRAD = MeVtokRad_3D(GunEnergyStdMeV, NORM_FACTOR_SPECTRUM, Npart, Radius)
+print("Edep1TotalKRAD:", TotalKRAD[0])
+print("Edep1StdKRAD:", StdKRAD[0])
 
-EdepTotalKRAD = []
-EsecTotalKRAD = []
-EdepStdKRAD = []
-EsecStdKRAD = []
+print("Edep1StdMeV %:", 100 * TotalKRAD[0] / StdKRAD[0])
+print("Esec1StdMeV %:", 100 * TotalKRAD[4] / StdKRAD[4])
 
-for i in range(NumberVolumes):
-    EdepTotalKRAD.append(MeVtokRad_3D(EdepTotalMeV[i], NORM_FACTOR_SPECTRUM, Npart, Radius))
-    EsecTotalKRAD.append(MeVtokRad_3D(EsecTotalMeV[i], NORM_FACTOR_SPECTRUM, Npart, Radius))
-    EdepStdKRAD.append(MeVtokRad_3D(EdepStdMeV[i], NORM_FACTOR_SPECTRUM, Npart, Radius))
-    EsecStdKRAD.append(MeVtokRad_3D(EsecStdMeV[i], NORM_FACTOR_SPECTRUM, Npart, Radius))
-
-
-print("GunEnergyTotalKRAD:", GunEnergyTotalKRAD)
-for i in range(NumberVolumes):
-    print("EdepTotalKRAD", str(i), EdepTotalKRAD[i], "+-", EdepStdKRAD[i])
+print("GunEnergyTotalKRAD:", TotalKRAD[-2])
+for i in range(4):
+    print("EdepTotalKRAD", str(i), TotalKRAD[i], "+-", TotalKRAD[i])
+    print("EsecTotalKRAD", str(i), TotalKRAD[i + 4], "+-", TotalKRAD[i + 4])

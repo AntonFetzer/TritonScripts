@@ -14,27 +14,25 @@ def readMultipleRoot(fileName):
 
     Branches = tree.keys()
     print("Branches:", Branches)
-    NumVols = int((len(Branches)/2)-1)
+    NumBranches = len(Branches)
 
     GunEnergy = tree["Gun_energy_MeV"].array(library="np")
     NumPoints = len(GunEnergy)
     print("Number of Data points", "{:,}".format(NumPoints))
 
-    Edep = np.zeros((NumVols, NumPoints))
-    Esec = np.zeros((NumVols, NumPoints))
+    Data = np.zeros((NumBranches, NumPoints))
 
-    for i in range(NumVols):
-        Edep[i] = tree[Branches[i]].array(library="np")
-        Esec[i] = tree[Branches[i+NumVols]].array(library="np")
+    for i in range(NumBranches):
+        Data[i] = tree[Branches[i]].array(library="np")
 
-    return GunEnergy, Edep, Esec  # 0: Gun_energy; 1: SiVol_0_Edep; 2: SiVol_0_Esec; 3: SiVol_1_Edep; 4: SiVol_1_Esec etc...
+    return Data  # ['Sivol_0_Edep_MeV', ... , 'Sivol_0_Esec_MeV', ... , 'Gun_energy_MeV', 'Gun_angle_deg']
 
 
 if __name__ == "__main__":
-    GunEnergyTest, EdepTest, EsecTest = readMultipleRoot("/home/anton/Desktop/triton_work/3D/SiChipTestModular/root/1mmal3dmultichip2e9electrons500kev.root")
-    print(type(GunEnergyTest))
-    print(type(GunEnergyTest[0]))
-    plt.hist(GunEnergyTest, weights=EdepTest[0], bins=100)
+    DataTest = readMultipleRoot("/home/anton/Desktop/triton_work/3D/MultiChipTest/root/1-mmal3dmultichip2e9electrons500kev.root")
+    print(type(DataTest))
+    print(type(DataTest[0]))
+    plt.hist(DataTest[-2], weights=DataTest[1], bins=100)
     plt.yscale("log")
     plt.xlabel("Primary particle energy [MeV]")
     plt.ylabel("Dose per primary energy bin")
