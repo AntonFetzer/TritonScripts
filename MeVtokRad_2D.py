@@ -9,23 +9,23 @@ def MeVtokRad_2D(MeV, NORM_FACTOR_SPECTRUM, Npart):
     MissionMeV = MeV / Npart * Norm
     # -------------------------------
 
-    print("MissionMeV:", MissionMeV)  # MeV
+    # print("MissionMeV:", MissionMeV)  # MeV
 
     # ------ Sensitive Volume ------
     SiDensity = 2.33 * 1e-3  # kg/cm3
     SiThick = 0.05  # cm
     MassPerArea = SiDensity * SiThick  # kg/cm2
-    print("SiMass", MassPerArea)  # kg
+    # print("SiMass", MassPerArea)  # kg
     # -----------------------------
 
     JperMev = 1.602E-13
     MissionJoule = MissionMeV * JperMev
-    print("MissionJoule", MissionJoule)  # J
+    # print("MissionJoule", MissionJoule)  # J
 
     Grays = MissionJoule / MassPerArea
-    print("Grays", Grays)  # J/kg
+    # print("Grays", Grays)  # J/kg
 
     kRads = Grays / 10
-    print("kRads", kRads)  # krad
+    # print("kRads", kRads)  # krad
 
     return kRads

@@ -1,14 +1,14 @@
 import numpy as np
 from ReadMultipleRoot import readMultipleRoot
 from MeVtokRad_3D import MeVtokRad_3D
-import matplotlib.pyplot as plt
 from natsort import natsorted
 import os
 
-Path = "/home/anton/Desktop/triton_work/3D/MultiChipTest/root/SolarProton/"
+Path = "/home/anton/Desktop/triton_work/3D/MultiChipTest/root/CosmicProton/"
 # NORM_FACTOR_SPECTRUM = 5.886798E+14  # Electron500keV
 # NORM_FACTOR_SPECTRUM = 3.381390E+11  # Protons10MeV
-NORM_FACTOR_SPECTRUM = 1.109681E+10  # SolarProton10MeV
+# NORM_FACTOR_SPECTRUM = 1.109681E+10  # SolarProton10MeV
+NORM_FACTOR_SPECTRUM = 2.024537E+07  # CosmicProtonsFull
 
 Npart = 2e9
 Radius = 10  # cm
@@ -23,7 +23,7 @@ StdMeV = []
 TotalKRAD = []
 StdKRAD = []
 
-CSVfile = open(Path + Files[0].split(".")[0].split("-")[1] + "DoseTable.txt", 'w')
+CSVfile = open(Path + Files[0].split(".")[0].split("-")[1] + "DoseTable.csv", 'w')
 
 for File in Files:
 
