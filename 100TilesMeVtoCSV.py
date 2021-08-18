@@ -1,29 +1,35 @@
 import uproot
+import awkward as ak
 import numpy as np
 import os
 
-Path = "/home/anton/Desktop/triton_work/Gradient/4MaterialGradient/"
-# Path = "/scratch/work/fetzera1/Gradient/2MaterialGradient/ta-al/root/"
+# "/scratch/work/fetzera1/Gradient/4MaterialGradient/Al-Pe-Al/root/",
+# PathList = ["/scratch/work/fetzera1/Gradient/4MaterialGradient/Al-W-Al/root/"]
 
-Files = [f for f in os.listdir(Path) if f.endswith('.root')]
-#Files = ["gradient-al-pe-al-pe-1e8electron.root"]
+PathList = ["/scratch/work/fetzera1/Gradient/2MaterialGradient/pe-zn/root/"]
 
-for File in Files:
-    f = uproot.open(Path + File)
-    print("Read in: " + Path + File)
+for Path in PathList:
 
-    tree = f["Detector Data 0"]
+    Files = [f for f in os.listdir(Path) if f.endswith('.root')]
+    # Files = ["gradient-al-test-directions-1e7proton.root"]
 
-    keys = tree.keys()
+    for File in Files:
+        f = uproot.open(Path + File)
+        print("Read in: " + Path + File)
 
-    print(keys)
+        tree = f["Detector Data 0"]
 
-    Edep = np.zeros(len(keys))
+        keys = tree.keys()
 
-    for i in range(len(keys)):
-        Edep[i] = np.sum(tree[keys[i]].array(library="np"))
+        # print(keys)
 
-    np.savetxt(Path + File.split(".")[0] + ".txt", Edep)
+        Edep = np.zeros(len(keys))
 
+        for i in range(len(keys)):
+            # Edep[i] = np.sum(tree[keys[i]].array(library="np"))
+            Edep[i] = ak.sum(tree[keys[i]].array())
+            print(keys[i], Edep[i])
 
-# srun --mem=10G --time=00:15:00 python 100TilesMeVtoCSV.py
+        np.savetxt(Path + File.split(".")[0] + ".txt", Edep)
+
+# srun --mem=16G --time=05:00:00 python 100TilesMeVtoCSV.py

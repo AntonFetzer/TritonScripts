@@ -28,8 +28,15 @@ Materials = ["G4_Li", "G4_Be", "G4_B", "G4_C", "G4_Na", "G4_Mg", "G4_Al", "G4_Si
 #    print('            <solidref ref="Shield_' + str(i) + '"/>')
 #    print('        </volume>')
 
-for y in range(16):
-    for x in range(16):
-        print("/detector/add Sivol_" + str(x+y*16))
-        print("A:", (15 - x) * (15 - y), "B:", x * (15 - y), "C:", (15 - x) * y, "D:", x * y)
-        print("Sum", (15 - x) * (15 - y) + x * (15 - y) + (15 - x) * y + x * y)
+# for y in range(32):
+#     for x in range(32):
+#         print(y*x)
+#         print("/detector/add Sivol_" + str(x+y*32))
+#         print("A:", (31 - x) * (31 - y), "B:", x * (31 - y), "C:", (31 - x) * y, "D:", x * y)
+#         print("Sum", (31 - x) * (31 - y) + x * (31 - y) + (31 - x) * y + x * y)
+
+x = 10
+y = 0
+print("/detector/add Sivol_" + str(x+y*32))
+print("A:", (31 - x) * (31 - y), "B:", x * (31 - y), "C:", (31 - x) * y, "D:", x * y)
+print("Sum", (31 - x) * (31 - y) + x * (31 - y) + (31 - x) * y + x * y)
