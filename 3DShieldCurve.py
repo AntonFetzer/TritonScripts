@@ -4,7 +4,7 @@ from ReadSD2Q import readSDQ2
 import os
 import csv
 
-Path = "/home/anton/Desktop/triton_work/3D/MultiChipTest/CSV/"
+Path = "/home/anton/Desktop/triton_work/3D/MultiChipTest/AluVault1cm2Hole/csv/"
 
 # Get list of all root files in that folder
 CSVFiles = [f for f in os.listdir(Path) if f.endswith('.csv')]
@@ -26,7 +26,7 @@ for file in CSVFiles:
 
 # print(CSVFilesContent[0][0][0][:])  #
 
-Electron = np.zeros((4, len(ThickList), 4))  # [Sivol, Thickness, Variable]
+ElectronFull = np.zeros((4, len(ThickList), 4))  # [Sivol, Thickness, Variable]
 SolarProton = np.zeros((4, len(ThickList), 4))
 TrapProton = np.zeros((4, len(ThickList), 4))
 CosmicProton = np.zeros((4, len(ThickList), 4))
@@ -35,12 +35,12 @@ for j in range(4):
     for i in range(len(ThickList)):
         SolarProton[j][i] = CSVFilesContent[0][2 + j + i * 7][1:5]
         CosmicProton[j][i] = CSVFilesContent[1][2 + j + i * 7][1:5]
-        Electron[j][i] = CSVFilesContent[2][2 + j + i * 7][1:5]
+        ElectronFull[j][i] = CSVFilesContent[2][2 + j + i * 7][1:5]
         TrapProton[j][i] = CSVFilesContent[3][2 + j + i * 7][1:5]
 
-print(Electron[0][:, 0])
+print(ElectronFull[0][:, 0])
 
-Total = Electron + SolarProton + TrapProton + CosmicProton
+Total = ElectronFull + SolarProton + TrapProton + CosmicProton
 
 # ------------------------------- Import and Plot SHIELDOSE Data -------------------------------------------------------
 SDData = readSDQ2("spenvis_sqo.txt")
@@ -52,8 +52,8 @@ plt.plot(SDData[:, 0], SDData[:, 1] / 1000, label="SHIELDOSE-2Q Total trapped Do
 # ----------------------------------------- Plot Total Dose ------------------------------------------------------------
 plt.errorbar(ThickList, Total[0][:, 0], Total[0][:, 1], fmt='+', capsize=5, markersize=10, label="Geant-4 Total Dose")
 
-# ----------------------------------------- Plot Electrons -------------------------------------------------------------
-plt.errorbar(ThickList, Electron[0][:, 0], Electron[0][:, 1], fmt='+', capsize=5, markersize=10, label="Geant-4 Trapped Electrons")
+# ----------------------------------------- Plot ElectronsFull -------------------------------------------------------------
+plt.errorbar(ThickList, ElectronFull[0][:, 0], ElectronFull[0][:, 1], fmt='+', capsize=5, markersize=10, label="Geant-4 Trapped Electrons full spectrum")
 
 # ----------------------------------------- Plot Trapped Protons -------------------------------------------------------
 plt.errorbar(ThickList, TrapProton[0][:, 0], TrapProton[0][:, 1], fmt='+', capsize=5, markersize=10, label="Geant-4 Trapped Protons")

@@ -1,7 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib
 from MeVtokRad_2D import MeVtokRad_2D
+import nmmn.plots
+
+turbo = nmmn.plots.turbocmap()
 
 Path = "/home/anton/Desktop/triton_work/Gradient/4MaterialGradient/Pe-Al-Zn-Al/csv/"
 
@@ -35,34 +37,28 @@ for y in range(Plates):
         i += 1
 
 fig1 = plt.figure(1)  # , figsize=(5, 5)
-plt.imshow(EleckRad, extent=(0, Plates, Plates, 0))
-plt.jet()
-plt.title("Electron dose map behind gradient shielding " + Shield + "\n Gradient  " + MatA + " --> " + MatC)
+plt.imshow(EleckRad, cmap=turbo, extent=(0, Plates, Plates, 0))
+plt.title("Electron dose map behind gradient shielding " + Shield + "\n Gradient  " + MatA + " --> " + MatC + "   Minimum=" + str(round(np.min(EleckRad), 2)) + " krad")
 plt.xlabel("Plate Y index   Gradient " + MatB + " --> " + MatD)
 plt.ylabel("Plate X index")
 plt.colorbar()
-# plt.show()
 plt.savefig(Path + Shield + "-Electron-Gradient.eps", format='eps')
 
 fig2 = plt.figure(2)
-plt.imshow(ProtkRad, extent=(0, Plates, Plates, 0))
-plt.jet()
-plt.title("Proton dose map behind gradient shielding " + Shield + "\n Gradient  " + MatA + " --> " + MatC)
+plt.imshow(ProtkRad, cmap=turbo, extent=(0, Plates, Plates, 0))
+plt.title("Proton dose map behind gradient shielding " + Shield + "\n Gradient  " + MatA + " --> " + MatC + "   Minimum=" + str(round(np.min(ProtkRad), 2)) + " krad")
 plt.xlabel("Plate Y index   Gradient " + MatB + " --> " + MatD)
 plt.ylabel("Plate X index")
 plt.colorbar()
-# plt.show()
 plt.savefig(Path + Shield + "-Proton-Gradient.eps", format='eps')
 
 TotalkRad = EleckRad + ProtkRad
 fig3 = plt.figure(3)
-plt.imshow(TotalkRad, extent=(0, Plates, Plates, 0))
-plt.jet()
-plt.title("Total dose map behind gradient shielding " + Shield + "\n Gradient  " + MatA + " --> " + MatC)
+plt.imshow(TotalkRad, cmap=turbo, extent=(0, Plates, Plates, 0))
+plt.title("Total dose map behind gradient shielding " + Shield + "\n Gradient  " + MatA + " --> " + MatC + "   Minimum=" + str(round(np.min(TotalkRad), 2)) + " krad")
 plt.xlabel("Plate Y index   Gradient " + MatB + " --> " + MatD)
 plt.ylabel("Plate X index")
 plt.colorbar()
-# plt.show()
 plt.savefig(Path + Shield + "-Total-Gradient.eps", format='eps')
 
 '''

@@ -4,17 +4,17 @@ from MeVtokRad_3D import MeVtokRad_3D
 from natsort import natsorted
 import os
 
-Path = "/home/anton/Desktop/triton_work/3D/MultiChipTest/root/CosmicProton/"
+Path = "/home/anton/Desktop/triton_work/3D/MultiChipTest/root/"
 # NORM_FACTOR_SPECTRUM = 5.886798E+14  # Electron500keV
 # NORM_FACTOR_SPECTRUM = 3.381390E+11  # Protons10MeV
-# NORM_FACTOR_SPECTRUM = 1.109681E+10  # SolarProton10MeV
-NORM_FACTOR_SPECTRUM = 2.024537E+07  # CosmicProtonsFull
+# NORM_FACTOR_SPECTRUM = 6.159454E+15  # ElectronsFull
+NORM_FACTOR_SPECTRUM = 8.003046E+14  # ProtonFUll
 
 Npart = 2e9
 Radius = 10  # cm
 
 # Get list of all root files in that folder
-Files = [f for f in os.listdir(Path) if f.endswith('.root')]
+Files = [f for f in os.listdir(Path) if f.endswith('protonsfull.root')]
 Files = natsorted(Files)
 
 NumDataSets = 0

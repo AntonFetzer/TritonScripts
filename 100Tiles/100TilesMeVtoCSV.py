@@ -3,10 +3,8 @@ import awkward as ak
 import numpy as np
 import os
 
-# "/scratch/work/fetzera1/Gradient/4MaterialGradient/Al-Pe-Al/root/",
-# PathList = ["/scratch/work/fetzera1/Gradient/4MaterialGradient/Al-W-Al/root/"]
-
-PathList = ["/scratch/work/fetzera1/Gradient/2MaterialGradient/pe-zn/root/"]
+#PathList = ["/scratch/work/fetzera1/Gradient/2MaterialGradient/Cu-Al/root/"]
+PathList = ["/home/anton/Desktop/triton_work/Gradient/2MaterialGradient/Cu-Al/root/"]
 
 for Path in PathList:
 
