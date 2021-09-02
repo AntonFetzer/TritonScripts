@@ -4,7 +4,7 @@ import numpy as np
 import os
 
 #PathList = ["/scratch/work/fetzera1/Gradient/2MaterialGradient/Cu-Al/root/"]
-PathList = ["/home/anton/Desktop/triton_work/Gradient/2MaterialGradient/Cu-Al/root/"]
+PathList = ["/scratch/work/fetzera1/Permutations/root/"]
 
 for Path in PathList:
 
