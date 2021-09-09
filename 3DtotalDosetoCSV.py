@@ -1,20 +1,21 @@
 import numpy as np
-from ReadMultipleRoot import readMultipleRoot
-from MeVtokRad_3D import MeVtokRad_3D
+from Dependencies.ReadMultipleRoot import readMultipleRoot
+from Dependencies.MeVtokRad_3D import MeVtokRad_3D
+from Dependencies.EstimateError import EstimateError
 from natsort import natsorted
 import os
 
-Path = "/home/anton/Desktop/triton_work/3D/MultiChipTest/root/"
-# NORM_FACTOR_SPECTRUM = 5.886798E+14  # Electron500keV
+Path = "/home/anton/Desktop/triton_work/3D/PE-W-Vault/1-5gcm2/root/"
+NORM_FACTOR_SPECTRUM = 5.886798E+14  # Electron500keV
 # NORM_FACTOR_SPECTRUM = 3.381390E+11  # Protons10MeV
 # NORM_FACTOR_SPECTRUM = 6.159454E+15  # ElectronsFull
-NORM_FACTOR_SPECTRUM = 8.003046E+14  # ProtonFUll
+# NORM_FACTOR_SPECTRUM = 8.003046E+14  # ProtonFUll
 
 Npart = 2e9
 Radius = 10  # cm
 
 # Get list of all root files in that folder
-Files = [f for f in os.listdir(Path) if f.endswith('protonsfull.root')]
+Files = [f for f in os.listdir(Path) if f.endswith('kev.root')]
 Files = natsorted(Files)
 
 NumDataSets = 0
@@ -23,12 +24,11 @@ StdMeV = []
 TotalKRAD = []
 StdKRAD = []
 
-CSVfile = open(Path + Files[0].split(".")[0].split("-")[1] + "DoseTable.csv", 'w')
+CSVfile = open(Path + Files[0].split(".")[0].split("-")[3] + "DoseTable.csv", 'w')
 
 for File in Files:
 
-    Data = readMultipleRoot(
-        Path + File)  # ['Sivol_0_Edep_MeV', ... , 'Sivol_0_Esec_MeV', ... , 'Gun_energy_MeV', 'Gun_angle_deg']
+    Data = readMultipleRoot(Path + File)  # ['Sivol_0_Edep_MeV', ... , 'Sivol_0_Esec_MeV', ... , 'Gun_energy_MeV', 'Gun_angle_deg']
 
     NumDataSets = len(Data)
     NumSivols = int(NumDataSets / 2) - 1
@@ -40,18 +40,12 @@ for File in Files:
 
     # -------------------------- Standard Deviation ---------------------------
     NumPoints = len(Data[0])
-    SampleLen = int(NumPoints / 100)
-
+    tesz = 1
     Samples = np.zeros(100)
     StdMeV = []
 
     for j in range(NumDataSets):
-        for i in range(100):
-            Samples[i] = sum(Data[j][SampleLen * i:SampleLen * (i + 1) - 1])
-        # print("From:", SampleLen*i)
-        # print("To:", SampleLen*(i+1)-1)
-        # print("Samples:", Samples)
-        StdMeV.append(np.std(Samples))
+        StdMeV.append(EstimateError(Data[j], 100))
 
     # --------- Conversion ##############
     TotalKRAD = []

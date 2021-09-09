@@ -3,8 +3,8 @@ import numpy as np
 from natsort import natsorted
 import os
 import csv
-from MeVtokRad_2D import MeVtokRad_2D
-from ReadSD2Q import readSDQ2
+from Dependencies.MeVtokRad_2D import MeVtokRad_2D
+from Dependencies.ReadSD2Q import readSDQ2
 
 # -------------- Change these inputs --------------------------
 Folder = "MulasCosmicProton1e8Full"
@@ -52,7 +52,7 @@ EsecStdkRads = MeVtokRad_2D(EsecStd, NORM_FACTOR_SPECTRUM, Npart)
 CriticalDose = [10] * len(ThickList)
 plt.plot(ThickList, CriticalDose, color='k', linewidth=2, label='Critical Dose of 10 krad')
 # ------------- Import and Plot SHIELDOSE Data --------------------------
-SDData = readSDQ2("spenvis_sqo.txt")
+SDData = readSDQ2("Dependencies/spenvis_sqo.txt")
 # SDDataCollumns = ['Aluminium Thickness', 'Total Dose', 'Electrons', 'Bremsstrahlung', 'Protons']
 plt.plot(SDData[:, 0], SDData[:, 4] / 1000, label="SHIELDOSE-2Q trapped Protons")
 plt.plot(SDData[:, 0], (SDData[:, 2] + SDData[:, 3]) / 1000, label="SHIELDOSE-2Q trapped Electrons + Bremsstrahlung")

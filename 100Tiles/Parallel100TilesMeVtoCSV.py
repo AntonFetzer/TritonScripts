@@ -5,14 +5,14 @@ import os
 import multiprocessing
 
 # PathList = ["/scratch/work/fetzera1/Gradient/2MaterialGradient/Pb-Al/root/"]
-PathList = ["/scratch/work/fetzera1/Permutations/root/"]
+PathList = ["/scratch/work/fetzera1/Gradient/2Material/PE-Pb/root/"]
 
 
 def sum_up_channels(i: int, tree_, keys_: str, que: multiprocessing.Queue):
     # Edep[i] = np.sum(tree[keys[i]].array(library="np"))
     res = ak.sum(tree_[keys_[i]].array())
     # print(keys_[i], res)
-    que.put((i, res), timeout=1.0)
+    que.put((i, res), timeout=10)
 
 
 def sum_up_channels2(jobque: multiprocessing.Queue, resque: multiprocessing.Queue, tree, keys):
@@ -26,13 +26,13 @@ def sum_up_channels2(jobque: multiprocessing.Queue, resque: multiprocessing.Queu
         if i == -1:
             return
         r = ak.sum(tree[keys[i]].array())
-        resque.put((i, r), timeout=2.0)
+        resque.put((i, r), timeout=10)
 
 
 def process_a_file(Path, File):
     mgr = multiprocessing.Manager()
 
-    f = uproot.open(Path + File, array_cache="6000 MB")
+    f = uproot.open(Path + File, array_cache="20000 MB")
     print("Read in: " + Path + File)
     tree = f["Detector Data 0"]
     keys = tree.keys()
@@ -61,7 +61,7 @@ def process_a_file(Path, File):
     print("Gathering results...")
     ngot = 0
     while ngot < nkeys:
-        (i, res) = resque.get(timeout=50)
+        (i, res) = resque.get(timeout=60)
         Edep[i] = res
         print("Got result idx:{} = {}".format(i, res))
         ngot += 1
@@ -86,7 +86,7 @@ def the_job():
     for Path in PathList:
 
         Files = [f for f in os.listdir(Path) if f.endswith('.root')]
-        # Files = ["gradient-al-test-directions-1e7proton.root"]
+        # Files = ["3layer2e9electron.root"]
 
         for File in Files:
             process_a_file(Path, File)

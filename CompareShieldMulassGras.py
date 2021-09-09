@@ -1,6 +1,5 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from ReadSD2Q import readSDQ2
+from Dependencies.ReadSD2Q import readSDQ2
 
 
 ####### Import and Plot SHIELDOSE Data #########

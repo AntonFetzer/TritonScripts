@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from ReadSD2Q import readSDQ2
+from Dependencies.ReadSD2Q import readSDQ2
 import os
 import csv
 
-Path = "/home/anton/Desktop/triton_work/3D/MultiChipTest/AluVault1cm2Hole/csv/"
+Path = "/home/anton/Desktop/triton_work/3D/MultiChipTest/OldAluVault/csv/"
 
 # Get list of all root files in that folder
 CSVFiles = [f for f in os.listdir(Path) if f.endswith('.csv')]
@@ -43,26 +43,26 @@ print(ElectronFull[0][:, 0])
 Total = ElectronFull + SolarProton + TrapProton + CosmicProton
 
 # ------------------------------- Import and Plot SHIELDOSE Data -------------------------------------------------------
-SDData = readSDQ2("spenvis_sqo.txt")
+SDData = readSDQ2("Dependencies/spenvis_sqo.txt")
 # SDDataCollumns = ['Aluminium Thickness', 'Total Dose', 'Electrons', 'Bremsstrahlung', 'Protons']
 plt.plot(SDData[:, 0], SDData[:, 4] / 1000, label="SHIELDOSE-2Q trapped Protons")
 plt.plot(SDData[:, 0], (SDData[:, 2] + SDData[:, 3]) / 1000, label="SHIELDOSE-2Q trapped Electrons")
 plt.plot(SDData[:, 0], SDData[:, 1] / 1000, label="SHIELDOSE-2Q Total trapped Dose")
 
 # ----------------------------------------- Plot Total Dose ------------------------------------------------------------
-plt.errorbar(ThickList, Total[0][:, 0], Total[0][:, 1], fmt='+', capsize=5, markersize=10, label="Geant-4 Total Dose")
+plt.errorbar(ThickList, Total[0][:, 0], Total[0][:, 1], fmt='k.', capsize=4, markersize=10, label="Geant-4 Total Dose")
 
-# ----------------------------------------- Plot ElectronsFull -------------------------------------------------------------
-plt.errorbar(ThickList, ElectronFull[0][:, 0], ElectronFull[0][:, 1], fmt='+', capsize=5, markersize=10, label="Geant-4 Trapped Electrons full spectrum")
+# ----------------------------------------- Plot ElectronsFull ---------------------------------------------------------
+plt.errorbar(ThickList, ElectronFull[0][:, 0], ElectronFull[0][:, 1], fmt='b.', capsize=4, markersize=10, label="Geant-4 Trapped Electrons")
 
 # ----------------------------------------- Plot Trapped Protons -------------------------------------------------------
-plt.errorbar(ThickList, TrapProton[0][:, 0], TrapProton[0][:, 1], fmt='+', capsize=5, markersize=10, label="Geant-4 Trapped Protons")
+plt.errorbar(ThickList, TrapProton[0][:, 0], TrapProton[0][:, 1], fmt='r.', capsize=4, markersize=10, label="Geant-4 Trapped Protons")
 
 # ----------------------------------------- Plot Solar Protons ---------------------------------------------------------
-plt.errorbar(ThickList, SolarProton[0][:, 0], SolarProton[0][:, 1], fmt='+', capsize=5, markersize=10, label="Geant-4 Solar Protons")
+plt.errorbar(ThickList, SolarProton[0][:, 0], SolarProton[0][:, 1], fmt='y.', capsize=4, markersize=10, label="Geant-4 Solar Protons")
 
 # ----------------------------------------- Plot Cosmic Protons --------------------------------------------------------
-plt.errorbar(ThickList, CosmicProton[0][:, 0], CosmicProton[0][:, 1], fmt='+', capsize=5, markersize=10, label="Geant-4 Cosmic Protons")
+plt.errorbar(ThickList, CosmicProton[0][:, 0], CosmicProton[0][:, 1], fmt='m.', capsize=4, markersize=10, label="Geant-4 Cosmic Protons")
 
 ####### Plot 10kRad line #########
 CriticalDose = [10] * SDData.shape[0]

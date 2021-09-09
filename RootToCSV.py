@@ -1,7 +1,6 @@
-from ReadG4root import readG4root
+from Dependencies.ReadG4root import readG4root
 import numpy as np
 import glob
-import matplotlib.pyplot as plt
 
 # ---------------------- Dont Modify -------- Dont break compatability -----------------------
 

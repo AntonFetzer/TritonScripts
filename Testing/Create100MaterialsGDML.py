@@ -21,3 +21,18 @@
 
 
 
+#for i in range(1296):
+#    print("/detector/add Sivol_" + str(i))
+
+DensityLead = 11.35
+DensityTungsten = 19.3
+DensityHDPE = 0.94
+
+for i in range(9):
+    print('<material name="PE-Pb-' + str((i+1)*10) + '">')
+    print('     <D value="' + str(DensityHDPE*(9-i)/10 + DensityLead*(i+1)/10) + '" unit="g/cm3"/>')
+    print('     <fraction n="' + str((9-i)/10) + '" ref="Polyethylene"/>')
+    print('     <fraction n="' + str((i+1)/10) + '" ref="lead"/>')
+    print('</material>')
+
+

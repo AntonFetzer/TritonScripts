@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
-from ReadG4root import readG4root
-import numpy as np
+from Dependencies.ReadG4root import readG4root
 import os
 from natsort import natsorted
 import sys

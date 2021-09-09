@@ -1,17 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from MeVtokRad_2D import MeVtokRad_2D
+from Dependencies.MeVtokRad_2D import MeVtokRad_2D
 
-Path = "/home/anton/Desktop/triton_work/Gradient/2Material/Cu-Al/csv/"
+Path = "/home/anton/Desktop/triton_work/Gradient/2Material/PE-Pb/csv/"
 
-Shield = "Cu-Al"
-MatA = "Copper"
-MatB = "Aluminum"
+Shield = "PE-Pb"
+MatA = "Polyethylene"
+MatB = "Lead"
 
-ElecFileA = "gradient-cu-al-2e9electron.txt"
-ProtFileA = "gradient-cu-al-2e7proton.txt"
-ElecFileB = "gradient-al-cu-2e9electron.txt"
-ProtFileB = "gradient-al-cu-2e7proton.txt"
+ElecFileA = "gradient-pe-pb-2e9electron.txt"
+ProtFileA = "gradient-pe-pb-2e7proton.txt"
+ElecFileB = "gradient-pb-pe-2e9electron.txt"
+ProtFileB = "gradient-pb-pe-2e7proton.txt"
 
 NORM_FACTOR_SPECTRUM_Elec = 5.886798E+14  # Elec500keV
 NORM_FACTOR_SPECTRUM_Prot = 3.381390E+11  # Prots10MeV
@@ -48,7 +48,7 @@ plt.plot(x + 1, ProtB, '.', label="Protons " + MatB + " on top of " + MatA)
 
 plt.title(
     "Dose deposited by trapped particles in 0.5 mm Si \n behind 2.5g/cm2 of " + Shield + " shielding")  # ---------
-plt.xlabel(MatA + "/" + MatB + " mass ratio [%]")
+plt.xlabel(MatA + " mass ratio [%]")
 plt.ylabel("Deposited ionising dose [krad]")
 plt.grid(which='both')
 plt.legend()
@@ -65,7 +65,7 @@ plt.plot(x + 1, TotalEdepB, '.',
 
 plt.title(
     "Total dose deposited by trapped particles in 0.5 mm Si \n behind 2.5g/cm2 of " + Shield + " shielding")  # ---------
-plt.xlabel(MatA + "/" + MatB + " mass ratio [%]")
+plt.xlabel(MatA + " mass ratio [%]")
 plt.ylabel("Deposited ionising dose [krad]")
 plt.grid(which='both')
 plt.legend()

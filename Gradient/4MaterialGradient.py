@@ -1,22 +1,22 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from MeVtokRad_2D import MeVtokRad_2D
+from Dependencies.MeVtokRad_2D import MeVtokRad_2D
 import nmmn.plots
 
 turbo = nmmn.plots.turbocmap()
 
-Path = "/home/anton/Desktop/triton_work/Gradient/3Material/Pe-Cu-Al/csv/"
+Path = "/home/anton/Desktop/triton_work/Gradient/3Material/Pe-Pb-W/csv/"
 
 Plates = 32
 
-Shield = "Pe-Cu-Al-Al"
+Shield = "Pe-Pe-Pb-W"
 MatA = "Polyethylene"
-MatB = "Copper"
-MatC = "Aluminium"
-MatD = "Aluminium"
+MatB = "Polyethylene"
+MatC = "Lead"
+MatD = "Tungsten"
 
-ElecFile = "pe-cu-al-al-2e9electron.txt"
-ProtFile = "pe-cu-al-al-2e7proton.txt"
+ElecFile = "pe-pe-pb-w-2e9electron.txt"
+ProtFile = "pe-pe-pb-w-2e7proton.txt"
 
 NORM_FACTOR_SPECTRUM_Elec = 5.886798E+14  # Elec500keV
 NORM_FACTOR_SPECTRUM_Prot = 3.381390E+11  # Prots10MeV
