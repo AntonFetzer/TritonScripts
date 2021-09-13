@@ -33,8 +33,8 @@ CosmicProton = np.zeros((4, len(ThickList), 4))
 
 for j in range(4):
     for i in range(len(ThickList)):
-        SolarProton[j][i] = CSVFilesContent[0][2 + j + i * 7][1:5]
-        CosmicProton[j][i] = CSVFilesContent[1][2 + j + i * 7][1:5]
+        CosmicProton[j][i] = CSVFilesContent[0][2 + j + i * 7][1:5]
+        SolarProton[j][i] = CSVFilesContent[1][2 + j + i * 7][1:5]
         ElectronFull[j][i] = CSVFilesContent[2][2 + j + i * 7][1:5]
         TrapProton[j][i] = CSVFilesContent[3][2 + j + i * 7][1:5]
 
@@ -69,7 +69,7 @@ CriticalDose = [10] * SDData.shape[0]
 plt.plot(SDData[:, 0], CriticalDose, color='k', linewidth=2, label='Critical Dose of 10 krad')
 
 plt.xlim([0, 17])
-plt.ylim([1e-4, 1e7])
+# plt.ylim([1e-4, 1e7])
 plt.yscale("log")
 # plt.xscale("log")
 plt.grid(which='major')

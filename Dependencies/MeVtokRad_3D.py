@@ -1,7 +1,7 @@
 import math
 
 
-def MeVtokRad_3D(MeV, NORM_FACTOR_SPECTRUM, Npart, Radius):  # Radius in cm
+def MeVtokRad_3D(MeV, NORM_FACTOR_SPECTRUM, Npart, Radius, SiChipLen):  # Radius in cm
 
     # ----------- Norm factors from GPS spectrum ------------
     NORM_FACTOR_ANGULAR = 2.500000E-01
@@ -22,9 +22,7 @@ def MeVtokRad_3D(MeV, NORM_FACTOR_SPECTRUM, Npart, Radius):  # Radius in cm
     # ------ Sensitive Volume ------
     SiDensity = 2.33 * 1e-3  # kg/cm3
     SiThick = 0.05  # cm
-    SiLength = 0.3  # cm ***********************************************************************************************
-    SiWidth = 0.3  # cm ************************************************************************************************
-    SiVol = SiThick * SiLength * SiWidth
+    SiVol = SiThick * SiChipLen * SiChipLen
     # print("SiVol", SiVol)  # cm3
     SiMass = SiVol * SiDensity
     # print("SiMass", SiMass)  # kg

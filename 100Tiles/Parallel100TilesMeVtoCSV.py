@@ -5,7 +5,7 @@ import os
 import multiprocessing
 
 # PathList = ["/scratch/work/fetzera1/Gradient/2MaterialGradient/Pb-Al/root/"]
-PathList = ["/scratch/work/fetzera1/Gradient/2Material/PE-Pb/root/"]
+PathList = ["/scratch/work/fetzera1/Gradient/2Material1-5gcm2/Al-Al/root/"]
 
 
 def sum_up_channels(i: int, tree_, keys_: str, que: multiprocessing.Queue):

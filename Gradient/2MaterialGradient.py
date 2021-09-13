@@ -2,16 +2,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 from Dependencies.MeVtokRad_2D import MeVtokRad_2D
 
-Path = "/home/anton/Desktop/triton_work/Gradient/2Material/PE-Pb/csv/"
+Path = "/home/anton/Desktop/triton_work/Gradient/2Material1-5gcm2/Al-Al/csv/"
 
-Shield = "PE-Pb"
-MatA = "Polyethylene"
-MatB = "Lead"
+Shield = "Al-Al"
+MatA = "Aluminium"
+MatB = "Aluminium"
 
-ElecFileA = "gradient-pe-pb-2e9electron.txt"
-ProtFileA = "gradient-pe-pb-2e7proton.txt"
-ElecFileB = "gradient-pb-pe-2e9electron.txt"
-ProtFileB = "gradient-pb-pe-2e7proton.txt"
+ElecFileA = "gradient-al-al-2e9electron.txt"
+ProtFileA = "gradient-al-al-2e7proton.txt"
+ElecFileB = "gradient-al-al-2e9electron.txt"
+ProtFileB = "gradient-al-al-2e7proton.txt"
 
 NORM_FACTOR_SPECTRUM_Elec = 5.886798E+14  # Elec500keV
 NORM_FACTOR_SPECTRUM_Prot = 3.381390E+11  # Prots10MeV
@@ -47,7 +47,7 @@ plt.plot(x + 1, ProtA, '.', label="Protons " + MatA + " on top of " + MatB)
 plt.plot(x + 1, ProtB, '.', label="Protons " + MatB + " on top of " + MatA)
 
 plt.title(
-    "Dose deposited by trapped particles in 0.5 mm Si \n behind 2.5g/cm2 of " + Shield + " shielding")  # ---------
+    "Dose deposited by trapped particles in 0.5 mm Si \n behind 1.5g/cm2 of " + Shield + " shielding")  # ---------
 plt.xlabel(MatA + " mass ratio [%]")
 plt.ylabel("Deposited ionising dose [krad]")
 plt.grid(which='both')
@@ -64,10 +64,11 @@ plt.plot(x + 1, TotalEdepB, '.',
              round(np.argmin(TotalEdepB) + 1)) + " %")
 
 plt.title(
-    "Total dose deposited by trapped particles in 0.5 mm Si \n behind 2.5g/cm2 of " + Shield + " shielding")  # ---------
+    "Total dose deposited by trapped particles in 0.5 mm Si \n behind 1.5g/cm2 of " + Shield + " shielding")  # ---------
 plt.xlabel(MatA + " mass ratio [%]")
 plt.ylabel("Deposited ionising dose [krad]")
 plt.grid(which='both')
 plt.legend()
 # plt.show()
 plt.savefig(Path + Shield + "-GradientSum.eps", format='eps')
+# plt.savefig(Path + Shield + "-GradientSum.png", format='png', dpi=400)

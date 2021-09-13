@@ -5,23 +5,23 @@ import nmmn.plots
 
 turbo = nmmn.plots.turbocmap()
 
-Path = "/home/anton/Desktop/triton_work/Gradient/3Material/Pe-Pb-W/csv/"
+Path = "/home/anton/Desktop/triton_work/Gradient/3Material1-5gcm2/Al-PE-W/csv/"
 
 Plates = 32
 
-Shield = "Pe-Pe-Pb-W"
-MatA = "Polyethylene"
+Shield = "Al-PE-W-W"
+MatA = "Aluminium"
 MatB = "Polyethylene"
-MatC = "Lead"
+MatC = "Tungsten"
 MatD = "Tungsten"
 
-ElecFile = "pe-pe-pb-w-2e9electron.txt"
-ProtFile = "pe-pe-pb-w-2e7proton.txt"
+ElecFile = "al-pe-w-w-2e8electron.txt"
+ProtFile = "al-pe-w-w-2e6proton.txt"
 
 NORM_FACTOR_SPECTRUM_Elec = 5.886798E+14  # Elec500keV
 NORM_FACTOR_SPECTRUM_Prot = 3.381390E+11  # Prots10MeV
-Npart_Elec = 2e9 / (Plates * Plates)
-Npart_Prot = 2e7 / (Plates * Plates)
+Npart_Elec = 2e8 / (Plates * Plates)
+Npart_Prot = 2e6 / (Plates * Plates)
 
 ElecMeV = np.loadtxt(Path + ElecFile)
 ProtMeV = np.loadtxt(Path + ProtFile)
@@ -38,7 +38,7 @@ for y in range(Plates):
 
 fig1 = plt.figure(1)  # , figsize=(5, 5)
 plt.imshow(EleckRad, cmap=turbo, extent=(0, Plates, Plates, 0))
-plt.title("Electrons vs 2.5g/cm2 " + Shield + " Min=" + str(round(np.min(EleckRad), 2)) + " krad \n" + MatA + " --> " + MatC)
+plt.title("Electrons vs 1.5g/cm2 " + Shield + " Min=" + str(round(np.min(EleckRad), 2)) + " krad \n" + MatA + " --> " + MatC)
 plt.xlabel(MatB + " --> " + MatD)
 plt.ylabel(MatB + " <-- " + MatA)
 cbar = plt.colorbar()
@@ -47,7 +47,7 @@ plt.savefig(Path + Shield + "-Electron-Gradient.eps", format='eps')
 
 fig2 = plt.figure(2)
 plt.imshow(ProtkRad, cmap=turbo, extent=(0, Plates, Plates, 0))
-plt.title("Proton vs 2.5g/cm2 " + Shield + " Min=" + str(round(np.min(ProtkRad), 2)) + " krad \n" + MatA + " --> " + MatC)
+plt.title("Proton vs 1.5g/cm2 " + Shield + " Min=" + str(round(np.min(ProtkRad), 2)) + " krad \n" + MatA + " --> " + MatC)
 plt.xlabel(MatB + " --> " + MatD)
 plt.ylabel(MatB + " <-- " + MatA)
 cbar = plt.colorbar()
@@ -57,7 +57,7 @@ plt.savefig(Path + Shield + "-Proton-Gradient.eps", format='eps')
 TotalkRad = EleckRad + ProtkRad
 fig3 = plt.figure(3)
 plt.imshow(TotalkRad, cmap=turbo, extent=(0, Plates, Plates, 0))
-plt.title("Trapped Particles vs 2.5g/cm2 " + Shield + " Min=" + str(round(np.min(TotalkRad), 2)) + " krad \n" + MatA + " --> " + MatC)
+plt.title("Trapped Particles vs 1.5g/cm2 " + Shield + " Min=" + str(round(np.min(TotalkRad), 2)) + " krad \n" + MatA + " --> " + MatC)
 plt.xlabel(MatB + " --> " + MatD)
 plt.ylabel(MatB + " <-- " + MatA)
 cbar = plt.colorbar()

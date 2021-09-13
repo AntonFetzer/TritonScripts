@@ -4,12 +4,12 @@ import numpy as np
 import os
 
 #PathList = ["/scratch/work/fetzera1/Gradient/2MaterialGradient/Cu-Al/root/"]
-PathList = ["/scratch/work/fetzera1/Permutations/root/"]
+PathList = ["/scratch/work/fetzera1/Gradient/2Material1-5gcm2/Al-Al/root/"]
 
 for Path in PathList:
 
     Files = [f for f in os.listdir(Path) if f.endswith('.root')]
-    # Files = ["gradient-al-test-directions-1e7proton.root"]
+    # Files = ["gradient-al-pe-2e9electron.root"]
 
     for File in Files:
         f = uproot.open(Path + File)
