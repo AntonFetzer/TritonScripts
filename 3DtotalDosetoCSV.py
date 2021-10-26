@@ -7,12 +7,13 @@ from Dependencies.EstimateError import EstimateError
 from Dependencies.MeVtokRad_3D import MeVtokRad_3D
 from Dependencies.ReadMultipleRoot import readMultipleRoot
 
-Path = "/home/anton/Desktop/triton_work/3D/AlFrame/AlFramePE-W/root/"
+Path = "/home/anton/Desktop/triton_work/6U/6U-FR4-Solder/"
 SiChipLen = 0.8  # cm --------------------------------------------------------------------------------------------------
+Radius = 21  # cm     --------------------------------------------------------------------------------------------------
 
 #                       Electron500keV, Protons10MeV, ElectronsFull, ProtonFUll, solarproton, cosmicproton
 NORM_FACTOR_SPECTRUM_List = [5.886798E+14, 3.381390E+11, 6.159454E+15, 8.003046E+14, 1.109681E+10, 2.024537E+07]
-SpectrumTypes = ["electrons500kev.root", "protons10mev.root", "electronsfull.root", "protonsfull.root", "solarproton10mev.root", "cosmicproton.root"]
+SpectrumTypes = ["electrons500kev.root", "protons10mev.root", "electronsfull.root", "protonsfull.root", "solarproton10mev.root", "cosmicproton.root", "electronsfullpowerbiasing.root", "protonsfullpowerbiasing"]
 NpartList = [2e9, 2e9, 2e9, 2e9, 2e9, 1e8]
 
 for Type in range(6):
@@ -26,7 +27,7 @@ for Type in range(6):
     Spectrum = SpectrumTypes[Type]
     NORM_FACTOR_SPECTRUM = NORM_FACTOR_SPECTRUM_List[Type]
     Npart = NpartList[Type]
-    Radius = 10  # cm
+
 
     TotalMeV = []
     StdMeV = []

@@ -1,4 +1,3 @@
-
 # for i in range(100):
 #    print()
 #    print('        <volume name ="ShieldVol_' + str(i) + '">')
@@ -12,7 +11,7 @@
 #         print("/detector/add Sivol_" + str(x+y*32))
 #         print("A:", (31 - x) * (31 - y), "B:", x * (31 - y), "C:", (31 - x) * y, "D:", x * y)
 #         print("Sum", (31 - x) * (31 - y) + x * (31 - y) + (31 - x) * y + x * y)
-
+"""
 AT = 0.015583
 BT = 0.000759
 CT = 0.005427
@@ -31,7 +30,7 @@ print("Sum", (32 - x) * (32 - y) + x * (32 - y) + (32 - x) * y + x * y)
 #    print("/detector/add Sivol_" + str(i))
 
 
-"""
+
 DensityLead = 11.35
 DensityTungsten = 19.3
 DensityHDPE = 0.94

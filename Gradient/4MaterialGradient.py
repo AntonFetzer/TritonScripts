@@ -15,13 +15,13 @@ MatB = "Polyethylene"
 MatC = "Tungsten"
 MatD = "Tungsten"
 
-ElecFile = "al-pe-w-w-2e8electron.txt"
-ProtFile = "al-pe-w-w-2e6proton.txt"
+ElecFile = "al-pe-w-w-1e9electron.txt"
+ProtFile = "al-pe-w-w-2e7proton.txt"
 
 NORM_FACTOR_SPECTRUM_Elec = 5.886798E+14  # Elec500keV
 NORM_FACTOR_SPECTRUM_Prot = 3.381390E+11  # Prots10MeV
-Npart_Elec = 2e8 / (Plates * Plates)
-Npart_Prot = 2e6 / (Plates * Plates)
+Npart_Elec = 1e9 / (Plates * Plates)
+Npart_Prot = 2e7 / (Plates * Plates)
 
 ElecMeV = np.loadtxt(Path + ElecFile)
 ProtMeV = np.loadtxt(Path + ProtFile)

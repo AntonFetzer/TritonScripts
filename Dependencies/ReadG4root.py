@@ -16,15 +16,15 @@ def readG4root(fileName):
     # print(file.classnames())
 
     tree = file["Detector Data 0"]
-    # tree.show()
+    tree.show()
 
     Temp = tree["Gun_energy_MeV"].array(library="np")
 
     Data = np.zeros((3, len(Temp)))
 
     Data[0] = Temp
-    Data[1] = tree["Sivol_Edep_MeV"].array(library="np")
-    Data[2] = tree["Sivol_Esec_MeV"].array(library="np")
+    Data[1] = tree["SiVol_Edep_MeV"].array(library="np")
+    Data[2] = tree["SiVol_Esec_MeV"].array(library="np")
 
     return Data  # 0: Gun_energy; 1: SiVol_Edep; 2: SiVol_Esec
 

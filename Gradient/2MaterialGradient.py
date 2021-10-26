@@ -2,16 +2,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 from Dependencies.MeVtokRad_2D import MeVtokRad_2D
 
-Path = "/home/anton/Desktop/triton_work/Gradient/2Material1-5gcm2/Al-Al/csv/"
+Path = "/home/anton/Desktop/triton_work/Gradient/2Material1-5gcm2/FR4-Solder/csv/"
 
-Shield = "Al-Al"
-MatA = "Aluminium"
-MatB = "Aluminium"
+Shield = "FR4-Solder"
+MatA = "FR4"
+MatB = "Solder"
+A = "fr4"
+B = "solder"
 
-ElecFileA = "gradient-al-al-2e9electron.txt"
-ProtFileA = "gradient-al-al-2e7proton.txt"
-ElecFileB = "gradient-al-al-2e9electron.txt"
-ProtFileB = "gradient-al-al-2e7proton.txt"
+
+ElecFileA = "gradient-" + A + "-" + B + "-2e9electron.txt"
+ProtFileA = "gradient-" + A + "-" + B + "-2e7proton.txt"
+ElecFileB = "gradient-" + B + "-" + A + "-2e9electron.txt"
+ProtFileB = "gradient-" + B + "-" + A + "-2e7proton.txt"
 
 NORM_FACTOR_SPECTRUM_Elec = 5.886798E+14  # Elec500keV
 NORM_FACTOR_SPECTRUM_Prot = 3.381390E+11  # Prots10MeV
@@ -25,9 +28,9 @@ ProtB = np.loadtxt(Path + ProtFileB)[:99]
 TotalEdepA = np.zeros(99)
 TotalEdepB = np.zeros(99)
 
-ElecB = np.flip(ElecB)
-ProtB = np.flip(ProtB)
-TotalEdepB = np.flip(TotalEdepB)
+#ElecB = np.flip(ElecB)
+#ProtB = np.flip(ProtB)
+#TotalEdepB = np.flip(TotalEdepB)
 
 for i in range(99):
     ElecA[i] = MeVtokRad_2D(ElecA[i], NORM_FACTOR_SPECTRUM_Elec, Npart_Elec)
@@ -37,14 +40,14 @@ for i in range(99):
     TotalEdepA[i] = ElecA[i] + ProtA[i]
     TotalEdepB[i] = ElecB[i] + ProtB[i]
 
-x = np.linspace(0, 98, num=99, dtype=int)
+x = np.linspace(1, 99, num=99, dtype=int)
 
 plt.figure(1)
-plt.plot(x + 1, ElecA, '.', label="Electrons " + MatA + " on top of " + MatB)
-plt.plot(x + 1, ElecB, '.', label="Electrons " + MatB + " on top of " + MatA)
+plt.plot(x, ElecA, '.', label="Electrons " + MatA + " on top of " + MatB)
+plt.plot(x, ElecB, '.', label="Electrons " + MatB + " on top of " + MatA)
 
-plt.plot(x + 1, ProtA, '.', label="Protons " + MatA + " on top of " + MatB)
-plt.plot(x + 1, ProtB, '.', label="Protons " + MatB + " on top of " + MatA)
+plt.plot(x, ProtA, '.', label="Protons " + MatA + " on top of " + MatB)
+plt.plot(x, ProtB, '.', label="Protons " + MatB + " on top of " + MatA)
 
 plt.title(
     "Dose deposited by trapped particles in 0.5 mm Si \n behind 1.5g/cm2 of " + Shield + " shielding")  # ---------

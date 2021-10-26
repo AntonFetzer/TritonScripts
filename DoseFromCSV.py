@@ -74,7 +74,7 @@ plt.savefig(Path + Folder + "/Img/" + Folder + "TotalDoseCurve.eps", format='eps
 CSVfile = open(Path + Folder + "/" + Folder + "_DoseTable.txt", 'w')
 CSVfile.write("Al Shield Thickness, Edep, EdepStd, Esec, EsecStd\n")
 for i in range(len(ThickList)):
-    CSVfile.write(','.join([str(ThickList[i]), str(EdepkRads[i]), str(EdepStdkRads[i]), str(EseckRads[i]), str(EsecStdkRads[i]),"\n"]))
+    CSVfile.write(','.join([str(ThickList[i]), str(EdepkRads[i]), str(EdepStdkRads[i]), str(EseckRads[i]), str(EsecStdkRads[i]), "\n"]))
 CSVfile.close()
 
 

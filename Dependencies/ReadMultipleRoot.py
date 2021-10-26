@@ -29,7 +29,7 @@ def readMultipleRoot(fileName):
 
 
 if __name__ == "__main__":
-    DataTest = readMultipleRoot("/home/anton/Desktop/triton_work/3D/MultiChipTest/root/1-mmal3dmultichip2e9electrons500kev.root")
+    DataTest = readMultipleRoot("/home/anton/Desktop/triton_work/6U/6U-FR4-Solder/6u-fr4-solder-2e8runprotonsfullpowerbiasing.root")
     print(type(DataTest))
     print(type(DataTest[0]))
     plt.hist(DataTest[-2], weights=DataTest[1], bins=100)

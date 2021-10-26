@@ -1,5 +1,5 @@
 import numpy as np
-from Dependencies.ReadMultipleRoot import readMultipleRoot
+from ..Dependencies.ReadMultipleRoot import readMultipleRoot
 
 
 def EstimateError(Data, N):
