@@ -5,23 +5,23 @@ import nmmn.plots
 
 turbo = nmmn.plots.turbocmap()
 
-Path = "/home/anton/Desktop/triton_work/Gradient/3Material1-5gcm2/Al-PE-W/csv/"
+Path = "/home/anton/Desktop/triton_work/Gradient/3Material1-5gcm2/Al-Al-Al/csv/"
 
 Plates = 32
 
-Shield = "Al-PE-W-W"
+Shield = "Al-Al-Al-Al"
 MatA = "Aluminium"
-MatB = "Polyethylene"
-MatC = "Tungsten"
-MatD = "Tungsten"
+MatB = "Aluminium"
+MatC = "Aluminium"
+MatD = "Aluminium"
 
-ElecFile = "al-pe-w-w-1e9electron.txt"
-ProtFile = "al-pe-w-w-2e7proton.txt"
+ElecFile = "al-al-al-al-2e9electron.txt"
+ProtFile = "al-al-al-al-1e8proton.txt"
 
 NORM_FACTOR_SPECTRUM_Elec = 5.886798E+14  # Elec500keV
 NORM_FACTOR_SPECTRUM_Prot = 3.381390E+11  # Prots10MeV
-Npart_Elec = 1e9 / (Plates * Plates)
-Npart_Prot = 2e7 / (Plates * Plates)
+Npart_Elec = 2e9 / (Plates*Plates)
+Npart_Prot = 1e8 / (Plates*Plates)
 
 ElecMeV = np.loadtxt(Path + ElecFile)
 ProtMeV = np.loadtxt(Path + ProtFile)

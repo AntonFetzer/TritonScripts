@@ -1,13 +1,10 @@
 import os
-
 import numpy as np
 from natsort import natsorted
-
-from Dependencies.EstimateError import EstimateError
 from Dependencies.MeVtokRad_3D import MeVtokRad_3D
 from Dependencies.ReadMultipleRoot import readMultipleRoot
 
-Path = "/home/anton/Desktop/triton_work/6U/6U-FR4-Solder/"
+Path = "/home/anton/Desktop/triton_work/6U/DONE/6U-Al/"
 SiChipLen = 0.8  # cm --------------------------------------------------------------------------------------------------
 Radius = 21  # cm     --------------------------------------------------------------------------------------------------
 
@@ -28,13 +25,6 @@ for Type in range(6):
     NORM_FACTOR_SPECTRUM = NORM_FACTOR_SPECTRUM_List[Type]
     Npart = NpartList[Type]
 
-
-    TotalMeV = []
-    StdMeV = []
-    TotalKRAD = []
-    StdKRAD = []
-    lol = 0
-
     CSVfile = open(Path + Files[0].split(".")[0] + "DoseTable.csv", 'w')
 
     for File in Files:
@@ -45,18 +35,11 @@ for Type in range(6):
         NumSivols = int(NumDataSets / 2) - 1
 
         TotalMeV = []
+        StdMeV = []
 
         for i in range(NumDataSets):
             TotalMeV.append(sum(Data[i]))
-
-        # -------------------------- Standard Deviation ---------------------------
-        NumPoints = len(Data[0])
-        tesz = 1
-        Samples = np.zeros(100)
-        StdMeV = []
-
-        for j in range(NumDataSets):
-            StdMeV.append(EstimateError(Data[j], 100))
+            StdMeV.append(np.sqrt(len(Data[i]))*np.std(Data[i]))
 
         # --------- Conversion ##############
         TotalKRAD = []
@@ -73,7 +56,7 @@ for Type in range(6):
 
         # ---------- Write to CSV File ----------------------------------
 
-        CSVfile.write(File + ", Dose Table in kRad, Number of Points: " + str(NumPoints) + "\n")
+        CSVfile.write(File + ", Dose Table in kRad, Number of Points: " + str(len(Data[0])) + "\n")
         CSVfile.write(File.split("-")[0] + "mm Al Shielding Thickness, Edep, EdepStd, Esec, EsecStd\n")
         for i in range(NumSivols):
             CSVfile.write(','.join(["Sivol_" + str(i), str(TotalKRAD[i]), str(StdKRAD[i]), str(TotalKRAD[i + NumSivols]), str(StdKRAD[i + NumSivols]) + "\n"]))

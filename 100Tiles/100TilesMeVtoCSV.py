@@ -2,17 +2,19 @@ import uproot
 import awkward as ak
 import numpy as np
 import os
+import sys
 
+# print(f"Arguments of the script : {sys.argv[1:]=}")
 
-PathList = ["/scratch/work/fetzera1/Permutations/3Layer1-5gcm2/"]
-# PathList = ["/home/anton/Desktop/triton_work/TEST/100Materials/root/"]
+PathList = ["/scratch/work/fetzera1/Gradient/2Material1-5gcm2/PE-Pb/root/"]
+# PathList = ["/home/anton/Desktop/triton_work/Gradient/2Material1-5gcm2/PE-Pb/root/"]
+# PathList = sys.argv[1:]
 
 for Path in PathList:
 
     Files = [f for f in os.listdir(Path) if f.endswith('.root')]
-    # Files = ["100materials2e9electron.root"]
-
-    N = 100
+    # Files = ["5layer3-2e7proton.root"]
+    # Files = sys.argv[1:]
 
     for File in Files:
         f = uproot.open(Path + File)
@@ -20,9 +22,14 @@ for Path in PathList:
 
         tree = f["Detector Data 0"]
 
-        keys = tree.keys()
+        AllKeys = tree.keys()
+        keys = []
 
-        # print(keys)
+        for key in AllKeys:
+            if "Edep" in key:
+                keys.append(key)
+
+        print(keys)
         numKeys = len(keys)
 
         Edep = np.zeros(numKeys)
@@ -33,17 +40,7 @@ for Path in PathList:
             # Edep[i] = ak.sum(tree[keys[i]].array())
             Data = tree[keys[i]].array()
             Edep[i] = ak.sum(Data)
-
-            SampleLen = int(len(Data) / N)
-            Sums = np.zeros(N)
-
-            for j in range(N):
-                Sums[j] = sum(Data[SampleLen * j:SampleLen * (j + 1) - 1])
-                # print("From:", SampleLen*j)
-                # print("To:", SampleLen*(j+1)-1)
-                # print("Sum:", Samples[j])
-
-            Error[i] = np.std(Sums) * np.sqrt(N)
+            Error[i] = ak.std(Data) * np.sqrt(len(Data))
 
             print(keys[i], Edep[i], Error[i])
 

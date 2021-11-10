@@ -5,7 +5,7 @@ import os
 import multiprocessing
 
 # PathList = ["/scratch/work/fetzera1/Gradient/2MaterialGradient/Pb-Al/root/"]
-PathList = ["/scratch/work/fetzera1/Gradient/3Material1-5gcm2/Al-PE-W/root/"]
+PathList = ["/scratch/work/fetzera1/Gradient/3Material1-5gcm2/Al-Al-Al/root/"]
 
 
 def sum_up_channels(i: int, tree_, keys_: str, que: multiprocessing.Queue):
@@ -36,6 +36,7 @@ def process_a_file(Path, File):
     print("Read in: " + Path + File)
     tree = f["Detector Data 0"]
     keys = tree.keys()
+
 
     print("Number of cores =", multiprocessing.cpu_count())
     nprocs = multiprocessing.cpu_count() - 1
