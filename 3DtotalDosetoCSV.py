@@ -4,14 +4,15 @@ from natsort import natsorted
 from Dependencies.MeVtokRad_3D import MeVtokRad_3D
 from Dependencies.ReadMultipleRoot import readMultipleRoot
 
-Path = "/home/anton/Desktop/triton_work/6U/DONE/6U-Al/"
+# Path = "/scratch/work/fetzera1/3D/AluVault/root/Cosmic/"
+Path = "/home/anton/Desktop/triton_work/6U/NoShield/Full/"
 SiChipLen = 0.8  # cm --------------------------------------------------------------------------------------------------
 Radius = 21  # cm     --------------------------------------------------------------------------------------------------
 
 #                       Electron500keV, Protons10MeV, ElectronsFull, ProtonFUll, solarproton, cosmicproton
 NORM_FACTOR_SPECTRUM_List = [5.886798E+14, 3.381390E+11, 6.159454E+15, 8.003046E+14, 1.109681E+10, 2.024537E+07]
-SpectrumTypes = ["electrons500kev.root", "protons10mev.root", "electronsfull.root", "protonsfull.root", "solarproton10mev.root", "cosmicproton.root", "electronsfullpowerbiasing.root", "protonsfullpowerbiasing"]
-NpartList = [2e9, 2e9, 2e9, 2e9, 2e9, 1e8]
+SpectrumTypes = ["electrons500kev.root", "protons10mev.root", "electronsfull.root", "protonsfull.root", "solarproton10mev.root", "cosmicprotonsfull.root"]
+NpartList = [2e9, 2e9, 2e9, 2e9, 2e9, 2e9]
 
 for Type in range(6):
 
@@ -39,7 +40,7 @@ for Type in range(6):
 
         for i in range(NumDataSets):
             TotalMeV.append(sum(Data[i]))
-            StdMeV.append(np.sqrt(len(Data[i]))*np.std(Data[i]))
+            StdMeV.append(np.sqrt(len(Data[i]))*np.std(Data[i]))  # Formula that calculates the statisitcal error
 
         # --------- Conversion ##############
         TotalKRAD = []
@@ -63,3 +64,6 @@ for Type in range(6):
 
         CSVfile.write("\n")
     CSVfile.close()
+
+
+# srun --mem=1G --time=01:00:00 python 3DtotalDosetoCSV.py
