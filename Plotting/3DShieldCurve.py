@@ -63,7 +63,7 @@ for thick in range(6):
 print(Data[0][0][:, 0], Data[0][0][:, 1])
 
 # ------------------------------- Import and Plot SHIELDOSE Data -------------------------------------------------------
-SDData = readSDQ2("Dependencies/spenvis_sqo.txt")
+SDData = readSDQ2("../Dependencies/spenvis_sqo.txt")
 # SDDataCollumns = ['Aluminium Thickness', 'Total Dose', 'Electrons', 'Bremsstrahlung', 'Protons']
 plt.plot(SDData[:, 0], (SDData[:, 2] + SDData[:, 3]) / 1000, '-.', label="SHIELDOSE-2Q trapped Electrons")
 plt.plot(SDData[:, 0], SDData[:, 4] / 1000, '--', label="SHIELDOSE-2Q trapped Protons")
@@ -98,5 +98,5 @@ plt.title("GTO particle spectra shielded by 1U aluminium vault")
 plt.xlabel("Aluminium Vault Thickness [mm]")
 plt.ylabel("Dose in silicon detector [krad]")
 plt.legend()
-# plt.show()
-plt.savefig(Path + "3DShieldCurve.eps", format='eps', bbox_inches="tight")
+plt.show()
+#plt.savefig(Path + "3DShieldCurve.eps", format='eps', bbox_inches="tight")

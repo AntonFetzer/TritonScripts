@@ -1,0 +1,240 @@
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+Read in: /scratch/work/fetzera1/MulasTest2/ProtonsFull/root/0-2e9-protonsfull.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 0mm: 2,000,000,000
+Read in: /scratch/work/fetzera1/MulasTest2/ProtonsFull/root/1-2e9-protonsfull.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 1mm: 186,753
+Read in: /scratch/work/fetzera1/MulasTest2/ProtonsFull/root/2-2e9-protonsfull.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 2mm: 73,209
+Read in: /scratch/work/fetzera1/MulasTest2/ProtonsFull/root/4-2e9-protonsfull.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 4mm: 36,742
+Read in: /scratch/work/fetzera1/MulasTest2/ProtonsFull/root/8-2e9-protonsfull.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 8mm: 23,213
+Read in: /scratch/work/fetzera1/MulasTest2/ProtonsFull/root/16-2e9-protonsfull.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 16mm: 15,156
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+Read in: /scratch/work/fetzera1/MulasTest2/Protons10MeV/root/0-2e9-protons10mev.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 0mm: 1,999,999,984
+Read in: /scratch/work/fetzera1/MulasTest2/Protons10MeV/root/1-2e9-protons10mev.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 1mm: 558,290,873
+Read in: /scratch/work/fetzera1/MulasTest2/Protons10MeV/root/2-2e9-protons10mev.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 2mm: 217,107,271
+Read in: /scratch/work/fetzera1/MulasTest2/Protons10MeV/root/4-2e9-protons10mev.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 4mm: 110,700,924
+Read in: /scratch/work/fetzera1/MulasTest2/Protons10MeV/root/8-2e9-protons10mev.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 8mm: 70,034,442
+Read in: /scratch/work/fetzera1/MulasTest2/Protons10MeV/root/16-2e9-protons10mev.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 16mm: 46,049,049
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+Read in: /scratch/work/fetzera1/MulasTest2/ElectronsFull/root/0-2e9-electronsfull.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 0mm: 1,999,999,756
+Read in: /scratch/work/fetzera1/MulasTest2/ElectronsFull/root/1-2e9-electronsfull.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 1mm: 42,286,458
+Read in: /scratch/work/fetzera1/MulasTest2/ElectronsFull/root/2-2e9-electronsfull.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 2mm: 11,560,767
+Read in: /scratch/work/fetzera1/MulasTest2/ElectronsFull/root/4-2e9-electronsfull.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 4mm: 1,350,359
+Read in: /scratch/work/fetzera1/MulasTest2/ElectronsFull/root/8-2e9-electronsfull.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 8mm: 217,902
+Read in: /scratch/work/fetzera1/MulasTest2/ElectronsFull/root/16-2e9-electronsfull.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 16mm: 115,712
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+Read in: /scratch/work/fetzera1/MulasTest2/Electrons500keV/root/0-2e9-electrons500kev.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 0mm: 1,999,999,596
+Read in: /scratch/work/fetzera1/MulasTest2/Electrons500keV/root/1-2e9-electrons500kev.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 1mm: 486,755,939
+Read in: /scratch/work/fetzera1/MulasTest2/Electrons500keV/root/2-2e9-electrons500kev.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 2mm: 131,974,752
+Read in: /scratch/work/fetzera1/MulasTest2/Electrons500keV/root/4-2e9-electrons500kev.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 4mm: 14,550,777
+Read in: /scratch/work/fetzera1/MulasTest2/Electrons500keV/root/8-2e9-electrons500kev.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 8mm: 1,992,244
+Read in: /scratch/work/fetzera1/MulasTest2/Electrons500keV/root/16-2e9-electrons500kev.root
+name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+SiVol_Edep_MeV       | double                   | AsDtype('>f8')
+SiVol_Esec_MeV       | double                   | AsDtype('>f8')
+Gun_energy_MeV       | double                   | AsDtype('>f8')
+Gun_angle_deg        | double                   | AsDtype('>f8')
+Number of Data points for 16mm: 1,098,756

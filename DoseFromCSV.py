@@ -14,7 +14,7 @@ Npart = 1e8
 
 Path = "/home/anton/Desktop/triton_work/MULASS/"
 
-# Get list of all root files in that folder
+# Get list of all CSV files in that folder
 CSVFiles = [f for f in os.listdir(Path + Folder + "/CSV/") if f.endswith('.csv')]
 CSVFiles = natsorted(CSVFiles)
 

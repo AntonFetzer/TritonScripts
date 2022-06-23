@@ -8,7 +8,7 @@ import sys
 
 # PathList = "/scratch/work/fetzera1/Gradient/Gradient/4Material/"
 # Path = "/home/anton/Desktop/triton_work/Gradient/4Material/"
-Path = "/scratch/work/fetzera1/Gradient/3Material2-5gcm2/"
+Path = "/scratch/work/fetzera1/MulasTest2/"
 # PathList = sys.argv[1:]
 
 # for Path in PathList:
