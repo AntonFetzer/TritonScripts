@@ -23,6 +23,6 @@ def readGrasCsv1Tile(file):
 
 
 if __name__ == "__main__":
-    File = "/home/anton/Desktop/triton_work/GRAS-2Mat/Test/Results/Protons_976734_151107.csv"
+    File = "/home/anton/Desktop/triton_work/GRAS-1Mat/ParallelTest/Results/Electrons_4325_268.csv"
 
     print(readGrasCsv1Tile(File))
