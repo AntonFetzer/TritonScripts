@@ -32,12 +32,11 @@ def readGrasCsv(file):
 
 if __name__ == "__main__":
     # File = "/home/anton/Desktop/triton_work/GRAS-2Mat/Test/Results/Electrons_3613_3392.csv"
-    File = "/home/anton/Desktop/triton_work/GRAS-2Mat/Test/Results/Protons_763149_118064.csv"
 
     Results = readGrasCsv(File)
 
     print(np.shape(Results))
-    # print(Results[:, 0])
+    print(Results)
 
     plt.plot(Results[0])
     plt.show()
