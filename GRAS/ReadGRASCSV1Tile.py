@@ -19,6 +19,8 @@ def readGrasCsv1Tile(file):
                 else:
                     data["Dose"] = float(line[0])
                     data["Error"] = float(line[1])
+                    data["Entries"] = float(line[2])
+                    data["NonZero"] = float(line[3])
     return data
 
 

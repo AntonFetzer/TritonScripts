@@ -5,7 +5,7 @@ from ReadGRASCSV import readGrasCsv
 from MeVtokRad2DGras import MeVtokRad_2D
 from TotalKRadGras import totalkRadGras
 
-Path = "/home/anton/Desktop/triton_work/2Mat"
+Path = "/home/anton/Desktop/triton_work/2MatPhys"
 ShieldingDepth = "1.5"  # g/cm2
 
 MatA = "Aluminium"
@@ -14,10 +14,11 @@ a = "al"
 b = "pb"
 A = "Al"
 B = "Pb"
-Shield = A + "-" + B
+#Shield = A + "-" + B
+Shield = "em_standard_space"
 NumTiles = 99
 
-Ymax = 10  # Max kRad shown in plots so that every plot has the same scale
+Ymax = 15  # Max kRad shown in plots so that every plot has the same scale
 
 Path += "/" + Shield + "/"
 ElecA = totalkRadGras(Path + "Res/", "ElectronsA") * NumTiles

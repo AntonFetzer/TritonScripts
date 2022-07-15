@@ -16,7 +16,9 @@ def totalkRadGras(path, particle: str):
     Data = np.zeros((2, NumTiles), dtype=float)
 
     for i, File in enumerate(Files):
+        print(File)
         Data += readGrasCsv(path + File)
+
 
     Data = Data / len(Files)
 
@@ -34,7 +36,7 @@ def totalkRadGras(path, particle: str):
 
 
 if __name__ == "__main__":
-    Path = "/home/anton/Desktop/triton_work/GRAS-2Mat/Test/Results/"
+    Path = "/home/anton/Desktop/triton_work/2Mat/Al-Pb/Res/"
 
     Electrons = totalkRadGras(Path, "Elec")*99
 
