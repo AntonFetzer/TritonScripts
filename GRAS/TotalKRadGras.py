@@ -13,12 +13,15 @@ def totalkRadGras(path, particle: str):
 
     NumTiles = np.shape(readGrasCsv(path + Files[0]))[1]
 
-    Data = np.zeros((2, NumTiles), dtype=float)
+    Dose = 0
+    Error = 0
 
     for i, File in enumerate(Files):
-        print(File)
-        Data += readGrasCsv(path + File)
+        Temp = readGrasCsv(path + File)
+        Dose += Temp[0]
+        Error += Temp[1]*Temp[1]
 
+    Data = np.asarray([Dose, np.sqrt(Error)])
 
     Data = Data / len(Files)
 
@@ -36,15 +39,20 @@ def totalkRadGras(path, particle: str):
 
 
 if __name__ == "__main__":
-    Path = "/home/anton/Desktop/triton_work/2Mat/Al-Pb/Res/"
+    Path = "/home/anton/Desktop/triton_work/Permutations/1Layer/Res1e5/"
 
-    Electrons = totalkRadGras(Path, "Elec")*99
+    Electrons = totalkRadGras(Path, "Elec")*299
 
-    Protons = totalkRadGras(Path, "Prot")*99
+    Protons = totalkRadGras(Path, "Prot")*299
 
-    plt.plot(Electrons[0])
-    plt.plot(Protons[0])
+    print(np.shape(Electrons))
+
+    x = np.linspace(1, 300, num=299, dtype=int)
+
+    plt.errorbar(x, Electrons[0], Electrons[1])
+    plt.errorbar(x, Protons[0], Protons[1])
     plt.show()
+
 
     # print("The total electron dose is: ", Electrons[0], " kRad")
     # print("with ", 100 * Electrons[1] / Electrons[0], " % error")
