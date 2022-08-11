@@ -5,7 +5,7 @@ from MeVtokRad2DGras import MeVtokRad_2D
 import matplotlib.pyplot as plt
 
 
-def totalkRadGras(path, particle: str):
+def totalkRadGras(path, particle: str, Norm):
     print("Reading in all", particle, "files in folder:", path)
 
     # Get list of all csv files in Path
@@ -25,32 +25,36 @@ def totalkRadGras(path, particle: str):
 
     Data = Data / len(Files)
 
-    if "lec" in particle:
-        NORM_FACTOR_SPECTRUM = 7.891281E+14
-    elif "rot" in particle:
-        NORM_FACTOR_SPECTRUM = 3.389664E+11
-    else:
-        NORM_FACTOR_SPECTRUM = "NaN"
-        print("!!!! ERROR !!!! WRONG PARTICLE TYPE SPECIFIED")
+#    if "lec" in particle:
+#        NORM_FACTOR_SPECTRUM = 7.891281E+14
+#    elif "rot" in particle:
+#        NORM_FACTOR_SPECTRUM = 3.389664E+11
+#    else:
+#        NORM_FACTOR_SPECTRUM = "NaN"
+#        print("!!!! ERROR !!!! WRONG PARTICLE TYPE SPECIFIED")
 
-    Data = MeVtokRad_2D(Data, NORM_FACTOR_SPECTRUM)
+    #Data = MeVtokRad_2D(Data, Norm)
 
     return Data
 
 
 if __name__ == "__main__":
-    Path = "/home/anton/Desktop/triton_work/Permutations/1Layer/Res1e5/"
+    Path = "/home/anton/Desktop/triton_work/2LayerOpt/Al-Pb/Res/"
 
-    Electrons = totalkRadGras(Path, "Elec")*299
+    Scale = 365 / 2 * 24 * 60 * 60
 
-    Protons = totalkRadGras(Path, "Prot")*299
+    NumTiles = 99
+
+    Electrons = totalkRadGras(Path, "Elec", 1)
+
+    Protons = totalkRadGras(Path, "Prot", 1)
 
     print(np.shape(Electrons))
 
-    x = np.linspace(1, 300, num=299, dtype=int)
+    x = np.linspace(1, 100, num=99, dtype=int)
 
-    plt.errorbar(x, Electrons[0], Electrons[1])
-    plt.errorbar(x, Protons[0], Protons[1])
+    plt.plot(x, Electrons[0] * Scale / 1000)
+    plt.plot(x, Protons[0] * Scale / 1000)
     plt.show()
 
 

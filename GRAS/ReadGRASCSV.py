@@ -31,7 +31,7 @@ def readGrasCsv(file):
 
 
 if __name__ == "__main__":
-    File = "/home/anton/Desktop/triton_work/Permutations/1Layer/Res1e5/Electrons_11167_3222.csv"
+    File = "/home/anton/Desktop/triton_work/2LayerOpt/Al-Pb/Res/ElectronsA_966954_65703.csv"
 
     Results = readGrasCsv(File)
 

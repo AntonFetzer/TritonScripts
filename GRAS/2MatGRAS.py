@@ -5,7 +5,8 @@ from ReadGRASCSV import readGrasCsv
 from MeVtokRad2DGras import MeVtokRad_2D
 from TotalKRadGras import totalkRadGras
 
-Path = "/home/anton/Desktop/triton_work/2MatPhys/DONE"
+# Path = "/home/anton/Desktop/triton_work/2MatPhys/"
+Path = "/home/anton/Desktop/triton_work/2LayerOpt/"
 ShieldingDepth = "1.5"  # g/cm2
 
 MatA = "Aluminium"
@@ -15,17 +16,23 @@ b = "pb"
 A = "Al"
 B = "Pb"
 #Shield = A + "-" + B
-Shield = "FTFP_BERT"
-NumTiles = 99
+Shield = "Al-Pb"
+# ElecNorm = 2.432839E+07
+# ProtNorm = 1.989247E+04
+Scale = 365/2 * 24 * 60 * 60 / 1000 # * 99
+ElecNorm = 1
+ProtNorm = 1
+#Scale = 1
+#Scale = 6
 
 Ymax = 15  # Max kRad shown in plots so that every plot has the same scale
 
 Path += "/" + Shield + "/"
-ElecA = totalkRadGras(Path + "Res/", "ElectronsA") * NumTiles
-ProtA = totalkRadGras(Path + "Res/", "ProtonsA") * NumTiles
+ElecA = totalkRadGras(Path + "Res/", "ElectronsA", ElecNorm) * Scale
+ProtA = totalkRadGras(Path + "Res/", "ProtonsA", ProtNorm) * Scale
 
-ElecB = totalkRadGras(Path + "Res/", "ElectronsB") * NumTiles
-ProtB = totalkRadGras(Path + "Res/", "ProtonsB") * NumTiles
+ElecB = totalkRadGras(Path + "Res/", "ElectronsB", ElecNorm) * Scale
+ProtB = totalkRadGras(Path + "Res/", "ProtonsB", ProtNorm) * Scale
 
 x = np.linspace(1, 99, num=99, dtype=int)
 
@@ -44,12 +51,13 @@ plt.errorbar(x, ProtB[0], ProtB[1], fmt=' ', capsize=2,
              label="Protons " + B + " on " + A + " Min=" + str(round(np.min(ProtB[0]), 2)) + " kRad at " + str(
                  round(np.argmin(ProtB[0]) + 1)) + " % " + A)
 
-plt.ylim(0, Ymax)
+#plt.ylim(0, Ymax)
 plt.title("Dose deposited by trapped particles in 0.5 mm Si \n behind " + ShieldingDepth + "/cm2 of " + MatA + "-" + MatB + " shielding")
 plt.xlabel("Percentage of shielding mass in " + MatA + " [%]")
 plt.ylabel("Deposited ionising dose [kRad]")
 plt.grid(which='both')
 plt.legend()
+# plt.yscale("log")
 # plt.show()
 plt.savefig(Path + Shield + "-Gradient.eps", format='eps', bbox_inches="tight")
 
@@ -69,13 +77,14 @@ plt.errorbar(x, TotalB[0], TotalB[1], fmt=' ', capsize=2,
              label=MatB + " on top of " + MatA + " Min=" + str(round(np.min(TotalB[0]), 2)) + " krad at " + str(
              round(np.argmin(TotalB[0]) + 1)) + " % " + A)
 
-plt.ylim(0, Ymax)
+#plt.ylim(0, Ymax)
 plt.title(
     "Total dose deposited by trapped particles in 0.5 mm Si \n behind " + ShieldingDepth + "/cm2 of " + MatA + "-" + MatB + " shielding")  # --------
 plt.xlabel("Percentage of shielding mass in " + MatA + " [%]")
 plt.ylabel("Deposited ionising dose [krad]")
 plt.grid(which='both')
 plt.legend()
+# plt.yscale("log")
 # plt.show()
 plt.savefig(Path + Shield + "-GradientSum.eps", format='eps', bbox_inches="tight")
 

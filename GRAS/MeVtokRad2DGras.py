@@ -29,3 +29,9 @@ def MeVtokRad_2D(MeV, NORM_FACTOR_SPECTRUM):
     # print("kRads", kRads)  # krad
 
     return kRads
+
+
+if __name__ == "__main__":
+    x = MeVtokRad_2D(1, 2.432839E+07)
+    #Scale = 30 * 24 * 60 * 60
+    print(x)
