@@ -1,4 +1,4 @@
-def MeVtokRad_2D(MeV, NORM_FACTOR_SPECTRUM):
+def MeVtokRad_2DGRAS(MeV, NORM_FACTOR_SPECTRUM):
 
     # ----------- Norm factors from GPS spectrum ------------
     NORM_FACTOR_ANGULAR = 2.500000E-01
@@ -32,6 +32,6 @@ def MeVtokRad_2D(MeV, NORM_FACTOR_SPECTRUM):
 
 
 if __name__ == "__main__":
-    x = MeVtokRad_2D(1, 2.432839E+07)
+    x = MeVtokRad_2DGRAS(1, 2.432839E+07)
     #Scale = 30 * 24 * 60 * 60
     print(x)
