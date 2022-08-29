@@ -9,16 +9,19 @@ import sys
 sys.path.append('../GRAS')
 from TotalKRadGras import totalkRadGras
 
-Path = "/home/anton/Desktop/triton_work/ShieldingCurves/100AlFull/Res/"
+Path = "/home/anton/Desktop/triton_work/ShieldingCurves1000/"
+Folder = "05Elec-10Prot"
+ElecMeV = 0.5
+ProtMeV = 10
 
-Electrons = totalkRadGras(Path, "Elec")
-Protons = totalkRadGras(Path, "Prot")
-x = np.linspace(0, 2.5, num=101, dtype=float)
+Electrons = totalkRadGras(Path + Folder + "/Res/", "Elec")
+Protons = totalkRadGras(Path + Folder + "/Res/", "Prot")
+x = np.linspace(0, 2.5, num=1001, dtype=float)
 #x = np.linspace(0.05, 2.5, num=50, dtype=float)
 #for i in x:
 #    print(i)
 
-
+fig1 = plt.figure(1)
 # ------------------------------- Import and Plot SHIELDOSE Data -------------------------------------------------------
 SDData = readSDQ2("../Dependencies/spenvis_sqoA9gcm2.txt")
 # SDDataCollumns = ['Aluminium Thickness', 'Total Dose', 'Electrons', 'Bremsstrahlung', 'Protons']
@@ -31,13 +34,14 @@ CriticalDose = [1] * SDData.shape[0]
 plt.plot(SDData[:, 0], CriticalDose, color='k', linewidth=2, label='Critical Dose of 1 krad per month')
 
 # ----------------------------------------- Plot electrons500kev ---------------------------------------------------------
-plt.errorbar(x, Electrons[0], Electrons[1], fmt='C0 ', capsize=3, label="GRAS Electrons Full")
+plt.errorbar(x, Electrons[0], Electrons[1], fmt='C0 ', capsize=1, label="GRAS Electrons > " + str(ElecMeV) + " MeV", elinewidth=0.1, capthick=0.1)
+
 
 # ----------------------------------------- Plot electronsfull ---------------------------------------------------------
 #plt.errorbar(ThickList, Data[:, 1, 2], Data[:, 1, 3], fmt='bD', capsize=7, markersize=5, label="GRAS Electrons > 40 keV")
 
 # ----------------------------------------- Plot protons10MeV -------------------------------------------------------
-plt.errorbar(x, Protons[0], Protons[1], fmt='C1 ', capsize=3, label="GRAS Protons Full")
+plt.errorbar(x, Protons[0], Protons[1], fmt='C1 ', capsize=1, label="GRAS Protons > " + str(ProtMeV) + " MeV", elinewidth=0.1, capthick=0.1)
 
 # ----------------------------------------- Plot protonsfull -------------------------------------------------------
 #plt.errorbar(ThickList, Data[:, 3, 2], Data[:, 3, 3], fmt='yo', capsize=7, markersize=5, label="GRAS Protons > 100 keV")
@@ -47,7 +51,7 @@ Total[0] = Electrons[0] + Protons[0]
 Total[1] = np.sqrt(Electrons[1] * Electrons[1] + Protons[1] * Protons[1])
 
 # ----------------------------------------- Plot Total -------------------------------------------------------
-plt.errorbar(x, Total[0], Total[1], fmt='C2 ', capsize=3, label="GRAS total ionizing dose")
+plt.errorbar(x, Total[0], Total[1], fmt='C2 ', capsize=3, label="GRAS total ionizing dose", elinewidth=0.1, capthick=0.1)
 
 
 # plt.xlim([0, 17])
@@ -55,9 +59,31 @@ plt.errorbar(x, Total[0], Total[1], fmt='C2 ', capsize=3, label="GRAS total ioni
 plt.yscale("log")
 # plt.xscale("log")
 plt.grid(which='major')
-plt.title("Trapped particle spectra shielded by aluminium")
+plt.title(Folder)
 plt.xlabel("Aluminium Shield Thickness [mm]")
 plt.ylabel("Total ionizing dose in silicon [krad]")
 plt.legend()
+plt.savefig(Path + Folder + "/CompareGRASSHieldose.eps", format='eps', bbox_inches="tight")
+
+fig2 = plt.figure(2)
+plt.title(Folder)
+plt.plot(x, Electrons[3], 'C0.', label="GRAS Electrons > " + str(ElecMeV) + " MeV")
+plt.plot(x, Protons[3], 'C1.', label="GRAS Protons > " + str(ProtMeV) + " MeV")
+plt.legend()
+plt.xlabel("Aluminium Shield Thickness [mm]")
+plt.ylabel("Number of Non Zero Entries")
+plt.grid(which='both')
+plt.yscale("log")
+plt.savefig(Path + Folder + "/NonZeroEntries.eps", format='eps', bbox_inches="tight")
+
+fig3 = plt.figure(3)
+plt.title(Folder)
+plt.plot(x, 100 * Electrons[1] / Electrons[0], 'C0.', label="GRAS Electrons > " + str(ElecMeV) + " MeV")
+plt.plot(x, 100 * Protons[1] / Protons[0], 'C1.', label="GRAS Protons > " + str(ProtMeV) + " MeV")
+plt.legend()
+plt.xlabel("Aluminium Shield Thickness [mm]")
+plt.ylabel("Relative Error in %")
+plt.grid(which='both')
+#plt.yscale("log")
+plt.savefig(Path + Folder + "/RelativeError.eps", format='eps', bbox_inches="tight")
 #plt.show()
-plt.savefig(Path + "../CompareGRASSHieldose.eps", format='eps', bbox_inches="tight")

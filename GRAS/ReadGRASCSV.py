@@ -27,11 +27,12 @@ def readGrasCsv(file):
                     data[2].append(float(line[2]))
                     data[3].append(float(line[3]))
 
-    Res = np.ndarray(np.shape(data), dtype=float)
+    #Res = np.ndarray(np.shape(data), dtype=np.float64)
+    Res = np.array(data, dtype=np.float64)
 
-    for c, column in enumerate(data):
-        for i, item in enumerate(column):
-            Res[c, i] = item
+    #for c, column in enumerate(data):
+    #    for i, item in enumerate(column):
+    #       Res[c, i] = item
 
     return Res  # 2xNumTiles matrix
     # data[0]: MeV per particle for each volume
