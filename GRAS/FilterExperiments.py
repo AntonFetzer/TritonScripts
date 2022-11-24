@@ -1,10 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from ReadGRASCSV import readGrasCsv
 from scipy.optimize import curve_fit
 import scipy.odr as odr
 import pandas as pd
-from TotalKRadGras import totalkRadGras
+from GRAS.Dependencies.TotalKRadGras import totalkRadGras
 
 
 def simpleFilter(data, window_size=5):
@@ -36,7 +35,7 @@ def simpleFilter(data, window_size=5):
 
 
 if __name__ == "__main__":
-    path = "/home/anton/Desktop/triton_work/2LayerOpt/PE-Pb-16/Res/"
+    path = "/home/anton/Desktop/triton_work/2LayerStackedCurves/PE-Pb-32/Res/"
 
     # Data = readGrasCsv(path)
     Data = totalkRadGras(path, "Elec")
