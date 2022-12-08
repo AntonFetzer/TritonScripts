@@ -17,10 +17,10 @@ print(fdiff)
 f = sp.lambdify(E, f, "numpy")
 fdiff = sp.lambdify(E, fdiff, "numpy")
 
-Evals = np.geomspace(0.13, 1000, num=10)
+Evals = np.geomspace(0.13, 10, num=10)
 
 for E in Evals:
-    #print(f"{E:.4}", f"{-fdiff(E):.4}")
+    #print("/gps/hist/point", f"{E:.4}", f"{-fdiff(E):.4}")
     print(f"{E:.4}", f"{f(E):.4}")
 
 file = "/home/anton/Desktop/triton_work/Spectra/A9/spenvis_tri.txt"

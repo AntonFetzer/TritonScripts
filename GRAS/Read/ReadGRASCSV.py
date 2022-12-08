@@ -49,7 +49,7 @@ def readGrasCsv(file):
 
 
 if __name__ == "__main__":
-    File = "/home/anton/Desktop/triton_work/1U/0mm/Res/Electrons0_986336_152593.csv"
+    File = "/home/anton/Desktop/triton_work/CARRINGTON/HistogramTestDifferentialPowSpec/Res/Electrons1Tile0mm_23566_3645.csv"
 
     Results = readGrasCsv(File)
 

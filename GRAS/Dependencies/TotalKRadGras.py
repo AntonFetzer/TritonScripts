@@ -78,13 +78,13 @@ def totalkRadGras(path, particle: str):
 
 
 if __name__ == "__main__":
-    Path = "/home/anton/Desktop/triton_work/Permutations/1Layer/Res/"
+    Path = "/home/anton/Desktop/triton_work/3MatTriangles/Al-FlatTest/Res/"
 
     AorB = "B"
 
-    Electrons = totalkRadGras(Path, "Elec")
+    #Electrons = totalkRadGras(Path, "Elec")
     #Electrons = totalkRadGras(Path, "Electrons2Mat" + AorB)
-    #Protons = totalkRadGras(Path, "Prot")
+    Protons = totalkRadGras(Path, "Prot")
     #Protons = totalkRadGras(Path, "Protons2Mat" + AorB)
 
     #Total = Electrons + Protons
@@ -96,22 +96,22 @@ if __name__ == "__main__":
 
     # x = np.linspace(0, 99, num=100, dtype=np.float64)
 
-    fig1 = plt.figure(1)
-    plt.plot(100 * Electrons[1] / Electrons[0], '.', label="Electrons")
-    #plt.plot(100 * Protons[1] / Protons[0], '.', label="Protons")
+    plt.figure(1)
+    #plt.plot(100 * Electrons[1] / Electrons[0], '.', label="Electrons")
+    plt.plot(100 * Protons[1] / Protons[0], '.', label="Protons")
     plt.legend()
     plt.title("Relative Error in %")
 
-    fig2 = plt.figure(2)
-    plt.plot(Electrons[3], '.', label="Electrons")
-    #plt.plot(Protons[3], '.', label="Protons")
+    plt.figure(2)
+    #plt.plot(Electrons[3], '.', label="Electrons")
+    plt.plot(Protons[3], '.', label="Protons")
     plt.legend()
     plt.yscale("log")
     plt.title("Number of non-Zero Entries")
 
-    fig3 = plt.figure(3)
-    plt.plot(Electrons[0], '.', label="Electrons")
-    #plt.plot(Protons[0], '.', label="Protons")
+    plt.figure(3)
+    #plt.plot(Electrons[0], '.', label="Electrons")
+    plt.plot(Protons[0], '.', label="Protons")
     #plt.plot(Protons[0] + Electrons[0], '.', label="Total")
     plt.legend()
     plt.grid()

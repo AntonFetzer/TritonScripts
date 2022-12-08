@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+############ SAPPHIRE Spectra are in Fluence with minimum duration 6 months !!! ###############################
+
 def readSpenvis_sef(fileName):
     print("Reading in", fileName)
     f = open(fileName, "r")
@@ -24,13 +26,15 @@ def readSpenvis_sef(fileName):
     rows, cols = np.shape(Iontable)
     cols = int((cols-1)/2)
 
+    #print(cols)
+
     IonData = np.zeros((rows, cols), dtype=np.float64)
     EnergyPerNucleon = np.zeros(rows, dtype=np.float64)
 
     for i, line in enumerate(Iontable):
-        IonData[i] = line[1:cols+1]
         EnergyPerNucleon[i] = line[0]
-        IonData[i] /= (30*24*60*60)  # The sef.txt contains the Fluence not the flux!
+        IonData[i] = line[1:cols+1]     # Reading the Integral Fluence
+        IonData[i] /= (6*30*24*60*60)   # The sef.txt contains the Fluence per 6 months not the flux!
 
     # print(Energy)
 
@@ -59,6 +63,8 @@ def readSpenvis_sef(fileName):
 
 
 if __name__ == "__main__":
+    ############ SAPPHIRE Spectra are in Fluence with minimum duration 6 months !!! ###############################
+    ############ Check duration and normalisation of the spectrum #################################################
     DataT = readSpenvis_sef("/home/anton/Desktop/triton_work/SuperGTO/spenvis_sef.txt")
     #plt.bar(range(93), DataT[:, 0, 1])
     print(DataT[:, 0, 1])
@@ -74,10 +80,14 @@ if __name__ == "__main__":
         FluxMax = DataT[i, 0, 1]
         if FluxMax > 1:
             print(Species[i], FluxMax)
-
             plt.plot(DataT[i, :, 0], DataT[i, :, 1], label=Species[i])
 
+    plt.xlim(1, 1e7)
+    plt.ylim(1e-7, 1e5)
     plt.xscale("log")
     plt.yscale("log")
+    plt.title("Solar Ion Integral Flux")
+    plt.xlabel("Energy [MeV]")
+    plt.ylabel("Integral Flux [cm-2 s-1]")
     plt.legend()
     plt.show()

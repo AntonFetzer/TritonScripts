@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
-from GRAS.Read.ReadGPSMacro import readGPSMacro
-from GRAS.Read.ReadSpenvis_sef import readSpenvis_sef
+
 
 def readSpenvis_tri(file):
 
@@ -66,10 +65,6 @@ if __name__ == "__main__":
     plt.plot(Electrons[0], Electrons[1], label="Trapped Electrons")
     #plt.plot(Electrons[0], Electrons[2], label="Electron Differential")
 
-    #GPSfile = "/home/anton/Desktop/triton_work/Spectra/A9/AE9Mission.mac"
-    #GPSElectrons = readGPSMacro(GPSfile)
-
-    #plt.plot(GPSElectrons[0], GPSElectrons[1], 'x', label="Electron GPS")
 
 
     plt.yscale("log")
@@ -81,9 +76,4 @@ if __name__ == "__main__":
     plt.ylabel("Integral Flux [cm-2 s-1]")
     #plt.ylabel("Differential Flux [cm-2 s-1 MeV-1]")
 
-    DataT = readSpenvis_sef("/home/anton/Desktop/triton_work/SuperGTO/spenvis_sef.txt")
-    plt.plot(DataT[0, :, 0], DataT[0, :, 1], label="Solar Protons")
-    plt.plot(DataT[1, :, 0], DataT[1, :, 1], label="Solar Helium Ions")
-    plt.legend()
-    plt.savefig("/home/anton/Desktop/triton_work/SuperGTO/SuperGTOSpectra.svg", format='svg', bbox_inches="tight")
-    #plt.show()
+    plt.show()

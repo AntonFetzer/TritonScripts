@@ -8,11 +8,12 @@ Folder = "SuperGTO"
 ElecMeV = 0.5
 ProtMeV = 10
 
-Electrons = totalkRadGras(Path + Folder + "/Res/", "Elec")
-Protons = totalkRadGras(Path + Folder + "/Res/", "Prot")
-Sol = totalkRadGras(Path + Folder + "/Res/", "Sol")
-
-Sol = Sol / (30*24*60*60) # Fluence was in per month. Not per second.
+Electrons = totalkRadGras(Path + Folder + "/Elec/", "Elec")
+Protons = totalkRadGras(Path + Folder + "/Prot/", "Prot")
+Sol = totalkRadGras(Path + Folder + "/SolProt/", "Sol")
+He = totalkRadGras(Path + Folder + "/SolHe/", "He")
+#Ox = totalkRadGras(Path + Folder + "/SolO/", "O")
+#Fe = totalkRadGras(Path + Folder + "/SolFe/", "Fe")
 
 x = np.linspace(0, 2.5/0.27, num=101, dtype=float)
 #x = np.linspace(0.05, 2.5, num=50, dtype=float)
@@ -23,10 +24,10 @@ fig1 = plt.figure(1)
 # ------------------------------- Import and Plot SHIELDOSE Data -------------------------------------------------------
 SDData = readSDQ2("/home/anton/Desktop/triton_work/SuperGTO/spenvis_sqo.txt")
 # SDDataCollumns = ['Aluminium Thickness', 'Total Dose', 'Electrons', 'Bremsstrahlung', 'Protons']
-plt.plot(SDData[:, 0], (SDData[:, 2] + SDData[:, 3]) / 1000, '-.', label="SHIELDOSE-2Q Electrons", linewidth=1)
-plt.plot(SDData[:, 0], SDData[:, 4] / 1000, '--', label="SHIELDOSE-2Q Protons", linewidth=1)
-plt.plot(SDData[:, 0], SDData[:, 5] / 1000, '--', label="SHIELDOSE-2Q Solar Protons", linewidth=1)
-plt.plot(SDData[:, 0], SDData[:, 1] / 1000, '-', label="SHIELDOSE-2Q Total Dose", linewidth=1)
+plt.plot(SDData[:, 0], (SDData[:, 2] + SDData[:, 3]) / 1000, '-.', label="SHIELDOSE-2Q Trapped Electrons", linewidth=1)
+plt.plot(SDData[:, 0], SDData[:, 4] / 1000, '--', label="SHIELDOSE-2Q Trapped Protons", linewidth=1)
+plt.plot(SDData[:, 0], SDData[:, 5] / 6000, '--', label="SHIELDOSE-2Q Solar Protons", linewidth=1)
+#plt.plot(SDData[:, 0], SDData[:, 1] / 1000 - SDData[:, 5] / 5000, '-', label="SHIELDOSE-2Q Total Dose", linewidth=1)
 
 ####### Plot 10kRad line #########
 CriticalDose = [1] * SDData.shape[0]
@@ -41,24 +42,33 @@ plt.errorbar(x, Protons[0], Protons[1], fmt='C1 ', capsize=4, label="GRAS Trappe
 # ----------------------------------------- Plot Solar protons -------------------------------------------------------
 plt.errorbar(x, Sol[0], Sol[1], fmt='C2 ', capsize=4, label="GRAS Solar Protons > " + str(ProtMeV) + " MeV", elinewidth=1, capthick=1)
 
+# ----------------------------------------- Plot Solar Helium -------------------------------------------------------
+plt.errorbar(x, He[0], He[1], fmt='C3 ', capsize=4, label="GRAS Solar Helium > " + str(ProtMeV) + " MeV", elinewidth=1, capthick=1)
+
+#----------------------------------------- Plot Solar Oxygen -------------------------------------------------------
+#plt.errorbar(x, Ox[0], Ox[1], fmt='C4 ', capsize=4, label="GRAS Solar Oxygen > " + str(ProtMeV) + " MeV", elinewidth=1, capthick=1)
+
+#----------------------------------------- Plot Solar Iron -------------------------------------------------------
+#plt.errorbar(x, Fe[0], Fe[1], fmt='C5 ', capsize=4, label="GRAS Solar Iron > " + str(ProtMeV) + " MeV", elinewidth=1, capthick=1)
+
 Total = Electrons
-Total[0] = Electrons[0] + Protons[0] + Sol[0]
-Total[1] = np.sqrt(Electrons[1] * Electrons[1] + Protons[1] * Protons[1] + Sol[1] * Sol[1])
+Total[0] = Electrons[0] + Protons[0] + Sol[0] + He[0] #+ Ox[0] + Fe[0]
+Total[1] = np.sqrt(Electrons[1] * Electrons[1] + Protons[1] * Protons[1] + Sol[1] * Sol[1] + He[1] * He[1] )#+ Ox[1] * Ox[1] + Fe[1] * Fe[1])
 
 # ----------------------------------------- Plot Total -------------------------------------------------------
-plt.errorbar(x, Total[0], Total[1], fmt='C3 ', capsize=4, label="GRAS Total Ionizing Dose", elinewidth=1, capthick=1)
+plt.errorbar(x, Total[0], Total[1], fmt='C8 ', capsize=4, label="GRAS Total Ionizing Dose", elinewidth=1, capthick=1)
 
 
 plt.xlim(-0.2, 2.5/0.27)
-# plt.ylim([0.2, 2e2])
+plt.ylim([1e-3, 3e3])
 plt.yscale("log")
-# plt.xscale("log")
+#plt.xscale("log")
 plt.grid(which='major')
-plt.title(Folder)
+plt.title("Super GTO TID from energetic trapped and solar particles")
 plt.xlabel("Aluminium Shield Thickness [mm]")
-plt.ylabel("Total ionizing dose in silicon [krad]")
+plt.ylabel("Total ionizing dose in silicon [krad per month]")
 plt.legend()
-plt.savefig("/home/anton/Desktop/triton_work/ShieldingCurves/SuperGTO/CompareGRASSHieldose-mm.svg", format='svg', bbox_inches="tight")
+plt.savefig("/home/anton/Desktop/triton_work/ShieldingCurves/SuperGTO/CompareGRASSHieldose-mm.png", format='png', bbox_inches="tight",  dpi=300)
 
 
 '''

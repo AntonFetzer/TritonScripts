@@ -4,27 +4,30 @@ import numpy as np
 from GRAS.Dependencies.TotalKRadGras import totalkRadGras
 from matplotlib import cm
 
-Path = "/home/anton/Desktop/triton_work/3MatTriangles/PE-Al-Pb/Res/"
+Path = "/home/anton/Desktop/triton_work/3MatTriangles/Al-PE-Al/Res/"
 
-Electrons = totalkRadGras(Path, "Elec")
+#Electrons = totalkRadGras(Path, "Elec")
 Protons = totalkRadGras(Path, "Prot")
-Total = Electrons + Protons
+#Total = Electrons + Protons
+Total = Protons
 
-Data = Total[0]
-Min = np.min(Data)
-Data = Data - np.min(Data)
-Max = np.max(Data)
-Data = Data/Max
+ColorData = Total[0]
+Min = np.min(ColorData)
+ColorData = ColorData - np.min(ColorData)
+Max = np.max(ColorData)
+ColorData = ColorData/Max
 
-Colors = cm.turbo(Data)
-print(len(Data))
+print("The average Dose is", np.mean(Total[0]))
+
+Colors = cm.turbo(ColorData)
+print(len(ColorData))
 
 N = 30
 Offset = (N+1)*N/2
 
 h = np.sqrt(3) / 2
 
-fig, ax = plt.subplots(1, 1)
+fig, ax = plt.subplots(figsize=(20, 18))
 
 i = 0
 
@@ -43,8 +46,7 @@ for x in range(N):
         #print(ID, i, ID-i, Data[ID], Colors[ID])
         #i = i + 1
 
-        ax.add_patch(
-            Polygon([(x + y / 2, y * h), (x + 1 + y / 2, y * h), (x + 0.5 + y / 2, (y + 1) * h)], color=Colors[ID]))
+        ax.add_patch(Polygon([(x + y / 2, y * h), (x + 1 + y / 2, y * h), (x + 0.5 + y / 2, (y + 1) * h)], color=Colors[ID], linewidth=0))
         #ax.text(x + y / 2 + 0.1, y * h + 0.1, str(r) + " " + str(g) + " " + str(b))
 
 
@@ -63,7 +65,7 @@ for x in range(N - 1):
         #print(ID, i, ID-i, Data[ID], Colors[ID])
         #i = i + 1
 
-        ax.add_patch(Polygon([(x + y / 2 + 0.5, (y + 1) * h), (x + 1 + y / 2, y * h), (x + 1.5 + y / 2, (y + 1) * h)], color=Colors[ID]))
+        ax.add_patch(Polygon([(x + y / 2 + 0.5, (y + 1) * h), (x + 1 + y / 2, y * h), (x + 1.5 + y / 2, (y + 1) * h)], color=Colors[ID], linewidth=0))
         #ax.text(x + y / 2 + 0.5, (y + 1) * h - 0.2, str(r) + " " + str(g) + " " + str(b))
 
 
@@ -72,5 +74,7 @@ plt.xlim(0, N)
 plt.axis('off')
 plt.gca().set_aspect('equal')
 #plt.colorbar()
+plt.title("The average Dose is " + str(np.mean(Total[0])) + " krad")
 
-plt.show()
+plt.savefig(Path + "../TIDmap.eps", format='eps', bbox_inches="tight")
+#plt.show()

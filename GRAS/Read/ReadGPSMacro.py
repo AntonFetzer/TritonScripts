@@ -17,15 +17,15 @@ def readGPSMacro(file):
             if ReadFlag == 0:
                 if '/gps/hist/type arb' in line:
                     ReadFlag = 1
-                    print(line)
+                    #print(line)
             elif ReadFlag == 1:
                 if '/gps/hist/inter Log' in line:
                     ReadFlag = 2
-                    print(line)
+                    #print(line)
                 else:
                     Text = line[0]
                     Text = Text.split()
-                    print(float(Text[1]), float(Text[2]))
+                    #print(float(Text[1]), float(Text[2]))
                     Energy.append(float(Text[1]))
                     DiffFlux.append(float(Text[2]))
 
