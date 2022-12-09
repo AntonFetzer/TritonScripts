@@ -4,7 +4,7 @@ import numpy as np
 from GRAS.Dependencies.TotalKRadGras import totalkRadGras
 from matplotlib import cm
 
-Path = "/home/anton/Desktop/triton_work/3MatTriangles/Al-PE-Al/Res/"
+Path = "/home/anton/Desktop/triton_work/3MatTriangles/PE-Al-Pb/Res/"
 
 #Electrons = totalkRadGras(Path, "Elec")
 Protons = totalkRadGras(Path, "Prot")
@@ -17,13 +17,16 @@ ColorData = ColorData - np.min(ColorData)
 Max = np.max(ColorData)
 ColorData = ColorData/Max
 
-print("The average Dose is", np.mean(Total[0]))
-
 Colors = cm.turbo(ColorData)
 print(len(ColorData))
 
 N = 30
-Offset = (N+1)*N/2
+Offset = int((N+1)*N/2)
+
+print("The average Dose is", np.mean(Total[0]))
+print("The average Dose of the main triangle is", np.mean(Total[0][:Offset]))
+print("The average Dose of the upside down triangle is", np.mean(Total[0][Offset:]))
+print("The difference in Dose is", 100*(np.mean(Total[0][Offset:]) - np.mean(Total[0][:Offset])) / np.mean(Total[0]), "%")
 
 h = np.sqrt(3) / 2
 
@@ -76,5 +79,5 @@ plt.gca().set_aspect('equal')
 #plt.colorbar()
 plt.title("The average Dose is " + str(np.mean(Total[0])) + " krad")
 
-plt.savefig(Path + "../TIDmap.eps", format='eps', bbox_inches="tight")
-#plt.show()
+#plt.savefig(Path + "../TIDmap.eps", format='eps', bbox_inches="tight")
+plt.show()
