@@ -56,9 +56,9 @@ for x in range(N):
 for x in range(N - 1):
     for y in range(N - x - 1):
         n = N - 1
-        r = x / n + 0.5 / n
-        g = y / n + 0.5 / n
-        b = 1 - x / n - y / n - 1 / n
+        r = x / n + 1/(3*n)
+        g = y / n + 1/(3*n)
+        b = 1 - r - g
 
         if b < 0:
             #print(x, y, r, g, b)

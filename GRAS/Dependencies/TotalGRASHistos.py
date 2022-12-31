@@ -69,9 +69,8 @@ def totalGRASHistos(path, particle: str):
 if __name__ == "__main__":
 
     # Only works if all input files have the same number of particles!!!!!
-    path1 = "/home/anton/Desktop/triton_work/CARRINGTON/HistogramTestIntegralSpectrum/Res/"
-    path2 = "/home/anton/Desktop/triton_work/CARRINGTON/HistogramTestDifferentialPowSpec/Res/"
-    DoseHist, PrimaryHist = totalGRASHistos(path1, "Elec")
+    path = "/home/anton/Desktop/triton_work/CARRINGTON/HistogramSEP/Res/"
+    DoseHist, PrimaryHist = totalGRASHistos(path, "Prot")
 
     print("DoseHist Shape", np.shape(DoseHist))
 
@@ -82,52 +81,55 @@ if __name__ == "__main__":
     errorID = 4
     entriesID = 5
 
-    '''
+    ####    Dose hist Entries #######
     NumberEntries = sum(DoseHist[:, entriesID])
-    TotalDose = sum(DoseHist[:, meanID] * DoseHist[:, entriesID])
+    DoseEntries = sum(DoseHist[:, meanID] * DoseHist[:, entriesID])
 
-    plt.figure(1)
+    plt.figure(0)
     plt.bar(DoseHist[:, lowerID], DoseHist[:, entriesID], width=DoseHist[:, upperID] - DoseHist[:, lowerID], align='edge')
     plt.yscale("log")
     plt.xscale("log")
     plt.grid()
-    plt.title("Dose Depositions Histogram\n" + f"{NumberEntries:.2}" + " entries " + f"{TotalDose:.2}" + " krad total dose ?!?")
+    plt.title("Dose Entries Histogram\n" + f"{NumberEntries:.2}" + " entries " + f"{DoseEntries:.2}" + " krad total dose ?!?")
     plt.xlabel("Dose [krad per Month]")
     plt.ylabel("Number of entries per dose bin")
-    plt.savefig(path + "../DoseDepositionsHistogram.eps", format='eps', bbox_inches="tight")
-    '''
 
-    NumberEntries = sum(PrimaryHist[:, entriesID])
-    TotalDose = sum(PrimaryHist[:, valueID])
+    ####    Dose hist Values #######
+    SumValues = sum(DoseHist[:, valueID])
+    DoseValues = sum(DoseHist[:, meanID] * DoseHist[:, valueID])
 
-    plt.figure(2)
-    plt.bar(PrimaryHist[:, lowerID], PrimaryHist[:, valueID], width=PrimaryHist[:, upperID] - PrimaryHist[:, lowerID], align='edge', alpha=0.5)
+    plt.figure(1)
+    plt.bar(DoseHist[:, lowerID], DoseHist[:, valueID], width=DoseHist[:, upperID] - DoseHist[:, lowerID], align='edge')
     plt.yscale("log")
     plt.xscale("log")
     plt.grid()
-    plt.title("Dose deposited VS primary kinetic energy\n" + f"{NumberEntries:.2}" + " simulated particles " + f"{TotalDose:.2}" + " krad total dose")
+    plt.title("Dose Values Histogram\n" + f"{SumValues:.2}" + " SumValues " + f"{DoseValues:.2}" + " krad total dose ?!?")
+    plt.xlabel("Dose [krad per Month] ?")
+    plt.ylabel("Number of entries per dose bin")
+
+    ####    Primary hist Entries #######
+    NumberEntries = sum(PrimaryHist[:, entriesID])
+
+    plt.figure(2)
+    plt.bar(PrimaryHist[:, lowerID], PrimaryHist[:, entriesID], width=PrimaryHist[:, upperID] - PrimaryHist[:, lowerID], align='edge')
+    plt.yscale("log")
+    plt.xscale("log")
+    plt.grid()
+    plt.title("Entries VS primary kinetic energy\n" + f"{NumberEntries:.2}" + " total Entries")
+    plt.xlabel("Kinetic energy [MeV]")
+    plt.ylabel("Number of entries")
+    plt.savefig(path + "../PrimaryHistEntries.eps", format='eps', bbox_inches="tight")
+
+    ####    Primary hist Values #######
+    TotalDose = sum(PrimaryHist[:, valueID])
+
+    plt.figure(3)
+    plt.bar(PrimaryHist[:, lowerID], PrimaryHist[:, valueID], width=PrimaryHist[:, upperID] - PrimaryHist[:, lowerID], align='edge')
+    plt.yscale("log")
+    plt.xscale("log")
+    plt.grid()
+    plt.title("Dose deposited VS primary kinetic energy\n" + f"{NumberEntries:.2}" + " total Entries " + f"{TotalDose:.2}" + " krad total dose")
     plt.xlabel("Kinetic energy [MeV]")
     plt.ylabel("Dose [krad per Month]")
 
-    DoseHist, PrimaryHist = totalGRASHistos(path2, "Elec")
-    plt.bar(PrimaryHist[:, lowerID], PrimaryHist[:, valueID], width=PrimaryHist[:, upperID] - PrimaryHist[:, lowerID], align='edge', alpha=0.5)
-
-    plt.savefig(path1 + "../../Comp/DoseVSPrimaryComparison.pdf", format='pdf', bbox_inches="tight")
-
-    DoseHist, PrimaryHist = totalGRASHistos(path1, "Elec")
-
-    NumberEntries = sum(PrimaryHist[:, entriesID])
-
-    plt.figure(3)
-    plt.bar(PrimaryHist[:, lowerID], PrimaryHist[:, entriesID], width=PrimaryHist[:, upperID] - PrimaryHist[:, lowerID], align='edge', alpha=0.5)
-    plt.yscale("log")
-    plt.xscale("log")
-    plt.grid()
-    plt.title("Particle count VS primary kinetic energy\n" + f"{NumberEntries:.2}" + " simulated particles")
-    plt.xlabel("Kinetic energy [MeV]")
-    plt.ylabel("Number of entries")
-
-    DoseHist, PrimaryHist = totalGRASHistos(path2, "Elec")
-    plt.bar(PrimaryHist[:, lowerID], PrimaryHist[:, entriesID], width=PrimaryHist[:, upperID] - PrimaryHist[:, lowerID], align='edge', alpha=0.5)
-
-    plt.savefig(path1 + "../../Comp/PrimaryHistogramComparison.pdf", format='pdf', bbox_inches="tight")
+    plt.show()

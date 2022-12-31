@@ -3,7 +3,7 @@ import mpltern  # noqa: F401
 import numpy as np
 
 
-ax = plt.subplot(111, projection='ternary')
+ax = plt.subplot(projection='ternary')
 
 Triangles = []
 
