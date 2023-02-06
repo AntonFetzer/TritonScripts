@@ -19,8 +19,13 @@ fdiff = sp.lambdify(E, fdiff, "numpy")
 
 Evals = np.geomspace(0.13, 10, num=10)
 
+print("Differential")
 for E in Evals:
+    print(f"{E:.4}", f"{-fdiff(E):.4}")
     #print("/gps/hist/point", f"{E:.4}", f"{-fdiff(E):.4}")
+
+print("Integral")
+for E in Evals:
     print(f"{E:.4}", f"{f(E):.4}")
 
 file = "/home/anton/Desktop/triton_work/Spectra/A9/spenvis_tri.txt"

@@ -50,9 +50,10 @@ def readGRASHistos(file):
 
 
 if __name__ == "__main__":
-    file = "/home/anton/Desktop/triton_work/CARRINGTON/HistogramAE9Test/Res0mm/Electrons1Tile0mm_179_27.csv"
+    path = "/home/anton/Desktop/triton_work/Histograms/CarringtonSEPTwoPointPowerLaw/Res/"
+    file = "Protons_597868_92494.csv"
 
-    DoseHist, PrimaryHist = readGRASHistos(file)
+    DoseHist, PrimaryHist = readGRASHistos(path + file)
 
     print("DoseHist Shape", np.shape(DoseHist))
 
@@ -77,7 +78,7 @@ if __name__ == "__main__":
     plt.title("Dose Depositions Histogram\n" + f"{NumberEntries:.2}" + " entries " + f"{TotalDose:.2}" + " krad total dose ?!?")
     plt.xlabel("Dose [krad per Month]")
     plt.ylabel("Number of entries per dose bin")
-    '''
+ 
 
     NumberEntries = sum(PrimaryHist[:, entriesID])
     TotalDose = sum(PrimaryHist[:, valueID])
@@ -90,7 +91,7 @@ if __name__ == "__main__":
     plt.title("Dose deposited VS primary kinetic energy\n" + f"{NumberEntries:.2}" + " enties " + f"{TotalDose:.2}" + " krad total dose")
     plt.xlabel("Kinetic energy [MeV]")
     plt.ylabel("Dose [krad per Month]")
-
+   '''
     NumberEntries = sum(PrimaryHist[:, entriesID])
 
     plt.figure(3)
@@ -102,4 +103,5 @@ if __name__ == "__main__":
     plt.xlabel("Kinetic energy [MeV]")
     plt.ylabel("Number of entries")
 
-    plt.show()
+    plt.savefig(path + "../Hist.pdf", format='pdf', bbox_inches="tight")
+    #plt.show()

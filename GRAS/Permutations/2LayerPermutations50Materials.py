@@ -2,8 +2,8 @@ import nmmn.plots
 from GRAS.Dependencies.TotalKRadGras import totalkRadGras
 import numpy as np
 import matplotlib.pyplot as plt
-import numpy as np
 from matplotlib import cm
+
 
 Names = ["G4_lH2", "G4_He", "G4_Li", "G4_Be", "G4_B", "G4_C", "G4_lN2", "G4_lO2", "G4_F", "G4_Ne", "G4_Na", "G4_Mg",
          "G4_Al", "G4_Si", "G4_P", "G4_S", "G4_Cl", "G4_lAr", "G4_K", "G4_Ca", "G4_Sc", "G4_Ti", "G4_V", "G4_Cr",
@@ -18,6 +18,8 @@ Densities = [0.0708, 0.000166322, 0.534, 1.848, 2.37, 2, 0.807, 1.141, 0.0015802
 
 print("Number of Names:", len(Names))
 print("Number of Densities:", len(Densities))
+
+Cmap = cm.viridis
 
 #VolumesStr = ''
 #for i, Name in enumerate(Names):
@@ -61,45 +63,45 @@ for x in range(NumMat):
 
 
 fig1 = plt.figure(1)
-plt.imshow(np.rot90(np.transpose(ElectronMap)), cmap=cm.rainbow, extent=(0.5, len(Names)+0.5, 0.5, len(Names)+0.5))
+image = plt.imshow(np.rot90(np.transpose(ElectronMap)), cmap=Cmap, extent=(0.5, len(Names)+0.5, 0.5, len(Names)+0.5))
 ax = plt.gca()
 ax.set_xticks(np.arange(5, 55, 5))
 ax.set_yticks(np.arange(5, 55, 5))
 ax.set_xticklabels(np.arange(5, 55, 5))
 ax.set_yticklabels(np.arange(5, 55, 5))
 cbar = plt.colorbar()
-cbar.set_label("Ionizing dose per month in krad")
+cbar.set_label("Ionizing dose per month [kRad]")
 plt.title("Electron dose for two layer shielding")
 plt.xlabel("Z-number of bottom-layer")
 plt.ylabel("Z-number of top-layer")
-plt.savefig(Path + "../ElectronMap.eps", format='eps', bbox_inches="tight")
+plt.savefig(Path + "../ElectronMap.pdf", format='pdf', bbox_inches="tight")
 
 fig2 = plt.figure(2)
-plt.imshow(np.rot90(np.transpose(ProtonMap)), cmap=cm.rainbow, extent=(0.5, len(Names)+0.5, 0.5, len(Names)+0.5))
+plt.imshow(np.rot90(np.transpose(ProtonMap)), cmap=Cmap, extent=(0.5, len(Names)+0.5, 0.5, len(Names)+0.5))
 ax = plt.gca()
 ax.set_xticks(np.arange(5, 55, 5))
 ax.set_yticks(np.arange(5, 55, 5))
 ax.set_xticklabels(np.arange(5, 55, 5))
 ax.set_yticklabels(np.arange(5, 55, 5))
 cbar = plt.colorbar()
-cbar.set_label("Ionizing dose per month in krad")
+cbar.set_label("Ionizing dose per month [kRad]")
 plt.title("Proton dose for two layer shielding")
 plt.xlabel("Z-number of bottom-layer")
 plt.ylabel("Z-number of top-layer")
-plt.savefig(Path + "../ProtonMap.eps", format='eps', bbox_inches="tight")
+plt.savefig(Path + "../ProtonMap.pdf", format='pdf', bbox_inches="tight")
 
 TotalMap = ElectronMap + ProtonMap
 
 fig3 = plt.figure(3)
-plt.imshow(np.rot90(np.transpose(TotalMap)), cmap=cm.rainbow, extent=(0.5, len(Names)+0.5, 0.5, len(Names)+0.5))
+plt.imshow(np.rot90(np.transpose(TotalMap)), cmap=Cmap, extent=(0.5, len(Names)+0.5, 0.5, len(Names)+0.5))
 ax = plt.gca()
 ax.set_xticks(np.arange(5, 55, 5))
 ax.set_yticks(np.arange(5, 55, 5))
 ax.set_xticklabels(np.arange(5, 55, 5))
 ax.set_yticklabels(np.arange(5, 55, 5))
 cbar = plt.colorbar()
-cbar.set_label("Ionizing dose per month in krad")
+cbar.set_label("Ionizing dose per month [kRad]")
 plt.title("Total Ionizing dose for two layer shielding")
 plt.xlabel("Z-number of bottom-layer")
 plt.ylabel("Z-number of top-layer")
-plt.savefig(Path + "../TotalMap.eps", format='eps', bbox_inches="tight")
+plt.savefig(Path + "../TotalMap.pdf", format='pdf', bbox_inches="tight")

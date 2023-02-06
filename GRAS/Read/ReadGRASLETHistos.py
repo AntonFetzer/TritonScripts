@@ -33,27 +33,27 @@ def readGRASLETHistos(file):
     LETHist = np.asarray(LETHist)
     EffHist = np.asarray(EffHist)
 
-    # The LET spectra are in 'counts' per MeV/cm bin
-    # Counts are normalised to the particle flux per second
+    # The LET spectra are in 'counts' per MeV/cm bin ???
+    # If the input spcectrum is in [cm-2 s-1] then the counts are in [s-1] per interface area between the shield and detector
+    # This area is 1e6 cm2 in the 1Tile.gdml file written in December 2022
+    # To get the values in [cm-2 s-1] they have to be divided by 1e6
+                        # LET            Eff
+    valueID = 3     #   counts          counts
+    errorID = 4     #   counts          counts
 
-    # --> multiply with number of seconds in a month to get to dose per months.
-    # Dose is given per generated particle --> need to divide by the number of files
-    # Dose is given in rad --> divide by 1000 to get to krad.
-    #ScaleFactor = 30 * 24 * 60 * 60 / 1000
+    AreaNormFactor = 1e6
 
-    #LETHist[:, 0] = LETHist[:, 0] * ScaleFactor
-    #LETHist[:, 1] = LETHist[:, 1] * ScaleFactor
-    #LETHist[:, 2] = LETHist[:, 2] * ScaleFactor
-
-    #EffHist[:, 3] = EffHist[:, 3] * ScaleFactor
-    #EffHist[:, 4] = EffHist[:, 4] * ScaleFactor
+    LETHist[:, valueID] = LETHist[:, valueID] / AreaNormFactor
+    LETHist[:, errorID] = LETHist[:, errorID] / AreaNormFactor
+    EffHist[:, valueID] = EffHist[:, valueID] / AreaNormFactor
+    EffHist[:, errorID] = EffHist[:, errorID] / AreaNormFactor
 
     return LETHist, EffHist
 
 
 
 if __name__ == "__main__":
-    file = "/home/anton/Desktop/triton_work/LET/0mm/Res/Protons1Tile_236630_36608.csv"
+    file = "/home/anton/Desktop/triton_work/LET/0mm/Res/Protons1Tile_700548_108379.csv"
 
     LETHist, EffHist = readGRASLETHistos(file)
 
@@ -66,7 +66,6 @@ if __name__ == "__main__":
     valueID = 3     #   counts          counts
     errorID = 4     #   counts          counts
     entriesID = 5   #   Num             Num
-
 
     NumberEntriesLETHist = sum(LETHist[:, entriesID])
     TotalLETbyEntries = sum(LETHist[:, meanID] * LETHist[:, entriesID])
@@ -89,7 +88,7 @@ if __name__ == "__main__":
     plt.grid()
     plt.title("LET Histogram " + f"{NumberEntriesLETHist:.2}" + " entries\nTotal LET by Values " + f"{TotalLETbyValues:.2}" + " MeV/cm")
     plt.xlabel("LET [MeV/cm]")
-    plt.ylabel("Counts per LET bin")
+    plt.ylabel("Rate per LET bin [cm-2 s-1]")
 
     NumberEntriesEffHist = sum(EffHist[:, entriesID])
     TotalEffbyEntries = sum(EffHist[:, meanID] * EffHist[:, entriesID])
@@ -112,7 +111,7 @@ if __name__ == "__main__":
     plt.grid()
     plt.title("EffLET Histogram " + f"{NumberEntriesEffHist:.2}" + " entries\nTotal EffLET by Values " + f"{TotalEffLETbyValues:.2}" + " MeV/cm")
     plt.xlabel("EffLET [MeV/cm]")
-    plt.ylabel("Counts per EffLET bin")
+    plt.ylabel("Rate per LET bin [cm-2 s-1]")
 
     NumberEntries = sum(EffHist[:, entriesID])
 

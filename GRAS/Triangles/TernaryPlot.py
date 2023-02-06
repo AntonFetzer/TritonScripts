@@ -50,7 +50,7 @@ def plotTernary(path, particle, materials, mat):
     MinID = np.argmin(Data[0])
     MinErr = Data[1][MinID]
 
-    Colors = cm.turbo(ColorData)
+    Colors = cm.viridis(ColorData)
     print(len(ColorData))
 
     fig = plt.figure(Fig)
@@ -116,7 +116,7 @@ def plotTernary(path, particle, materials, mat):
     cax = ax.inset_axes([1.02, 0.1, 0.05, 0.9], transform=ax.transAxes)
     norm = mpl.colors.Normalize(vmin=Min, vmax=Max)
     #print(norm)
-    Map = mpl.cm.ScalarMappable(norm=norm, cmap=cm.turbo)
+    Map = mpl.cm.ScalarMappable(norm=norm, cmap=cm.viridis)
     colorbar = fig.colorbar(Map, cax=cax, label='Some Units')
     colorbar.set_label('Ionizing Dose per Month [krad]', rotation=270, va='baseline')
 
@@ -126,7 +126,7 @@ def plotTernary(path, particle, materials, mat):
              + str(round(bMin*100)) + "% " + materials[2], fontsize='large')
 
     #plt.show()
-    plt.savefig(path + "../Plot/" + particle + "TernaryPlot.eps", format='eps')
+    plt.savefig(path + "../Plot/" + particle + "TernaryPlot.pdf", format='pdf')
     plt.close(Fig)
 
     if "Total" in particle:
@@ -144,7 +144,7 @@ def plotTernary(path, particle, materials, mat):
 
 if __name__ == "__main__":
 
-    Path = "/home/anton/Desktop/triton_work/3MatTriangles/ToProcess/"
+    Path = "/home/anton/Desktop/triton_work/3MatTriangles/DONE/"
 
     Folders = [f for f in os.listdir(Path) if "-" in f]
 
@@ -173,6 +173,6 @@ if __name__ == "__main__":
                 Materials[i] = "FR4"
 
         print(Materials)
-        #plotTernary(Path, "Proton", Materials, Mat)
-        #plotTernary(Path, "Electron", Materials, Mat)
+        plotTernary(Path + F + "/Res/", "Proton", Materials, Mat)
+        plotTernary(Path + F + "/Res/", "Electron", Materials, Mat)
         plotTernary(Path + F + "/Res/", "Total", Materials, Mat)

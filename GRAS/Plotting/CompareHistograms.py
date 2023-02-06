@@ -5,15 +5,13 @@ from natsort import natsorted
 import numpy as np
 
 Paths = [
-    "/home/anton/Desktop/triton_work/CARRINGTON/SpectrumComparison/HistogramTestDifferentialTabelated/Res/",
-    "/home/anton/Desktop/triton_work/CARRINGTON/SpectrumComparison/HistogramTestIntegralSpectrum/Res/",
-    "/home/anton/Desktop/triton_work/CARRINGTON/SpectrumComparison/HistogramTestDifferentialPowSpec/Res/", ]
-# "/home/anton/Desktop/triton_work/CARRINGTON/HistogramAE9Test/Res/"]
+    "/home/anton/Desktop/triton_work/Histograms/CarringtonSEPTwoPointPowerLaw/Res/",
+    "/home/anton/Desktop/triton_work/Histograms/CarringtonSEP-AP9lowEndextrapolation/Res/",
+    "/home/anton/Desktop/triton_work/Histograms/CarringtonSEP-AP9highEndextrapolation/Res/"]
 
-Labels = ["Differential Tabulated",
-          "Integral Tabulated",
-          "Differential Parametric"]
-# "AE9"]
+Labels = ["CaringtonSEP",
+          "Low-End extrapolation",
+          "High-End extrapolation"]
 
 lowerID = 0
 upperID = 1
@@ -25,24 +23,24 @@ entriesID = 5
 DoseHists = []
 PrimaryHists = []
 for path in Paths:
-    Temp = totalGRASHistos(path, "Elec")
+    Temp = totalGRASHistos(path, "")
     DoseHists.append(Temp[0])
     PrimaryHists.append(Temp[1])
 
 plt.figure(1)
-
 for i, PrimaryHist in enumerate(PrimaryHists):
     plt.bar(PrimaryHist[:, lowerID], PrimaryHist[:, valueID], width=PrimaryHist[:, upperID] - PrimaryHist[:, lowerID],
-            align='edge', label=Labels[i], alpha=0.5)
+            align='edge', alpha=0.5)
+    plt.step(PrimaryHist[:, lowerID], PrimaryHist[:, valueID], where='post', label=Labels[i])
 
 plt.yscale("log")
 plt.xscale("log")
 plt.grid()
-plt.title("Dose deposited VS primary kinetic energy")
+plt.title("Ionising dose VS primary kinetic energy")
 plt.xlabel("Kinetic energy [MeV]")
-plt.ylabel("Dose [krad]")
+plt.ylabel("Relative ionising Dose [a.u.]")
 plt.legend()
-plt.savefig("/home/anton/Desktop/triton_work/CARRINGTON/SpectrumComparison/HistogramComparison.eps", format='eps', bbox_inches="tight")
+plt.savefig("/home/anton/Desktop/triton_work/Histograms/HistogramComparison.pdf", format='pdf', bbox_inches="tight")
 '''
 plt.figure(2)
 

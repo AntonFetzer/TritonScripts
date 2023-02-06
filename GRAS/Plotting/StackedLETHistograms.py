@@ -3,13 +3,14 @@ from GRAS.Dependencies.TotalGRASLETHistos import totalGRASLETHistos
 import os
 from natsort import natsorted
 import numpy as np
+from uncertainties import ufloat
 
 
 absolute_path = os.path.abspath(__file__)
 print("Full path: " + absolute_path)
 print("Directory Path: " + os.path.dirname(absolute_path))
 
-Path = "/scratch/work/fetzera1/LET/"
+Path = "/home/anton/Desktop/triton_work/LET/LETCarringtonSEPupto50MeV/"
 
 lowerID = 0
 upperID = 1
@@ -63,51 +64,60 @@ Colours = ['C3', 'C1', 'C8', 'C2', 'C9', 'C0', 'C7']
 # C8    yellow
 # C9    cyan
 
-NumberEntriesLETHist = sum(LETHist[0][:, entriesID])
+#NumberEntriesLETHist = sum(LETHist[0][:, entriesID])
 
 plt.figure(0)
 for i in range(Num):
     plt.bar(LETHist[i][:, lowerID], LETHist[i][:, entriesID], width=LETHist[i][:, upperID] - LETHist[i][:, lowerID],
-            align='edge', label=str(ThickList[i]) + "mm Al", alpha=0.5, color=Colours[i])
+            align='edge', alpha=0.5, color=Colours[i])
+    plt.step(LETHist[i][:, lowerID], LETHist[i][:, entriesID], where='post', label=str(ThickList[i]) + "mm Al", color=Colours[i])
+
 plt.yscale("log")
 plt.xscale("log")
 plt.grid()
-plt.title("LET Histogram " + f"{NumberEntriesLETHist:.2}" + " entries")
+plt.title("LET Histogram")
 plt.xlabel("LET [MeV/cm]")
 plt.ylabel("Number of entries per LET bin")
 plt.legend()
-plt.xlim(10, 1e6)
-plt.savefig(Path + "StackedPlots/LETentries.eps", format='eps', bbox_inches="tight")
+plt.savefig(Path + "StackedPlots/LETentries.pdf", format='pdf', bbox_inches="tight")
+
+#TotalLETbyValues = []
+#TotalLETERRORbyValues = []
+#  " + str(ufloat(TotalLETbyValues[i], TotalLETERRORbyValues[i])) + " MeV/cm total LET"
 
 plt.figure(1)
 for i in range(Num):
+    #TotalLETbyValues.append(sum(LETHist[i][:, meanID] * LETHist[i][:, valueID]))
+    #TotalLETERRORbyValues.append(sum(LETHist[i][:, meanID] * LETHist[i][:, errorID]))
     plt.bar(LETHist[i][:, lowerID], LETHist[i][:, valueID], width=LETHist[i][:, upperID] - LETHist[i][:, lowerID],
-            align='edge', label=str(ThickList[i]) + "mm Al", alpha=0.5, color=Colours[i])
+            align='edge', alpha=0.5, color=Colours[i])
+    plt.step(LETHist[i][:, lowerID], LETHist[i][:, valueID], where='post', label=str(ThickList[i]) + "mm Al", color=Colours[i])
+    
 plt.yscale("log")
 plt.xscale("log")
 plt.grid()
-plt.title("LET Histogram " + f"{NumberEntriesLETHist:.2}" + " entries")
+plt.title("LET Histogram")
 plt.xlabel("LET [MeV/cm]")
-plt.ylabel("Counts per LET bin")
+plt.ylabel("Rate per LET bin [cm-2 s-1]")
 plt.legend()
-plt.xlim(10, 1e6)
-plt.savefig(Path + "StackedPlots/LETvalues.eps", format='eps', bbox_inches="tight")
+plt.savefig(Path + "StackedPlots/LETvalues.pdf", format='pdf', bbox_inches="tight")
 
+'''
 NumberEntriesEffHist = sum(EffHist[0][:, entriesID])
 
 plt.figure(2)
 for i in range(Num):
     plt.bar(EffHist[i][:, lowerID], EffHist[i][:, entriesID], width=EffHist[i][:, upperID] - EffHist[i][:, lowerID],
-            align='edge', label=str(ThickList[i]) + "mm Al", alpha=0.5, color=Colours[i])
+            align='edge', alpha=0.5, color=Colours[i])
+    plt.step(EffHist[i][:, lowerID], EffHist[i][:, valueID], where='post', label=str(ThickList[i]) + "mm Al", color=Colours[i])
 plt.yscale("log")
 plt.xscale("log")
 plt.grid()
-plt.title("EffLET Histogram " + f"{NumberEntriesEffHist:.2}" + " entries")
+plt.title("EffLET Histogram" + f"{NumberEntriesEffHist:.2}" + " events each")
 plt.xlabel("EffLET [MeV/cm]")
 plt.ylabel("Number of entries per EffLET bin")
 plt.legend()
-plt.xlim(10, 1e6)
-plt.savefig(Path + "StackedPlots/EFFentries.eps", format='eps', bbox_inches="tight")
+plt.savefig(Path + "StackedPlots/EFFentries.pdf", format='pdf', bbox_inches="tight")
 
 plt.figure(3)
 for i in range(Num):
@@ -116,11 +126,12 @@ for i in range(Num):
 plt.yscale("log")
 plt.xscale("log")
 plt.grid()
-plt.title("EffLET Histogram " + f"{NumberEntriesEffHist:.2}" + " entries")
+plt.title("EffLET Histogram " + f"{NumberEntriesEffHist:.2}" + " events each")
 plt.xlabel("EffLET [MeV/cm]")
-plt.ylabel("Counts per EffLET bin")
+plt.ylabel("Rate per LET bin [cm-2 s-1]")
 plt.legend()
-plt.xlim(10, 1e6)
-plt.savefig(Path + "StackedPlots/EFFvalues.eps", format='eps', bbox_inches="tight")
+#plt.xlim(10, 1e6)
+plt.savefig(Path + "StackedPlots/EFFvalues.pdf", format='pdf', bbox_inches="tight")
 
-plt.show()
+#plt.show()
+'''

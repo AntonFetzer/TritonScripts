@@ -78,13 +78,13 @@ def totalkRadGras(path, particle: str):
 
 
 if __name__ == "__main__":
-    Path = "/home/anton/Desktop/triton_work/3MatTriangles/DONE/Al-PE-Al/Res/"
+    Path = "/home/anton/Desktop/triton_work/ShieldingCurves/CarringtonProton/Res/"
 
-    Electrons = totalkRadGras(Path, "Elec")
+    #Electrons = totalkRadGras(Path, "Elec")
     Protons = totalkRadGras(Path, "Prot")
 
-    Total = Electrons + Protons
-    Total[1] = np.sqrt(Electrons[1] * Electrons[1] + Protons[1] * Protons[1])
+    #Total = Electrons + Protons
+    #Total[1] = np.sqrt(Electrons[1] * Electrons[1] + Protons[1] * Protons[1])
 
 #    for i, x in enumerate(Protons[0]):
 #        print(i, Electrons[0][i], Electrons[1][i], Protons[0][i], Protons[1][i], Total[0][i], Total[1][i])
@@ -93,22 +93,22 @@ if __name__ == "__main__":
     # x = np.linspace(0, 99, num=100, dtype=np.float64)
 
     plt.figure(1)
-    plt.plot(100 * Electrons[1] / Electrons[0], '.', label="Electrons")
+    #plt.plot(100 * Electrons[1] / Electrons[0], '.', label="Electrons")
     plt.plot(100 * Protons[1] / Protons[0], '.', label="Protons")
     plt.legend()
     plt.title("Relative Error in %")
 
     plt.figure(2)
-    plt.plot(Electrons[3], '.', label="Electrons")
+    #plt.plot(Electrons[3], '.', label="Electrons")
     plt.plot(Protons[3], '.', label="Protons")
     plt.legend()
     plt.yscale("log")
     plt.title("Number of non-Zero Entries")
 
     plt.figure(3)
-    plt.plot(Electrons[0], '.', label="Electrons")
+    #plt.plot(Electrons[0], '.', label="Electrons")
     plt.plot(Protons[0], '.', label="Protons")
-    plt.plot(Total[0], '.', label="Total")
+    #plt.plot(Total[0], '.', label="Total")
     plt.legend()
     plt.grid()
     plt.yscale("log")

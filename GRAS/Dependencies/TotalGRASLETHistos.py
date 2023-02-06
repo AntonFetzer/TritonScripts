@@ -14,6 +14,8 @@ def totalGRASLETHistos(path, particle: str):
 
     NumFiles = len(Files)
 
+    print("Number of Files:", NumFiles)
+
     if not Files:
         sys.exit("ERROR !!! No files found")
 
@@ -51,24 +53,23 @@ def totalGRASLETHistos(path, particle: str):
                     break
 
                 Data[h][b][valueID] += Bin[valueID]
-                Data[h][b][errorID] += Bin[errorID]
+                Data[h][b][errorID] += Bin[errorID]**2
                 Data[h][b][entriesID] += Bin[entriesID]
 
     LETHist, EffHist = Data
 
-    EffHist[:, 3] = EffHist[:, 3] / NumFiles
-    EffHist[:, 4] = EffHist[:, 4] / NumFiles
-
-    LETHist[:, 3] = LETHist[:, 3] / NumFiles
-    LETHist[:, 4] = LETHist[:, 4] / NumFiles
+    LETHist[:, valueID] = LETHist[:, valueID] / NumFiles
+    LETHist[:, errorID] = np.sqrt(LETHist[:, errorID]) / NumFiles
+    EffHist[:, valueID] = EffHist[:, valueID] / NumFiles
+    EffHist[:, errorID] = np.sqrt(EffHist[:, errorID]) / NumFiles
 
     return Data
 
 
 if __name__ == "__main__":
 
-    # Only works if all input files have the same number of particles!!!!!
-    path = "/home/anton/Desktop/triton_work/LET/16mm/Res/"
+    # Only works if all input files have the same number of particle!!!!!
+    path = "/home/anton/Desktop/triton_work/LET/LETMono10MeV/1mm/Res/"
 
     LETHist, EffHist = totalGRASLETHistos(path, "Prot")
 
@@ -104,7 +105,7 @@ if __name__ == "__main__":
     plt.grid()
     plt.title("LET Histogram " + f"{NumberEntriesLETHist:.2}" + " entries\nTotal LET by Values " + f"{TotalLETbyValues:.2}" + " MeV/cm")
     plt.xlabel("LET [MeV/cm]")
-    plt.ylabel("Counts per LET bin")
+    plt.ylabel("Rate per LET bin [cm-2 s-1]")
 
     ### Eff by Entries ###############
     NumberEntriesEffHist = sum(EffHist[:, entriesID])
@@ -128,7 +129,7 @@ if __name__ == "__main__":
     plt.grid()
     plt.title("EffLET Histogram " + f"{NumberEntriesEffHist:.2}" + " entries\nTotal EffLET by Values " + f"{TotalEffLETbyValues:.2}" + " MeV/cm")
     plt.xlabel("EffLET [MeV/cm]")
-    plt.ylabel("Counts per EffLET bin")
+    plt.ylabel("Rate per LET bin [cm-2 s-1]")
 
     plt.show()
     #plt.savefig(path1 + "../../Comp/EffHistogramComparison.pdf", format='pdf', bbox_inches="tight")

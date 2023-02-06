@@ -43,12 +43,11 @@ for i, folder in enumerate(Folders):
     print(folder, min(Total))
     Mins.append(min(Total))
     Matrix[i] = Total
-'''
-np.savetxt(Path + "/Matrix", Matrix)
 
-Matrix = np.loadtxt(Path + "/Matrix")
-'''
-plt.imshow(Matrix, cmap=cm.rainbow, aspect='auto')
+#np.savetxt(Path + "/Matrix", Matrix)
+#Matrix = np.loadtxt(Path + "/Matrix")
+
+plt.imshow(Matrix, cmap=cm.viridis, aspect='auto')
 cbar = plt.colorbar(orientation="horizontal")
 cbar.set_label("Total ionizing dose per month in krad")
 
@@ -61,11 +60,11 @@ ax2.set_yticks(np.arange(9), RightAxis)
 plt.title("Total Ionizing dose for two layer shielding")
 plt.xlabel("Percentage of shielding mass in bottom layer [%]")
 
-plt.savefig(Path + "/Summary.eps", format='eps', bbox_inches="tight")
+plt.savefig(Path + "/Summary.pdf", format='pdf', bbox_inches="tight")
 
-print(Mins)
+#print(Mins)
 
-
+plt.show()
 
 
 

@@ -6,7 +6,7 @@ import numpy as np
 
 Num = 7
 
-Path = "/home/anton/Desktop/triton_work/CARRINGTON/"
+Path = "/home/anton/Desktop/triton_work/Histograms/StackedCarringtonSEP/"
 
 lowerID = 0
 upperID = 1
@@ -23,19 +23,19 @@ print(Folders)
 ThickList = []
 
 for folder in Folders:
-    ThickList.append(int(folder.split("-")[1]))
+    ThickList.append(int(folder.split("m")[0]))
 
 print(ThickList)
 
 DoseHists = []
 PrimaryHists = []
-
+TotalNumberEntries = []
 
 for i in range(Num):
-    Data = totalGRASHistos(Path + Folders[i] + "/Res/", "Elec")
+    Data = totalGRASHistos(Path + Folders[i] + "/Res/", "")
     #print("Shape of Data:", np.shape(Data))
-    TotalNumberEntries = sum(Data[0][:, entriesID])
-    print("Total number of particles = " + f"{TotalNumberEntries:.5}")
+    TotalNumberEntries.append(sum(Data[0][:, entriesID]))
+    print("Total number of particles = " + f"{TotalNumberEntries[i]:.3}")
     print("Number of Data points for", str(ThickList[i]) + "mm:", "{:,}".format(len(Data[0])))
 
     DoseHists.append(Data[0])
@@ -68,12 +68,13 @@ for i in range(Num):
 
 plt.yscale("log")
 plt.xscale("log")
+plt.xlim(5, 55)
 plt.grid()
-plt.title("Dose deposited VS primary kinetic energy\n 2e10 particles each")
+plt.title("Dose deposited VS primary kinetic energy\n" + f"{TotalNumberEntries[0]:.3}" + " particles each")
 plt.xlabel("Kinetic energy [MeV]")
 plt.ylabel("Dose [krad per Month]")
 plt.legend()
-plt.savefig(Path + "DoseVSPrimary.eps", format='eps', bbox_inches="tight")
+plt.savefig(Path + "DoseVSPrimary.pdf", format='pdf', bbox_inches="tight")
 
 
 plt.figure(3)
@@ -83,9 +84,10 @@ for i in range(Num):
 
 plt.yscale("log")
 plt.xscale("log")
+plt.xlim(5, 55)
 plt.grid()
-plt.title("Particle count VS primary kinetic energy\n 2e10 particles each")
+plt.title("Particle count VS primary kinetic energy\n" + f"{TotalNumberEntries[0]:.3}" + " particles each")
 plt.xlabel("Kinetic energy [MeV]")
 plt.ylabel("Number of entries")
 plt.legend()
-plt.savefig(Path + "PrimaryHistogram.eps", format='eps', bbox_inches="tight")
+plt.savefig(Path + "PrimaryHistogram.pdf", format='pdf', bbox_inches="tight")

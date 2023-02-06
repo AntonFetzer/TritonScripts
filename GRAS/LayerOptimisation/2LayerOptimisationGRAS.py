@@ -38,7 +38,7 @@ plt.errorbar(x, ElecB[0], ElecB[1], fmt=' ', capsize=2, label="Electrons " + B +
 plt.errorbar(x, ProtA[0], ProtA[1], fmt=' ', capsize=2, label="Protons " + A + " on " + B) # + " Min=" + str(round(np.min(ProtA[0]), 2)) + " kRad at " + str(round(np.argmin(ProtA[0]))) + " % " + A)
 plt.errorbar(x, ProtB[0], ProtB[1], fmt=' ', capsize=2, label="Protons " + B + " on " + A) # + " Min=" + str(round(np.min(ProtB[0]), 2)) + " kRad at " + str(round(np.argmin(ProtB[0]))) + " % " + A)
 
-plt.ylim(0, Ymax)
+#plt.ylim(0, Ymax)
 plt.title("Dose deposited by trapped particles in 0.5 mm Si \n behind " + ShieldingDepth + " g/cm2 of " + MatA + "-" + MatB + " shielding")
 plt.xlabel("Percentage of shielding mass in " + MatA + " [%]")
 plt.ylabel("Deposited ionising dose [kRad]")
