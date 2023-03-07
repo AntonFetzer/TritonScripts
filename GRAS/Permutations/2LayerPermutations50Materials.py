@@ -3,6 +3,7 @@ from GRAS.Dependencies.TotalKRadGras import totalkRadGras
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
+from uncertainties import ufloat
 
 
 Names = ["G4_lH2", "G4_He", "G4_Li", "G4_Be", "G4_B", "G4_C", "G4_lN2", "G4_lO2", "G4_F", "G4_Ne", "G4_Na", "G4_Mg",
@@ -47,9 +48,9 @@ NumMat = 50
 for x in range(NumMat):
     for y in range(NumMat):
         i = x * NumMat + y
-        print(i, x, y, Names[x], Names[y], Electrons[0][i], Electrons[1][i], Protons[0][i], Protons[1][i], Total[0][i],
-              Total[1][i])
+        print(i+1, x+1, y+1, Names[x], Names[y],  ufloat(Electrons[0][x], Electrons[1][x]), ufloat(Protons[0][x], Protons[1][x]), ufloat(Total[0][x], Total[1][x]))
 
+'''
 NumTiles = np.shape(Protons)[1]
 print("NumTiles:", NumTiles)
 
@@ -105,3 +106,4 @@ plt.title("Total Ionizing dose for two layer shielding")
 plt.xlabel("Z-number of bottom-layer")
 plt.ylabel("Z-number of top-layer")
 plt.savefig(Path + "../TotalMap.pdf", format='pdf', bbox_inches="tight")
+'''

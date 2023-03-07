@@ -27,8 +27,8 @@ def totalGRASLETHistos(path, particle: str):
     #print("RawDataShape", np.shape(RawData))
     # ( File# , Dose or Primary , Bin#, Var# )
 
-    Data = RawData[0]
-
+    Data = np.array(RawData[0])
+    #print(np.shape(Data))
                     # LET            Eff
     lowerID = 0     # MeV/cm          MeV/cm
     upperID = 1     # MeV/cm          MeV/cm
@@ -36,6 +36,8 @@ def totalGRASLETHistos(path, particle: str):
     valueID = 3     # counts          counts
     errorID = 4     # counts          counts
     entriesID = 5   # Num             Num
+
+    MeanCountList = np.zeros(len(Data[0, :, 0]))
 
     for f, file in enumerate(RawData):
         if f == 0:
@@ -52,16 +54,20 @@ def totalGRASLETHistos(path, particle: str):
                     Data = 0
                     break
 
+                if Bin[meanID] != 0 and h==0: # This messes up the Eff histograms, but I don't care
+                    MeanCountList[b] += 1
+                    Data[h][b][meanID] += Bin[meanID]
+
                 Data[h][b][valueID] += Bin[valueID]
                 Data[h][b][errorID] += Bin[errorID]**2
                 Data[h][b][entriesID] += Bin[entriesID]
 
-    LETHist, EffHist = Data
 
-    LETHist[:, valueID] = LETHist[:, valueID] / NumFiles
-    LETHist[:, errorID] = np.sqrt(LETHist[:, errorID]) / NumFiles
-    EffHist[:, valueID] = EffHist[:, valueID] / NumFiles
-    EffHist[:, errorID] = np.sqrt(EffHist[:, errorID]) / NumFiles
+    for b, MeanCount in enumerate(MeanCountList):
+        if MeanCount != 0:
+            Data[:, b, meanID] = Data[:, b, meanID] / MeanCount
+    Data[:, :, valueID] = Data[:, :, valueID] / NumFiles
+    Data[:, :, errorID] = np.sqrt(Data[:, :, errorID]) / NumFiles
 
     return Data
 

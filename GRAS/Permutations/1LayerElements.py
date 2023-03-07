@@ -45,7 +45,7 @@ NumTiles = np.shape(Electrons)[1]
 print("NumTiles:", NumTiles)
 
 for i, x in enumerate(range(NumTiles)):
-    print(x, Names[x], ufloat(Electrons[0][x], Electrons[1][x]), ufloat(Protons[0][x], Protons[1][x]), ufloat(Total[0][x], Total[1][x]))
+    print(x+1, Names[x], ufloat(Electrons[0][x], Electrons[1][x]), ufloat(Protons[0][x], Protons[1][x]), ufloat(Total[0][x], Total[1][x]))
 
 
 

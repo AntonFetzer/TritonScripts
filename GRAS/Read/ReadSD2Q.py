@@ -25,7 +25,7 @@ def readSDQ2(fileName):
 
 
 if __name__ == "__main__":
-    Data = readSDQ2("/home/anton/Desktop/triton_work/SuperGTO/spenvis_sqo.txt")
+    Data = readSDQ2("/home/anton/Desktop/triton_work/Spectra/A9/Shieldose/spenvis_sqo.txt")
 
     print(np.shape(Data))
 
@@ -35,17 +35,16 @@ if __name__ == "__main__":
     print("Bremsstrahlung", Data[:, 3])
     print("Protons", Data[:, 4])
 
-    plt.plot(Data[:, 0], Data[:, 2] / 1000, '-.', label="SHIELDOSE-2Q Electrons", linewidth=1)
-    plt.plot(Data[:, 0], Data[:, 3] / 1000, '-.', label="SHIELDOSE-2Q Bremsstrahlung", linewidth=1)
-    plt.plot(Data[:, 0], Data[:, 4] / 1000, '--', label="SHIELDOSE-2Q Protons", linewidth=1)
-    plt.plot(Data[:, 0], Data[:, 5] / 1000, '--', label="SHIELDOSE-2Q Solar Protons", linewidth=1)
-    plt.plot(Data[:, 0], Data[:, 1] / 1000, '-', label="SHIELDOSE-2Q Total Dose", linewidth=1)
+    plt.plot(Data[:, 0], Data[:, 2] / 1000, '.', label="SHIELDOSE-2Q Electrons")
+    plt.plot(Data[:, 0], Data[:, 3] / 1000, '.', label="SHIELDOSE-2Q Bremsstrahlung")
+    plt.plot(Data[:, 0], Data[:, 4] / 1000, '.', label="SHIELDOSE-2Q Protons")
+    plt.plot(Data[:, 0], Data[:, 1] / 1000, '.', label="SHIELDOSE-2Q Total Dose")
 
     plt.yscale("log")
     # plt.xscale("log")
     plt.grid(which='major')
     plt.title("Shielddose")
-    plt.xlabel("Aluminium Shield Thickness [g/cm2]")
+    plt.xlabel("Aluminium Shield Thickness [mm]")
     plt.ylabel("Total ionizing dose in silicon [krad]")
     plt.legend()
 

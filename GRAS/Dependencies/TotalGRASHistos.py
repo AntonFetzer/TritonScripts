@@ -13,6 +13,7 @@ def totalGRASHistos(path, particle: str):
     Files = [f for f in os.listdir(path) if particle in f]
 
     NumFiles = len(Files)
+    print("Number of files:", NumFiles)
 
     if not Files:
         sys.exit("ERROR !!! No files found")

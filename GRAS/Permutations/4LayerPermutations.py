@@ -35,4 +35,4 @@ for i1 in range(NumMat):
         for i3 in range(NumMat):
             for i4 in range(NumMat):
                 i = i1 * NumMat * NumMat * NumMat + i2 * NumMat * NumMat + i3 * NumMat + i4
-                print(i, Materials[i1], Materials[i2], Materials[i3], Materials[i4], ufloat(Electrons[0][i], Electrons[1][i]), ufloat(Protons[0][i], Protons[1][i]), ufloat(Total[0][i], Total[1][i]))
+                print(i+1, Materials[i1], Materials[i2], Materials[i3], Materials[i4], ufloat(Electrons[0][i], Electrons[1][i]), ufloat(Protons[0][i], Protons[1][i]), ufloat(Total[0][i], Total[1][i]))

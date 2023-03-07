@@ -10,7 +10,8 @@ absolute_path = os.path.abspath(__file__)
 print("Full path: " + absolute_path)
 print("Directory Path: " + os.path.dirname(absolute_path))
 
-Path = "/home/anton/Desktop/triton_work/LET/LETCarringtonSEPupto50MeV/"
+Path = "/home/anton/Desktop/triton_work/LET/SEP2003-INTEGRAL-FluxBasedOnFluenceDividedBy24h/"
+Title = "LET Histogram 2003 SEP"
 
 lowerID = 0
 upperID = 1
@@ -75,7 +76,7 @@ for i in range(Num):
 plt.yscale("log")
 plt.xscale("log")
 plt.grid()
-plt.title("LET Histogram")
+plt.title(Title)
 plt.xlabel("LET [MeV/cm]")
 plt.ylabel("Number of entries per LET bin")
 plt.legend()
@@ -96,7 +97,7 @@ for i in range(Num):
 plt.yscale("log")
 plt.xscale("log")
 plt.grid()
-plt.title("LET Histogram")
+plt.title(Title)
 plt.xlabel("LET [MeV/cm]")
 plt.ylabel("Rate per LET bin [cm-2 s-1]")
 plt.legend()

@@ -4,25 +4,16 @@ import os
 from natsort import natsorted
 import numpy as np
 
-Paths = [#"/home/anton/Desktop/triton_work/LET/LETCarringtonSEPupto50MeV/8mm/Res/",
-    # "/home/anton/Desktop/triton_work/LET/LETAP910MeV/8mm/Res/",
-    # "/home/anton/Desktop/triton_work/LET/LETMono1MeV/8mm/Res/",
-    "/home/anton/Desktop/triton_work/LET/LETMono10MeV/8mm/Res/",
-    "/home/anton/Desktop/triton_work/LET/LETMono20MeV/8mm/Res/",
-    "/home/anton/Desktop/triton_work/LET/LETMono40MeV/8mm/Res/",
-    "/home/anton/Desktop/triton_work/LET/LETMono100MeV/8mm/Res/",
-    "/home/anton/Desktop/triton_work/LET/LETMono1000MeV/8mm/Res/"]
+Paths = ["/home/anton/Desktop/triton_work/LET/Carrington-SEP-Plus2Sigma-Int-With0/16mm/Res/",
+         "/home/anton/Desktop/triton_work/LET/Carrington-SEP-Expected-Int-With0/16mm/Res/",
+         "/home/anton/Desktop/triton_work/LET/Carrington-SEP-Minus2Sigma-Int-With0/16mm/Res/"]
 
-Labels = [#"Carrington SEP up to 50MeV 8mm",
-    # "AP9 8mm",
-    # "1MeV",
-    "10MeV",
-    "20MeV",
-    "40MeV",
-    "100MeV",
-    "1000MeV"]
+Labels = ["Carington SEP +2 Sigma SEP",
+          "Carington SEP Expected SEP",
+          "Carington SEP -2 Sigma SEP"]
 
-Colours = ['C3', 'C1', 'C8', 'C2', 'C9', 'C0', 'C7']
+#Colours = ['C3', 'C1', 'C8', 'C2', 'C9', 'C0', 'C7']
+Colours = ['C1', 'C0', 'C2']
 
 lowerID = 0
 upperID = 1
@@ -49,7 +40,7 @@ for i in range(Num):
 plt.yscale("log")
 plt.xscale("log")
 plt.grid()
-plt.title("LET Histogram Monoenergetic Protons vs. 8mm Aluminium")
+plt.title("LET Histogram Carrington SEP vs. 16mm Aluminium")
 plt.xlabel("LET [MeV/cm]")
 plt.ylabel("Number of entries per LET bin")
 plt.legend()
@@ -63,7 +54,7 @@ for i in range(Num):
 plt.yscale("log")
 plt.xscale("log")
 plt.grid()
-plt.title("LET Histogram Monoenergetic Protons vs. 8mm Aluminium")
+plt.title("LET Histogram Carrington SEP vs. 16mm Aluminium")
 plt.xlabel("LET [MeV/cm]")
 plt.ylabel("Rate per LET bin [s-1]")
 plt.legend()

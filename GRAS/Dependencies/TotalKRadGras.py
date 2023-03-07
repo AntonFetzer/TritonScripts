@@ -78,39 +78,26 @@ def totalkRadGras(path, particle: str):
 
 
 if __name__ == "__main__":
-    Path = "/home/anton/Desktop/triton_work/ShieldingCurves/CarringtonProton/Res/"
+    Path = "/home/anton/Desktop/triton_work/ShieldingCurves/CarringtonElectron-32mm/Res/"
 
-    #Electrons = totalkRadGras(Path, "Elec")
-    Protons = totalkRadGras(Path, "Prot")
-
-    #Total = Electrons + Protons
-    #Total[1] = np.sqrt(Electrons[1] * Electrons[1] + Protons[1] * Protons[1])
-
-#    for i, x in enumerate(Protons[0]):
-#        print(i, Electrons[0][i], Electrons[1][i], Protons[0][i], Protons[1][i], Total[0][i], Total[1][i])
-        # print(i, Electrons[0][i], 100 * Electrons[1][i] / Electrons[0][i], Protons[0][i], 100 * Protons[1][i] / Protons[0][i])
-
-    # x = np.linspace(0, 99, num=100, dtype=np.float64)
+    TID = totalkRadGras(Path, "")
 
     plt.figure(1)
-    #plt.plot(100 * Electrons[1] / Electrons[0], '.', label="Electrons")
-    plt.plot(100 * Protons[1] / Protons[0], '.', label="Protons")
-    plt.legend()
+    plt.plot(100 * TID[1] / TID[0], '.')
+    plt.grid(which="both")
     plt.title("Relative Error in %")
 
     plt.figure(2)
-    #plt.plot(Electrons[3], '.', label="Electrons")
-    plt.plot(Protons[3], '.', label="Protons")
-    plt.legend()
+    plt.plot(TID[3], '.')
+    plt.grid(which="both")
     plt.yscale("log")
     plt.title("Number of non-Zero Entries")
 
+
+    x = np.linspace(0, len(TID[0]), num=len(TID[0]))
     plt.figure(3)
-    #plt.plot(Electrons[0], '.', label="Electrons")
-    plt.plot(Protons[0], '.', label="Protons")
-    #plt.plot(Total[0], '.', label="Total")
-    plt.legend()
-    plt.grid()
+    plt.errorbar(x, TID[0], yerr=TID[1], fmt=' ', capsize=5)
+    plt.grid(which="both")
     plt.yscale("log")
     plt.title("Dose")
 

@@ -4,36 +4,41 @@ import matplotlib.pyplot as plt
 import os
 from natsort import natsorted
 
-Paths = ["/home/anton/Desktop/triton_work/ShieldingCurves/CarringtonProton/Res/",
-         "/home/anton/Desktop/triton_work/ShieldingCurves/CarringtonProtonLow/Res/",
-         "/home/anton/Desktop/triton_work/ShieldingCurves/CarringtonProtonHigh/Res/",
-         "/home/anton/Desktop/triton_work/ShieldingCurves/CarringtonElectron/Res/"]
+Paths = ["/home/anton/Desktop/triton_work/ShieldingCurves/Carrington-SEP-Plus2Sigma-Int-With0/Res/",
+         "/home/anton/Desktop/triton_work/ShieldingCurves/Carrington-SEP-Expected-Int-With0/Res/",
+         "/home/anton/Desktop/triton_work/ShieldingCurves/Carrington-SEP-Minus2Sigma-Int-With0/Res/",
+         "/home/anton/Desktop/triton_work/ShieldingCurves/AP9-10MeV-32mm/Res/",
+         "/home/anton/Desktop/triton_work/ShieldingCurves/CarringtonElectron-32mm/Res/",
+         "/home/anton/Desktop/triton_work/ShieldingCurves/SEP2003-INTEGRAL-FluxBasedOnFluenceDividedBy24h/Res/"]
 
-Labels = ["Carrington SEP 4 hour Fluence",
-          "Carrington SEP Low Extrapolation 4 hour Fluence",
-          "Carrington SEP High Extrapolation 4 hour Fluence",
-          "Electrons peak flux for 4 hours"]
+Labels = ["Carrington SEP +2 Sigma",
+          "Carrington SEP Expected",
+          "Carrington SEP -2 Sigma",
+          "AP9 GT0",
+          "Carrington Peak Electron Flux",
+          "SEP 2003"]
+
+Colours = ['C1', 'C0', 'C2', 'C3', 'C9', 'C10']
 
 Data = []
 for path in Paths:
-    Data.append(totalkRadGras(path, "") / (30*6))
+    Data.append(totalkRadGras(path, "")/ 30 )  # DAILY dose
 
 NumTiles = np.shape(Data[0])[1]
 
 plt.figure(1)
 
-
 x = np.linspace(0, 32, num=NumTiles, endpoint=True)
 
 for i, data in enumerate(Data):
-    plt.errorbar(x, data[0], data[1], fmt='o', markersize=4, capsize=5, label=Labels[i])
+    plt.errorbar(x, data[0], data[1], fmt='o', markersize=4, capsize=5, label=Labels[i], color=Colours[i])
 
-#plt.xlim(-0.5, 32)
+plt.xlim(-0.5, 20)
 plt.grid()
 plt.yscale("log")
-plt.title("Ionising Dose behind shielding of varying thickness")
+plt.title("Daily Ionising Dose behind shielding of varying thickness")
 plt.xlabel("Aluminium Shielding Thickness [mm]")
-plt.ylabel("Ionising Dose [krad]")
+plt.ylabel("Ionising Dose per Day [krad]")
 plt.legend()
 
 ####### Plot 10kRad line #########
