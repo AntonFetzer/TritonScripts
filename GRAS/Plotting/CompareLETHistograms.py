@@ -4,16 +4,33 @@ import os
 from natsort import natsorted
 import numpy as np
 
-Paths = ["/home/anton/Desktop/triton_work/LET/Carrington-SEP-Plus2Sigma-Int-With0/16mm/Res/",
-         "/home/anton/Desktop/triton_work/LET/Carrington-SEP-Expected-Int-With0/16mm/Res/",
-         "/home/anton/Desktop/triton_work/LET/Carrington-SEP-Minus2Sigma-Int-With0/16mm/Res/"]
+Paths = [#"/home/anton/Desktop/triton_work/LET/Carrington-SEP-Plus2Sigma-Int-With0/2mm/Res/",
+         #"/home/anton/Desktop/triton_work/LET/Carrington-SEP-Expected-Int-With0/0mm/Res/",
+        #"/home/anton/Desktop/triton_work/LET/Carrington-SEP-Expected-Int-With0-Thin/0mm/Res/"
+    #"/home/anton/Desktop/triton_work/LET/LETMono100MeVThin/2mm/Res/",
+    #"/home/anton/Desktop/triton_work/LET/LETMono100MeV/2mm/Res/",
+    #"/home/anton/Desktop/triton_work/LET/LETMono100MeVThin-Cu/2mm/Res/"
+         #"/home/anton/Desktop/triton_work/LET/Carrington-SEP-Minus2Sigma-Int-With0/2mm/Res/",
+         #"/home/anton/Desktop/triton_work/LET/SEP2003-INTEGRAL-FluxBasedOnFluenceDividedBy24h/2mm/Res/",
+         "/home/anton/Desktop/triton_work/LET/LETAP910MeV/2mm/Res/",
+         "/home/anton/Desktop/triton_work/LET/ISS-LEO-Proton10MeV/2mm/Res/",
+        "/home/anton/Desktop/triton_work/LET/LunarCosmic-H-Flux/2mm/Res/",
+        "/home/anton/Desktop/triton_work/LET/LunarSEP10MeVFlux/2mm/Res/"
+        ]
 
-Labels = ["Carington SEP +2 Sigma SEP",
-          "Carington SEP Expected SEP",
-          "Carington SEP -2 Sigma SEP"]
+Labels = [#"Carrington SEP +2 Sigma",
+    #"0.5mm",
+    #"1micron",
+    #"Cu"
+    #"Carrington SEP -2 Sigma",
+    #"2003 SPE",
+    "AP9 GTO trapped protons",
+    "AP9 LEO trapped protons",
+    "Cosmic Protons",
+    "Solar Protons"
+]
 
-#Colours = ['C3', 'C1', 'C8', 'C2', 'C9', 'C0', 'C7']
-Colours = ['C1', 'C0', 'C2']
+Colours = ['C1', 'C0', 'C2', 'C8', 'C3', 'C7']
 
 lowerID = 0
 upperID = 1
@@ -31,7 +48,7 @@ for path in Paths:
     EffHist.append(Temp[1])
 
 Num = len(Paths)
-
+'''
 plt.figure(0)
 for i in range(Num):
     plt.bar(LETHist[i][:, lowerID], LETHist[i][:, entriesID], width=LETHist[i][:, upperID] - LETHist[i][:, lowerID],
@@ -45,7 +62,7 @@ plt.xlabel("LET [MeV/cm]")
 plt.ylabel("Number of entries per LET bin")
 plt.legend()
 plt.savefig("/home/anton/Desktop/triton_work/LET/Plots/LETentries.pdf", format='pdf', bbox_inches="tight")
-
+'''
 plt.figure(1)
 for i in range(Num):
     plt.bar(LETHist[i][:, lowerID], LETHist[i][:, valueID], width=LETHist[i][:, upperID] - LETHist[i][:, lowerID],
@@ -53,12 +70,14 @@ for i in range(Num):
     plt.step(LETHist[i][:, lowerID], LETHist[i][:, valueID], where='post', label=Labels[i], color=Colours[i])
 plt.yscale("log")
 plt.xscale("log")
+#plt.ylim(1e-7, 1e5)
 plt.grid()
-plt.title("LET Histogram Carrington SEP vs. 16mm Aluminium")
+plt.title("LET Histogram Carrington SEP vs. 2mm Aluminium")
 plt.xlabel("LET [MeV/cm]")
 plt.ylabel("Rate per LET bin [s-1]")
 plt.legend()
-plt.savefig("/home/anton/Desktop/triton_work/LET/Plots/LETvalues.pdf", format='pdf', bbox_inches="tight")
+#plt.savefig("/home/anton/Desktop/triton_work/LET/Plots/LETvalues.pdf", format='pdf', bbox_inches="tight")
+plt.savefig("/home/anton/Desktop/TritonPlots/Luna/LETHistogramComparison.svg", format='svg', bbox_inches="tight")
 '''
 NumberEntriesEffHist = sum(EffHist[0][:, entriesID])
 

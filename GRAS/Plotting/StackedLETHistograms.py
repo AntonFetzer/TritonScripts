@@ -10,8 +10,8 @@ absolute_path = os.path.abspath(__file__)
 print("Full path: " + absolute_path)
 print("Directory Path: " + os.path.dirname(absolute_path))
 
-Path = "/home/anton/Desktop/triton_work/LET/SEP2003-INTEGRAL-FluxBasedOnFluenceDividedBy24h/"
-Title = "LET Histogram 2003 SEP"
+Path = "/home/anton/Desktop/triton_work/LET/LETMono100MeVThin-Cu/"
+Title = "LETMono100MeVThin-Cu"
 
 lowerID = 0
 upperID = 1

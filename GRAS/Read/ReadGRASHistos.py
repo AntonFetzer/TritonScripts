@@ -50,8 +50,8 @@ def readGRASHistos(file):
 
 
 if __name__ == "__main__":
-    path = "/home/anton/Desktop/triton_work/Histograms/CarringtonSEPTwoPointPowerLaw/Res/"
-    file = "Protons_597868_92494.csv"
+    path = "/home/anton/Desktop/triton_work/LunarRadiaitonAnalysis/LunarSEP/Res/"
+    file = "Protons_987082_152708.csv"
 
     DoseHist, PrimaryHist = readGRASHistos(path + file)
 

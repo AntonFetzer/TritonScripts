@@ -75,9 +75,9 @@ def totalGRASLETHistos(path, particle: str):
 if __name__ == "__main__":
 
     # Only works if all input files have the same number of particle!!!!!
-    path = "/home/anton/Desktop/triton_work/LET/LETMono10MeV/1mm/Res/"
+    path = "/home/anton/Desktop/triton_work/LET/LETMono100MeVThin/0mm/Res/"
 
-    LETHist, EffHist = totalGRASLETHistos(path, "Prot")
+    LETHist, EffHist = totalGRASLETHistos(path, "")
 
     print("LETHist Shape", np.shape(LETHist))
 
@@ -100,6 +100,7 @@ if __name__ == "__main__":
     plt.title("LET Histogram " + f"{NumberEntriesLETHist:.2}" + " entries\nTotal LET by Entries " + f"{TotalLETbyEntries:.2}" + " MeV/cm")
     plt.xlabel("LET [MeV/cm]")
     plt.ylabel("Number of entries per LET bin")
+    plt.savefig(path + "../LETentries.pdf", format='pdf', bbox_inches="tight")
 
     ### LET by Values ###############
     TotalLETbyValues = sum(LETHist[:, meanID] * LETHist[:, valueID])
@@ -112,7 +113,9 @@ if __name__ == "__main__":
     plt.title("LET Histogram " + f"{NumberEntriesLETHist:.2}" + " entries\nTotal LET by Values " + f"{TotalLETbyValues:.2}" + " MeV/cm")
     plt.xlabel("LET [MeV/cm]")
     plt.ylabel("Rate per LET bin [cm-2 s-1]")
+    plt.savefig(path + "../LETvalues.pdf", format='pdf', bbox_inches="tight")
 
+    '''
     ### Eff by Entries ###############
     NumberEntriesEffHist = sum(EffHist[:, entriesID])
     TotalEffbyEntries = sum(EffHist[:, meanID] * EffHist[:, entriesID])
@@ -136,6 +139,6 @@ if __name__ == "__main__":
     plt.title("EffLET Histogram " + f"{NumberEntriesEffHist:.2}" + " entries\nTotal EffLET by Values " + f"{TotalEffLETbyValues:.2}" + " MeV/cm")
     plt.xlabel("EffLET [MeV/cm]")
     plt.ylabel("Rate per LET bin [cm-2 s-1]")
-
-    plt.show()
+    '''
+    #plt.show()
     #plt.savefig(path1 + "../../Comp/EffHistogramComparison.pdf", format='pdf', bbox_inches="tight")

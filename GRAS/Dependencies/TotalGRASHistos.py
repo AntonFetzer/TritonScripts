@@ -70,8 +70,8 @@ def totalGRASHistos(path, particle: str):
 if __name__ == "__main__":
 
     # Only works if all input files have the same number of particles!!!!!
-    path = "/home/anton/Desktop/triton_work/CARRINGTON/HistogramSEP/Res/"
-    DoseHist, PrimaryHist = totalGRASHistos(path, "Prot")
+    path = "/home/anton/Desktop/triton_work/Histograms/LunarSEP/Res/"
+    DoseHist, PrimaryHist = totalGRASHistos(path, "")
 
     print("DoseHist Shape", np.shape(DoseHist))
 
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     plt.title("Entries VS primary kinetic energy\n" + f"{NumberEntries:.2}" + " total Entries")
     plt.xlabel("Kinetic energy [MeV]")
     plt.ylabel("Number of entries")
-    plt.savefig(path + "../PrimaryHistEntries.eps", format='eps', bbox_inches="tight")
+    #plt.savefig(path + "../PrimaryHistEntries.eps", format='eps', bbox_inches="tight")
 
     ####    Primary hist Values #######
     TotalDose = sum(PrimaryHist[:, valueID])

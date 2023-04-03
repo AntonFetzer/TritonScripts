@@ -4,9 +4,7 @@ import os
 from natsort import natsorted
 import numpy as np
 
-Num = 7
-
-Path = "/home/anton/Desktop/triton_work/Histograms/StackedCarringtonSEP/"
+Path = "/home/anton/Desktop/triton_work/LunarRadiaitonAnalysis/LunarGCR-WideHist/"
 
 lowerID = 0
 upperID = 1
@@ -31,7 +29,7 @@ DoseHists = []
 PrimaryHists = []
 TotalNumberEntries = []
 
-for i in range(Num):
+for i in range(len(Folders)):
     Data = totalGRASHistos(Path + Folders[i] + "/Res/", "")
     #print("Shape of Data:", np.shape(Data))
     TotalNumberEntries.append(sum(Data[0][:, entriesID]))
@@ -63,12 +61,12 @@ Colours = ['C3', 'C1', 'C8', 'C2', 'C9', 'C0', 'C7']
 
 plt.figure(2)
 
-for i in range(Num):
+for i in range(len(Folders)):
     plt.bar(PrimaryHists[i][:, lowerID], PrimaryHists[i][:, valueID], width=PrimaryHists[i][:, upperID] - PrimaryHists[i][:, lowerID], align='edge', color=Colours[i], label=str(ThickList[i]) + "mm Al")
 
 plt.yscale("log")
 plt.xscale("log")
-plt.xlim(5, 55)
+#plt.xlim(8, 1200)
 plt.grid()
 plt.title("Dose deposited VS primary kinetic energy\n" + f"{TotalNumberEntries[0]:.3}" + " particles each")
 plt.xlabel("Kinetic energy [MeV]")
@@ -79,12 +77,12 @@ plt.savefig(Path + "DoseVSPrimary.pdf", format='pdf', bbox_inches="tight")
 
 plt.figure(3)
 
-for i in range(Num):
+for i in range(len(Folders)):
     plt.bar(PrimaryHists[i][:, lowerID], PrimaryHists[i][:, entriesID], width=PrimaryHists[i][:, upperID] - PrimaryHists[i][:, lowerID], align='edge', color=Colours[i], label=str(ThickList[i]) + "mm Al")
 
 plt.yscale("log")
 plt.xscale("log")
-plt.xlim(5, 55)
+#plt.xlim(8, 1200)
 plt.grid()
 plt.title("Particle count VS primary kinetic energy\n" + f"{TotalNumberEntries[0]:.3}" + " particles each")
 plt.xlabel("Kinetic energy [MeV]")

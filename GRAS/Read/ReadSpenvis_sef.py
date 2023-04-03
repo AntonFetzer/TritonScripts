@@ -24,17 +24,16 @@ def readSpenvis_sef(fileName):
                 Iontable.append(np.fromstring(line, dtype=np.float64, sep=','))
 
     rows, cols = np.shape(Iontable)
-    cols = int((cols-1)/2)
 
-    #print(cols)
+    NumSpecies = 92
 
-    IonData = np.zeros((rows, cols), dtype=np.float64)
+    IonData = np.zeros((rows, cols-1), dtype=np.float64)
     EnergyPerNucleon = np.zeros(rows, dtype=np.float64)
 
     for i, line in enumerate(Iontable):
         EnergyPerNucleon[i] = line[0]
-        IonData[i] = line[1:cols+1]     # Reading the Integral Fluence
-        IonData[i] /= (6*30*24*60*60)   # The sef.txt contains the Fluence per 6 months not the flux!
+        IonData[i] = line[1:cols]     # Reading the Fluence
+        IonData[i] /= (1.578e+7)   # The sef.txt contains the Fluence per 6 months not the flux!
 
     # print(Energy)
 
@@ -47,27 +46,31 @@ def readSpenvis_sef(fileName):
                   190.23, 192.217, 195.078, 196.967, 200.59, 204.383, 207.2, 208.98, 209, 210, 222, 223, 226, 227,
                   232.038, 231.036, 238.029]
 
-    Data = np.zeros((cols, len(Iontable), 2), dtype=float)
+    Data = np.zeros((NumSpecies, len(Iontable), 3), dtype=float)
 
-    for i in range(cols-1):
+    for i in range(NumSpecies):
         Energy = EnergyPerNucleon*AtomicMass[i]
-        #print("Species:", Species[i])
+        #print("Species:", i)
         #print("AtomicMass:", AtomicMass[i])
         #print("Energy:", Energy)
         #print("IonData:", IonData[:, i+1])
         Data[i, :, 0] = Energy
-        Data[i, :, 1] = IonData[:, i]
+        Data[i, :, 1] = IonData[:, i]  # Integral Flux
+        Data[i, :, 2] = IonData[:, NumSpecies+i]  # Differential Flux
 
     return Data
-# Data[ Z-NUmber , DatapointNum, Energy or Flux ]
+# Data[ Z-NUmber , DatapointNum, Energy or Integral Flux or Differential Flux ]
 
 
 if __name__ == "__main__":
     ############ SAPPHIRE Spectra are in Fluence with minimum duration 6 months !!! ###############################
     ############ Check duration and normalisation of the spectrum #################################################
-    DataT = readSpenvis_sef("/home/anton/Desktop/triton_work/SuperGTO/spenvis_sef.txt")
+    DataT = readSpenvis_sef("/home/anton/Desktop/triton_work/Spectra/Moon/SAPPHIRE/spenvis_sef.txt")
+
+    IntorDiff = 2  # 1 for Int 2 for Diff
+
     #plt.bar(range(93), DataT[:, 0, 1])
-    print(DataT[:, 0, 1])
+    #print(DataT[:, 0, 1])
 
     Species = ['H ', 'He', 'Li', 'Be', 'B ', 'C ', 'N ', 'O ', 'F ', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P ', 'S ', 'Cl',
                'Ar', 'K ', 'Ca', 'Sc', 'Ti', 'V ', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se',
@@ -76,18 +79,28 @@ if __name__ == "__main__":
                'Tm', 'Yb', 'Lu', 'Hf', 'Ta', 'W ', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At',
                'Rn', 'Fr', 'Ra', 'Ac', 'Th', 'Pa', 'U ']
 
-    for i in range(np.shape(DataT)[0]):
-        FluxMax = DataT[i, 0, 1]
-        if FluxMax > 1:
-            print(Species[i], FluxMax)
-            plt.plot(DataT[i, :, 0], DataT[i, :, 1], label=Species[i])
+    #print(np.shape(DataT))
 
-    plt.xlim(1, 1e7)
-    plt.ylim(1e-7, 1e5)
+    for i in range(np.shape(DataT)[0]):
+        FluxMax = np.max(DataT[i, :, IntorDiff])
+        if FluxMax > 20:
+            print(Species[i], FluxMax)
+            plt.plot(DataT[i, :, 0], DataT[i, :, IntorDiff], label=Species[i])
+
+    #plt.xlim(1e-2, 1e4)
+    #plt.ylim(1e-5, 1e6)
     plt.xscale("log")
     plt.yscale("log")
-    plt.title("Solar Ion Integral Flux")
+
+    if IntorDiff == 1:
+        plt.title("Solar Ion Integral Flux")
+        plt.ylabel("Integral Flux [cm-2 s-1]")
+    elif IntorDiff == 2:
+        plt.title("Solar Ion Differential Flux")
+        plt.ylabel("Differential Flux [cm-2 s-1 MeV-1]")
+
     plt.xlabel("Energy [MeV]")
-    plt.ylabel("Integral Flux [cm-2 s-1]")
     plt.legend()
-    plt.show()
+    plt.grid(which='both')
+    #plt.show()
+    plt.savefig("/home/anton/Desktop/TritonPlots/Luna/SolarFlux.svg", format='svg', bbox_inches="tight")

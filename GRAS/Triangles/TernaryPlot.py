@@ -104,9 +104,9 @@ def plotTernary(path, particle, materials, mat):
                 gMin = g
 
 
-    ax.set_tlabel("Layer 1 [%]: " + Materials[0] + " [%]")
-    ax.set_rlabel("Layer 2 [%]: " + Materials[1] + " [%]")
-    ax.set_llabel("Layer 3 [%]: " + Materials[2] + " [%]")
+    ax.set_tlabel("Layer 1 [%]: " + materials[0] + " [%]")
+    ax.set_rlabel("Layer 2 [%]: " + materials[1] + " [%]")
+    ax.set_llabel("Layer 3 [%]: " + materials[2] + " [%]")
     ax.taxis.set_label_position('tick1')
     ax.laxis.set_label_position('tick1')
     ax.raxis.set_label_position('tick1')
@@ -128,7 +128,7 @@ def plotTernary(path, particle, materials, mat):
     #plt.show()
     plt.savefig(path + "../Plot/" + particle + "TernaryPlot.pdf", format='pdf')
     plt.close(Fig)
-
+    '''
     if "Total" in particle:
         CSVFile = open("/home/anton/Desktop/triton_work/3MatTriangles/3MatSum.csv", 'a')
         List = (str(round(rMin*100)), "\% " + mat[0] + " &",
@@ -139,40 +139,4 @@ def plotTernary(path, particle, materials, mat):
         print(String)
         CSVFile.writelines(String + "\n")
         CSVFile.close()
-
-
-
-if __name__ == "__main__":
-
-    Path = "/home/anton/Desktop/triton_work/3MatTriangles/DONE/"
-
-    Folders = [f for f in os.listdir(Path) if "-" in f]
-
-    print(Folders)
-
-    for F in Folders:
-
-        if not F:
-            break
-
-        Mat = F.split("-")
-
-        print(Mat)
-        Materials = ["", "", ""]
-
-        for i in range(3):
-            if "Al" in Mat[i]:
-                Materials[i] = "Aluminium"
-            elif "PE" in Mat[i]:
-                Materials[i] = "Polyethylene"
-            elif "W" in Mat[i]:
-                Materials[i] = "Tungsten"
-            elif "Pb" in Mat[i]:
-                Materials[i] = "Lead"
-            elif "FR4" in Mat[i]:
-                Materials[i] = "FR4"
-
-        print(Materials)
-        plotTernary(Path + F + "/Res/", "Proton", Materials, Mat)
-        plotTernary(Path + F + "/Res/", "Electron", Materials, Mat)
-        plotTernary(Path + F + "/Res/", "Total", Materials, Mat)
+    '''

@@ -44,12 +44,12 @@ Total[1] = np.sqrt(Electrons[1] * Electrons[1] + Protons[1] * Protons[1])
 NumTiles = np.shape(Electrons)[1]
 print("NumTiles:", NumTiles)
 
-for i, x in enumerate(range(NumTiles)):
-    print(x+1, Names[x], ufloat(Electrons[0][x], Electrons[1][x]), ufloat(Protons[0][x], Protons[1][x]), ufloat(Total[0][x], Total[1][x]))
+#for i, x in enumerate(range(NumTiles)):
+#    print(x+1, Names[x], ufloat(Electrons[0][x], Electrons[1][x]), ufloat(Protons[0][x], Protons[1][x]), ufloat(Total[0][x], Total[1][x]))
 
 
 
-'''
+
 x = np.linspace(1, NumTiles, num=NumTiles, dtype=int)
 
 #for i in x:
@@ -66,5 +66,5 @@ plt.grid(which='both')
 plt.title("Ionizing dose behind 1.5 g/cm2 of shielding")
 plt.ylabel("Total ionizing dose per month in silicon [krad]")
 plt.xlabel("Z-Number of shielding material")
-plt.savefig(Path + "../1LayerMaterials.eps", format='eps', bbox_inches="tight")
-'''
+plt.show()
+#plt.savefig(Path + "../1LayerMaterials.eps", format='eps', bbox_inches="tight")

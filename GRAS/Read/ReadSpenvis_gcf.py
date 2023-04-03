@@ -23,17 +23,16 @@ def readSpenvis_gcf(fileName):
                 Iontable.append(np.fromstring(line, dtype=np.float64, sep=','))
 
     rows, cols = np.shape(Iontable)
-    cols = int((cols-1)/2)
 
-    #print(cols)
+    NumSpecies = 92
 
-    IonData = np.zeros((rows, cols), dtype=np.float64)
+    IonData = np.zeros((rows, cols-1), dtype=np.float64)
     EnergyPerNucleon = np.zeros(rows, dtype=np.float64)
 
     for i, line in enumerate(Iontable):
         EnergyPerNucleon[i] = line[0]
-        IonData[i] = line[1:cols+1]     # Reading the Integral Fluence
-        IonData[i] = IonData[i] * 4 * np.pi * 1e-4   # The gfc.txt contains the Fluc in units of (m-2 sr-1 s-1)!
+        IonData[i] = line[1:cols]     # Reading the Integral Fluence
+        IonData[i] = IonData[i] * 4 * np.pi * 1e-4   # The gfc.txt contains the Flux in units of (m-2 sr-1 s-1)!
         # *4pi becasue of sr # * 1e-4 to convert from 1/m2 to 1/cm2
 
     # print(Energy)
@@ -47,26 +46,29 @@ def readSpenvis_gcf(fileName):
                   190.23, 192.217, 195.078, 196.967, 200.59, 204.383, 207.2, 208.98, 209, 210, 222, 223, 226, 227,
                   232.038, 231.036, 238.029]
 
-    Data = np.zeros((cols, len(Iontable), 2), dtype=float)
+    Data = np.zeros((NumSpecies, len(Iontable), 3), dtype=float)
 
-    for i in range(cols-1):
+    for i in range(NumSpecies):
         Energy = EnergyPerNucleon*AtomicMass[i]
-        #print("Species:", Species[i])
+        #print("Species:", i)
         #print("AtomicMass:", AtomicMass[i])
         #print("Energy:", Energy)
         #print("IonData:", IonData[:, i+1])
         Data[i, :, 0] = Energy
-        Data[i, :, 1] = IonData[:, i]
+        Data[i, :, 1] = IonData[:, i]  # Integral Flux
+        Data[i, :, 2] = IonData[:, NumSpecies+i]  # Differential Flux
 
     return Data
-# Data[ Z-NUmber , DatapointNum, Energy or Flux ]
+# Data[ Z-NUmber , DatapointNum, Energy or Integral Flux or Differential Flux ]
 
 
 if __name__ == "__main__":
 
-    DataT = readSpenvis_gcf("/home/anton/Desktop/triton_work/SuperGTO/spenvis_gcf.txt")
+    DataT = readSpenvis_gcf("/home/anton/Desktop/triton_work/Spectra/Moon/ISO/spenvis_gcf.txt")
     #plt.bar(range(93), DataT[:, 0, 1])
-    print(DataT[:, 0, 1])
+    #print(DataT[:, 0, 1])
+
+    IntorDiff = 2  # 1 for Int 2 for Diff
 
     Species = ['H ', 'He', 'Li', 'Be', 'B ', 'C ', 'N ', 'O ', 'F ', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P ', 'S ', 'Cl',
                'Ar', 'K ', 'Ca', 'Sc', 'Ti', 'V ', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se',
@@ -76,17 +78,25 @@ if __name__ == "__main__":
                'Rn', 'Fr', 'Ra', 'Ac', 'Th', 'Pa', 'U ']
 
     for i in range(np.shape(DataT)[0]):
-        FluxMax = DataT[i, 0, 1]
-        if FluxMax > 0.001:
+        FluxMax = np.max(DataT[i, :, IntorDiff])
+        if FluxMax > 1e-7:
             print(Species[i], FluxMax)
-            plt.plot(DataT[i, :, 0], DataT[i, :, 1], label=Species[i])
+            plt.plot(DataT[i, :, 0], DataT[i, :, IntorDiff], label=Species[i])
 
-    plt.xlim(1, 1e7)
-    plt.ylim(1e-7, 1e5)
+    #plt.xlim(1, 1e7)
+    #plt.ylim(1e-7, 1e5)
     plt.xscale("log")
     plt.yscale("log")
-    plt.title("Cosmic Ion Integral Flux")
+
+    if IntorDiff == 1:
+        plt.title("Cosmic Ion Integral Flux")
+        plt.ylabel("Integral Flux [cm-2 s-1]")
+    elif IntorDiff == 2:
+        plt.title("Cosmic Ion Differential Flux")
+        plt.ylabel("Differential Flux [cm-2 s-1 MeV-1]")
+
     plt.xlabel("Energy [MeV]")
-    plt.ylabel("Integral Flux [cm-2 s-1]")
     plt.legend()
-    plt.show()
+    plt.grid(which='both')
+    #plt.show()
+    plt.savefig("/home/anton/Desktop/TritonPlots/Luna/CosmicFlux.svg", format='svg', bbox_inches="tight")
