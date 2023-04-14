@@ -70,10 +70,11 @@ def totalGRASHistos(path, particle: str):
 if __name__ == "__main__":
 
     # Only works if all input files have the same number of particles!!!!!
-    path = "/home/anton/Desktop/triton_work/Histograms/LunarSEP/Res/"
+    path = "/home/anton/Desktop/triton_work/LunarRadiaitonAnalysis/LunarSEP/0mm/Res/"
     DoseHist, PrimaryHist = totalGRASHistos(path, "")
 
     print("DoseHist Shape", np.shape(DoseHist))
+    print("PrimaryHist Shape", np.shape(PrimaryHist))
 
     lowerID = 0
     upperID = 1
@@ -81,7 +82,7 @@ if __name__ == "__main__":
     valueID = 3
     errorID = 4
     entriesID = 5
-
+    '''
     ####    Dose hist Entries #######
     NumberEntries = sum(DoseHist[:, entriesID])
     DoseEntries = sum(DoseHist[:, meanID] * DoseHist[:, entriesID])
@@ -94,6 +95,7 @@ if __name__ == "__main__":
     plt.title("Dose Entries Histogram\n" + f"{NumberEntries:.2}" + " entries " + f"{DoseEntries:.2}" + " krad total dose ?!?")
     plt.xlabel("Dose [krad per Month]")
     plt.ylabel("Number of entries per dose bin")
+    plt.savefig(path + "../Plot/DoseHistEntries.pdf", format='pdf', bbox_inches="tight")
 
     ####    Dose hist Values #######
     SumValues = sum(DoseHist[:, valueID])
@@ -107,7 +109,8 @@ if __name__ == "__main__":
     plt.title("Dose Values Histogram\n" + f"{SumValues:.2}" + " SumValues " + f"{DoseValues:.2}" + " krad total dose ?!?")
     plt.xlabel("Dose [krad per Month] ?")
     plt.ylabel("Number of entries per dose bin")
-
+    plt.savefig(path + "../Plot/DoseHistValues.pdf", format='pdf', bbox_inches="tight")
+    '''
     ####    Primary hist Entries #######
     NumberEntries = sum(PrimaryHist[:, entriesID])
 
@@ -119,7 +122,7 @@ if __name__ == "__main__":
     plt.title("Entries VS primary kinetic energy\n" + f"{NumberEntries:.2}" + " total Entries")
     plt.xlabel("Kinetic energy [MeV]")
     plt.ylabel("Number of entries")
-    #plt.savefig(path + "../PrimaryHistEntries.eps", format='eps', bbox_inches="tight")
+    plt.savefig(path + "../Plot/PrimaryHistEntries.pdf", format='pdf', bbox_inches="tight")
 
     ####    Primary hist Values #######
     TotalDose = sum(PrimaryHist[:, valueID])
@@ -132,5 +135,6 @@ if __name__ == "__main__":
     plt.title("Dose deposited VS primary kinetic energy\n" + f"{NumberEntries:.2}" + " total Entries " + f"{TotalDose:.2}" + " krad total dose")
     plt.xlabel("Kinetic energy [MeV]")
     plt.ylabel("Dose [krad per Month]")
+    plt.savefig(path + "../Plot/PrimaryHistValues.pdf", format='pdf', bbox_inches="tight")
 
-    plt.show()
+    #plt.show()

@@ -3,8 +3,10 @@ from GRAS.Dependencies.TotalGRASHistos import totalGRASHistos
 import os
 from natsort import natsorted
 import numpy as np
+from GRAS.GPT4Experiments.MergeBins import merge_bins
 
-Path = "/home/anton/Desktop/triton_work/LunarRadiaitonAnalysis/LunarGCR-WideHist/"
+Path = "/home/anton/Desktop/triton_work/LunarBackscatter/LunarGCR-WideHist/"
+MergeBinns = 1
 
 lowerID = 0
 upperID = 1
@@ -36,8 +38,8 @@ for i in range(len(Folders)):
     print("Total number of particles = " + f"{TotalNumberEntries[i]:.3}")
     print("Number of Data points for", str(ThickList[i]) + "mm:", "{:,}".format(len(Data[0])))
 
-    DoseHists.append(Data[0])
-    PrimaryHists.append(Data[1])
+    DoseHists.append(merge_bins(Data[0], MergeBinns))
+    PrimaryHists.append(merge_bins(Data[1], MergeBinns))
 
 print("Shape of DoseHists:", np.shape(DoseHists))
 # [Thickness][Bin][Variable]

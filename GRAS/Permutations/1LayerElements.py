@@ -34,6 +34,7 @@ print("Number of Densities:", len(Densities))
 #    print(x)
 
 Path = "/home/anton/Desktop/triton_work/Permutations/1Layer/Res/"
+file_name = Path + "../Analysis/1Layer-Raw.csv"
 
 Electrons = totalkRadGras(Path, "Elec")
 Protons = totalkRadGras(Path, "Prot")
@@ -44,9 +45,13 @@ Total[1] = np.sqrt(Electrons[1] * Electrons[1] + Protons[1] * Protons[1])
 NumTiles = np.shape(Electrons)[1]
 print("NumTiles:", NumTiles)
 
-#for i, x in enumerate(range(NumTiles)):
-#    print(x+1, Names[x], ufloat(Electrons[0][x], Electrons[1][x]), ufloat(Protons[0][x], Protons[1][x]), ufloat(Total[0][x], Total[1][x]))
 
+with open(file_name, 'w') as file:
+    file.write("Material 1 Z-Number,Material 1,Electron Dose [krad/Month],Electron Err [krad/Month],Proton Dose [krad/Month],Proton Err [krad/Month],Total Dose [krad/Month],Total Err [krad/Month]\n")
+    for i in range(NumTiles):
+        line = f"{i+1},{Names[i]},{ufloat(Electrons[0][i], Electrons[1][i])},{ufloat(Protons[0][i], Protons[1][i])},{ufloat(Total[0][i], Total[1][i])}\n"
+        line = line.replace("+/-", ",")
+        file.write(line)
 
 
 
@@ -54,7 +59,7 @@ x = np.linspace(1, NumTiles, num=NumTiles, dtype=int)
 
 #for i in x:
 #    print(i, Electrons[0][i-1])
-
+'''
 fig1 = plt.figure(1)
 plt.errorbar(x, Electrons[0], Electrons[1], fmt='C0', label="AE9 Electrons", linewidth=0.75, capsize=2) #, elinewidth=0.5, capthick=0.5)
 plt.errorbar(x, Protons[0], Protons[1], fmt='C1', label="AP9 Protons", linewidth=0.75, capsize=2) #, elinewidth=0.5, capthick=0.5)
@@ -68,3 +73,25 @@ plt.ylabel("Total ionizing dose per month in silicon [krad]")
 plt.xlabel("Z-Number of shielding material")
 plt.show()
 #plt.savefig(Path + "../1LayerMaterials.eps", format='eps', bbox_inches="tight")
+'''
+
+
+fig1, ax1 = plt.subplots(figsize=(8, 6))
+
+ax1.errorbar(x, Electrons[0], Electrons[1], fmt='.-', color='C0', label="AE9 Electrons", linewidth=1, capsize=5, elinewidth=1.5, capthick=1.5, alpha=0.8)
+ax1.errorbar(x, Protons[0], Protons[1], fmt='.-', color='C1', label="AP9 Protons", linewidth=1, capsize=5, elinewidth=1.5, capthick=1.5, alpha=0.8)
+ax1.errorbar(x, Total[0], Total[1], fmt='.-', color='C2', label="Total dose", linewidth=1, capsize=5, elinewidth=1.5, capthick=1.5, alpha=0.8)
+
+ax1.legend()
+ax1.set_yscale("log")
+ax1.set_yticks([0.25, 0.5, 1, 2])
+ax1.set_yticklabels([0.25, 0.5, 1, 2], fontsize=12)
+ax1.grid(which='both', linestyle='--', linewidth=0.5)
+ax1.set_title("Ionizing dose behind 1.5 g/cm2 of shielding", fontsize=16)
+ax1.set_ylabel("Total ionizing dose per month in silicon [krad]", fontsize=14)
+ax1.set_xlabel("Z-Number of shielding material", fontsize=14)
+ax1.tick_params(axis='both', which='major', labelsize=12)
+
+plt.tight_layout()
+plt.show()
+

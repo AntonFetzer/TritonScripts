@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
+from GRAS.GPT4Experiments.MergeBins import merge_bins
 
 
 def readGRASHistos(file):
@@ -50,12 +51,14 @@ def readGRASHistos(file):
 
 
 if __name__ == "__main__":
-    path = "/home/anton/Desktop/triton_work/LunarRadiaitonAnalysis/LunarSEP/Res/"
-    file = "Protons_987082_152708.csv"
+    path = "/home/anton/Desktop/triton_work/LunarRadiaitonAnalysis/LunarGCR-NarrowHist/0mm/Res/"
+    file = "Protons_3842_594.csv"
 
     DoseHist, PrimaryHist = readGRASHistos(path + file)
 
-    print("DoseHist Shape", np.shape(DoseHist))
+    print("DoseHist Shape", np.shape(PrimaryHist))
+    PrimaryHist = merge_bins(PrimaryHist, 10)
+    print("DoseHist Shape", np.shape(PrimaryHist))
 
                     #   Dose            Primary
     lowerID = 0     #   rad/s           MeV

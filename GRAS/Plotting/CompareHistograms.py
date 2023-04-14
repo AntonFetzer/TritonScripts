@@ -4,32 +4,12 @@ import os
 from natsort import natsorted
 import numpy as np
 
-Paths = [#"/home/anton/Desktop/triton_work/Histograms/AP910MeV/Res/",
-    #"/home/anton/Desktop/triton_work/Histograms/AP910MeV-DIffwith0/Res/",
-    #"/home/anton/Desktop/triton_work/Histograms/AP910MeV-Integral/Res/",
-    #"/home/anton/Desktop/triton_work/Histograms/AP910MeV-Integral-With0/Res/"
-    #"/home/anton/Desktop/triton_work/Histograms/Carrington-SEP-Expected-Diff/Res/",
-    #"/home/anton/Desktop/triton_work/Histograms/Carrington-SEP-Expected-Int/Res/",
-    "/home/anton/Desktop/triton_work/Histograms/Carrington-SEP-Plus2Sigma-Int-With0/Res/",
-    "/home/anton/Desktop/triton_work/Histograms/Carrington-SEP-Expected-Int-With0/Res/",
-    "/home/anton/Desktop/triton_work/Histograms/Carrington-SEP-Minus2Sigma-Int-With0/Res/",
-    "/home/anton/Desktop/triton_work/Histograms/SEP2003-INTEGRAL-FluxBasedOnFluenceDividedBy24h/Res/",
-    "/home/anton/Desktop/triton_work/Histograms/AP910MeV/Res/",
-    "/home/anton/Desktop/triton_work/Histograms/ISS-LEO-Proton10MeV/Res/"]
+Paths = ["/home/anton/Desktop/triton_work/LunarBackscatter/LunarGCR-WideHist/0mm/Res/",
+         "/home/anton/Desktop/triton_work/Histograms/LunarGCR-Wide/Res/"]
 
 
-Labels = [#"AP910MeV",
-    # "AP910MeV-DIffwith0",
-    # "AP910MeV-Integral",
-    # "AP910MeV-Integral-With0"
-    # "Car SEP Expected Diff",
-    # "Car SEP Expected Int",
-    "Carrington SEP +2 Sigma",
-    "Carrington SEP EVT",
-    "Carrington SEP -2 Sigma",
-    "2003 SPE",
-    "AP9 GTO trapped protons",
-    "AP9 LEO trapped protons"]
+Labels = ["GCR Backscatter",
+          "GCR"]
 
 Colours = ['C1', 'C0', 'C2', 'C8', 'C3', 'C7']
 
@@ -49,13 +29,12 @@ for path in Paths:
 
 plt.figure(1)
 for i, PrimaryHist in enumerate(PrimaryHists):
+    TotalDose = sum(PrimaryHist[:, valueID])
+    TotalError = np.sqrt(np.sum(PrimaryHist[:, errorID] ** 2))
     plt.bar(PrimaryHist[:, lowerID], PrimaryHist[:, valueID], width=PrimaryHist[:, upperID] - PrimaryHist[:, lowerID],
             align='edge', alpha=0.5, color=Colours[i])
-    plt.step(PrimaryHist[:, lowerID], PrimaryHist[:, valueID], where='post', label=Labels[i], color=Colours[i])
+    plt.step(PrimaryHist[:, lowerID], PrimaryHist[:, valueID], where='post', label=Labels[i] + str(TotalDose), color=Colours[i])
 
-#plt.ylim(1e-6, 10)
-plt.xlim(8, 300)
-plt.ylim(2e-4, 2e2)
 plt.yscale("log")
 plt.xscale("log")
 plt.grid()
@@ -63,8 +42,7 @@ plt.title("Ionising dose VS primary kinetic energy in unshielded Si")
 plt.xlabel("Kinetic energy [MeV]")
 plt.ylabel("Relative ionising Dose [a.u.]")
 plt.legend()
-#plt.savefig("/home/anton/Desktop/triton_work/Histograms/HistogramComparisonDose.pdf", format='pdf', bbox_inches="tight")
-plt.savefig("/home/anton/Desktop/TritonPlots/Carrington/HistogramComparisonDose.svg", format='svg', bbox_inches="tight")
+plt.savefig("/home/anton/Desktop/triton_work/LunarBackscatter/ComparisonPlots/HistogramComparisonDose.pdf", format='pdf', bbox_inches="tight")
 
 plt.figure(2)
 
@@ -81,7 +59,7 @@ plt.xlabel("Kinetic energy [MeV]")
 plt.ylabel("Number of entries")
 plt.legend()
 
-#plt.savefig("/home/anton/Desktop/triton_work/Histograms/HistogramComparisonCounts.pdf", format='pdf', bbox_inches="tight")
+plt.savefig("/home/anton/Desktop/triton_work/LunarBackscatter/ComparisonPlots/HistogramComparisonCounts.pdf", format='pdf', bbox_inches="tight")
 
 '''
 plt.figure(3)

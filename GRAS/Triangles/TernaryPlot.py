@@ -1,35 +1,37 @@
 import matplotlib.pyplot as plt
 import mpltern  # noqa: F401
 import numpy as np
-import os
 from GRAS.Dependencies.TotalKRadGras import totalkRadGras
 from matplotlib import cm
 import matplotlib as mpl
 from uncertainties import ufloat
-from csv import writer
+from GRAS.GPT4Experiments.CombinedColormaps import create_average_colormap
+import sigfig
 
 
 ### ------------------------------------ Do not touch !!!! It works but I don't know how and why !!!!!!
 
 def plotTernary(path, particle, materials, mat):
-
     Fig = 0
     Data = []
 
-    if "Prot" in particle:
+    if "Elec" in particle:
         Data = totalkRadGras(path, particle)
         Fig = 0
-    elif "Elec" in particle:
+        ColMap = cm.viridis
+    elif "Prot" in particle:
         Data = totalkRadGras(path, particle)
         Fig = 1
+        ColMap = cm.plasma
     if "Total" in particle:
         Fig = 2
         Prot = totalkRadGras(path, "Prot")
         Elec = totalkRadGras(path, "Elec")
         Data = Prot + Elec
-        Data[1] = np.sqrt(Prot[1]**2 + Elec[1]**2)
+        Data[1] = np.sqrt(Prot[1] ** 2 + Elec[1] ** 2)
+        ColMap = create_average_colormap(cm.viridis, cm.plasma)
 
-    Data = Data / 2 ############## This is needed becasue GRAS wrongly normalises the surface area of the particle source
+    Data = Data / 2  ############## This is needed becasue GRAS wrongly normalises the surface area of the particle source
 
     N = 30
     Offset = int((N + 1) * N / 2)
@@ -37,9 +39,10 @@ def plotTernary(path, particle, materials, mat):
     print("The average Dose is", np.mean(Data[0]))
     print("The average Dose of the main triangle is", np.mean(Data[0][:Offset]))
     print("The average Dose of the upside down triangle is", np.mean(Data[0][Offset:]))
-    print("The difference in Dose is", 100 * (np.mean(Data[0][Offset:]) - np.mean(Data[0][:Offset])) / np.mean(Data[0]), "%")
+    print("The difference in Dose is", 100 * (np.mean(Data[0][Offset:]) - np.mean(Data[0][:Offset])) / np.mean(Data[0]),
+          "%")
 
-    ColorData = Data[0]
+    ColorData = np.log(Data[0])
     Min = np.min(ColorData)
     ColorData = ColorData - Min
     Max = np.max(ColorData)
@@ -50,7 +53,7 @@ def plotTernary(path, particle, materials, mat):
     MinID = np.argmin(Data[0])
     MinErr = Data[1][MinID]
 
-    Colors = cm.viridis(ColorData)
+    Colors = ColMap(ColorData)
     print(len(ColorData))
 
     fig = plt.figure(Fig)
@@ -77,7 +80,6 @@ def plotTernary(path, particle, materials, mat):
                 bMin = b
                 gMin = g
 
-
     for x in range(N - 1):
         for y in range(N - x - 1):
             n = N - 1
@@ -103,7 +105,6 @@ def plotTernary(path, particle, materials, mat):
                 bMin = b
                 gMin = g
 
-
     ax.set_tlabel("Layer 1 [%]: " + materials[0] + " [%]")
     ax.set_rlabel("Layer 2 [%]: " + materials[1] + " [%]")
     ax.set_llabel("Layer 3 [%]: " + materials[2] + " [%]")
@@ -111,21 +112,26 @@ def plotTernary(path, particle, materials, mat):
     ax.laxis.set_label_position('tick1')
     ax.raxis.set_label_position('tick1')
     ax.tick_params(labelrotation='horizontal')
-    ax.set_title(particle + " ionising dose behind 1.5 g/cm2 of three layer shielding", pad=20) # \n of " + materials[0] + " on " + materials[1] + " on " + materials[2])
+    #ax.set_title(particle + " ionising dose behind 1.5 g/cm2 of three layer shielding",
+    #             pad=20)  # \n of " + materials[0] + " on " + materials[1] + " on " + materials[2])
 
-    cax = ax.inset_axes([1.02, 0.1, 0.05, 0.9], transform=ax.transAxes)
-    norm = mpl.colors.Normalize(vmin=Min, vmax=Max)
-    #print(norm)
-    Map = mpl.cm.ScalarMappable(norm=norm, cmap=cm.viridis)
-    colorbar = fig.colorbar(Map, cax=cax, label='Some Units')
+    cbar_ticks = np.geomspace(Min, Max, num=8)  # Adjust the number of ticks as needed
+    cbar_ticks = [sigfig.round(num, sigfigs=3) for num in cbar_ticks]
+
+    cax = ax.inset_axes([1, 0.1, 0.05, 0.95], transform=ax.transAxes)
+    norm = mpl.colors.Normalize(vmin=np.log(Min), vmax=np.log(Max))
+    # print(norm)
+    Map = mpl.cm.ScalarMappable(norm=norm, cmap=ColMap)
+    colorbar = fig.colorbar(Map, cax=cax, ticks=np.log(cbar_ticks))
+    colorbar.set_ticklabels(cbar_ticks)
     colorbar.set_label('Ionizing Dose per Month [krad]', rotation=270, va='baseline')
 
-    fig.text(0.04, 0.67, "Minimum dose per month:\n" + str(ufloat(Min, MinErr)) + " kRad.\nAt composition:\n"
-             + str(round(rMin*100)) + "% " + materials[0] + " on \n"
-             + str(round(gMin*100)) + "% " + materials[1] + " on \n"
-             + str(round(bMin*100)) + "% " + materials[2], fontsize='large')
+    fig.text(0.1, 0.70, "Minimum dose per month:\n" + str(ufloat(Min, MinErr)) + " kRad.\nAt composition:\n"
+             + str(round(rMin * 100)) + "% " + materials[0] + " on \n"
+             + str(round(gMin * 100)) + "% " + materials[1] + " on \n"
+             + str(round(bMin * 100)) + "% " + materials[2], fontsize='large')
 
-    #plt.show()
+    # plt.show()
     plt.savefig(path + "../Plot/" + particle + "TernaryPlot.pdf", format='pdf')
     plt.close(Fig)
     '''
@@ -140,3 +146,14 @@ def plotTernary(path, particle, materials, mat):
         CSVFile.writelines(String + "\n")
         CSVFile.close()
     '''
+
+
+if __name__ == "__main__":
+    Path = "/home/anton/Desktop/triton_work/3MatTriangles/Al-GradientTest/Res/"
+
+    Materials = ["Aluminium", "Aluminium", "Aluminium"]
+    Mat = ["Al", "Al", "Al"]
+
+    plotTernary(Path, "Electron", Materials, Mat)
+    plotTernary(Path, "Proton", Materials, Mat)
+    plotTernary(Path, "Total", Materials, Mat)

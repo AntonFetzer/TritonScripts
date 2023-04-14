@@ -18,6 +18,7 @@ print("Number of Names:", len(Materials))
 #    print(x)
 
 Path = "/home/anton/Desktop/triton_work/Permutations/4Layer/Res/"
+file_name = Path + "../Analysis/4Layer-Raw.csv"
 
 Electrons = totalkRadGras(Path, "Elec")
 Protons = totalkRadGras(Path, "Prot")
@@ -30,9 +31,20 @@ Total[1] = np.sqrt(Electrons[1] * Electrons[1] + Protons[1] * Protons[1])
 
 NumMat = len(Materials)
 
-for i1 in range(NumMat):
-    for i2 in range(NumMat):
-        for i3 in range(NumMat):
-            for i4 in range(NumMat):
-                i = i1 * NumMat * NumMat * NumMat + i2 * NumMat * NumMat + i3 * NumMat + i4
-                print(i+1, Materials[i1], Materials[i2], Materials[i3], Materials[i4], ufloat(Electrons[0][i], Electrons[1][i]), ufloat(Protons[0][i], Protons[1][i]), ufloat(Total[0][i], Total[1][i]))
+#for i1 in range(NumMat):
+#    for i2 in range(NumMat):
+#        for i3 in range(NumMat):
+#            for i4 in range(NumMat):
+#                i = i1 * NumMat * NumMat * NumMat + i2 * NumMat * NumMat + i3 * NumMat + i4
+#                print(i+1, Materials[i1], Materials[i2], Materials[i3], Materials[i4], ufloat(Electrons[0][i], Electrons[1][i]), ufloat(Protons[0][i], Protons[1][i]), ufloat(Total[0][i], Total[1][i]))
+
+with open(file_name, 'w') as file:
+    file.write("Combination #,Material 1 Z-Number,Material 2 Z-Number,Material 3 Z-Number,Material 4 Z-Number,Material 1,Material 2,Material 3,Material 4,Electron Dose [krad/Month],Electron Err [krad/Month],Proton Dose [krad/Month],Proton Err [krad/Month],Total Dose [krad/Month],Total Err [krad/Month]\n")
+    for i1 in range(NumMat):
+        for i2 in range(NumMat):
+            for i3 in range(NumMat):
+                for i4 in range(NumMat):
+                    i = i1 * NumMat**3 + i2 * NumMat**2 + i3 * NumMat + i4
+                    line = f"{i+1},{i1+1},{i2+1},{i3+1},{i4+1},{Materials[i1]},{Materials[i2]},{Materials[i3]},{Materials[i4]},{ufloat(Electrons[0][i], Electrons[1][i])},{ufloat(Protons[0][i], Protons[1][i])},{ufloat(Total[0][i], Total[1][i])}\n"
+                    line = line.replace("+/-", ",")
+                    file.write(line)

@@ -1,13 +1,6 @@
-import nmmn.plots
 from GRAS.Dependencies.TotalKRadGras import totalkRadGras
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib import cm
 from uncertainties import ufloat
-import matplotlib.colors as colors
-from matplotlib.ticker import ScalarFormatter
-import sigfig
-
 
 Materials = ["G4_lH2", "G4_He", "G4_Li", "G4_Be", "G4_B", "G4_C", "G4_lN2", "G4_lO2", "G4_F", "G4_Ne", "G4_Na", "G4_Mg",
          "G4_Al", "G4_Si", "G4_P", "G4_S", "G4_Cl", "G4_lAr", "G4_K", "G4_Ca", "G4_Sc", "G4_Ti", "G4_V", "G4_Cr",
@@ -24,6 +17,7 @@ print("Number of Names:", len(Materials))
 print("Number of Densities:", len(Densities))
 
 
+
 #VolumesStr = ''
 #for i, Name in enumerate(Names):
 #   VolumesStr += '        <volume name ="ShieldVol_' + str(i) + '">\n            <materialref ref="' + Name + '"/>\n            <solidref ref="Shield_' + str(i) + '"/>\n        </volume>\n\n'
@@ -32,10 +26,12 @@ print("Number of Densities:", len(Densities))
 # for x in Densities:
 #    print(x)
 
+Names = Materials
+
 Path = "/home/anton/Desktop/triton_work/Permutations/2Layer50/Res/"
+file_name = Path + "../Analysis/2Layer50-Raw.csv"
 
 Electrons = totalkRadGras(Path, "Elec")
-
 Protons = totalkRadGras(Path, "Prot")
 
 print("Electrons Shape:", np.shape(Electrons))
@@ -45,11 +41,22 @@ Total[1] = np.sqrt(Electrons[1] * Electrons[1] + Protons[1] * Protons[1])
 # print(Total)
 
 NumMat = 50
+List = []
 
-for i1 in range(NumMat):
-    for i2 in range(NumMat):
+#for i1 in range(NumMat):
+#    for i2 in range(NumMat):
+#            i = i1 * NumMat + i2
+#            print(i+1, i1, i2, Materials[i1], Materials[i2], ufloat(Electrons[0][i], Electrons[1][i]), ufloat(Protons[0][i], Protons[1][i]), ufloat(Total[0][i], Total[1][i]))
+
+with open(file_name, 'w') as file:
+    file.write("Combination #,Material 1 Z-Number,Material 2 Z-Number,Material 1,Material 2,Electron Dose [krad/Month],Electron Err [krad/Month],Proton Dose [krad/Month],Proton Err [krad/Month],Total Dose [krad/Month],Total Err [krad/Month]\n")
+    for i1 in range(NumMat):
+        for i2 in range(NumMat):
             i = i1 * NumMat + i2
-            print(i+1, i1, i2, Materials[i1], Materials[i2], ufloat(Electrons[0][i], Electrons[1][i]), ufloat(Protons[0][i], Protons[1][i]), ufloat(Total[0][i], Total[1][i]))
+            line = f"{i+1},{i1+1},{i2+1},{Materials[i1]},{Materials[i2]},{ufloat(Electrons[0][i], Electrons[1][i])},{ufloat(Protons[0][i], Protons[1][i])},{ufloat(Total[0][i], Total[1][i])}\n"
+            line = line.replace("+/-", ",")
+            file.write(line)
+
 
 '''
 NumTiles = np.shape(Protons)[1]
@@ -57,18 +64,24 @@ print("NumTiles:", NumTiles)
 
 ProtonMap = np.zeros((NumMat, NumMat), dtype=float)
 ElectronMap = np.zeros((NumMat, NumMat), dtype=float)
+TotalMap = np.zeros((NumMat, NumMat), dtype=float)
 
 for x in range(NumMat):
     for y in range(NumMat):
         ProtonMap[x][y] = Protons[0][x * NumMat + y]
         ElectronMap[x][y] = Electrons[0][x * NumMat + y]
+        TotalMap[x][y] = Total[0][x * NumMat + y]
 
-TotalMap = ElectronMap + ProtonMap
 
-Cmap = cm.viridis
+cmapE = cm.viridis
+cmapP = cm.plasma
+#cmapE = cm.jet
+#cmapP = cm.turbo
+cmapT = create_average_colormap(cmapE, cmapP)
+
 
 fig1 = plt.figure(1)
-plt.imshow(np.rot90(np.transpose(np.log(ElectronMap))), cmap=Cmap, extent=(0.5, len(Names)+0.5, 0.5, len(Names)+0.5))
+plt.imshow(np.rot90(np.transpose(np.log(ElectronMap))), cmap=cmapE, extent=(0.5, len(Names)+0.5, 0.5, len(Names)+0.5))
 ax = plt.gca()
 ax.set_xticks(np.arange(5, 55, 5))
 ax.set_yticks(np.arange(5, 55, 5))
@@ -84,11 +97,11 @@ cbar.set_label("Ionizing dose per month [kRad]")
 plt.title("Electron dose for two layer shielding")
 plt.xlabel("Z-number of bottom-layer")
 plt.ylabel("Z-number of top-layer")
-plt.savefig(Path + "../ElectronMap.pdf", format='pdf', bbox_inches="tight")
+plt.savefig(Path + "../Plots/ElectronMap.pdf", format='pdf', bbox_inches="tight")
 
 
 fig2 = plt.figure(2)
-plt.imshow(np.rot90(np.transpose(np.log(ProtonMap))), cmap=Cmap, extent=(0.5, len(Names)+0.5, 0.5, len(Names)+0.5))
+plt.imshow(np.rot90(np.transpose(np.log(ProtonMap))), cmap=cmapP, extent=(0.5, len(Names)+0.5, 0.5, len(Names)+0.5))
 ax = plt.gca()
 ax.set_xticks(np.arange(5, 55, 5))
 ax.set_yticks(np.arange(5, 55, 5))
@@ -104,11 +117,13 @@ cbar.set_label("Ionizing dose per month [kRad]")
 plt.title("Proton dose for two layer shielding")
 plt.xlabel("Z-number of bottom-layer")
 plt.ylabel("Z-number of top-layer")
-plt.savefig(Path + "../ProtonMap.pdf", format='pdf', bbox_inches="tight")
+plt.savefig(Path + "../Plots/ProtonMap.pdf", format='pdf', bbox_inches="tight")
+
+
 
 
 fig3 = plt.figure(3)
-plt.imshow(np.rot90(np.transpose(np.log(TotalMap))), cmap=Cmap, extent=(0.5, len(Names)+0.5, 0.5, len(Names)+0.5))
+plt.imshow(np.rot90(np.transpose(np.log(TotalMap))), cmap=cmapT, extent=(0.5, len(Names)+0.5, 0.5, len(Names)+0.5))
 ax = plt.gca()
 ax.set_xticks(np.arange(5, 55, 5))
 ax.set_yticks(np.arange(5, 55, 5))
@@ -124,5 +139,5 @@ cbar.set_label("Ionizing dose per month [kRad]")
 plt.title("Total Ionizing dose for two layer shielding")
 plt.xlabel("Z-number of bottom-layer")
 plt.ylabel("Z-number of top-layer")
-plt.savefig(Path + "../TotalMap.pdf", format='pdf', bbox_inches="tight")
+plt.savefig(Path + "../Plots/TotalMap.pdf", format='pdf', bbox_inches="tight")
 '''
