@@ -21,23 +21,23 @@ ThickList = ["0mm", "1mm", "2mm", "4mm", "8mm", "16mm", ]
 
 for Thick in ThickList:
 
-    Paths = [#"/home/anton/Desktop/triton_work/LET/Carrington-SEP-Plus2Sigma-Int-With0/" + Thick + "/Res/",
-         #"/home/anton/Desktop/triton_work/LET/Carrington-SEP-Expected-Int-With0/" + Thick + "/Res/",
-         #"/home/anton/Desktop/triton_work/LET/Carrington-SEP-Minus2Sigma-Int-With0/" + Thick + "/Res/",
-         #"/home/anton/Desktop/triton_work/LET/SEP2003-INTEGRAL-FluxBasedOnFluenceDividedBy24h/" + Thick + "/Res/",
-         "/home/anton/Desktop/triton_work/LET/LETAP910MeV/" + Thick + "/Res/",
-         "/home/anton/Desktop/triton_work/LET/ISS-LEO-Proton10MeV/" + Thick + "/Res/",
-        "/home/anton/Desktop/triton_work/LET/LunarCosmic-H-Flux/" + Thick + "/Res/",
-        "/home/anton/Desktop/triton_work/LET/LunarSEP10MeVFlux/" + Thick + "/Res/"]
+    Paths = ["/home/anton/Desktop/triton_work/LET/Carrington/Carrington-SEP-Plus2Sigma-Int-With0/" + Thick + "/Res/",
+             "/home/anton/Desktop/triton_work/LET/Carrington/Carrington-SEP-Expected-Int-With0/" + Thick + "/Res/",
+             "/home/anton/Desktop/triton_work/LET/Carrington/Carrington-SEP-Minus2Sigma-Int-With0/" + Thick + "/Res/",
+             "/home/anton/Desktop/triton_work/LET/Carrington/SEP2003-INTEGRAL-FluxBasedOnFluenceDividedBy24h/" + Thick + "/Res/",
+             "/home/anton/Desktop/triton_work/LET/A9-GTO/AE9Mission/" + Thick + "/Res/",
+             "/home/anton/Desktop/triton_work/LET/A9-GTO/AP9Mission/" + Thick + "/Res/",
+             "/home/anton/Desktop/triton_work/LET/A9-LEO/AE9Mission/" + Thick + "/Res/",
+             "/home/anton/Desktop/triton_work/LET/A9-LEO/AP9Mission/" + Thick + "/Res/"]
 
-    DataName = [#"Carrington SEP +2 Sigma",
-            #"Carrington SEP EVT",
-            #"Carrington SEP -2 Sigma",
-            #"2003 SPE",
-            "AP9 GTO trapped protons",
-            "AP9 LEO trapped protons",
-        "Cosmic Protons",
-        "Solar Protons"
+    DataName = ["Carrington SEP +2 Sigma",
+            "Carrington SEP EVT",
+            "Carrington SEP -2 Sigma",
+            "2003 SPE",
+            "AP9 GTO trapped Electrons",
+            "AP9 GTO trapped Protons",
+            "AP9 LEO trapped Electrons",
+            "AP9 LEO trapped Protons",
     ]
 
     if Correctable:
@@ -101,7 +101,7 @@ for Thick in ThickList:
         TotalLETError = np.sqrt(TotalLETError)
         TotalLET = ufloat(TotalLET, TotalLETError)
 
-        '''
+
         ### LET Histogram ###############
         fig, ax1 = plt.subplots(1)
         # plt.figure(1)
@@ -125,7 +125,7 @@ for Thick in ThickList:
         
         plt.savefig("/home/anton/Desktop/TritonPlots/Carrington/SEE/LET-Rate" + DataName[P] + " " + CrossectionName + ".pdf", format='pdf',
                     bbox_inches="tight")
-        '''
+
 
         ### SEE rate ###############
 

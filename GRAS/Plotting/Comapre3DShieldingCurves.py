@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from natsort import natsorted
+from GRAS.Dependencies.TotalKRadGras import totalkRadGras
 
 Path = "/home/anton/Desktop/triton_work/ShieldingCurves/Carrington/32mm/Res/"
 

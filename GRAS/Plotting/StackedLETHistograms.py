@@ -10,8 +10,8 @@ absolute_path = os.path.abspath(__file__)
 print("Full path: " + absolute_path)
 print("Directory Path: " + os.path.dirname(absolute_path))
 
-Path = "/home/anton/Desktop/triton_work/LET/LETMono100MeVThin-Cu/"
-Title = "LETMono100MeVThin-Cu"
+Path = "/home/anton/Desktop/triton_work/LET/A9-LEO/AP9Mission/"
+Title = "AP9Mission LEO"
 
 lowerID = 0
 upperID = 1
@@ -37,7 +37,7 @@ LETHist = []
 EffHist = []
 
 for i in range(Num):
-    Data = totalGRASLETHistos(Path + Folders[i] + "/Res/", "Prot")
+    Data = totalGRASLETHistos(Path + Folders[i] + "/Res/", "")
     # print("Shape of Data:", np.shape(Data))
     TotalNumberEntries = sum(Data[0][:, entriesID])
     print("Total number of particles = " + f"{TotalNumberEntries:.5}")
@@ -67,6 +67,13 @@ Colours = ['C3', 'C1', 'C8', 'C2', 'C9', 'C0', 'C7']
 
 #NumberEntriesLETHist = sum(LETHist[0][:, entriesID])
 
+C = 2330  # to convert from MeV/cm to Mev cm2 mg-1
+for i in range(Num):
+    LETHist[i][:, lowerID] = LETHist[i][:, lowerID] / C
+    LETHist[i][:, upperID] = LETHist[i][:, upperID] / C
+    LETHist[i][:, meanID] = LETHist[i][:, meanID] / C
+
+
 plt.figure(0)
 for i in range(Num):
     plt.bar(LETHist[i][:, lowerID], LETHist[i][:, entriesID], width=LETHist[i][:, upperID] - LETHist[i][:, lowerID],
@@ -77,7 +84,7 @@ plt.yscale("log")
 plt.xscale("log")
 plt.grid()
 plt.title(Title)
-plt.xlabel("LET [MeV/cm]")
+plt.xlabel("LET [MeV cm2 mg-1]")
 plt.ylabel("Number of entries per LET bin")
 plt.legend()
 plt.savefig(Path + "StackedPlots/LETentries.pdf", format='pdf', bbox_inches="tight")
@@ -98,10 +105,12 @@ plt.yscale("log")
 plt.xscale("log")
 plt.grid()
 plt.title(Title)
-plt.xlabel("LET [MeV/cm]")
+plt.xlabel("LET [MeV cm2 mg-1]")
 plt.ylabel("Rate per LET bin [cm-2 s-1]")
 plt.legend()
 plt.savefig(Path + "StackedPlots/LETvalues.pdf", format='pdf', bbox_inches="tight")
+
+#plt.show()
 
 '''
 NumberEntriesEffHist = sum(EffHist[0][:, entriesID])

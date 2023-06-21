@@ -49,11 +49,11 @@ def readGrasCsv(file):
 
 
 if __name__ == "__main__":
-    File = "/home/anton/Desktop/triton_work/CARRINGTON/HistogramTestDifferentialPowSpec/Res/Electrons1Tile0mm_23566_3645.csv"
+    File = "/home/anton/Desktop/triton_work/RadEx/RadEx0mm/Res/Electrons_981978_151919.csv"
 
     Results = readGrasCsv(File)
 
-    print(np.shape(Results))
+    #print(np.shape(Results))
     print(Results)
 
     plt.plot(100 * Results[1]/Results[0], '.')

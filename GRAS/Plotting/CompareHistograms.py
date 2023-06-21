@@ -3,13 +3,14 @@ from GRAS.Dependencies.TotalGRASHistos import totalGRASHistos
 import os
 from natsort import natsorted
 import numpy as np
+from uncertainties import ufloat
 
-Paths = ["/home/anton/Desktop/triton_work/LunarBackscatter/LunarGCR-WideHist/0mm/Res/",
-         "/home/anton/Desktop/triton_work/Histograms/LunarGCR-Wide/Res/"]
+Paths = ["/home/anton/Desktop/triton_work/LunarBackscatter/LunarSEP/0mm/Res/",
+         "/home/anton/Desktop/triton_work/Histograms/LunarSEP/Res/"]
 
 
-Labels = ["GCR Backscatter",
-          "GCR"]
+Labels = ["SEP Backscatter",
+          "SEP"]
 
 Colours = ['C1', 'C0', 'C2', 'C8', 'C3', 'C7']
 
@@ -33,7 +34,7 @@ for i, PrimaryHist in enumerate(PrimaryHists):
     TotalError = np.sqrt(np.sum(PrimaryHist[:, errorID] ** 2))
     plt.bar(PrimaryHist[:, lowerID], PrimaryHist[:, valueID], width=PrimaryHist[:, upperID] - PrimaryHist[:, lowerID],
             align='edge', alpha=0.5, color=Colours[i])
-    plt.step(PrimaryHist[:, lowerID], PrimaryHist[:, valueID], where='post', label=Labels[i] + str(TotalDose), color=Colours[i])
+    plt.step(PrimaryHist[:, lowerID], PrimaryHist[:, valueID], where='post', label=Labels[i] + " " + str(ufloat(TotalDose, TotalError)) + " krad/month", color=Colours[i])
 
 plt.yscale("log")
 plt.xscale("log")

@@ -4,33 +4,20 @@ import os
 from natsort import natsorted
 import numpy as np
 
-Paths = [#"/home/anton/Desktop/triton_work/LET/Carrington-SEP-Plus2Sigma-Int-With0/2mm/Res/",
-         #"/home/anton/Desktop/triton_work/LET/Carrington-SEP-Expected-Int-With0/0mm/Res/",
-        #"/home/anton/Desktop/triton_work/LET/Carrington-SEP-Expected-Int-With0-Thin/0mm/Res/"
-    #"/home/anton/Desktop/triton_work/LET/LETMono100MeVThin/2mm/Res/",
-    #"/home/anton/Desktop/triton_work/LET/LETMono100MeV/2mm/Res/",
-    #"/home/anton/Desktop/triton_work/LET/LETMono100MeVThin-Cu/2mm/Res/"
-         #"/home/anton/Desktop/triton_work/LET/Carrington-SEP-Minus2Sigma-Int-With0/2mm/Res/",
-         #"/home/anton/Desktop/triton_work/LET/SEP2003-INTEGRAL-FluxBasedOnFluenceDividedBy24h/2mm/Res/",
-         "/home/anton/Desktop/triton_work/LET/LETAP910MeV/2mm/Res/",
-         "/home/anton/Desktop/triton_work/LET/ISS-LEO-Proton10MeV/2mm/Res/",
-        "/home/anton/Desktop/triton_work/LET/LunarCosmic-H-Flux/2mm/Res/",
-        "/home/anton/Desktop/triton_work/LET/LunarSEP10MeVFlux/2mm/Res/"
-        ]
+Thick = "16mm"
 
-Labels = [#"Carrington SEP +2 Sigma",
-    #"0.5mm",
-    #"1micron",
-    #"Cu"
-    #"Carrington SEP -2 Sigma",
-    #"2003 SPE",
-    "AP9 GTO trapped protons",
-    "AP9 LEO trapped protons",
-    "Cosmic Protons",
-    "Solar Protons"
-]
+Paths = ["/home/anton/Desktop/triton_work/LET/Carrington/Carrington-SEP-Expected-Int-With0/" + Thick + "/Res/",
+         "/home/anton/Desktop/triton_work/LET/Carrington/Carrington-SEP-Minus2Sigma-Int-With0/" + Thick + "/Res/",
+         "/home/anton/Desktop/triton_work/LET/Carrington/Carrington-SEP-Plus2Sigma-Int-With0/" + Thick + "/Res/",
+         "/home/anton/Desktop/triton_work/LET/Carrington/SEP2003-INTEGRAL-FluxBasedOnFluenceDividedBy24h/" + Thick + "/Res/",
+         "/home/anton/Desktop/triton_work/LET/A9-GTO/AE9Mission/" + Thick + "/Res/",
+         "/home/anton/Desktop/triton_work/LET/A9-GTO/AP9Mission/" + Thick + "/Res/",
+         "/home/anton/Desktop/triton_work/LET/A9-LEO/AE9Mission/" + Thick + "/Res/",
+         "/home/anton/Desktop/triton_work/LET/A9-LEO/AP9Mission/" + Thick + "/Res/"]
 
-Colours = ['C1', 'C0', 'C2', 'C8', 'C3', 'C7']
+Labels = ["SEP-Expected", "Minus2Sigma", "Plus2Sigma", "SEP2003", "AE9 GTO", "AP9 GTO", "AE9 LEO", "AP9 LEO"]
+
+Colours = ['C1', 'C0', 'C2', 'C8', 'C3', 'C7', 'C9', 'b', 'k']
 
 lowerID = 0
 upperID = 1
@@ -42,8 +29,9 @@ entriesID = 5
 LETHist = []
 EffHist = []
 
-for path in Paths:
+for p, path in enumerate(Paths):
     Temp = totalGRASLETHistos(path, "")
+
     LETHist.append(Temp[0])
     EffHist.append(Temp[1])
 
@@ -65,19 +53,23 @@ plt.savefig("/home/anton/Desktop/triton_work/LET/Plots/LETentries.pdf", format='
 '''
 plt.figure(1)
 for i in range(Num):
+    if Labels[i].startswith("A"):
+        LETHist[i][:, valueID] /= 30 * 24 * 60 * 60
+        LETHist[i][:, errorID] /= 30 * 24 * 60 * 60
+
     plt.bar(LETHist[i][:, lowerID], LETHist[i][:, valueID], width=LETHist[i][:, upperID] - LETHist[i][:, lowerID],
             align='edge', alpha=0.5, color=Colours[i])
     plt.step(LETHist[i][:, lowerID], LETHist[i][:, valueID], where='post', label=Labels[i], color=Colours[i])
 plt.yscale("log")
 plt.xscale("log")
-#plt.ylim(1e-7, 1e5)
+# plt.ylim(1e-7, 1e5)
 plt.grid()
-plt.title("LET Histogram Carrington SEP vs. 2mm Aluminium")
+plt.title("LET Histogram Carrington SEP vs. " + Thick +" Aluminium")
 plt.xlabel("LET [MeV/cm]")
 plt.ylabel("Rate per LET bin [s-1]")
 plt.legend()
-#plt.savefig("/home/anton/Desktop/triton_work/LET/Plots/LETvalues.pdf", format='pdf', bbox_inches="tight")
-plt.savefig("/home/anton/Desktop/TritonPlots/Luna/LETHistogramComparison.svg", format='svg', bbox_inches="tight")
+# plt.savefig("/home/anton/Desktop/triton_work/LET/Plots/LETvalues.pdf", format='pdf', bbox_inches="tight")
+# plt.savefig("/home/anton/Desktop/TritonPlots/Luna/LETHistogramComparison.svg", format='svg', bbox_inches="tight")
 '''
 NumberEntriesEffHist = sum(EffHist[0][:, entriesID])
 
@@ -107,4 +99,4 @@ plt.ylabel("Rate per LET bin [s-1]")
 plt.legend()
 #plt.savefig("/home/anton/Desktop/triton_work/LET/EFFvalues.eps", format='eps', bbox_inches="tight")
 '''
-# plt.show()
+plt.show()

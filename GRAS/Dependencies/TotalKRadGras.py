@@ -78,7 +78,7 @@ def totalkRadGras(path, particle: str):
 
 
 if __name__ == "__main__":
-    Path = "/home/anton/Desktop/triton_work/LunarRadiaitonAnalysis/LunarSEP/Res/"
+    Path = "/home/anton/Desktop/triton_work/RadEx/RadEx0mm/Res/"
 
     TID = totalkRadGras(Path, "")
 

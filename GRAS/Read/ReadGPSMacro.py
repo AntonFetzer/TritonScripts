@@ -35,22 +35,22 @@ def readGPSMacro(file):
 
 if __name__ == "__main__":
 
-    file = "/home/anton/Desktop/triton_work/SuperGTO/SuperGTOElectrons.mac"
+    file = "/home/anton/Desktop/triton_work/Spectra/A9/AE9/AE9500keV.mac"
     Electrons = readGPSMacro(file)
 
-    file = "/home/anton/Desktop/triton_work/SuperGTO/SuperGTOProtons.mac"
+    file = "/home/anton/Desktop/triton_work/Spectra/A9/AP9/AP910MeV.mac"
     Protons = readGPSMacro(file)
 
-    plt.plot(Protons[0], Protons[1], label="Proton Differential")
-    plt.plot(Electrons[0], Electrons[1], label="Electron Differential")
+    plt.plot(Electrons[0], Electrons[1], label="AE-9 Electron Flux")
+    plt.plot(Protons[0], Protons[1], label="AP-9 Proton Flux")
 
     plt.yscale("log")
     plt.xscale("log")
     plt.grid(which="both")
     plt.legend()
-    plt.title("AP-9 and AE-9 Super-GTO spectra")
+    plt.title("Differential AP-9 and AE-9 spectra on GTO")
     plt.xlabel("Kinetic energy [MeV]")
     plt.ylabel("Differential Flux [cm-2 s-1 MeV-1]")
 
     #plt.show()
-    plt.savefig("/home/anton/Desktop/triton_work/SuperGTO/SpectraForGeant4.eps", format='eps', bbox_inches="tight")
+    plt.savefig("/home/anton/Desktop/TritonPlots/Paper/SpectraBasic.pdf", format='pdf', bbox_inches="tight")
