@@ -5,10 +5,10 @@ from GRAS.Read.ReadGPSMacro import readGPSMacro
 import numpy as np
 import matplotlib.pyplot as plt
 
-TRIProt, TRIElec = readSpenvis_tri("/home/anton/Desktop/triton_work/Spectra/A9/spenvis_tri.txt")
-SEF = readSpenvis_sef("/home/anton/Desktop/triton_work/Spectra/Moon/SAPPHIRE/spenvis_sef.txt")
-GCF = readSpenvis_gcf("/home/anton/Desktop/triton_work/Spectra/Moon/ISO/spenvis_gcf.txt")
-#GPS = readGPSMacro("/home/anton/Desktop/triton_work/Spectra/SuperGTO/SuperGTOElectrons.mac")
+TRIProt, TRIElec = readSpenvis_tri("/l/triton_work/Spectra/A9-GTO/spenvis_tri.txt")
+SEF = readSpenvis_sef("/l/triton_work/Spectra/SAPPHIRE-GTO/spenvis_sef.txt")
+GCF = readSpenvis_gcf("/l/triton_work/Spectra/ISO-GTO/spenvis_gcf.txt")
+#GPS = readGPSMacro("/l/triton_work/Spectra/SuperGTO/SuperGTOElectrons.mac")
 
 Species = ['H ', 'He', 'Li', 'Be', 'B ', 'C ', 'N ', 'O ', 'F ', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P ', 'S ', 'Cl',
            'Ar', 'K ', 'Ca', 'Sc', 'Ti', 'V ', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se',
@@ -45,7 +45,7 @@ plt.plot(SEF[1, :, 0], SEF[1, :, 2], label="Solar Helium Ions")
 plt.plot(SEF[25, :, 0], SEF[25, :, 2], label="Solar Iron Ions")
 
 
-####################################################### Cosmic Particles
+####################################################### Cosmic Particles ISO
 #for i in range(np.shape(GCF)[0]):
 #    FluxMax = GCF[i, 0, 1]
 #    if FluxMax > 0.1:
@@ -54,12 +54,14 @@ plt.plot(SEF[25, :, 0], SEF[25, :, 2], label="Solar Iron Ions")
 
 plt.plot(GCF[0, :, 0], GCF[0, :, 2], label="Cosmic Protons", color='C8')
 plt.plot(GCF[1, :, 0], GCF[1, :, 2], label="Cosmic Helium Ions", color='C9')
-plt.plot(GCF[25, :, 0], GCF[25, :, 2], label="Cosmic Iron Ions")
+plt.plot(GCF[25, :, 0], GCF[25, :, 2], label="Cosmic Iron Ions", color='C7')
+
 
 ####################################################### GPS FIles
 #plt.plot(GPS[0], GPS[1], 'x', label="GPS Differential Electron Flux")
 
 
+#plt.xlim(left=0.5)
 plt.yscale("log")
 plt.xscale("log")
 plt.grid(which="both")
@@ -69,4 +71,4 @@ plt.ylabel("Differential Flux [cm-2 s-1 MeV-1]")
 plt.legend()
 #plt.show()
 
-plt.savefig("/home/anton/Desktop/TritonPlots/Luna/FluxComparison.svg", format='svg', bbox_inches="tight")
+plt.savefig("/l/TritonPlots/Paper/FluxComparison.pdf", format='pdf', bbox_inches="tight")

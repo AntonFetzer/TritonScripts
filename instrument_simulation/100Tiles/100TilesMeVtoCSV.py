@@ -7,7 +7,7 @@ import sys
 # print(f"Arguments of the script : {sys.argv[1:]=}")
 
 # PathList = "/scratch/work/fetzera1/Gradient/Gradient/4Material/"
-# Path = "/home/anton/Desktop/triton_work/Gradient/4Material/"
+# Path = "/l/triton_work/Gradient/4Material/"
 Path = "/scratch/work/fetzera1/MulasTest2/"
 # PathList = sys.argv[1:]
 

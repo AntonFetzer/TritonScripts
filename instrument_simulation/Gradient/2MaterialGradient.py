@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from instrument_simulation.Dependencies.MeVtokRad_2D import MeVtokRad_2D
 
-Path = "/home/anton/Desktop/triton_work/Gradient/2Material2-5gcm2/Zn-Al/csv/"
+Path = "/l/triton_work/Gradient/2Material2-5gcm2/Zn-Al/csv/"
 
 MatA = "Aluminium"
 MatB = "Zinc"

@@ -26,7 +26,7 @@ print(VolumesStr)
 
 
 
-file = "/home/anton/Desktop/triton_work/Permutations/NIST.txt"
+file = "/l/triton_work/Permutations/NIST.txt"
 Text = []
 
 with open(file, 'r') as f:
@@ -75,7 +75,7 @@ print(VolumesStr)
 
 Materials = Names
 
-Path = "/home/anton/Desktop/triton_work/Permutations/2Layer62/Res/"
+Path = "/l/triton_work/Permutations/2Layer62/Res/"
 file_name = Path + "../Analysis/2Layer62-Raw.csv"
 
 Electrons = totalkRadGras(Path, "Elec")

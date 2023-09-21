@@ -6,7 +6,7 @@ from GRAS.Dependencies.MeVtokRad2DGras import MeVtokRad_2D
 import matplotlib.pyplot as plt
 
 
-path = "/home/anton/Desktop/triton_work/1Tile/PhysicsComparison"
+path = "/l/triton_work/1Tile/PhysicsComparison"
 
 ElecFiles = [f for f in os.listdir(path + "/Results/") if "Elec" in f]
 ProtFiles = [f for f in os.listdir(path + "/Results/") if "Prot" in f]
@@ -120,7 +120,7 @@ for i, Str in enumerate(PhysList):
     print("  " + str(i) + ")  MAC=" + Str + ".mac ;;")
 
 
-#Path = "/home/anton/Desktop/Test/"
+#Path = "/l/Test/"
 #
 #for Str in PhysList:
 #    with open(Path + Str + '.mac', 'w') as f:

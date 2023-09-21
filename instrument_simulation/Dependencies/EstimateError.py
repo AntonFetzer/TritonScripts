@@ -16,7 +16,7 @@ def EstimateError(Data, N):
 
 
 if __name__ == "__main__":
-    Path = "/home/anton/Desktop/triton_work/6U/6U-FR4-Solder/6u-fr4-solder-2e9electrons500kev.root"
+    Path = "/l/triton_work/6U/6U-FR4-Solder/6u-fr4-solder-2e9electrons500kev.root"
     TestData = readMultipleRoot(Path)[0]
     #TestData = TestData[0:10000]
     #print(TestData)

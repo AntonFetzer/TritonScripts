@@ -6,7 +6,7 @@ import pandas as pd
 from natsort import natsorted
 from GRAS.Dependencies.TotalKRadGras import totalkRadGras
 
-Path = "/home/anton/Desktop/triton_work/RadEx/"
+Path = "/l/triton_work/RadEx/"
 
 Folders = [f for f in os.listdir(Path) if f.endswith('mm')]
 Folders = natsorted(Folders)
@@ -48,7 +48,7 @@ print(ThickList)
 
 # Import Shiedling Curve Data
 
-Path2 = "/home/anton/Desktop/triton_work/ShieldingCurves"
+Path2 = "/l/triton_work/ShieldingCurves"
 
 Electrons = totalkRadGras(Path2 + "/AE9-500keV-10mm/Res/", "Elec")
 Protons = totalkRadGras(Path2 + "/AP9-10MeV-10mm/Res/", "Prot")

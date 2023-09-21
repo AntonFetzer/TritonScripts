@@ -5,8 +5,8 @@ from natsort import natsorted
 import numpy as np
 from uncertainties import ufloat
 
-Paths = ["/home/anton/Desktop/triton_work/LunarBackscatter/LunarSEP/0mm/Res/",
-         "/home/anton/Desktop/triton_work/Histograms/LunarSEP/Res/"]
+Paths = ["/l/triton_work/LunarBackscatter/LunarSEP/0mm/Res/",
+         "/l/triton_work/Histograms/LunarSEP/Res/"]
 
 
 Labels = ["SEP Backscatter",
@@ -43,7 +43,7 @@ plt.title("Ionising dose VS primary kinetic energy in unshielded Si")
 plt.xlabel("Kinetic energy [MeV]")
 plt.ylabel("Relative ionising Dose [a.u.]")
 plt.legend()
-plt.savefig("/home/anton/Desktop/triton_work/LunarBackscatter/ComparisonPlots/HistogramComparisonDose.pdf", format='pdf', bbox_inches="tight")
+plt.savefig("/l/triton_work/LunarBackscatter/ComparisonPlots/HistogramComparisonDose.pdf", format='pdf', bbox_inches="tight")
 
 plt.figure(2)
 
@@ -60,7 +60,7 @@ plt.xlabel("Kinetic energy [MeV]")
 plt.ylabel("Number of entries")
 plt.legend()
 
-plt.savefig("/home/anton/Desktop/triton_work/LunarBackscatter/ComparisonPlots/HistogramComparisonCounts.pdf", format='pdf', bbox_inches="tight")
+plt.savefig("/l/triton_work/LunarBackscatter/ComparisonPlots/HistogramComparisonCounts.pdf", format='pdf', bbox_inches="tight")
 
 '''
 plt.figure(3)

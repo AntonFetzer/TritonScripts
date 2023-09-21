@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from GRAS.Dependencies.TotalKRadGras import totalkRadGras
 from matplotlib import cm
 
-Path = "/home/anton/Desktop/triton_work/2LayerOptimisation"
+Path = "/l/triton_work/2LayerOptimisation"
 
 Folders = ["PE-Pb", "PE-W", "Ti-PE", "PE-FR4", "PE-Al", "Al-W", "FR4-Ti", "Al-FR4", "Kevlar-Al"]
 

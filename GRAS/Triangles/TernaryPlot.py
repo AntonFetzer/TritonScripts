@@ -136,7 +136,7 @@ def plotTernary(path, particle, materials, mat):
     plt.close(Fig)
     '''
     if "Total" in particle:
-        CSVFile = open("/home/anton/Desktop/triton_work/3MatTriangles/3MatSum.csv", 'a')
+        CSVFile = open("/l/triton_work/3MatTriangles/3MatSum.csv", 'a')
         List = (str(round(rMin*100)), "\% " + mat[0] + " &",
                 str(round(gMin * 100)), "\% " + mat[1] + " &",
                 str(round(bMin * 100)), "\% " + mat[2] + " & \\num{", ufloat(Min, MinErr), "} \\\\")
@@ -149,7 +149,7 @@ def plotTernary(path, particle, materials, mat):
 
 
 if __name__ == "__main__":
-    Path = "/home/anton/Desktop/triton_work/3MatTriangles/Al-GradientTest/Res/"
+    Path = "/l/triton_work/3MatTriangles/Al-GradientTest/Res/"
 
     Materials = ["Aluminium", "Aluminium", "Aluminium"]
     Mat = ["Al", "Al", "Al"]

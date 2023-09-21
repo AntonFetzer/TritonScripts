@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-Path = "/home/anton/Desktop/triton_work/Gradient/2Material1-5gcm2/TEST/root/gradient-test-2e9electron.txt"
+Path = "/l/triton_work/Gradient/2Material1-5gcm2/TEST/root/gradient-test-2e9electron.txt"
 
 # Data = np.loadtxt(Path)[:99]
 Data = np.genfromtxt(Path, delimiter=',', dtype=None, encoding='ASCII')

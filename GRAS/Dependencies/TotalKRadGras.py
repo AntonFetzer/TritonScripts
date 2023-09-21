@@ -67,7 +67,7 @@ def totalkRadGras(path, particle: str):
     PartNumRequired = (MaxRelativeError/0.01)**2 * Entries[0]
     FullRunns = PartNumRequired/2e9
 
-    print("The number of particles required to achieve 1% err is:", f"{PartNumRequired:.2}", "or", int(FullRunns), "2e9 Runns")
+    print("The number of particles required to achieve 1% err is:", f"{PartNumRequired:.2}", "or", round(PartNumRequired/Entries[0], 2), " times the number of particles in the run")
 
     if MaxRelativeError > 1:
         print("ERROR !!! Tile " + str(MaxRelativeErrorTile) + " has " + str(MaxRelativeError * 100) + " % relative error!!!")
@@ -78,7 +78,7 @@ def totalkRadGras(path, particle: str):
 
 
 if __name__ == "__main__":
-    Path = "/home/anton/Desktop/triton_work/RadEx/RadEx0mm/Res/"
+    Path = "/l/triton_work/RadEx/RadEx0mm/Res/"
 
     TID = totalkRadGras(Path, "")
 

@@ -2,7 +2,7 @@ import numpy as np
 from instrument_simulation.Dependencies.ReadG4root import readG4root
 import matplotlib.pyplot as plt
 
-Path = "/home/anton/Desktop/triton_work/MULASS/MulasTrapProton2e9AlFull/root/2.root"
+Path = "/l/triton_work/MULASS/MulasTrapProton2e9AlFull/root/2.root"
 
 Data = readG4root(Path)
 #Data = readMultipleRoot(Path)

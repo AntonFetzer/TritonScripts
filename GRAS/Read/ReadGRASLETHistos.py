@@ -53,7 +53,7 @@ def readGRASLETHistos(file):
 
 
 if __name__ == "__main__":
-    file = "/home/anton/Desktop/triton_work/LET/0mm/Res/Protons1Tile_700548_108379.csv"
+    file = "/l/triton_work/LET/0mm/Res/Protons1Tile_700548_108379.csv"
 
     LETHist, EffHist = readGRASLETHistos(file)
 

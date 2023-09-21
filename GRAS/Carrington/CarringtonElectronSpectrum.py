@@ -28,7 +28,7 @@ print("Integral")
 for E in Evals:
     print(f"{E:.4}", f"{f(E):.4}")
 
-file = "/home/anton/Desktop/triton_work/Spectra/A9/spenvis_tri.txt"
+file = "/l/triton_work/Spectra/A9/spenvis_tri.txt"
 
 Protons, Electrons = readSpenvis_tri(file)
 
@@ -48,6 +48,6 @@ plt.title("Spectra Comparison")
 plt.xlabel("Kinetic energy [MeV]")
 plt.ylabel("Flux [cm-2 s-1] or [cm-2 s-1 MeV-1]")
 
-#plt.savefig("/home/anton/Desktop/triton_work/CARRINGTON/SpectrumComparison.eps", format='eps', bbox_inches="tight")
+#plt.savefig("/l/triton_work/CARRINGTON/SpectrumComparison.eps", format='eps', bbox_inches="tight")
 
 plt.show()

@@ -5,7 +5,7 @@ from natsort import natsorted
 import os
 import csv
 
-Path = "/home/anton/Desktop/triton_work/3D/AluVault/csv/"
+Path = "/l/triton_work/3D/AluVault/csv/"
 
 # Get list of all csv files in that folder
 CSVFiles = [f for f in os.listdir(Path) if f.endswith('.csv')]

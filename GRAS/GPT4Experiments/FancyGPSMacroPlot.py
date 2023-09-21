@@ -2,10 +2,10 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import LogLocator
 from GRAS.Read.ReadGPSMacro import readGPSMacro
 
-file = "/home/anton/Desktop/triton_work/Spectra/A9/AE9/AE9500keV.mac"
+file = "/l/triton_work/Spectra/A9/AE9/AE9500keV.mac"
 Electrons = readGPSMacro(file)
 
-file = "/home/anton/Desktop/triton_work/Spectra/A9/AP9/AP910MeV.mac"
+file = "/l/triton_work/Spectra/A9/AP9/AP910MeV.mac"
 Protons = readGPSMacro(file)
 
 plt.plot(Electrons[0], Electrons[1], linestyle='--', linewidth=2, label="AE-9 Electron Flux")
@@ -26,5 +26,5 @@ plt.xlabel("Kinetic energy [MeV]", fontsize=12)
 plt.ylabel("Differential Flux [cm-2 s-1 MeV-1]", fontsize=12)
 
 #plt.show()
-plt.savefig("/home/anton/Desktop/TritonPlots/Paper/Spectra.pdf", format='pdf', bbox_inches="tight")
+plt.savefig("/l/TritonPlots/Paper/Spectra.pdf", format='pdf', bbox_inches="tight")
 

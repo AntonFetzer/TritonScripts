@@ -1,6 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+AtomicMass = [1.008, 4.003, 6.941, 9.012, 10.811, 12.011, 14.007, 15.999, 18.998, 20.18, 22.99, 24.305, 26.982,
+              28.086, 30.974, 32.065, 35.453, 39.948, 39.098, 40.078, 44.956, 47.867, 50.942, 51.996, 54.938,
+              55.845, 58.933, 58.693, 63.546, 65.39, 69.723, 72.64, 74.922, 78.96, 79.904, 83.8, 85.468, 87.62,
+              88.906, 91.224, 92.906, 95.94, 98, 101.07, 102.906, 106.42, 107.868, 112.411, 114.818, 118.71, 121.76,
+              127.6, 126.905, 131.293, 132.906, 137.327, 138.906, 140.116, 140.908, 144.24, 145, 150.36, 151.964,
+              157.25, 158.925, 162.5, 164.93, 167.259, 168.934, 173.04, 174.967, 178.49, 180.948, 183.84, 186.207,
+              190.23, 192.217, 195.078, 196.967, 200.59, 204.383, 207.2, 208.98, 209, 210, 222, 223, 226, 227,
+              232.038, 231.036, 238.029]
 
 ############ SAPPHIRE Spectra are in Fluence with minimum duration 6 months !!! ###############################
 
@@ -37,15 +45,6 @@ def readSpenvis_sef(fileName):
 
     # print(Energy)
 
-    AtomicMass = [1.008, 4.003, 6.941, 9.012, 10.811, 12.011, 14.007, 15.999, 18.998, 20.18, 22.99, 24.305, 26.982,
-                  28.086, 30.974, 32.065, 35.453, 39.948, 39.098, 40.078, 44.956, 47.867, 50.942, 51.996, 54.938,
-                  55.845, 58.933, 58.693, 63.546, 65.39, 69.723, 72.64, 74.922, 78.96, 79.904, 83.8, 85.468, 87.62,
-                  88.906, 91.224, 92.906, 95.94, 98, 101.07, 102.906, 106.42, 107.868, 112.411, 114.818, 118.71, 121.76,
-                  127.6, 126.905, 131.293, 132.906, 137.327, 138.906, 140.116, 140.908, 144.24, 145, 150.36, 151.964,
-                  157.25, 158.925, 162.5, 164.93, 167.259, 168.934, 173.04, 174.967, 178.49, 180.948, 183.84, 186.207,
-                  190.23, 192.217, 195.078, 196.967, 200.59, 204.383, 207.2, 208.98, 209, 210, 222, 223, 226, 227,
-                  232.038, 231.036, 238.029]
-
     Data = np.zeros((NumSpecies, len(Iontable), 3), dtype=float)
 
     for i in range(NumSpecies):
@@ -65,7 +64,7 @@ def readSpenvis_sef(fileName):
 if __name__ == "__main__":
     ############ SAPPHIRE Spectra are in Fluence with minimum duration 6 months !!! ###############################
     ############ Check duration and normalisation of the spectrum #################################################
-    DataT = readSpenvis_sef("/home/anton/Desktop/triton_work/Spectra/Moon/SAPPHIRE/spenvis_sef.txt")
+    DataT = readSpenvis_sef("/l/triton_work/Spectra/SAPPHIRE-GTO/spenvis_sef.txt")
 
     IntorDiff = 2  # 1 for Int 2 for Diff
 
@@ -81,13 +80,16 @@ if __name__ == "__main__":
 
     #print(np.shape(DataT))
 
-    for i in range(np.shape(DataT)[0]):
-        FluxMax = np.max(DataT[i, :, IntorDiff])
-        if FluxMax > 20:
-            print(Species[i], FluxMax)
-            plt.plot(DataT[i, :, 0], DataT[i, :, IntorDiff], label=Species[i])
+    for Specie in range(np.shape(DataT)[0]):
+        FluxMaxE = np.max(DataT[Specie, :, IntorDiff] * DataT[Specie, :, 0])
+        if FluxMaxE > 15:
+            print(f"Species: {Species[Specie]}, Max Flux * Energy: {FluxMaxE}")
+            plt.plot(DataT[Specie, :, 0], DataT[Specie, :, IntorDiff], label=Species[Specie])
+            #for Energy, Flux in zip(DataT[Specie, :, 0], DataT[Specie, :, IntorDiff]):
+                #if Energy > 10:
+                    #print(f"{Energy} {Flux}")
 
-    #plt.xlim(1e-2, 1e4)
+    #plt.xlim(10, 1e5)
     #plt.ylim(1e-5, 1e6)
     plt.xscale("log")
     plt.yscale("log")
@@ -103,4 +105,4 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid(which='both')
     #plt.show()
-    plt.savefig("/home/anton/Desktop/TritonPlots/Luna/SolarFlux.svg", format='svg', bbox_inches="tight")
+    plt.savefig("/l/triton_work/Spectra/SAPPHIRE-GTO/SolarFlux.pdf", format='pdf', bbox_inches="tight")

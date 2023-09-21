@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-File = '/home/anton/Desktop/triton_work/Chess1 GNSS SEE Analysis/Stopping Powers and Ranges/StoppingPower-Ranges.csv'
+File = '/l/triton_work/Chess1 GNSS SEE Analysis/Stopping Powers and Ranges/StoppingPower-Ranges.csv'
 
 # Column names
 columns = ['Proton Energy', 'Proton LET', 'Proton Range', 'Electron Energy', 'Electron LET', 'Electron Range']
@@ -49,4 +49,4 @@ ax2.set_ylabel('Range (g/cm2)')
 fig.legend(loc="upper left", bbox_to_anchor=[0, 1], bbox_transform=ax1.transAxes)
 
 # Save the plot
-plt.savefig("/home/anton/Desktop/triton_work/Chess1 GNSS SEE Analysis/Stopping Powers and Ranges/Stopping Power and Ranges in Silicon.pdf", format='pdf', bbox_inches="tight")
+plt.savefig("/l/triton_work/Chess1 GNSS SEE Analysis/Stopping Powers and Ranges/Stopping Power and Ranges in Silicon.pdf", format='pdf', bbox_inches="tight")

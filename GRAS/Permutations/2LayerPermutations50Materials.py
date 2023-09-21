@@ -28,7 +28,7 @@ print("Number of Densities:", len(Densities))
 
 Names = Materials
 
-Path = "/home/anton/Desktop/triton_work/Permutations/2Layer50/Res/"
+Path = "/l/triton_work/Permutations/2Layer50/Res/"
 file_name = Path + "../Analysis/2Layer50-Raw.csv"
 
 Electrons = totalkRadGras(Path, "Elec")

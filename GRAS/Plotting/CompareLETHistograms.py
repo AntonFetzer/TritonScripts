@@ -6,14 +6,14 @@ import numpy as np
 
 Thick = "16mm"
 
-Paths = ["/home/anton/Desktop/triton_work/LET/Carrington/Carrington-SEP-Expected-Int-With0/" + Thick + "/Res/",
-         "/home/anton/Desktop/triton_work/LET/Carrington/Carrington-SEP-Minus2Sigma-Int-With0/" + Thick + "/Res/",
-         "/home/anton/Desktop/triton_work/LET/Carrington/Carrington-SEP-Plus2Sigma-Int-With0/" + Thick + "/Res/",
-         "/home/anton/Desktop/triton_work/LET/Carrington/SEP2003-INTEGRAL-FluxBasedOnFluenceDividedBy24h/" + Thick + "/Res/",
-         "/home/anton/Desktop/triton_work/LET/A9-GTO/AE9Mission/" + Thick + "/Res/",
-         "/home/anton/Desktop/triton_work/LET/A9-GTO/AP9Mission/" + Thick + "/Res/",
-         "/home/anton/Desktop/triton_work/LET/A9-LEO/AE9Mission/" + Thick + "/Res/",
-         "/home/anton/Desktop/triton_work/LET/A9-LEO/AP9Mission/" + Thick + "/Res/"]
+Paths = ["/l/triton_work/LET/Carrington/Carrington-SEP-Expected-Int-With0/" + Thick + "/Res/",
+         "/l/triton_work/LET/Carrington/Carrington-SEP-Minus2Sigma-Int-With0/" + Thick + "/Res/",
+         "/l/triton_work/LET/Carrington/Carrington-SEP-Plus2Sigma-Int-With0/" + Thick + "/Res/",
+         "/l/triton_work/LET/Carrington/SEP2003-INTEGRAL-FluxBasedOnFluenceDividedBy24h/" + Thick + "/Res/",
+         "/l/triton_work/LET/A9-GTO/AE9Mission/" + Thick + "/Res/",
+         "/l/triton_work/LET/A9-GTO/AP9Mission/" + Thick + "/Res/",
+         "/l/triton_work/LET/A9-LEO/AE9Mission/" + Thick + "/Res/",
+         "/l/triton_work/LET/A9-LEO/AP9Mission/" + Thick + "/Res/"]
 
 Labels = ["SEP-Expected", "Minus2Sigma", "Plus2Sigma", "SEP2003", "AE9 GTO", "AP9 GTO", "AE9 LEO", "AP9 LEO"]
 
@@ -49,7 +49,7 @@ plt.title("LET Histogram Carrington SEP vs. 16mm Aluminium")
 plt.xlabel("LET [MeV/cm]")
 plt.ylabel("Number of entries per LET bin")
 plt.legend()
-plt.savefig("/home/anton/Desktop/triton_work/LET/Plots/LETentries.pdf", format='pdf', bbox_inches="tight")
+plt.savefig("/l/triton_work/LET/Plots/LETentries.pdf", format='pdf', bbox_inches="tight")
 '''
 plt.figure(1)
 for i in range(Num):
@@ -68,8 +68,8 @@ plt.title("LET Histogram Carrington SEP vs. " + Thick +" Aluminium")
 plt.xlabel("LET [MeV/cm]")
 plt.ylabel("Rate per LET bin [s-1]")
 plt.legend()
-# plt.savefig("/home/anton/Desktop/triton_work/LET/Plots/LETvalues.pdf", format='pdf', bbox_inches="tight")
-# plt.savefig("/home/anton/Desktop/TritonPlots/Luna/LETHistogramComparison.svg", format='svg', bbox_inches="tight")
+# plt.savefig("/l/triton_work/LET/Plots/LETvalues.pdf", format='pdf', bbox_inches="tight")
+# plt.savefig("/l/TritonPlots/Luna/LETHistogramComparison.svg", format='svg', bbox_inches="tight")
 '''
 NumberEntriesEffHist = sum(EffHist[0][:, entriesID])
 
@@ -84,7 +84,7 @@ plt.title("EffLET Histogram by entries")
 plt.xlabel("EffLET [MeV/cm]")
 plt.ylabel("Number of entries per EffLET bin")
 plt.legend()
-#plt.savefig("/home/anton/Desktop/triton_work/LET/EFFentries.eps", format='eps', bbox_inches="tight")
+#plt.savefig("/l/triton_work/LET/EFFentries.eps", format='eps', bbox_inches="tight")
 
 plt.figure(3)
 for i in range(Num):
@@ -97,6 +97,6 @@ plt.title("EffLET Histogram by values")
 plt.xlabel("EffLET [MeV/cm]")
 plt.ylabel("Rate per LET bin [s-1]")
 plt.legend()
-#plt.savefig("/home/anton/Desktop/triton_work/LET/EFFvalues.eps", format='eps', bbox_inches="tight")
+#plt.savefig("/l/triton_work/LET/EFFvalues.eps", format='eps', bbox_inches="tight")
 '''
 plt.show()

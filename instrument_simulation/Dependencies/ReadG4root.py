@@ -31,7 +31,7 @@ def readG4root(fileName):
 
 if __name__ == "__main__":
     DataTest = readG4root(
-        "/home/anton/Desktop/triton_work/TEST/SiChip in 1cm cube for Spenvis Test/root/electrons500kev1mm2SiChip.root")
+        "/l/triton_work/TEST/SiChip in 1cm cube for Spenvis Test/root/electrons500kev1mm2SiChip.root")
     print(type(DataTest))
     print(type(DataTest[0][0]))
     plt.hist(DataTest[0], bins=1000)

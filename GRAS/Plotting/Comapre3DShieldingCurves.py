@@ -5,7 +5,7 @@ import os
 from natsort import natsorted
 from GRAS.Dependencies.TotalKRadGras import totalkRadGras
 
-Path = "/home/anton/Desktop/triton_work/ShieldingCurves/Carrington/32mm/Res/"
+Path = "/l/triton_work/ShieldingCurves/Carrington/32mm/Res/"
 
 Data = totalkRadGras(Path, "Elec")
 
@@ -29,7 +29,7 @@ plt.plot(x, CriticalDose, '--', color='k', linewidth=2, label='100 krad')
 
 ######################  3D data  ##################################
 
-Path = "/home/anton/Desktop/triton_work/1U/"
+Path = "/l/triton_work/1U/"
 
 Folders = [f for f in os.listdir(Path) if f.endswith('mm')]
 Folders = natsorted(Folders)
@@ -67,6 +67,6 @@ plt.title("Carrington Total Electron Fluence\nTotal Dose deposited behind planar
 plt.xlabel("Aluminium Shielding Thickness [mm]")
 plt.ylabel("Ionising Dose [krad]")
 plt.legend()
-plt.savefig("/home/anton/Desktop/TritonPlots/Carrington/CarringtonShieldingCurveWith3D.eps", format='eps', bbox_inches="tight")
+plt.savefig("/l/TritonPlots/Carrington/CarringtonShieldingCurveWith3D.eps", format='eps', bbox_inches="tight")
 
 #plt.show()

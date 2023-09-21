@@ -10,7 +10,7 @@ import sys
 
 # ---------------------- Dont Modify -------- Dont break compatability -----------------------
 
-# Path = "/home/anton/Desktop/triton_work/MulasTest2/"
+# Path = "/l/triton_work/MulasTest2/"
 # Folder = "ProtonsFull"
 
 Path = "/scratch/work/fetzera1/MulasTest2/"

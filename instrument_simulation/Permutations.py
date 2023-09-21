@@ -1,7 +1,7 @@
 import numpy as np
 from Dependencies.MeVtokRad_2D import MeVtokRad_2D
 
-Path = "/home/anton/Desktop/triton_work/Permutations/5Layer1-5gcm2/Materials3/"
+Path = "/l/triton_work/Permutations/5Layer1-5gcm2/Materials3/"
 
 ElecFile = "5layer3-2e9electron.txt"
 ProtFile = "5layer3-2e7proton.txt"

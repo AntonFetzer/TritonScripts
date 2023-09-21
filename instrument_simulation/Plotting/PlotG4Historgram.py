@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from instrument_simulation.Dependencies.ReadMultipleRoot import readMultipleRoot
 
-File = "/home/anton/Desktop/triton_work/3D/MultiChipTest/TestWithoutShield/root/block-2e9protons10mev.root"
+File = "/l/triton_work/3D/MultiChipTest/TestWithoutShield/root/block-2e9protons10mev.root"
 
 Data = readMultipleRoot(File)
 # Data[8] = Gun_energy_MeV

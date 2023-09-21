@@ -84,7 +84,7 @@ def totalkRadGrasSingle(path, particle: str):
 
 
 if __name__ == "__main__":
-    Path = "/home/anton/Desktop/triton_work/RadEx/RadEx6mm/Res/"
+    Path = "/l/triton_work/RadEx/RadEx6mm/Res/"
 
     Results = totalkRadGrasSingle(Path, "Prot")
 

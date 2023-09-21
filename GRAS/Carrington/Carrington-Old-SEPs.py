@@ -40,7 +40,7 @@ plt.yscale("log")
 plt.xscale("log")
 plt.grid(which='both')
 
-path = "/home/anton/Desktop/triton_work/CARRINGTON/HistogramSEP/Res/"
+path = "/l/triton_work/CARRINGTON/HistogramSEP/Res/"
 DoseHist, PrimaryHist = totalGRASHistos(path, "Prot")
 lowerID = 0
 upperID = 1
@@ -59,7 +59,7 @@ AE9DiffTEST = DiffSpec(AP9Ener, AP9Int)
 DiffF = DiffSpec(NewEner, NewIntF)
 #plt.plot(NewEner, DiffF, label="Differential Fluence")
 plt.legend()
-plt.savefig("/home/anton/Desktop/triton_work/Spectra/Carrington/SEPIntegralSpectrumPythonFix.eps", format='eps', bbox_inches="tight")
+plt.savefig("/l/triton_work/Spectra/Carrington/SEPIntegralSpectrumPythonFix.eps", format='eps', bbox_inches="tight")
 #plt.show()
 
 '''
@@ -75,6 +75,6 @@ for f in Fit:
 
 plt.plot(Ener, Fit, label="Fit")
 
-plt.savefig("/home/anton/Desktop/triton_work/Spectra/Carrington/SEPIntegralSpectrumPython.eps", format='eps', bbox_inches="tight")
+plt.savefig("/l/triton_work/Spectra/Carrington/SEPIntegralSpectrumPython.eps", format='eps', bbox_inches="tight")
 plt.show()
 '''

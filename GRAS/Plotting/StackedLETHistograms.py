@@ -10,7 +10,7 @@ absolute_path = os.path.abspath(__file__)
 print("Full path: " + absolute_path)
 print("Directory Path: " + os.path.dirname(absolute_path))
 
-Path = "/home/anton/Desktop/triton_work/LET/A9-LEO/AP9Mission/"
+Path = "/l/triton_work/LET/A9-LEO/AP9Mission/"
 Title = "AP9Mission LEO"
 
 lowerID = 0

@@ -17,7 +17,7 @@ print("Number of Names:", len(Materials))
 #for x in Densities:
 #    print(x)
 
-Path = "/home/anton/Desktop/triton_work/Permutations/3Layer/Res/"
+Path = "/l/triton_work/Permutations/3Layer/Res/"
 file_name = Path + "../Analysis/3Layer-Raw.csv"
 
 Electrons = totalkRadGras(Path, "Elec")

@@ -7,7 +7,7 @@ Materials = ["Al-7075", "G4_POLYETHYLENE", "G4_W", "FR4"]
 
 print("Number of Names:", len(Materials))
 
-Path = "/home/anton/Desktop/triton_work/Permutations/5Layer/Res/"
+Path = "/l/triton_work/Permutations/5Layer/Res/"
 file_name = Path + "../Analysis/5Layer-Raw.csv"
 
 Electrons = totalkRadGras(Path, "Elec")

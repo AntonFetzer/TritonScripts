@@ -5,7 +5,7 @@ from Dependencies.MeVtokRad_3D import MeVtokRad_3D
 from Dependencies.ReadMultipleRoot import readMultipleRoot
 
 # Path = "/scratch/work/fetzera1/3D/AluVault/root/Cosmic/"
-Path = "/home/anton/Desktop/triton_work/6U/NoShield/Full/"
+Path = "/l/triton_work/6U/NoShield/Full/"
 SiChipLen = 0.8  # cm --------------------------------------------------------------------------------------------------
 Radius = 21  # cm     --------------------------------------------------------------------------------------------------
 

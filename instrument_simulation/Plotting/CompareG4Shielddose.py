@@ -6,7 +6,7 @@ from natsort import natsorted
 import os
 import csv
 
-Path = "/home/anton/Desktop/TritonOffline/MulasTest2/"
+Path = "/l/TritonOffline/MulasTest2/"
 
 #
 Npart = 2e9

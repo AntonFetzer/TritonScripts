@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from instrument_simulation.Dependencies.MeVtokRad_2D import MeVtokRad_2D
 import nmmn.plots
 
-Path = "/home/anton/Desktop/triton_work/Gradient/3Material2-5gcm2/Pe-Pb-W/csv/"
+Path = "/l/triton_work/Gradient/3Material2-5gcm2/Pe-Pb-W/csv/"
 
 MatA = "Polyethylene"
 MatB = "Lead"

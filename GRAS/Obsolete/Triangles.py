@@ -4,7 +4,7 @@ import numpy as np
 from GRAS.Dependencies.TotalKRadGras import totalkRadGras
 from matplotlib import cm
 
-Path = "/home/anton/Desktop/triton_work/3MatTriangles/DONE/PE-Al-Pb/Res/"
+Path = "/l/triton_work/3MatTriangles/DONE/PE-Al-Pb/Res/"
 
 #Electrons = totalkRadGras(Path, "Elec")
 Protons = totalkRadGras(Path, "Prot")

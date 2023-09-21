@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from GRAS.Dependencies.TotalKRadGras import totalkRadGras
 
-Path = "/home/anton/Desktop/triton_work/2LayerOptimisation"
+Path = "/l/triton_work/2LayerOptimisation"
 ShieldingDepth = "1.5"  # g/cm2
 
 MatA = "Polyethylene"

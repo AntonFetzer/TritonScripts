@@ -4,7 +4,6 @@ import csv
 
 
 def readGPSMacro(file):
-
     Energy = []
     DiffFlux = []
     ReadFlag = 0
@@ -13,44 +12,42 @@ def readGPSMacro(file):
     with open(file, 'r') as f:
         reader = csv.reader(f)
         for line in reader:
-            #print(line)
+            # print(line)
             if ReadFlag == 0:
                 if '/gps/hist/type arb' in line:
                     ReadFlag = 1
-                    #print(line)
+                    # print(line)
             elif ReadFlag == 1:
-                if '/gps/hist/inter Log' in line:
+                if "/gps/hist/inter " in line[0]:
                     ReadFlag = 2
-                    #print(line)
+                    # print(line)
                 else:
                     Text = line[0]
                     Text = Text.split()
-                    #print(float(Text[1]), float(Text[2]))
+                    # print(float(Text[1]), float(Text[2]))
                     Energy.append(float(Text[1]))
                     DiffFlux.append(float(Text[2]))
 
     return np.asarray([Energy, DiffFlux])
 
 
-
 if __name__ == "__main__":
+    file1 = "/l/triton_work/Spectra/ISO-GTO/ISO-GTO-Fe-mission.mac"
+    Data1 = readGPSMacro(file1)
 
-    file = "/home/anton/Desktop/triton_work/Spectra/A9/AE9/AE9500keV.mac"
-    Electrons = readGPSMacro(file)
+    file2 = "/l/triton_work/Spectra/ISO-GTO/ISO-GTO-Fe.mac"
+    Data2 = readGPSMacro(file2)
 
-    file = "/home/anton/Desktop/triton_work/Spectra/A9/AP9/AP910MeV.mac"
-    Protons = readGPSMacro(file)
-
-    plt.plot(Electrons[0], Electrons[1], label="AE-9 Electron Flux")
-    plt.plot(Protons[0], Protons[1], label="AP-9 Proton Flux")
+    plt.plot(Data1[0], Data1[1], label="ISO-GTO-Fe-mission")
+    plt.plot(Data2[0], Data2[1], label="ISO-GTO-Fe", linestyle="--")
 
     plt.yscale("log")
     plt.xscale("log")
     plt.grid(which="both")
     plt.legend()
-    plt.title("Differential AP-9 and AE-9 spectra on GTO")
+    plt.title("Differential particle flux")
     plt.xlabel("Kinetic energy [MeV]")
     plt.ylabel("Differential Flux [cm-2 s-1 MeV-1]")
 
-    #plt.show()
-    plt.savefig("/home/anton/Desktop/TritonPlots/Paper/SpectraBasic.pdf", format='pdf', bbox_inches="tight")
+    plt.show()
+    # plt.savefig("/l/triton_work/Spectra/ISO-GTO/MacroComparison.pdf", format='pdf', bbox_inches="tight")

@@ -59,6 +59,6 @@ plt.title("Spectra Comparison")
 plt.xlabel("Kinetic energy [MeV]")
 plt.ylabel("Fluence per Day [cm-2]")
 
-plt.savefig("/home/anton/Desktop/TritonPlots/Carrington/SpectrumComparison.svg", format='svg', bbox_inches="tight")
+plt.savefig("/l/TritonPlots/Carrington/SpectrumComparison.svg", format='svg', bbox_inches="tight")
 
 #plt.show()

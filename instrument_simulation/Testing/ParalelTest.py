@@ -12,7 +12,7 @@ executor = uproot.ThreadPoolExecutor(num_workers=os.cpu_count())  # threads
 
 print("Number of Threads", os.cpu_count())
 
-Path = "/home/anton/Desktop/RootScripts/root/"
+Path = "/l/RootScripts/root/"
 # Path = "/scratch/work/fetzera1/Gradient/4MaterialGradient/Al-Pe-Al/root/"
 
 # Files = [f for f in os.listdir(Path) if f.endswith('.root')]

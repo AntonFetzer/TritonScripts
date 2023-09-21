@@ -2,7 +2,7 @@ import pandas as pd
 import re
 
 # Read the file into a list of lines
-with open('/home/anton/Desktop/triton_work/LunarRadiaitonAnalysis/LunarGCR-NarrowHist/0mm/Res/Protons_3842_594.csv', 'r') as file:
+with open('/l/triton_work/LunarRadiaitonAnalysis/LunarGCR-NarrowHist/0mm/Res/Protons_3842_594.csv', 'r') as file:
     lines = file.readlines()
 
 # Initialize the data list

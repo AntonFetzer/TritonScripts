@@ -5,7 +5,7 @@ from natsort import natsorted
 import numpy as np
 from GRAS.GPT4Experiments.MergeBins import merge_bins
 
-Path = "/home/anton/Desktop/triton_work/LunarBackscatter/LunarGCR-WideHist/"
+Path = "/l/triton_work/LunarBackscatter/LunarGCR-WideHist/"
 MergeBinns = 1
 
 lowerID = 0

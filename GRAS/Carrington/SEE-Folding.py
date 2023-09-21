@@ -21,14 +21,14 @@ ThickList = ["0mm", "1mm", "2mm", "4mm", "8mm", "16mm", ]
 
 for Thick in ThickList:
 
-    Paths = ["/home/anton/Desktop/triton_work/LET/Carrington/Carrington-SEP-Plus2Sigma-Int-With0/" + Thick + "/Res/",
-             "/home/anton/Desktop/triton_work/LET/Carrington/Carrington-SEP-Expected-Int-With0/" + Thick + "/Res/",
-             "/home/anton/Desktop/triton_work/LET/Carrington/Carrington-SEP-Minus2Sigma-Int-With0/" + Thick + "/Res/",
-             "/home/anton/Desktop/triton_work/LET/Carrington/SEP2003-INTEGRAL-FluxBasedOnFluenceDividedBy24h/" + Thick + "/Res/",
-             "/home/anton/Desktop/triton_work/LET/A9-GTO/AE9Mission/" + Thick + "/Res/",
-             "/home/anton/Desktop/triton_work/LET/A9-GTO/AP9Mission/" + Thick + "/Res/",
-             "/home/anton/Desktop/triton_work/LET/A9-LEO/AE9Mission/" + Thick + "/Res/",
-             "/home/anton/Desktop/triton_work/LET/A9-LEO/AP9Mission/" + Thick + "/Res/"]
+    Paths = ["/l/triton_work/LET/Carrington/Carrington-SEP-Plus2Sigma-Int-With0/" + Thick + "/Res/",
+             "/l/triton_work/LET/Carrington/Carrington-SEP-Expected-Int-With0/" + Thick + "/Res/",
+             "/l/triton_work/LET/Carrington/Carrington-SEP-Minus2Sigma-Int-With0/" + Thick + "/Res/",
+             "/l/triton_work/LET/Carrington/SEP2003-INTEGRAL-FluxBasedOnFluenceDividedBy24h/" + Thick + "/Res/",
+             "/l/triton_work/LET/A9-GTO/AE9Mission/" + Thick + "/Res/",
+             "/l/triton_work/LET/A9-GTO/AP9Mission/" + Thick + "/Res/",
+             "/l/triton_work/LET/A9-LEO/AE9Mission/" + Thick + "/Res/",
+             "/l/triton_work/LET/A9-LEO/AP9Mission/" + Thick + "/Res/"]
 
     DataName = ["Carrington SEP +2 Sigma",
             "Carrington SEP EVT",
@@ -123,7 +123,7 @@ for Thick in ThickList:
         plt.yscale("log")
         ax2.tick_params(axis='y', colors='C1')
         
-        plt.savefig("/home/anton/Desktop/TritonPlots/Carrington/SEE/LET-Rate" + DataName[P] + " " + CrossectionName + ".pdf", format='pdf',
+        plt.savefig("/l/TritonPlots/Carrington/SEE/LET-Rate" + DataName[P] + " " + CrossectionName + ".pdf", format='pdf',
                     bbox_inches="tight")
 
 
@@ -171,11 +171,11 @@ for Thick in ThickList:
         ax2.tick_params(axis='y', colors='C1')
 
         plt.savefig(
-            "/home/anton/Desktop/TritonPlots/Luna/SEE/SEE-Rate" + DataName[P] + Thick + CrossectionName + ".svg",
+            "/l/TritonPlots/Luna/SEE/SEE-Rate" + DataName[P] + Thick + CrossectionName + ".svg",
             format='svg', bbox_inches="tight")
 
 
-        CSVFile = open("/home/anton/Desktop/TritonPlots/Luna/SEE/SEERates.csv", 'a')
+        CSVFile = open("/l/TritonPlots/Luna/SEE/SEERates.csv", 'a')
         List = (DataName[P], Thick, CrossectionName, SEERate, SEERateError)
 
         String = ', '.join(map(str, List))

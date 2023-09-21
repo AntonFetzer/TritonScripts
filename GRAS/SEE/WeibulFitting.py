@@ -41,9 +41,9 @@ plt.grid('both')
 plt.legend()
 
 if HardSoft == 0:
-    plt.savefig("/home/anton/Desktop/triton_work/Chess1 GNSS SEE Analysis/Fits/Soft Resets.pdf", format='pdf', bbox_inches="tight")
+    plt.savefig("/l/triton_work/Chess1 GNSS SEE Analysis/Fits/Soft Resets.pdf", format='pdf', bbox_inches="tight")
 elif HardSoft == 1:
-    plt.savefig("/home/anton/Desktop/triton_work/Chess1 GNSS SEE Analysis/Fits/Hard Resets.pdf", format='pdf', bbox_inches="tight")
+    plt.savefig("/l/triton_work/Chess1 GNSS SEE Analysis/Fits/Hard Resets.pdf", format='pdf', bbox_inches="tight")
 
 
 #plt.show()

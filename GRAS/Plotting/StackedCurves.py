@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from GRAS.Dependencies.TotalKRadGras import totalkRadGras
 from scipy import signal
 
-Path = "/home/anton/Desktop/triton_work/2LayerStackedCurves/"
+Path = "/l/triton_work/2LayerStackedCurves/"
 Shield = "PE-Pb"
 DepthsStr = ["-02", "-04", "-08", "-16", "-32"]
 #DepthsStr = ["-02", "-04"]

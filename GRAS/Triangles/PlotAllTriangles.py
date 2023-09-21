@@ -9,7 +9,7 @@ from uncertainties import ufloat
 from csv import writer
 from GRAS.Triangles.TernaryPlot import plotTernary
 
-Path = "/home/anton/Desktop/triton_work/3MatTriangles/DONE/"
+Path = "/l/triton_work/3MatTriangles/DONE/"
 
 Folders = [f for f in os.listdir(Path) if "-" in f]
 

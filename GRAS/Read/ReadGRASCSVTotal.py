@@ -41,7 +41,7 @@ def readGrasCsvTotal(file):
 
 
 if __name__ == "__main__":
-    path = "/home/anton/Desktop/triton_work/RadEx/RadEx1mm/Res/"
+    path = "/l/triton_work/RadEx/RadEx1mm/Res/"
     #particle = "Elec"
     particle = "Prot"
 

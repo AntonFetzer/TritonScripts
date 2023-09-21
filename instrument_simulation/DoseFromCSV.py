@@ -12,7 +12,7 @@ NORM_FACTOR_SPECTRUM = 2.024537E+07
 Npart = 1e8
 # ------------------------------------------------------------
 
-Path = "/home/anton/Desktop/triton_work/MULASS/"
+Path = "/l/triton_work/MULASS/"
 
 # Get list of all CSV files in that folder
 CSVFiles = [f for f in os.listdir(Path + Folder + "/CSV/") if f.endswith('.csv')]

@@ -80,5 +80,5 @@ plt.xlabel("Time since start of Carrington Event [days]")
 plt.ylabel("Ionising Dose [krad]")
 plt.legend(loc='upper right')
 
-plt.savefig("/home/anton/Desktop/TritonPlots/CarringtonTimeDep3D.eps", format='eps', bbox_inches="tight")
+plt.savefig("/l/TritonPlots/CarringtonTimeDep3D.eps", format='eps', bbox_inches="tight")
 #plt.show()

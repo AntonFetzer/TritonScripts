@@ -5,7 +5,7 @@ import pandas as pd
 
 plt.rc('axes', axisbelow=True)
 
-df = pd.read_csv('/home/anton/Desktop/TritonPlots/Luna/SEE/SEERates.csv')
+df = pd.read_csv('/l/TritonPlots/Luna/SEE/SEERates.csv')
 CorrectableOrNot = 0  # 0 for correctable 1 for uncorrectable
 
 DataNames = [  # "Carrington SEP +2 Sigma",
@@ -59,7 +59,7 @@ plt.ylabel("Single Bit Upset Rate [s-1 bit-1]")
 plt.legend()
 
 if CorrectableOrNot == 0:
-    plt.savefig("/home/anton/Desktop/TritonPlots/Luna/CorrectableSEERate.svg", format='svg', bbox_inches="tight")  # Correctable
+    plt.savefig("/l/TritonPlots/Luna/CorrectableSEERate.svg", format='svg', bbox_inches="tight")  # Correctable
 elif CorrectableOrNot == 1:
-    plt.savefig("/home/anton/Desktop/TritonPlots/Luna/UncorrectableSEERate.svg", format='svg', bbox_inches="tight")
+    plt.savefig("/l/TritonPlots/Luna/UncorrectableSEERate.svg", format='svg', bbox_inches="tight")
 

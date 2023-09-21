@@ -5,7 +5,6 @@ import sys
 import os
 
 def totalGRASHistos(path, particle: str):
-
     print("")
     print("Reading in all", particle, "files in folder:", path)
 
@@ -18,123 +17,120 @@ def totalGRASHistos(path, particle: str):
     if not Files:
         sys.exit("ERROR !!! No files found")
 
-    RawData = []
+    # Initialize Data dictionary with the first file
+    DoseData, PrimaryData = readGRASHistos(path + Files[0])
 
-    for File in Files:
-        RawData.append(readGRASHistos(path + File))
+    TotalDoseEntries = DoseData['entries'].copy()
+    TotalPrimaryEntries = PrimaryData['entries'].copy()
 
-    #print("RawDataShape", np.shape(RawData))
-    # ( File# , Dose or Primary , Bin#, Var# )
+    # Start from the second file
+    for File in Files[1:]:
+        DoseFileData, PrimaryFileData = readGRASHistos(path + File)
 
-    Data = RawData[0]
+        # Check that the bins for DoseHist align
+        if not np.allclose(DoseData['lower'], DoseFileData['lower']) or \
+           not np.allclose(DoseData['upper'], DoseFileData['upper']):
+            print("CANNOT ADD HISTOGRAMS Lower or Upper missmatch for DoseHist")
+            return None, None
 
-                    #   Dose            Primary
-    lowerID = 0     #   rad/s           MeV
-    upperID = 1     #   rad/s           MeV
-    meanID = 2      #   rad/s           MeV
-    valueID = 3     #   counts/cm2      rad/s
-    errorID = 4     #   counts/cm2      rad/s
-    entriesID = 5   #   Num             Num
+        # Check that the bins for PrimaryHist align
+        if not np.allclose(PrimaryData['lower'], PrimaryFileData['lower']) or \
+           not np.allclose(PrimaryData['upper'], PrimaryFileData['upper']):
+            print("CANNOT ADD HISTOGRAMS Lower or Upper missmatch for PrimaryHist")
+            return None, None
 
-    for f, file in enumerate(RawData):
-        if f == 0:
-            continue
-        for h, hist in enumerate(file):
-            for b, Bin in enumerate(hist):
-                if Data[h][b][lowerID] != Bin[lowerID]:
-                    print("CANNOT ADD HISTOGRAMS Lower missmatch")
-                    print("Data", Data[h][b][lowerID], "Bin", Bin[lowerID])
-                    Data = 0
-                    break
-                if Data[h][b][upperID] != Bin[upperID]:
-                    print("CANNOT ADD HISTOGRAMS Upper missmatch")
-                    Data = 0
-                    break
+        # Update mean with weighted average
+        DoseData['mean'] = (DoseData['mean'] * DoseData['entries'] + DoseFileData['mean'] * DoseFileData['entries']) / \
+                           (DoseData['entries'] + DoseFileData['entries'])
+        PrimaryData['mean'] = (PrimaryData['mean'] * PrimaryData['entries'] + PrimaryFileData['mean'] * PrimaryFileData['entries']) / \
+                              (PrimaryData['entries'] + PrimaryFileData['entries'])
 
-                Data[h][b][valueID] += Bin[valueID]
-                Data[h][b][errorID] += Bin[errorID]
-                Data[h][b][entriesID] += Bin[entriesID]
+        # Update error using error propagation rule
+        DoseData['error'] = np.sqrt(DoseData['error']**2 + DoseFileData['error']**2)
+        PrimaryData['error'] = np.sqrt(PrimaryData['error']**2 + PrimaryFileData['error']**2)
 
-    DoseHist, PrimaryHist = Data
+        # Weighted addition for 'value' data
+        DoseData['value'] = DoseData['value'] * DoseData['entries'] + DoseFileData['value'] * DoseFileData['entries']
+        PrimaryData['value'] = PrimaryData['value'] * PrimaryData['entries'] + PrimaryFileData['value'] * PrimaryFileData['entries']
 
-    PrimaryHist[:, 3] = PrimaryHist[:, 3] / NumFiles
-    PrimaryHist[:, 4] = PrimaryHist[:, 4] / NumFiles
+        # Add the entries for DoseHist and PrimaryHist
+        DoseData['entries'] += DoseFileData['entries']
+        PrimaryData['entries'] += PrimaryFileData['entries']
 
-    DoseHist[:, 3] = DoseHist[:, 3] / NumFiles
-    DoseHist[:, 4] = DoseHist[:, 4] / NumFiles
+        # Update total entries
+        TotalDoseEntries += DoseFileData['entries']
+        TotalPrimaryEntries += PrimaryFileData['entries']
 
-    return Data
+    # At the end, perform division for 'value' and 'error' using total entries
+    DoseData['value'] /= TotalDoseEntries
+    PrimaryData['value'] /= TotalPrimaryEntries
+    DoseData['error'] /= np.sqrt(TotalDoseEntries)
+    PrimaryData['error'] /= np.sqrt(TotalPrimaryEntries)
+
+    return DoseData, PrimaryData
+
+
 
 
 
 if __name__ == "__main__":
 
     # Only works if all input files have the same number of particles!!!!!
-    path = "/home/anton/Desktop/triton_work/LunarRadiaitonAnalysis/LunarSEP/0mm/Res/"
+    path = "/l/triton_work/Histograms/AE9500keV/Res/"
     DoseHist, PrimaryHist = totalGRASHistos(path, "")
 
-    print("DoseHist Shape", np.shape(DoseHist))
-    print("PrimaryHist Shape", np.shape(PrimaryHist))
-
-    lowerID = 0
-    upperID = 1
-    meanID = 2
-    valueID = 3
-    errorID = 4
-    entriesID = 5
-    '''
     ####    Dose hist Entries #######
-    NumberEntries = sum(DoseHist[:, entriesID])
-    DoseEntries = sum(DoseHist[:, meanID] * DoseHist[:, entriesID])
+    NumberEntries = np.sum(DoseHist['entries'])
+    DoseEntries = np.sum(DoseHist['mean'] * DoseHist['entries'])
 
     plt.figure(0)
-    plt.bar(DoseHist[:, lowerID], DoseHist[:, entriesID], width=DoseHist[:, upperID] - DoseHist[:, lowerID], align='edge')
+    plt.bar(DoseHist['lower'], DoseHist['entries'], width=DoseHist['upper'] - DoseHist['lower'], align='edge')
     plt.yscale("log")
     plt.xscale("log")
     plt.grid()
-    plt.title("Dose Entries Histogram\n" + f"{NumberEntries:.2}" + " entries " + f"{DoseEntries:.2}" + " krad total dose ?!?")
+    plt.title(
+        "Dose Entries Histogram\n" + f"{NumberEntries:.2}" + " entries " + f"{DoseEntries:.2}" + " krad total dose ?!?")
     plt.xlabel("Dose [krad per Month]")
     plt.ylabel("Number of entries per dose bin")
-    plt.savefig(path + "../Plot/DoseHistEntries.pdf", format='pdf', bbox_inches="tight")
 
     ####    Dose hist Values #######
-    SumValues = sum(DoseHist[:, valueID])
-    DoseValues = sum(DoseHist[:, meanID] * DoseHist[:, valueID])
+    SumValues = np.sum(DoseHist['value'])
+    DoseValues = np.sum(DoseHist['mean'] * DoseHist['value'])
 
     plt.figure(1)
-    plt.bar(DoseHist[:, lowerID], DoseHist[:, valueID], width=DoseHist[:, upperID] - DoseHist[:, lowerID], align='edge')
+    plt.bar(DoseHist['lower'], DoseHist['value'], width=DoseHist['upper'] - DoseHist['lower'], align='edge')
     plt.yscale("log")
     plt.xscale("log")
     plt.grid()
-    plt.title("Dose Values Histogram\n" + f"{SumValues:.2}" + " SumValues " + f"{DoseValues:.2}" + " krad total dose ?!?")
+    plt.title(
+        "Dose Values Histogram\n" + f"{SumValues:.2}" + " SumValues " + f"{DoseValues:.2}" + " krad total dose ?!?")
     plt.xlabel("Dose [krad per Month] ?")
     plt.ylabel("Number of entries per dose bin")
-    plt.savefig(path + "../Plot/DoseHistValues.pdf", format='pdf', bbox_inches="tight")
-    '''
+
     ####    Primary hist Entries #######
-    NumberEntries = sum(PrimaryHist[:, entriesID])
+    NumberEntries = np.sum(PrimaryHist['entries'])
 
     plt.figure(2)
-    plt.bar(PrimaryHist[:, lowerID], PrimaryHist[:, entriesID], width=PrimaryHist[:, upperID] - PrimaryHist[:, lowerID], align='edge')
+    plt.bar(PrimaryHist['lower'], PrimaryHist['entries'], width=PrimaryHist['upper'] - PrimaryHist['lower'],
+            align='edge')
     plt.yscale("log")
     plt.xscale("log")
     plt.grid()
     plt.title("Entries VS primary kinetic energy\n" + f"{NumberEntries:.2}" + " total Entries")
     plt.xlabel("Kinetic energy [MeV]")
     plt.ylabel("Number of entries")
-    plt.savefig(path + "../Plot/PrimaryHistEntries.pdf", format='pdf', bbox_inches="tight")
 
     ####    Primary hist Values #######
-    TotalDose = sum(PrimaryHist[:, valueID])
+    TotalDose = np.sum(PrimaryHist['value'])
 
     plt.figure(3)
-    plt.bar(PrimaryHist[:, lowerID], PrimaryHist[:, valueID], width=PrimaryHist[:, upperID] - PrimaryHist[:, lowerID], align='edge')
+    plt.bar(PrimaryHist['lower'], PrimaryHist['value'], width=PrimaryHist['upper'] - PrimaryHist['lower'], align='edge')
     plt.yscale("log")
     plt.xscale("log")
     plt.grid()
-    plt.title("Dose deposited VS primary kinetic energy\n" + f"{NumberEntries:.2}" + " total Entries " + f"{TotalDose:.2}" + " krad total dose")
+    plt.title(
+        "Dose deposited VS primary kinetic energy\n" + f"{NumberEntries:.2}" + " total Entries " + f"{TotalDose:.2}" + " krad total dose")
     plt.xlabel("Kinetic energy [MeV]")
     plt.ylabel("Dose [krad per Month]")
-    plt.savefig(path + "../Plot/PrimaryHistValues.pdf", format='pdf', bbox_inches="tight")
 
-    #plt.show()
+    plt.show()

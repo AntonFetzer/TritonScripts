@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 
-file_name = "/home/anton/Desktop/triton_work/Permutations/2Layer50/Analysis/2Layer50-Raw.csv"
+file_name = "/l/triton_work/Permutations/2Layer50/Analysis/2Layer50-Raw.csv"
 
 # Read the CSV file and create a dataframe
 dataframe = pd.read_csv(file_name)

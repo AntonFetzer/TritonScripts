@@ -35,7 +35,7 @@ def simpleFilter(data, window_size=5):
 
 
 if __name__ == "__main__":
-    path = "/home/anton/Desktop/triton_work/2LayerStackedCurves/PE-Pb-32/Res/"
+    path = "/l/triton_work/2LayerStackedCurves/PE-Pb-32/Res/"
 
     # Data = readGrasCsv(path)
     Data = totalkRadGras(path, "Elec")

@@ -75,7 +75,7 @@ def totalGRASLETHistos(path, particle: str):
 if __name__ == "__main__":
 
     # Only works if all input files have the same number of particle!!!!!
-    path = "/home/anton/Desktop/triton_work/LET/Chess1-Proton-Mission-AP8/0mm/Res/"
+    path = "/l/triton_work/LET/Chess1-Proton-Mission-AP8/0mm/Res/"
 
     LETHist, EffHist = totalGRASLETHistos(path, "")
 

@@ -45,7 +45,7 @@ def readSpenvis_tri(file):
 
 if __name__ == "__main__":
 
-    file = "/home/anton/Desktop/triton_work/SuperGTO/spenvis_tri.txt"
+    file = "/l/triton_work/SuperGTO/spenvis_tri.txt"
 
     Protons, Electrons = readSpenvis_tri(file)
 

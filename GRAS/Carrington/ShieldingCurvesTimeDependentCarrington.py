@@ -2,7 +2,7 @@ from GRAS.Dependencies.TotalKRadGras import totalkRadGras
 import numpy as np
 import matplotlib.pyplot as plt
 
-Path = "/home/anton/Desktop/triton_work/ShieldingCurves/Carrington/Res/"
+Path = "/l/triton_work/ShieldingCurves/Carrington/Res/"
 
 Data = totalkRadGras(Path, "Elec")
 
@@ -36,6 +36,6 @@ plt.title("Carrington Electron Spectrum\nDose deposited behind planar aluminium 
 plt.xlabel("Aluminium Shielding Thickness [mm]")
 plt.ylabel("Ionising Dose [krad]")
 plt.legend()
-#plt.savefig("/home/anton/Desktop/TritonPlots/CarringtonShieldingCurveTlin.eps", format='eps', bbox_inches="tight")
+#plt.savefig("/l/TritonPlots/CarringtonShieldingCurveTlin.eps", format='eps', bbox_inches="tight")
 
 plt.show()

@@ -4,7 +4,7 @@ from Dependencies.ReadSD2Q import readSDQ2
 import os
 import csv
 
-Path = "/home/anton/Desktop/triton_work/3D/AluVaultGap/csv/"
+Path = "/l/triton_work/3D/AluVaultGap/csv/"
 
 # Get list of all csv files in that folder
 CSVFiles = [f for f in os.listdir(Path) if f.endswith('.csv')]
