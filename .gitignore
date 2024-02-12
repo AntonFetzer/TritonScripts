@@ -4,11 +4,10 @@
 # Ignore specific directories
 __pycache__/
 .idea/
-.pyc
-.ipynb_checkpoints
-CodeRefinery
-Lingyun
+.pyc/
+.ipynb_checkpoints/
+CodeRefinery/
+Lingyun/
 
 # Ignore specific files
-misc.xml
 .idea/misc.xml
