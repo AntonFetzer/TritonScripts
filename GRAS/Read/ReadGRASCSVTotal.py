@@ -27,7 +27,8 @@ def readGrasCsvTotal(file):
     # Dose data is in rad/s --> multiply with number of seconds in a month to get to dose per months.
     # Dose is given per generated particle --> need to divide by the number of files
     # Dose is given in rad --> divide by 1000 to get to krad.
-    scale_factor = 30 * 24 * 60 * 60 / 1000
+    # scale_factor = 30 * 24 * 60 * 60 / 1000
+    scale_factor = 1 / 1000
 
     # Use in-place operations to update the data array
     data['Dose'] *= scale_factor
@@ -58,7 +59,6 @@ if __name__ == "__main__":
     for File in Files:
         Results = readGrasCsvTotal(path + File)
 
-    #print(np.shape(Results))
     print(Results)
 
     relative_dose_error_percent = (Results['Error'][0] / Results['Dose'][0]) * 100

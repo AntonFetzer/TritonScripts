@@ -67,8 +67,8 @@ def readGRASHistos(file):
 
 
 if __name__ == "__main__":
-    path = "/l/triton_work/Histograms/AE9500keV/Res/"
-    file = "Electrons_226959_35112.csv"
+    path = "/l/triton_work/Histograms/Cobalt-60/Res/"
+    file = "Electrons_627965_97150.csv"
 
     DoseHist, PrimaryHist = readGRASHistos(path + file)
 

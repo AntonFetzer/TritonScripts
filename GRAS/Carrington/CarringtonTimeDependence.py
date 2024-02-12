@@ -55,9 +55,9 @@ ax1.set_xlabel("Time [days]")
 
 
 
-ThickList = [0, 1, 2, 4, 8, 16]
-DosePerHour = [231.875541, 5.78169891, 1.3798122553287573, 0.3627583749127644, 0.14702413643842302, 0.07671414538190979]
-Error = [45.201527999999996, 0.7639131599999995, 0.17434836835347167, 0.024627762742141568, 0.007887851333699764, 0.006097929079940834]
+ThickList = [1, 2, 4, 8, 16]
+DosePerHour = [5.78169891, 1.3798122553287573, 0.3627583749127644, 0.14702413643842302, 0.07671414538190979]
+Error = [0.7639131599999995, 0.17434836835347167, 0.024627762742141568, 0.007887851333699764, 0.006097929079940834]
 
 for t, thick in enumerate(ThickList):
 
@@ -71,14 +71,14 @@ CriticalDose = [100 for i in Evals]
 plt.plot(Evals/24, CriticalDose, '--', color='k', linewidth=2, label='100 krad')
 
 #plt.ylim(5e-2, 1e3)
-# plt.xlim(-0.5, 20)
-plt.grid(which="major")
+# plt.xlim(0, 4.1)
+plt.grid()
 plt.yscale("log")
 #plt.xscale("log")
-plt.title("Carrington Electron Spectrum\nDose deposited depending on 3D shielding thickness")
-plt.xlabel("Time since start of Carrington Event [days]")
-plt.ylabel("Ionising Dose [krad]")
-plt.legend(loc='upper right')
+plt.title("Ionising dose due to Carrington event electron flux\n behind aluminium shielding of various thicknesses")
+plt.xlabel("Time since start of Carrington event [days]")
+plt.ylabel("Ionising dose due to electrons [krad]")
+plt.legend()
 
-plt.savefig("/l/TritonPlots/CarringtonTimeDep3D.eps", format='eps', bbox_inches="tight")
-#plt.show()
+# plt.savefig("/u/02/fetzera1/unix/Desktop/TritonPlots/Carrington/CarringtonTimeDep3D.pdf", format='pdf', bbox_inches="tight")
+plt.show()

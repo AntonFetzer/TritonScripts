@@ -30,6 +30,8 @@ def plotTernary(path, particle, materials, mat):
         Data = Prot + Elec
         Data[1] = np.sqrt(Prot[1] ** 2 + Elec[1] ** 2)
         ColMap = create_average_colormap(cm.viridis, cm.plasma)
+        Prot = Prot / 2
+        Elec = Elec / 2
 
     Data = Data / 2  ############## This is needed becasue GRAS wrongly normalises the surface area of the particle source
 
@@ -57,7 +59,7 @@ def plotTernary(path, particle, materials, mat):
     print(len(ColorData))
 
     fig = plt.figure(Fig)
-    ax = fig.add_subplot(projection='ternary', ternary_scale=100)
+    ax = fig.add_subplot(projection='ternary', ternary_sum=100)
 
     for x in range(N):
         for y in range(N - x):
@@ -133,11 +135,11 @@ def plotTernary(path, particle, materials, mat):
 
     # plt.show()
     plt.savefig(path + "../Plot/" + particle + "TernaryPlot.pdf", format='pdf')
-    plt.close(Fig)
+    # plt.close(Fig)
     '''
     if "Total" in particle:
         CSVFile = open("/l/triton_work/3MatTriangles/3MatSum.csv", 'a')
-        List = (str(round(rMin*100)), "\% " + mat[0] + " &",
+        List = (str(round(rMin * 100)), "\% " + mat[0] + " &",
                 str(round(gMin * 100)), "\% " + mat[1] + " &",
                 str(round(bMin * 100)), "\% " + mat[2] + " & \\num{", ufloat(Min, MinErr), "} \\\\")
 
@@ -147,12 +149,58 @@ def plotTernary(path, particle, materials, mat):
         CSVFile.close()
     '''
 
+    print(ufloat(Min, MinErr))
+
+    if "Total" in particle:
+        # Extract minimum and its error for Total Dose
+        total_dose_min = Min
+        total_dose_min_err = MinErr
+
+        # Extract minimum and its error for Electron Dose
+        elec_dose_min = Elec[0][MinID]
+        elec_dose_min_err = Elec[1][MinID]
+
+        # Extract minimum and its error for Proton Dose
+        proton_dose_min = Prot[0][MinID]
+        proton_dose_min_err = Prot[1][MinID]
+
+        CSVFilePath = path + "../" + "MinDoses.csv"
+
+        # Convert to string representation with uncertainties
+        total_dose_str = str(ufloat(total_dose_min, total_dose_min_err)).split('+/-')
+        elec_dose_str = str(ufloat(elec_dose_min, elec_dose_min_err)).split('+/-')
+        proton_dose_str = str(ufloat(proton_dose_min, proton_dose_min_err)).split('+/-')
+
+        # Construct the line to write to the CSV
+        line = (f"{materials[0]},"
+                f"{materials[1]},"
+                f"{materials[2]},"
+                f"{round(rMin * 100)},"
+                f"{round(gMin * 100)},"
+                f"{100 - round(rMin * 100) - round(gMin * 100)},"
+                f"{elec_dose_str[0]},{elec_dose_str[1]},"
+                f"{proton_dose_str[0]},{proton_dose_str[1]},"
+                f"{total_dose_str[0]},{total_dose_str[1]}\n")
+
+        # Check if the file exists and write header if it doesn't
+        try:
+            with open(CSVFilePath, 'r') as file:
+                pass
+        except FileNotFoundError:
+            with open(CSVFilePath, 'w') as file:
+                file.write(
+                    "Material A, Material B, Material C, % A, % B, % C, Electron Dose, Electron Error, Proton Dose, Proton Error, Total Dose, Total Error\n")
+
+        # Write data to the CSV file
+        with open(CSVFilePath, 'a') as file:
+            file.write(line)
+
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/3MatTriangles/Al-GradientTest/Res/"
+    Path = "/l/triton_work/3MatTriangles/Al-Ti-Ta/Res/"
 
-    Materials = ["Aluminium", "Aluminium", "Aluminium"]
-    Mat = ["Al", "Al", "Al"]
+    Materials = ["Aluminium", "Titanium", "Tantalum"]
+    Mat = ["Al", "Ti", "Ta"]
 
     plotTernary(Path, "Electron", Materials, Mat)
     plotTernary(Path, "Proton", Materials, Mat)

@@ -105,7 +105,7 @@ plt.title("Comparison between Geant4 and SHIELDOSE-2Q", x=0.425)
 plt.xlabel("Aluminium Shielding Depth [g/cm2]")
 plt.ylabel("Ionizing dose in silicon [krad per month]")
 plt.legend(loc='lower left', framealpha=0.75)
-plt.savefig("/l/TritonPlots/Paper/ShielddoseComparison.pdf", format='pdf', bbox_inches="tight")
+#plt.savefig("/l/TritonPlots/Paper/ShielddoseComparison.pdf", format='pdf', bbox_inches="tight")
 '''
 
 
@@ -131,4 +131,4 @@ plt.grid(which='both')
 #plt.yscale("log")
 #plt.savefig(Path + Folder + "/RelativeError.eps", format='eps', bbox_inches="tight")
 '''
-# plt.show()
+plt.show()

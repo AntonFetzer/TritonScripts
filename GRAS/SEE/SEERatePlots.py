@@ -1,12 +1,11 @@
 import numpy as np
-from IPython.display import display
 import matplotlib.pyplot as plt
 import pandas as pd
 
 plt.rc('axes', axisbelow=True)
 
 df = pd.read_csv('/l/triton_work/CARRINGTON/SEERates.csv')
-FitParams = "Uncorrectable"
+FitParams = "Correctable"
 
 DataNames = [#"AP8", "SolarP", "AE8", "CosmicP", "CosmicFe"]
     "Carrington SEP +2 Sigma",
@@ -16,7 +15,8 @@ DataNames = [#"AP8", "SolarP", "AE8", "CosmicP", "CosmicFe"]
     #"AE9 GTO trapped Electrons",
     "AP9 GTO trapped Protons",
     #"AE9 LEO trapped Electrons",
-    "AP9 LEO trapped Protons"]
+    #"AP9 LEO trapped Protons"
+    ]
 
 Colours = ['C1', 'C0', 'C2', 'C8', 'C3', 'C9']
 
@@ -56,7 +56,7 @@ for DataName in DataNames:
 #plt.plot([1/8e+3]*5, '--', label="1 Bitflip per kB per Second", color='black')
 #plt.plot([1/8e+6]*5, ':', label="1 Bitflip per MByte per second", color='black')
 plt.plot([1/8e+9]*5, '-.', label="1 Bitflip per GByte per second", color='black')
-plt.plot([1/8e+12]*5, '--', label="1 Bitflip per TByte per second", color='black')
+#plt.plot([1/8e+12]*5, '--', label="1 Bitflip per TByte per second", color='black')
 
 #plt.ylim(1e-15, 1e-3)
 plt.yscale("log")
@@ -65,6 +65,6 @@ plt.title(CrossectionName)
 
 plt.xlabel("Aluminium Shielding Thickness")
 plt.ylabel("Single Bit Upset Rate [s-1 bit-1]")
-plt.legend()
+plt.legend(loc='lower left')
 
 plt.savefig("/l/triton_work/CARRINGTON/" + CrossectionName + "Rates.pdf", format='pdf', bbox_inches="tight")

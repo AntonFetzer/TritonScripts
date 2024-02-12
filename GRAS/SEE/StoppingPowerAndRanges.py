@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-File = '/l/triton_work/Chess1 GNSS SEE Analysis/Stopping Powers and Ranges/StoppingPower-Ranges.csv'
+File = '/l/triton_work/LET/Stopping Powers and Ranges/StoppingPower-Ranges.csv'
 
 # Column names
 columns = ['Proton Energy', 'Proton LET', 'Proton Range', 'Electron Energy', 'Electron LET', 'Electron Range']
@@ -22,31 +22,51 @@ G4Proton_LET = np.array([7786.6, 11782, 4088, 2602.7, 1359.4, 805.05, 392.61, 22
 
 G4Proton_LET = G4Proton_LET / C
 
-fig, ax1 = plt.subplots()
+# Convert LET from MeV cm2/g to MeV cm2/mg
+data['Electron LET'] = data['Electron LET'] / 1000
+data['Proton LET'] = data['Proton LET'] / 1000
+G4Electron_LET = G4Electron_LET / 1000
+G4Proton_LET = G4Proton_LET / 1000
 
-# Plot the LET data
-ax1.loglog(data['Electron Energy'], data['Electron LET'], label='ESTAR Electron LET')
-ax1.loglog(data['Proton Energy'], data['Proton LET'], label='PSTAR Proton LET')
-ax1.loglog(G4Electron_Energy, G4Electron_LET, label='G4Electron LET', linestyle='dotted')
-ax1.loglog(G4Proton_Energy, G4Proton_LET, label='G4Proton LET', linestyle='dotted')
+# Create a new figure with 2 subplots
+fig, (ax1, ax2) = plt.subplots(2)
 
-# Formatting the first y-axis
+# Plot the LET data with a linear y-axis
+ax1.plot(data['Electron Energy'], data['Electron LET'], label='ESTAR Electron LET')
+ax1.plot(data['Proton Energy'], data['Proton LET'], label='PSTAR Proton LET')
+ax1.plot(G4Electron_Energy, G4Electron_LET, label='G4Electron LET', linestyle='dotted')
+ax1.plot(G4Proton_Energy, G4Proton_LET, label='G4Proton LET', linestyle='dotted')
+
+# Formatting the first subplot
 ax1.set_xlabel('Energy (MeV)')
-ax1.set_ylabel('LET (MeV cm2/g)')
+ax1.set_ylabel('LET (MeV cm2/mg)')
 ax1.grid(True)
+ax1.legend()
+#ax1.set_xscale('log')
+#ax1.set_yscale('log')
+ax1.set_xlim(0, 0.1)
 
-# Create a second y-axis
-ax2 = ax1.twinx()
 
-# Plot the Range data on the second y-axis
-ax2.loglog(data['Electron Energy'], data['Electron Range'], label='ESTAR Electron Range', linestyle='dashed')
-ax2.loglog(data['Proton Energy'], data['Proton Range'], label='PSTAR Proton Range', linestyle='dashed')
+# Convert Range from g/cm2 to mm of Aluminium
+data['Electron Range'] = data['Electron Range'] / 0.27
+data['Proton Range'] = data['Proton Range'] / 0.27
 
-# Formatting the second y-axis
-ax2.set_ylabel('Range (g/cm2)')
+# Plot the Range data on the second subplot
+ax2.plot(data['Electron Energy'], data['Electron Range'], label='ESTAR Electron Range', linestyle='dashed')
+ax2.plot(data['Proton Energy'], data['Proton Range'], label='PSTAR Proton Range', linestyle='dashed')
 
-# Adding the legend
-fig.legend(loc="upper left", bbox_to_anchor=[0, 1], bbox_transform=ax1.transAxes)
+# Formatting the second subplot
+ax2.set_xlabel('Energy (MeV)')
+ax2.set_ylabel('Range (mm of Aluminium)')  # Update the y-label
+ax2.grid(True)
+ax2.legend()
+#ax2.set_xscale('log')
+ax2.set_yscale('log')
+ax2.set_xlim(0, 0.1)
+#ax2.set_ylim(0, 1)
+
+# Adjust the space between the subplots
+plt.tight_layout()
 
 # Save the plot
-plt.savefig("/l/triton_work/Chess1 GNSS SEE Analysis/Stopping Powers and Ranges/Stopping Power and Ranges in Silicon.pdf", format='pdf', bbox_inches="tight")
+plt.savefig("/l/triton_work/LET/Stopping Powers and Ranges/Stopping Power and Ranges in Silicon.pdf", format='pdf', bbox_inches="tight")

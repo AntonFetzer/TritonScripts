@@ -91,7 +91,8 @@ ax.set_ylim(1e-1, 1e3)
 
 ax.grid(True, which='both', linestyle='--', alpha=0.5)  # Add gridlines
 
-plt.savefig(os.path.join(Path, "Plots", "RadEx-Total.pdf"), format='pdf', bbox_inches="tight")
+plt.show()
+#plt.savefig(os.path.join(Path, "Plots", "RadEx-Total.pdf"), format='pdf', bbox_inches="tight")
 
 
 

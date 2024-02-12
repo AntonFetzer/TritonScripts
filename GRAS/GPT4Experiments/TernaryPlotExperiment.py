@@ -43,7 +43,7 @@ def plotTernary(path, particle, materials, mat):
     print("The average Dose of the upside down triangle is", np.mean(Data[0][Offset:]))
     print("The difference in Dose is", 100 * (np.mean(Data[0][Offset:]) - np.mean(Data[0][:Offset])) / np.mean(Data[0]),
           "%")
-    '''
+
     ColorData = Data[0]
     Min = np.min(ColorData)
     ColorData = ColorData - (Min*0.999)
@@ -55,12 +55,15 @@ def plotTernary(path, particle, materials, mat):
     Max = np.max(ColorData)
     ColorData = ColorData / Max
 
-    '''
-    ColorData = np.log(Data[0])
-    Min = np.min(ColorData)
-    ColorData = ColorData - Min
-    Max = np.max(ColorData)
-    ColorData = ColorData / Max
+    # Define the function to reverse the transformation
+    def reverse_transformation(norm_value, Min, Max):
+        # Reverse the steps in the normalization
+        value = norm_value * Max  # Reverse division by Max
+        value = value + Min  # Reverse subtraction of Min
+        value = np.exp(value)  # Reverse log
+        value = value * Max  # Reverse division by Max
+        value = value + (Min * 0.999)  # Reverse subtraction of Min*0.999
+        return value
 
     Max = np.max(Data[0])
     Min = np.min(Data[0])

@@ -2,10 +2,10 @@ from GRAS.Dependencies.TotalKRadGras import totalkRadGras
 import numpy as np
 import matplotlib.pyplot as plt
 
-Path = "/l/triton_work/2LayerOptimisation10TilesPE/Protons/"
+Path = "/l/triton_work/2LayerOptimisationPhysicsTest10Tiles/Pe-Pb-Electrons/"
 res_suffix = "/Res/"
 
-'''
+
 Labels = [
     "Template",
     ############# Models that all produce the same results as the default #################
@@ -13,20 +13,20 @@ Labels = [
     "QBBC",
     "QGSP_BERT",
     "QGSP_BIC",
-    # "binary_ion",
-    # "qmd_ion",
-    # "incl_ion",
-    # "decay",
+    "binary_ion",
+    "qmd_ion",
+    "incl_ion",
+    "decay",
     # "raddecay",
-    # "gamma_nuc",
-    # "stopping",
+    "gamma_nuc",
+    "stopping",
     "binary_had",
     "bertini",
     "bertini_preco",
     "elastic",
-    # "elasticCHIPS",
+    "elasticCHIPS",
     "binary",
-    # "firsov",
+    "firsov",
     # "QGSP_BERT_HP",
     # "QGSP_BIC_HP",
     # "QGSP_QMD_HP",
@@ -36,19 +36,19 @@ Labels = [
     # "elasticHP",
 
     ############# Models that produce significantly different results as the default #################
-    "em_standard",  # Not actually the standard
-    "em_standard_opt1",  # low precision
-    "em_standard_opt2",  # experimental
-    "em_standard_opt3",
+    # "em_standard",  # Not actually the standard
+    # "em_standard_opt1",  # low precision
+    # "em_standard_opt2",  # experimental
+    # "em_standard_opt3",
     "em_standard_opt4",  # Seems to be the default EM ???
 
     # "em_penelope",  # Produces slightly higher dose
-    # "em_livermore",
+    "em_livermore",
 
     # "em_lowenergy",  # Does not work for protons and huge deviations for electrons
     # "em_standard_space",  # Low performance
     # "em_standard_remizovich",
-    #
+
     # "em_standardSS",  # terrible performance
     # "em_standardWVI",  # slow
     # "em_standardNR",  # terrible performance
@@ -57,112 +57,9 @@ Labels = [
     # "secondary_generator",
     # "rmc_em_standard",  #No Proton results. This is reverse Monte Carlo. DO NOT USE !!!
 ]
-'''
 
-Labels = [
-    "LH2",
-    "He",
-    "Li",
-    "Be",
-    "B",
-    "C",
-    "lN2",
-    "lO2",
-    "F",
-    "Ne",
-    "Na",
-    "Mg",
-    "Al",
-    "Si",
-    "P",
-    "S",
-    "Cl",
-    "lAr",
-    "K",
-    "Ca",
-    "Sc",
-    "Ti",
-    "V",
-    "Cr",
-    "Mn",
-    "Fe",
-    "Co",
-    "Ni",
-    "Cu",
-    "Zn",
-    "Ga",
-    "Ge",
-    "As",
-    "Se",
-    "lBr",
-    "lKr",
-    "Rb",
-    "Sr",
-    "Y",
-    "Zr",
-    "Nb",
-    "Mo",
-    "Tc",
-    "Ru",
-    "Rh",
-    "Pd",
-    "Ag",
-    "Cd",
-    "In",
-    "Sn",
-    "Sb",
-    "Te",
-    "I",
-    "lXe",
-    "Cs",
-    "Ba",
-    "La",
-    "Ce",
-    "Pr",
-    "Nd",
-    "Pm",
-    "Sm",
-    "Eu",
-    "Gd",
-    "Tb",
-    "Dy",
-    "Ho",
-    "Er",
-    "Tm",
-    "Yb",
-    "Lu",
-    "Hf",
-    "Ta",
-    "W",
-    "Re",
-    "Os",
-    "Ir",
-    "Pt",
-    "Au",
-    "Hg",
-    "Tl",
-    "Pb",
-    "Bi",
-    "Po",
-    "At",
-    "Rn",
-    "Fr",
-    "Ra",
-    "Ac",
-    "Th",
-    "Pa",
-    "U",
-    "Np",
-    "Pu",
-    "Am",
-    "Cm",
-    "Bk",
-    "Cf"
-]
 
-Paths = []
-for i, label in enumerate(Labels, start=1):
-    Paths.append(Path + str(i) + "-" + label + res_suffix)
+Paths = [Path + label + res_suffix for label in Labels]
 
 
 Colours = ['C0', 'C1', 'C2', 'C8', 'C3', 'C9', 'C7', 'k', 'C4', 'C5', 'C6',
@@ -172,9 +69,6 @@ Colours = ['C0', 'C1', 'C2', 'C8', 'C3', 'C9', 'C7', 'k', 'C4', 'C5', 'C6',
            (0.1, 0.2, 0.3, 0.4), (0.5, 0.6, 0.7, 0.8),  # some RGBA colors
            'C0', 'C1', 'C2', 'C8', 'C3', 'C9', 'C7', 'k', 'C4', 'C5', 'C6',
            'blue', 'green', 'red', 'cyan', 'magenta', 'yellow', 'black', 'white']
-
-Colours.extend(Colours)
-Colours.extend(Colours)
 
 Data = []
 for i, path in enumerate(Paths):
@@ -204,14 +98,13 @@ x = np.linspace(0, NumTiles - 1, num=NumTiles, dtype=int, endpoint=True)
 for i, data in enumerate(Data):
     plt.errorbar(x, data[0], data[1], fmt='', markersize=5, capsize=5, label=Labels[i], color=Colours[i], linestyle='-')
 
-####### Plot 10kRad line #########
-CriticalDose = [10 for i in x]
-# plt.plot(x, CriticalDose, color='k', linewidth=2, label='10 krad')
-# CriticalDose = [100 for i in x]
-# plt.plot(x, CriticalDose, '--', color='k', linewidth=2, label='100 krad')
+####### Plot 1kRad line #########
+# CriticalDose = [1 for i in x]
+# plt.plot(x, CriticalDose, color='k', linewidth=2, label='1 krad per month')
+# CriticalDose = [10 for i in x]
+# plt.plot(x, CriticalDose, '--', color='k', linewidth=2, label='10 krad per month')
 
-plt.ylim(0, )
-# plt.xlim(0.25, 2.5)
+# plt.ylim(0, 1)
 # plt.yscale("log")
 # plt.xscale("log")
 plt.title("Ionising Dose per month behind multilayer shielding")
@@ -273,7 +166,7 @@ for i, data in enumerate(Data[1:]):  # Skip the first dataset as it's the new re
     max_relative_error.append(np.max(data[1] / data[0]))
 
 # Open a CSV file to write the data
-with open('model_entries.csv', 'w') as f:
+with open('../Plotting/model_entries.csv', 'w') as f:
     # Write the header to the CSV file
     f.write("Model Name,Number of Entries,Chi-Squared,Min Non-Zero Entries,Max Relative Error\n")
 

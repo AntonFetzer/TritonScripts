@@ -199,4 +199,4 @@ for Thick in ThickList:
         CSVFile.writelines(String + "\n")
         CSVFile.close()
 
-        # plt.show()
+        plt.show()

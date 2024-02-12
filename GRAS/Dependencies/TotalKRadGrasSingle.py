@@ -5,12 +5,12 @@ import matplotlib.pyplot as plt
 import sys
 import pandas as pd
 
-def totalkRadGrasSingle(path, particle: str):
+def totalkRadGrasSingle(path):
     print("")
-    print("Reading in all", particle, "files in folder:", path)
+    print("Reading in all csv files in folder:", path)
 
     # Get list of all csv files in Path
-    Files = [f for f in os.listdir(path) if particle in f]
+    Files = os.listdir(path)
 
     if not Files:
         sys.exit("ERROR !!! No files found")
@@ -84,9 +84,9 @@ def totalkRadGrasSingle(path, particle: str):
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/RadEx/RadEx6mm/Res/"
+    Path = "/l/triton_work/1Tile/A9-GTO-FullSpectrum/Electrons-6mmAl/Res/"
 
-    Results = totalkRadGrasSingle(Path, "Prot")
+    Results = totalkRadGrasSingle(Path)
 
     print(Results)
     '''
@@ -106,5 +106,6 @@ if __name__ == "__main__":
     ax2.set_xticklabels(reshaped_data['variable'], rotation=0)
     ax2.set_xlabel('')
     ax2.set_ylim(bottom=0)  # Set the lower limit of the y-axis to 0
-    '''
+
     plt.show()
+    '''

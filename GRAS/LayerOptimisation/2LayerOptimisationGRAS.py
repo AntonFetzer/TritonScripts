@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from GRAS.Dependencies.TotalKRadGras import totalkRadGras
+from uncertainties import ufloat
 
 Path = "/l/triton_work/2LayerOptimisation"
 ShieldingDepth = "1.5"  # g/cm2
@@ -31,6 +32,7 @@ print(np.shape(ProtB))
 ElecB = np.flip(ElecB, 1)
 ProtB = np.flip(ProtB, 1)
 
+
 plt.figure(1)
 plt.errorbar(x, ElecA[0], ElecA[1], fmt=' ', capsize=2, label="Electrons " + A + " on " + B) # + " Min=" + str(round(np.min(ElecA[0]), 2)) + " kRad at " + str(round(np.argmin(ElecA[0]))) + " % " + A)
 plt.errorbar(x, ElecB[0], ElecB[1], fmt=' ', capsize=2, label="Electrons " + B + " on " + A) # + " Min=" + str(round(np.min(ElecB[0]), 2)) + " kRad at " + str(round(np.argmin(ElecB[0]))) + " % " + A)
@@ -45,14 +47,14 @@ plt.ylabel("Deposited ionising dose [kRad]")
 plt.grid(which='both')
 plt.legend()
 # plt.yscale("log")
-# plt.show()
-plt.savefig(Path + Shield + "-Gradient.eps", format='eps', bbox_inches="tight")
+plt.show()
+# plt.savefig(Path + Shield + "-Gradient.eps", format='eps', bbox_inches="tight")
 
-TotalA = ElecA
+TotalA = np.zeros_like(ElecA)
 TotalA[0] = ElecA[0] + ProtA[0]
 TotalA[1] = np.sqrt(ElecA[1] * ElecA[1] + ProtA[1] * ProtA[1])
 
-TotalB = ElecB
+TotalB = np.zeros_like(ElecB)
 TotalB[0] = ElecB[0] + ProtB[0]
 TotalB[1] = np.sqrt(ElecB[1] * ElecB[1] + ProtB[1] * ProtB[1])
 
@@ -67,8 +69,8 @@ plt.ylabel("Deposited ionising dose [krad]")
 plt.grid(which='both')
 plt.legend()
 # plt.yscale("log")
-# plt.show()
-plt.savefig(Path + Shield + "-GradientSum.eps", format='eps', bbox_inches="tight")
+plt.show()
+# plt.savefig(Path + Shield + "-GradientSum.eps", format='eps', bbox_inches="tight")
 
 
 TotalAmin = np.min(TotalA[0])
@@ -90,18 +92,42 @@ ProtBminErr = ProtB[1][TotalBminIndex]
 
 TotalAminErr = np.sqrt(ElecAminErr * ElecAminErr + ProtAminErr * ProtAminErr)
 TotalBminErr = np.sqrt(ElecBminErr * ElecBminErr + ProtBminErr * ProtBminErr)
-
+'''
 CSVFile = open(Path + "Results.txt", 'w')
 CSVFile.writelines("Material A, Material B, % A, % B, Electron Dose, Electron Error, Proton Dose, Proton Error, Total Dose, Total Error, \n")
 
 print("TotalAmin:", TotalAmin, "TotalBmin:", TotalBmin)
 
 if TotalAmin < TotalBmin:
-    List = (A, B, TotalAminIndex+1, 101-TotalAminIndex, ElecAmin, ElecAminErr, ProtAmin, ProtAminErr, TotalAmin, TotalAminErr)
+    List = (A, B, TotalAminIndex, 100-TotalAminIndex, ElecAmin, ElecAminErr, ProtAmin, ProtAminErr, TotalAmin, TotalAminErr)
 elif TotalAmin > TotalBmin:
-    List = (B, A, 101-TotalBminIndex, TotalBminIndex+1, ElecBmin, ElecBminErr, ProtBmin, ProtBminErr, TotalBmin, TotalBminErr)
+    List = (B, A, 100-TotalBminIndex, TotalBminIndex, ElecBmin, ElecBminErr, ProtBmin, ProtBminErr, TotalBmin, TotalBminErr)
 
 String = ', '.join(map(str, List))
 print(String)
 CSVFile.writelines(String + "\n")
 CSVFile.close()
+'''
+# Open the CSV file for writing
+with open(Path + "Results.txt", 'w') as CSVFile:
+    # Write the header to the CSV file
+    CSVFile.write(
+        "Material A, Material B, % A, % B, Electron Dose, Electron Error, Proton Dose, Proton Error, Total Dose, Total Error, \n")
+    print("TotalAmin:", TotalAmin, "TotalBmin:", TotalBmin)
+
+    if TotalAmin < TotalBmin:
+        elec_dose = str(ufloat(ElecAmin, ElecAminErr)).split('+/-')
+        prot_dose = str(ufloat(ProtAmin, ProtAminErr)).split('+/-')
+        total_dose = str(ufloat(TotalAmin, TotalAminErr)).split('+/-')
+        List = (A, B, TotalAminIndex, 100 - TotalAminIndex, elec_dose[0], elec_dose[1], prot_dose[0], prot_dose[1],
+                total_dose[0], total_dose[1])
+    elif TotalAmin > TotalBmin:
+        elec_dose = str(ufloat(ElecBmin, ElecBminErr)).split('+/-')
+        prot_dose = str(ufloat(ProtBmin, ProtBminErr)).split('+/-')
+        total_dose = str(ufloat(TotalBmin, TotalBminErr)).split('+/-')
+        List = (B, A, 100 - TotalBminIndex, TotalBminIndex, elec_dose[0], elec_dose[1], prot_dose[0], prot_dose[1],
+                total_dose[0], total_dose[1])
+
+    String = ', '.join(map(str, List))
+    print(String)
+    CSVFile.write(String + "\n")
