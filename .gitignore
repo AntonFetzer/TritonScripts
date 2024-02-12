@@ -1,0 +1,7 @@
+# Ignore all text files
+*.txt
+
+# Ignore specific directories
+__pycache__/
+.idea/
+.pyc
