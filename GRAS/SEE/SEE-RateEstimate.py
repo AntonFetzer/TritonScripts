@@ -6,7 +6,7 @@ from uncertainties import ufloat
 
 '''
 The functional form of the Weibull is:
-F(x) = A (1- exp{-[(x-x0)/W]s}) where
+F(x) = A (1- exp{-[(x-x0)/W] ** s}) where
     x = effective LET in MeV-cm2/milligram;
     F(x) = SEE cross-section in square-microns/bit;
     A0 = limiting or plateau cross-section;
@@ -17,38 +17,43 @@ https://creme.isde.vanderbilt.edu/CREME-MC/help/weibull
 '''
 
 
-ThickList = ["1mm", "2mm", "4mm", "8mm", "16mm"]
+ThickList = ["0mm", "2mm", "4mm"]
 
-FitParams = "Correctable"
+FitParams = "SEU"
 
-if FitParams == "Hard":
-    CrossectionName = "Hard reset cross section"
-    A = 1.00148367952522e-09
-    x0 = 1e-10
-    W = 0.002399012436035362
+if FitParams == "SEU":
+    CrossectionName = "Hercules SEU"
+    A = 1.25E-11
+    x0 = 0.95535
+    W = 13.23393071
     s = 1
-elif FitParams == "Soft":
-    CrossectionName = "Soft reset cross section"
-    A = 2.68987341772152e-09
-    x0 = 1e-10
-    W = 0.002399012436035362
+elif FitParams == "SET":
+    CrossectionName = "Hercules SET"
+    A = 4.02E-07
+    x0 = 3.54024
+    W = 18.31970977
     s = 1
-elif FitParams == "Correctable":
-    CrossectionName = "LSRAM correctable SBU"
-    x0 = 0.4
-    W = 18
-    s = 0.98
-    A = 4.01e-9
-elif FitParams == "Uncorrectable":
-    CrossectionName = "LSRAM uncorrectable SBU"
-    x0 = 0.4
-    W = 1
-    s = 0.4
-    A = 5.5e-14
+elif FitParams == "SEFI":
+    CrossectionName = "Hercules SEFI"
+    A = 2.48E-06
+    x0 = 0.95337
+    W = 1.90630695
+    s = 1
+
 
 def f(LET):
+    """
+    Calculate the rate estimate based on the Linear Energy Transfer (LET) values.
 
+    Parameters:
+    LET (numpy.ndarray): Array of LET values.
+
+    Returns:
+    numpy.ndarray: Array of rate estimates.
+    """
+    
     result = np.zeros_like(LET)
+    # Remove all values of LET that are less than x0
     mask = LET > x0
     result[mask] = A * (1 - np.exp(-((LET[mask] - x0) / W) ** s))
 
@@ -56,32 +61,11 @@ def f(LET):
 
 
 Paths = [
-        #"/l/triton_work/LET/Chess/Chess1-Proton-Mission-AP8/",
-        #"/l/triton_work/LET/Chess/Chess1-SolarProton-Mission-Sapphire/",
-        #"/l/triton_work/LET/Chess/Chess1-Electron-Mission-AE8/",
-        #"/l/triton_work/LET/Chess/Chess1-CosmicProton-Mission-ISO/",
-        #"/l/triton_work/LET/Chess/Chess1-CosmicFe-Mission-ISO/",
-        "/l/triton_work/LET/Carrington/Carrington-SEP-Plus2Sigma-Int-With0/",
-        "/l/triton_work/LET/Carrington/Carrington-SEP-Expected-Int-With0/",
-        "/l/triton_work/LET/Carrington/Carrington-SEP-Minus2Sigma-Int-With0/",
-        "/l/triton_work/LET/Carrington/SEP2003-INTEGRAL-FluxBasedOnFluenceDividedBy24h/",
-        #"/l/triton_work/LET/A9-GTO/AE9Mission/",
-        #"/l/triton_work/LET/A9-GTO/AP9Mission/",
-        "/l/triton_work/LET/A9-GTO/AP910MeV/",
-        #"/l/triton_work/LET/A9-LEO/AE9Mission/",
-        #"/l/triton_work/LET/A9-LEO/AP9Mission/"
-        #"/l/triton_work/LET/A9-LEO/ISS-LEO-Proton10MeV/"
+    "/l/triton_work/LET/Foresail1-Hercules/FS1-SolarProtons/"
     ]
 
-DataName = [#"AP8", "SolarP", "AE8", "CosmicP", "CosmicFe"]
-    "Carrington SEP +2 Sigma",
-    "Carrington SEP EVT",
-    "Carrington SEP -2 Sigma",
-    "2003 SPE",
-    #"AE9 GTO trapped Electrons",
-    "AP9 GTO trapped Protons",
-    #"AE9 LEO trapped Electrons",
-    #"AP9 LEO trapped Protons"
+DataName = [
+    "FS1-SolarProtons"
     ]
 
 lowerID = 0
@@ -97,7 +81,6 @@ for Thick in ThickList:
         
         path = Path + Thick + "/Res/"
         ## ----------------------------------- LET Read-in -----------------------------------------------------------
-
         # Only works if all input files have the same number of particle!!!!!
         LETHist, EffHist = totalGRASLETHistos(path, "")
 
@@ -117,8 +100,7 @@ for Thick in ThickList:
 
         ### LET Histogram ###############
         fig, ax1 = plt.subplots(1)
-        plt.bar(LETHist[:, lowerID], LETHist[:, valueID], width=LETHist[:, upperID] - LETHist[:, lowerID], align='edge',
-                alpha=0.3)
+        plt.bar(LETHist[:, lowerID], LETHist[:, valueID], width=LETHist[:, upperID] - LETHist[:, lowerID], align='center', alpha=0.3)
         plt.errorbar(LETHist[:, meanID], LETHist[:, valueID], LETHist[:, errorID], fmt=' ', capsize=5, elinewidth=1,
                      capthick=1, label="LET Histogram")
         plt.plot([], [], label="SEE cross-section", color='C1')
@@ -129,19 +111,19 @@ for Thick in ThickList:
         plt.xlabel("LET [MeV cm2 mg-1]")
         ax1.legend(loc='center right')
         ax1.set_ylabel("Rate per LET bin [cm-2 s-1]", color='C0')
-        # ax1.set_ylabel("Total LET per LET bin [MeV cm2 mg-1]", color='C0')
         ax1.tick_params(axis='y', colors='C0')
 
         ax2 = ax1.twinx()
         plt.plot(LETHist[:, lowerID], f(LETHist[:, lowerID]), color='C1')
         ax2.set_ylabel("Cross Section [cm2 bit-1]", color='C1')
-        # ax2.set_ylabel("Cross Section of the receiver [cm2]", color='C1')
         plt.yscale("log")
         ax2.tick_params(axis='y', colors='C1')
-        plt.savefig("/l/triton_work/CARRINGTON/Histograms/" + DataName[P] + "/" + DataName[P] + " " + CrossectionName + " " + Thick + " LET-Hist.pdf",
-            format='pdf', bbox_inches="tight")
-        # plt.show()
-        plt.close('all')
+
+        #plt.savefig("/l/triton_work/CARRINGTON/Histograms/" + DataName[P] + "/" + DataName[P] + " " + CrossectionName + " " + Thick + " LET-Hist.pdf",
+        #    format='pdf', bbox_inches="tight")
+        #plt.close('all')
+        plt.show()
+
 
         ### SEE rate ###############
 
@@ -187,9 +169,11 @@ for Thick in ThickList:
         plt.yscale("log")
         ax2.tick_params(axis='y', colors='C1')
 
-        plt.savefig("/l/triton_work/CARRINGTON/Histograms/" + DataName[P] + "/" + DataName[P] + " " + CrossectionName + " " + Thick + " SEE-Hist.pdf",
-            format='pdf', bbox_inches="tight")
-        plt.close('all')
+        #plt.savefig("/l/triton_work/CARRINGTON/Histograms/" + DataName[P] + "/" + DataName[P] + " " + CrossectionName + " " + Thick + " SEE-Hist.pdf",
+        #    format='pdf', bbox_inches="tight")
+        # plt.close('all')
+        plt.show()
+
 
         CSVFile = open("/l/triton_work/CARRINGTON/SEERates.csv", 'a')
         List = (DataName[P], Thick, CrossectionName, SEERate, SEERateError)
@@ -199,4 +183,3 @@ for Thick in ThickList:
         CSVFile.writelines(String + "\n")
         CSVFile.close()
 
-        plt.show()

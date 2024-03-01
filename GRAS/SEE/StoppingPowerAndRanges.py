@@ -31,6 +31,8 @@ G4Proton_LET = G4Proton_LET / 1000
 # Create a new figure with 2 subplots
 fig, (ax1, ax2) = plt.subplots(2)
 
+xlims = [1e0, 1e3]
+
 # Plot the LET data with a linear y-axis
 ax1.plot(data['Electron Energy'], data['Electron LET'], label='ESTAR Electron LET')
 ax1.plot(data['Proton Energy'], data['Proton LET'], label='PSTAR Proton LET')
@@ -42,9 +44,9 @@ ax1.set_xlabel('Energy (MeV)')
 ax1.set_ylabel('LET (MeV cm2/mg)')
 ax1.grid(True)
 ax1.legend()
-#ax1.set_xscale('log')
-#ax1.set_yscale('log')
-ax1.set_xlim(0, 0.1)
+ax1.set_xscale('log')
+ax1.set_yscale('log')
+ax1.set_xlim(xlims)
 
 
 # Convert Range from g/cm2 to mm of Aluminium
@@ -60,13 +62,21 @@ ax2.set_xlabel('Energy (MeV)')
 ax2.set_ylabel('Range (mm of Aluminium)')  # Update the y-label
 ax2.grid(True)
 ax2.legend()
-#ax2.set_xscale('log')
-ax2.set_yscale('log')
-ax2.set_xlim(0, 0.1)
-#ax2.set_ylim(0, 1)
+ax2.set_xscale('log')
+#ax2.set_yscale('log')
+ax2.set_xlim(xlims)
+ax2.set_ylim(0, 6)
 
 # Adjust the space between the subplots
 plt.tight_layout()
 
 # Save the plot
 plt.savefig("/l/triton_work/LET/Stopping Powers and Ranges/Stopping Power and Ranges in Silicon.pdf", format='pdf', bbox_inches="tight")
+
+# Print maximum LET and corresponding energy of PSTAR data
+max_LET = data['Proton LET'].max()
+max_LET_energy = data['Proton Energy'][data['Proton LET'].idxmax()]
+RangeAtMaxLET = data['Proton Range'][data['Proton LET'].idxmax()]
+print('Maximum LET of Proton data:', max_LET, 'MeV cm2/mg')
+print('Energy of maximum LET of Proton data:', max_LET_energy, 'MeV')
+print('Range at maximum LET of Proton data:', RangeAtMaxLET, 'mm of Aluminium')
