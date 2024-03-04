@@ -17,9 +17,9 @@ https://creme.isde.vanderbilt.edu/CREME-MC/help/weibull
 '''
 
 
-ThickList = ["0mm", "2mm", "4mm"]
+ThickList = ["0mm", "2mm", "4mm", "6mm"]
 
-FitParams = "SEU"
+FitParams = "SEFI"
 
 if FitParams == "SEU":
     CrossectionName = "Hercules SEU"
@@ -55,25 +55,31 @@ def f(LET):
     result = np.zeros_like(LET)
     # Remove all values of LET that are less than x0
     mask = LET > x0
+    # A * (1 - np.exp(-((x - x0) / W) ** s))
     result[mask] = A * (1 - np.exp(-((LET[mask] - x0) / W) ** s))
 
     return result
 
 
 Paths = [
-    "/l/triton_work/LET/Foresail1-Hercules/FS1-SolarProtons/"
+    "/l/triton_work/LET/Foresail1-Hercules/FS1-SolarProtons/",
+    "/l/triton_work/LET/Foresail1-Hercules/FS1-CosmicProt/",
+    "/l/triton_work/LET/Foresail1-Hercules/FS1-CosmicHe/",
+    "/l/triton_work/LET/Foresail1-Hercules/FS1-CosmicFe/",
+    "/l/triton_work/LET/Foresail1-Hercules/FS1-CosmicO/",
+    "/l/triton_work/LET/Foresail1-Hercules/FS1-TrappedProtons/",
+    "/l/triton_work/LET/Foresail1-Hercules/FS1-TrappedElectrons/"
     ]
 
 DataName = [
-    "FS1-SolarProtons"
+    "FS1-Solar Protons",
+    "FS1-Cosmic Protons",
+    "FS1-Cosmic Helium",
+    "FS1-Cosmic Iron",
+    "FS1-Cosmic Oxygen",
+    "FS1-Trapped Protons",
+    "FS1-Trapped Electrons"
     ]
-
-lowerID = 0
-upperID = 1
-meanID = 2
-valueID = 3
-errorID = 4
-entriesID = 5
 
 for Thick in ThickList:
 
@@ -82,26 +88,20 @@ for Thick in ThickList:
         path = Path + Thick + "/Res/"
         ## ----------------------------------- LET Read-in -----------------------------------------------------------
         # Only works if all input files have the same number of particle!!!!!
-        LETHist, EffHist = totalGRASLETHistos(path, "")
+        LETHist = totalGRASLETHistos(path)
 
-        C = 2330  # to convert from MeV/cm to Mev cm2 mg-1 in silicon with silicion density being 2.33 g/cm3
-
-        LETHist[:, lowerID] = LETHist[:, lowerID] / C
-        LETHist[:, upperID] = LETHist[:, upperID] / C
-        LETHist[:, meanID] = LETHist[:, meanID] / C
-
-        NumberEntriesLETHist = sum(LETHist[:, entriesID])
-        TotalLET = sum(LETHist[:, meanID] * LETHist[:, valueID])
+        NumberEntriesLETHist = np.sum(LETHist['entries'])
+        TotalLET = np.sum(LETHist['mean'] * LETHist['value'])
         TotalLETError = 0
-        for i in range(len(LETHist[:, valueID])):
-            TotalLETError += LETHist[i, errorID] ** 2
+        for i in range(len(LETHist['value'])):
+            TotalLETError += LETHist['error'][i] ** 2
         TotalLETError = np.sqrt(TotalLETError)
         TotalLETU = ufloat(TotalLET, TotalLETError)
 
         ### LET Histogram ###############
         fig, ax1 = plt.subplots(1)
-        plt.bar(LETHist[:, lowerID], LETHist[:, valueID], width=LETHist[:, upperID] - LETHist[:, lowerID], align='center', alpha=0.3)
-        plt.errorbar(LETHist[:, meanID], LETHist[:, valueID], LETHist[:, errorID], fmt=' ', capsize=5, elinewidth=1,
+        plt.bar(LETHist['lower'], LETHist['value'], width=LETHist['upper'] - LETHist['lower'], align='center', alpha=0.3)
+        plt.errorbar(LETHist['mean'], LETHist['value'], LETHist['error'], fmt=' ', capsize=5, elinewidth=1,
                      capthick=1, label="LET Histogram")
         plt.plot([], [], label="SEE cross-section", color='C1')
         plt.yscale("log")
@@ -114,30 +114,31 @@ for Thick in ThickList:
         ax1.tick_params(axis='y', colors='C0')
 
         ax2 = ax1.twinx()
-        plt.plot(LETHist[:, lowerID], f(LETHist[:, lowerID]), color='C1')
+        plt.plot(LETHist['lower'], f(LETHist['lower']), color='C1')
         ax2.set_ylabel("Cross Section [cm2 bit-1]", color='C1')
         plt.yscale("log")
         ax2.tick_params(axis='y', colors='C1')
 
+        plt.savefig(path + "../" + DataName[P] + " " + CrossectionName + " LET.png", dpi=300, bbox_inches='tight')
         #plt.savefig("/l/triton_work/CARRINGTON/Histograms/" + DataName[P] + "/" + DataName[P] + " " + CrossectionName + " " + Thick + " LET-Hist.pdf",
         #    format='pdf', bbox_inches="tight")
         #plt.close('all')
-        plt.show()
+        #plt.show()
 
 
         ### SEE rate ###############
 
         SEEHist = LETHist
 
-        SEEHist[:, valueID] = LETHist[:, valueID] * f(LETHist[:, meanID])
-        SEEHist[:, errorID] = LETHist[:, errorID] * f(LETHist[:, meanID])
+        SEEHist['value'] = LETHist['value'] * f(LETHist['mean'])
+        SEEHist['error'] = LETHist['error'] * f(LETHist['mean'])
 
         ################## Calculating total SEE Rate #####################################
 
-        SEERate = np.sum(SEEHist[:, valueID])
+        SEERate = np.sum(SEEHist['value'])
         SEERateError = 0
-        for i in range(len(SEEHist[:, valueID])):
-            SEERateError += SEEHist[i, errorID] ** 2
+        for i in range(len(SEEHist['value'])):
+            SEERateError += SEEHist['error'][i] ** 2
         SEERateError = np.sqrt(SEERateError)
         SEERateU = ufloat(SEERate, SEERateError)
 
@@ -146,9 +147,9 @@ for Thick in ThickList:
         print("or:", SEERateU * 8e+9, " s-1 Gbyte-1 ")
 
         fig, ax1 = plt.subplots(1)
-        plt.bar(SEEHist[:, lowerID], SEEHist[:, valueID], width=SEEHist[:, upperID] - SEEHist[:, lowerID], align='edge',
+        plt.bar(SEEHist['lower'], SEEHist['value'], width=SEEHist['upper'] - SEEHist['lower'], align='edge',
                 alpha=0.3)
-        plt.errorbar(SEEHist[:, meanID], SEEHist[:, valueID], SEEHist[:, errorID], fmt=' ', capsize=5, elinewidth=1,
+        plt.errorbar(SEEHist['mean'], SEEHist['value'], SEEHist['error'], fmt=' ', capsize=5, elinewidth=1,
                      capthick=1, label="SEE Histogram")
         plt.plot([], [], label="SEE cross-section", color='C1')
         plt.yscale("log")
@@ -163,19 +164,20 @@ for Thick in ThickList:
         ax1.tick_params(axis='y', colors='C0')
 
         ax2 = ax1.twinx()
-        plt.plot(LETHist[:, lowerID], f(LETHist[:, lowerID]), color='C1')
+        plt.plot(LETHist['lower'], f(LETHist['lower']), color='C1')
         ax2.set_ylabel("Cross Section [cm2 bit-1]", color='C1')
         #ax2.set_ylabel("Cross Section of the receiver [cm2]", color='C1')
         plt.yscale("log")
         ax2.tick_params(axis='y', colors='C1')
 
+        plt.savefig(path + "../" + DataName[P] + " " + CrossectionName + " SEE.png", dpi=300, bbox_inches='tight')
         #plt.savefig("/l/triton_work/CARRINGTON/Histograms/" + DataName[P] + "/" + DataName[P] + " " + CrossectionName + " " + Thick + " SEE-Hist.pdf",
         #    format='pdf', bbox_inches="tight")
-        # plt.close('all')
-        plt.show()
+        plt.close('all')
+        #plt.show()
 
 
-        CSVFile = open("/l/triton_work/CARRINGTON/SEERates.csv", 'a')
+        CSVFile = open("/l/triton_work/LET/Foresail1-Hercules/SEERates.csv", 'a')
         List = (DataName[P], Thick, CrossectionName, SEERate, SEERateError)
 
         String = ', '.join(map(str, List))
