@@ -1,22 +1,17 @@
 import numpy as np
-import csv
 import matplotlib.pyplot as plt
 
 def readGRASLETHistos(file):
-    # Initialize empty lists for the histograms
-    LETHist = []
-    EffHist = []
+    # Initialize dictionaries for LET and Eff histograms
+    LET = {'lower': [], 'upper': [], 'mean': [], 'value': [], 'error': [], 'entries': []}
+    Eff = {'lower': [], 'upper': [], 'mean': [], 'value': [], 'error': [], 'entries': []}
 
     # Initialize the ReadFlag
     ReadFlag = 0
 
-    # Column names and their corresponding indices
-    column_names = ['lower', 'upper', 'mean', 'value', 'error', 'entries']
-
     # Open the file and read line by line
     with open(file, 'r') as f:
-        reader = csv.reader(f)
-        for line in reader:
+        for line in f:
             # Process the file based on the current state of ReadFlag
             if ReadFlag == 0:
                 if "'Bin entries'" in line:
@@ -25,7 +20,9 @@ def readGRASLETHistos(file):
                 if "'End of Block'" in line:
                     ReadFlag = 2
                 else:
-                    LETHist.append([float(x) for x in line])
+                    values = [float(x) for x in line.split(',')]  # Adjust split as necessary
+                    for i, key in enumerate(['lower', 'upper', 'mean', 'value', 'error', 'entries']):
+                        LET[key].append(values[i])
             elif ReadFlag == 2:
                 if "'Bin entries'" in line:
                     ReadFlag = 3
@@ -33,17 +30,21 @@ def readGRASLETHistos(file):
                 if "'End of Block'" in line:
                     ReadFlag = 4
                 else:
-                    EffHist.append([float(x) for x in line])
+                    values = [float(x) for x in line.split(',')]  # Adjust split as necessary
+                    for i, key in enumerate(['lower', 'upper', 'mean', 'value', 'error', 'entries']):
+                        Eff[key].append(values[i])
 
-    # Convert lists to NumPy arrays
-    LETHist = np.asarray(LETHist)
-    EffHist = np.asarray(EffHist)
+    # Convert lists inside the dicts to numpy arrays
+    for key in ['lower', 'upper', 'mean', 'value', 'error', 'entries']:
+        LET[key] = np.array(LET[key])
+        Eff[key] = np.array(Eff[key])
 
+    ## Convert bin edges from [MeV/cm] to [MeV cm2 mg-1]
     C = 2330  # to convert from MeV/cm to Mev cm2 mg-1 in silicon with silicion density being 2.33 g/cm3
 
-    LETHist[:, 0] /= C
-    LETHist[:, 1] /= C
-    LETHist[:, 2] /= C
+    for key in ['lower', 'upper', 'mean']:
+        LET[key] = LET[key] / C
+        Eff[key] = Eff[key] / C
 
     # The LET spectra are in 'counts' per MeV/cm bin ???
     # If the input spcectrum is in [cm-2 s-1] then the counts are in [s-1] per interface area between the shield and detector
@@ -51,17 +52,22 @@ def readGRASLETHistos(file):
     # To get the values in [cm-2 s-1] they have to be divided by 1e6
     AreaNormFactor = 1e6
 
-    # Normalize 'value' and 'error' for both histograms
-    LETHist[:, 3] /= AreaNormFactor  # 'value'
-    LETHist[:, 4] /= AreaNormFactor  # 'error'
-    EffHist[:, 3] /= AreaNormFactor  # 'value'
-    EffHist[:, 4] /= AreaNormFactor  # 'error'
+    for key in ['value', 'error']:
+        LET[key] = LET[key] / AreaNormFactor
+        Eff[key] = Eff[key] / AreaNormFactor
 
-    # Create dictionaries for LET and Efficiency histograms with normalization applied
-    LETHistDict = {name: LETHist[:, i] for i, name in enumerate(column_names)}
-    EffHistDict = {name: EffHist[:, i] for i, name in enumerate(column_names)}
 
-    return LETHistDict, EffHistDict
+    # Adjust for mission duration by dividing by the mission duration in seconds
+    MissionDuration = 5 # years
+    MissionDuration *= 365.25 # days
+    MissionDuration *= 24 # hours
+    MissionDuration *= 3600 # seconds
+
+    for key in ['value', 'error']:
+        LET[key] = LET[key] / MissionDuration
+        Eff[key] = Eff[key] / MissionDuration
+
+    return LET, Eff
 
 
 if __name__ == "__main__":
