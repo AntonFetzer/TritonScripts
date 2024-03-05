@@ -26,7 +26,7 @@ y_data = np.array([9.031E-08, 2.632E-07, 1.447E-06, 2.254E-06])   # cross sectio
 # x0 = min(x_data)*99 because the threshold is close to but below the minimum value of the x_data
 # W = std(x_data) because the width is on the order of the standard deviation of the x_data ?
 # s = 1 because 1 is the most stable exponent.
-p0 = [np.max(y_data)*1.1, np.min(x_data)*0.99, np.std(x_data), 1]
+p0 = [np.max(y_data)*1.1, np.min(x_data)/10, np.std(x_data), 1]
 
 # Bounds for the parameters
 # All parameters are positive
@@ -36,7 +36,7 @@ bounds = ([0, 0, 0, 0], [np.inf, np.inf, np.inf, np.inf])  # set different bound
 # popt: optimal parameters
 # pcov: covariance matrix
 # maxfev: maximum number of function evaluations
-popt, pcov = curve_fit(weibull_func, x_data, y_data, p0=p0, bounds=bounds,  maxfev=5000)
+popt, pcov = curve_fit(weibull_func, x_data, y_data, p0=p0, bounds=bounds,  maxfev=500000, method='dogbox')
 
 # Print the optimal parameters
 A, x0, W, s = popt
@@ -56,14 +56,14 @@ plt.plot(x_Fit, y_Fit, 'r-', label=Fit_label)
 plt.xlabel('LET [MeV cm2 mg-1]')
 plt.ylabel('Cross Section [cm-2] ')
 plt.title("SEE cross section vs LET")
-plt.xlim(min(x_data)*0.5, max(x_data)*1.5)
-plt.ylim(min(y_data)*0.2, max(y_data)*1.5)
+plt.xlim(min(x_data)*0.1, max(x_data)*2)
+plt.ylim(min(y_data)*0.1, max(y_data)*2)
 plt.xscale('log')
 plt.yscale('log')
 plt.grid('both')
 plt.legend()
 
-#plt.show()
+plt.show()
 
 # Save the plot
-plt.savefig('/l/triton_work/LET/Foresail1-Hercules/Fig13_SEFI_CrossSection_vs_LET_WeibullFitting.png', dpi=300, bbox_inches='tight')
+#plt.savefig('/l/triton_work/LET/Foresail1-Hercules/Fig13_SEFI_CrossSection_vs_LET_WeibullFitting.png', dpi=300, bbox_inches='tight')
