@@ -24,8 +24,7 @@ def readSourceHistos(file):
             elif "'End of Block'" in line and start_line is not None:
                 # End of a histogram data block
                 end_line = i
-                hist_data = pd.read_csv(file, skiprows=start_line, nrows=end_line - start_line, header=None,
-                                        engine='python')
+                hist_data = pd.read_csv(file, skiprows=start_line, nrows=end_line - start_line, header=None, engine='python')
                 hist_data.columns = ['lower', 'upper', 'mean', 'value', 'error', 'entries']
 
                 # Check if we have reached beyond the known histogram names
@@ -56,7 +55,7 @@ def readSourceHistos(file):
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/SourceHistograms/ISO-GTO/ISO-GTO-Fe-mission/Res/"
+    Path = "/l/triton_work/SourceHistograms/A9-FS1/AE9/Res/"
     # Find the first .csv file in the specified directory
     FullPath = next(iglob(os.path.join(Path, '*.csv')), None)
     # Construct the path for the 'Plot' directory
@@ -119,8 +118,8 @@ if __name__ == "__main__":
     plt.xlabel('Weights')
     plt.ylabel('Counts')
     plt.title('Weights Distribution')
-    plt.xscale('linear')
-    plt.yscale('linear')
+    plt.xscale('log')
+    plt.yscale('log')
 
     plt.savefig(os.path.join(PlotDir, 'Weights Source Distribution.pdf'), format='pdf', bbox_inches='tight')
 

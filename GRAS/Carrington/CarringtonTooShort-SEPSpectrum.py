@@ -28,7 +28,7 @@ print("Integral:")
 for E in Evals:
     print(f"{E:.4}", f"{Jint(E):.4}")
 
-file = "/l/triton_work/Spectra/A9/spenvis_tri.txt"
+file = "/l/triton_work/Spectra/A9-GTO/spenvis_tri.txt"
 
 Protons, Electrons = readSpenvis_tri(file)
 
@@ -50,6 +50,6 @@ plt.title("Spectra Comparison")
 plt.xlabel("Kinetic energy [MeV]")
 plt.ylabel("Fluence [cm-2 s-1] or [cm-2 s-1 MeV-1]")
 
-plt.savefig("/l/triton_work/CARRINGTON/SpectrumComparisonSEP.pdf", format='pdf', bbox_inches="tight")
+#plt.savefig("/l/triton_work/CARRINGTON/SpectrumComparisonSEP.pdf", format='pdf', bbox_inches="tight")
 
-#plt.show()
+plt.show()

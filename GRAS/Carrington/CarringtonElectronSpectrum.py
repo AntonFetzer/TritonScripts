@@ -17,7 +17,7 @@ print(fdiff)
 f = sp.lambdify(E, f, "numpy")
 fdiff = sp.lambdify(E, fdiff, "numpy")
 
-Evals = np.geomspace(0.13, 10, num=10)
+Evals = np.geomspace(0.13, 1000, num=10)
 
 print("Differential")
 for E in Evals:
@@ -28,15 +28,15 @@ print("Integral")
 for E in Evals:
     print(f"{E:.4}", f"{f(E):.4}")
 
-file = "/l/triton_work/Spectra/A9/spenvis_tri.txt"
+#file = "/l/triton_work/Spectra/A9/spenvis_tri.txt"
 
-Protons, Electrons = readSpenvis_tri(file)
+#Protons, Electrons = readSpenvis_tri(file)
 
 plt.figure(1)
 #plt.plot(Protons[0], Protons[1], label="Proton Integral")
 #plt.plot(Protons[0], Protons[2], label="Proton Differential")
-plt.plot(Electrons[0], Electrons[1], '-.', label="AE9 Integral")
-plt.plot(Electrons[0], Electrons[2], '-.', label="AE9 Differential")
+#plt.plot(Electrons[0], Electrons[1], '-.', label="AE9 Integral")
+#plt.plot(Electrons[0], Electrons[2], '-.', label="AE9 Differential")
 
 plt.plot(Evals, f(Evals), label="Carrington Integral")
 plt.plot(Evals, -fdiff(Evals), label="Carrington Differential")

@@ -18,11 +18,11 @@ combined_data_prot = pd.DataFrame(columns=['Dose', 'Error', 'Entries', 'Non zero
 combined_data_elec = pd.DataFrame(columns=['Dose', 'Error', 'Entries', 'Non zero entries'])
 
 for folder in Folders:
-    temp_prot = totalkRadGrasSingle(os.path.join(Path, folder, "Res"), "Prot")
+    temp_prot = totalkRadGrasSingle(os.path.join(Path, folder, "Res"))
     temp_prot.index = [folder[5:]]  # Set the index of the temp DataFrame to the folder name without the "RadEx" prefix
     combined_data_prot = pd.concat([combined_data_prot, temp_prot])
 
-    temp_elec = totalkRadGrasSingle(os.path.join(Path, folder, "Res"), "Elec")
+    temp_elec = totalkRadGrasSingle(os.path.join(Path, folder, "Res"))
     temp_elec.index = [folder[5:]]  # Set the index of the temp DataFrame to the folder name without the "RadEx" prefix
     combined_data_elec = pd.concat([combined_data_elec, temp_elec])
 
