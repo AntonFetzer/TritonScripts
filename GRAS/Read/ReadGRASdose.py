@@ -3,15 +3,18 @@ import matplotlib.pyplot as plt
 import csv
 
 
-def readGrasCsv(file):
-    data = [[], [], [], []]
+def readGRASdose(file):
+    keys = ['dose', 'error', 'entries', 'non-zeros']
+
+    # Generating the dictionary from the list of keys
+    TID = {key: [] for key in keys}
 
     ReadFlag = 0
-    # print("Reading in File: " + file)
+
+    # Open the file and read line by line
     with open(file, 'r') as f:
-        reader = csv.reader(f)
-        for line in reader:
-            # print(line)
+        for line in f:
+            # Process the file based on the current state of ReadFlag
             if ReadFlag == 0:
                 if "'TOTAL DOSE FOR INDIVIDUAL VOLUMES'" in line:
                     ReadFlag = 1
@@ -22,26 +25,23 @@ def readGrasCsv(file):
                 if "'End of Block'" in line:
                     break
                 else:
-                    data[0].append(float(line[0]))
-                    data[1].append(float(line[1]))
-                    data[2].append(float(line[2]))
-                    data[3].append(float(line[3]))
+                    values = [float(x) for x in line.split(',')]
+                    for i, key in enumerate(keys):
+                        TID[key].append(values[i])
 
-    Res = np.ndarray(np.shape(data), dtype=np.float64)
-    #Res = np.array(data, dtype=np.float64)
+    # Convert lists inside the dicts to numpy arrays
+    for key in keys:
+        TID[key] = np.array(TID[key])
 
     # Dose data is in rad/s --> multiply with number of seconds in a month to get to dose per months.
     # Dose is given per generated particle --> need to divide by the number of files
     # Dose is given in rad --> divide by 1000 to get to krad.
     ScaleFactor = 30 * 24 * 60 * 60 / 1000
 
-    for i, tile in enumerate(data[0]):
-        Res[0][i] = data[0][i] * ScaleFactor
-        Res[1][i] = data[1][i] * ScaleFactor
-        Res[2][i] = data[2][i]
-        Res[3][i] = data[3][i]
+    for key in ['dose', 'error']:
+        TID[key] = TID[key] * ScaleFactor
 
-    return Res  # 4xNumTiles matrix
+    return TID  # 4xNumTiles matrix
     # data[0]: kRad per particle for each volume
     # data[1]: Absolute Error in kRad per particle
     # data[2]: Number of Entries

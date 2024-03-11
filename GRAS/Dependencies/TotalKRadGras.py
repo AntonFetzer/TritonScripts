@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from GRAS.Read.ReadGRASCSV import readGrasCsv
+from GRAS.Read.ReadGRASdose import readGRASdose
 import matplotlib.pyplot as plt
 import sys
 
@@ -18,7 +18,7 @@ def totalkRadGras(path, particle: str):
     RawData = []
 
     for File in Files:
-        RawData.append(readGrasCsv(path + File))
+        RawData.append(readGRASdose(path + File))
 
     # RawData[File][Variable][Tile]
 
@@ -90,7 +90,7 @@ def totalkRadGras(path, particle: str):
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/ShieldingCurves/Cobalt-60/Cobalt-60/Res/"
+    Path = "/l/triton_work/ShieldingCurves/Carrington/CarringtonElectronDiffPowTabelated-10mm/Res/"
 
     TID = totalkRadGras(Path, "")
 
@@ -100,6 +100,8 @@ if __name__ == "__main__":
     plt.grid(which="both")
     plt.title("Relative Error in %")
 
+    plt.savefig("/l/triton_work/ShieldingCurves/Carrington/CarringtonElectronDiffPowTabelated-10mm/Plot/RelativeError.pdf", format='pdf', bbox_inches="tight")
+
     # Number of non-zero entries
     plt.figure(2)
     plt.plot(TID[3], '.')
@@ -107,16 +109,19 @@ if __name__ == "__main__":
     plt.yscale("log")
     plt.title("Number of non-Zero Entries")
 
+    plt.savefig("/l/triton_work/ShieldingCurves/Carrington/CarringtonElectronDiffPowTabelated-10mm/Plot/NonZeroEntries.pdf", format='pdf', bbox_inches="tight")
+
     # Total Dose
     x = np.linspace(0, len(TID[0])-1, num=len(TID[0]), dtype=int, endpoint=True)
     plt.figure(3)
     plt.errorbar(x, TID[0], yerr=TID[1], fmt=' ', capsize=5)
     plt.grid(which="both")
-    #plt.yscale("log")
-    plt.ylim(0, )
+    plt.yscale("log")
     plt.title("Dose")
 
-    plt.show()
+    plt.savefig("/l/triton_work/ShieldingCurves/Carrington/CarringtonElectronDiffPowTabelated-10mm/Plot/Dose.pdf", format='pdf', bbox_inches="tight")
+
+    #plt.show()
 
 
 

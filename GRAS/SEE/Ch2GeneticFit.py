@@ -1,6 +1,7 @@
 import numpy as np
-from deap import base, creator, tools, algorithms
 import matplotlib.pyplot as plt
+from deap import base, creator, tools, algorithms
+
 
 # Your Weibull function
 def weibull_func(x, A, x0, W, s):
@@ -17,6 +18,11 @@ x_data = np.array([0.963, 2.246, 3.479, 6.123])   # LET [MeV cm2 mg-1]
 y_data = np.array([9.031E-08, 2.632E-07, 1.447E-06, 2.254E-06])   # cross section [cm-2]
 y_lower = np.array([9.1610E-09, 5.2084E-08, 4.7947E-07, 8.2306E-07])   # lower error [cm-2]
 y_upper = np.array([3.2799E-07, 7.6510E-07, 2.8480E-06, 4.8890E-06])   # upper error [cm-2]
+
+# x_data = np.array([0.00984463519313305, 0.00583690987124464, 0.00438369098712446, 0.00362845493562232])   # LET [MeV cm2 mg-1]
+# y_data = np.array([2.37388724035608E-09, 1.84119677790564E-09, 2.14564369310793E-09, 2.68987341772152E-09])   # cross section [cm-2]
+# y_lower = y_data * 0.9   # lower error [cm-2]
+# y_upper = y_data * 1.1   # upper error [cm-2]
 
 def chi_squared(individual):
     A, x0, W, s = individual
@@ -48,7 +54,7 @@ def chi_squared(individual):
 POPULATION_SIZE = 500
 P_CROSSOVER = 0.5  # probability for crossover
 P_MUTATION = 0.01   # probability for mutating an individual
-MAX_GENERATIONS = 20
+MAX_GENERATIONS = 25
 HALL_OF_FAME_SIZE = 10
 
 # Set the random seed for reproducibility
@@ -112,7 +118,7 @@ def main():
 
 
 Results = {'A': [], 'x0': [], 'W': [], 's': [], 'Fitness': []}
-NumberofRuns = 50
+NumberofRuns = 20
 # Run the genetic algorithm 10 times
 for i in range(NumberofRuns):
     print(f"Run {i+1}")
@@ -137,7 +143,7 @@ plt.errorbar(x_data, y_data, yerr=[yerr_lower, yerr_upper], fmt='.', label='Data
 
 # Generate x values for the Weibull fit
 # 500 x values between 50% of the minimum x value and 150% of the maximum x value
-x_Fit = np.geomspace(min(x_data)/100, max(x_data)*10, 500)
+x_Fit = np.geomspace(min(x_data)/10, max(x_data)*10, 500)
 
 # Sort the resaults by fitness
 Results = {key: [value for _, value in sorted(zip(Results['Fitness'], Results[key]))] for key in Results}

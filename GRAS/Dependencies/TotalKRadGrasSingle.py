@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from GRAS.Read.ReadGRASCSVTotal import readGrasCsvTotal
+from GRAS.Read.ReadGRASdoseSingle import readGRASdoseSingle
 import matplotlib.pyplot as plt
 import sys
 import pandas as pd
@@ -19,7 +19,7 @@ def totalkRadGrasSingle(path):
     combined_data = pd.DataFrame(columns=['Dose', 'Error', 'Entries', 'Non zero entries'])
 
     for file in Files:
-        data = readGrasCsvTotal(os.path.join(path, file))
+        data = readGRASdoseSingle(os.path.join(path, file))
         combined_data = pd.concat([combined_data, data], ignore_index=True)
 
     # Sum up all the entries in the 'Entries' column

@@ -2,11 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def readGRASLETHistos(file):
-    # Initialize dictionaries for LET and Eff histograms
-    LET = {'lower': [], 'upper': [], 'mean': [], 'value': [], 'error': [], 'entries': []}
-    Eff = {'lower': [], 'upper': [], 'mean': [], 'value': [], 'error': [], 'entries': []}
+    keys = ['lower', 'upper', 'mean', 'value', 'error', 'entries']
 
-    # Initialize the ReadFlag
+    # Initialize dictionaries for LET and Eff histograms
+    LET = {key: [] for key in keys}
+    Eff = {key: [] for key in keys}
+
     ReadFlag = 0
 
     # Open the file and read line by line
@@ -20,8 +21,8 @@ def readGRASLETHistos(file):
                 if "'End of Block'" in line:
                     ReadFlag = 2
                 else:
-                    values = [float(x) for x in line.split(',')]  # Adjust split as necessary
-                    for i, key in enumerate(['lower', 'upper', 'mean', 'value', 'error', 'entries']):
+                    values = [float(x) for x in line.split(',')]
+                    for i, key in enumerate(keys):
                         LET[key].append(values[i])
             elif ReadFlag == 2:
                 if "'Bin entries'" in line:
@@ -31,11 +32,11 @@ def readGRASLETHistos(file):
                     ReadFlag = 4
                 else:
                     values = [float(x) for x in line.split(',')]  # Adjust split as necessary
-                    for i, key in enumerate(['lower', 'upper', 'mean', 'value', 'error', 'entries']):
+                    for i, key in enumerate(keys):
                         Eff[key].append(values[i])
 
     # Convert lists inside the dicts to numpy arrays
-    for key in ['lower', 'upper', 'mean', 'value', 'error', 'entries']:
+    for key in keys:
         LET[key] = np.array(LET[key])
         Eff[key] = np.array(Eff[key])
 
@@ -56,16 +57,12 @@ def readGRASLETHistos(file):
         LET[key] = LET[key] / AreaNormFactor
         Eff[key] = Eff[key] / AreaNormFactor
 
-
     # Adjust for mission duration by dividing by the mission duration in seconds
-    MissionDuration = 5 # years
-    MissionDuration *= 365.25 # days
-    MissionDuration *= 24 # hours
-    MissionDuration *= 3600 # seconds
+    # MissionDuration = 5 * 365.25 * 24 * 3600 # 5 years in seconds
 
-    for key in ['value', 'error']:
-        LET[key] = LET[key] / MissionDuration
-        Eff[key] = Eff[key] / MissionDuration
+    # for key in ['value', 'error']:
+    #     LET[key] = LET[key] / MissionDuration
+    #     Eff[key] = Eff[key] / MissionDuration
 
     return LET, Eff
 

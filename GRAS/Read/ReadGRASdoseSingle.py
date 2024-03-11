@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 import sys
 
-def readGrasCsvTotal(file):
+def readGRASdoseSingle(file):
     data = pd.DataFrame(columns=['Dose', 'Error', 'Entries', 'Non zero entries'])
 
     read_values = False
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     RawData = []
 
     for File in Files:
-        Results = readGrasCsvTotal(path + File)
+        Results = readGRASdoseSingle(path + File)
 
     print(Results)
 
