@@ -108,5 +108,5 @@ plt.xlabel("Aluminium Shielding Depth [g/cm2]")
 plt.ylabel("Ionising Dose per month [krad]")
 plt.legend()
 
-#plt.show()
-plt.savefig("/l/triton_work/ShieldingCurves/MultilayerPaper/ShieldingCurvesTypes.pdf", format='pdf', bbox_inches="tight")
+plt.show()
+#plt.savefig("/l/triton_work/ShieldingCurves/MultilayerPaper/ShieldingCurvesTypes.pdf", format='pdf', bbox_inches="tight")

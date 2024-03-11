@@ -4,6 +4,7 @@ import csv
 
 
 def readGRASdose(file):
+
     keys = ['dose', 'error', 'entries', 'non-zeros']
 
     # Generating the dictionary from the list of keys
@@ -51,7 +52,7 @@ def readGRASdose(file):
 if __name__ == "__main__":
     File = "/l/triton_work/RadEx/RadEx0mm/Res/Electrons_981978_151919.csv"
 
-    Results = readGrasCsv(File)
+    Results = readGRASdose(File)
 
     #print(np.shape(Results))
     print(Results)

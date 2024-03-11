@@ -5,7 +5,7 @@ from GRAS.Dependencies.TotalKRadGras import totalkRadGras
 from matplotlib import cm
 import matplotlib as mpl
 from uncertainties import ufloat
-from GRAS.GPT4Experiments.CombinedColormaps import create_average_colormap
+from GRAS.Triangles.CombinedColormaps import create_average_colormap
 import sigfig
 
 
