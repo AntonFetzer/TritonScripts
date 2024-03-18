@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def readGRASdose(file):
+def readDose(file):
 
     keys = ['dose', 'error', 'entries', 'non-zeros']
 
@@ -49,14 +49,37 @@ def readGRASdose(file):
 
 
 if __name__ == "__main__":
-    File = "/l/triton_work/RadEx/RadEx0mm/Res/Electrons_981978_151919.csv"
+    File = "/l/triton_work/ShieldingCurves/Carrington/CarringtonElectronDiffPowTabelated-10mm/Res/TID_757480_117187.csv"
 
-    Results = readGRASdose(File)
+    Results = readDose(File)
 
-    #print(np.shape(Results))
-    print(Results)
+    print(np.shape(Results))
+    #print(Results)
 
-    plt.plot(100 * Results[1]/Results[0], '.')
-    plt.title("Relative Error in %")
-    #plt.yscale("log")
+    # Plot the dose with error bars
+    plt.figure(0)
+    plt.errorbar(np.arange(len(Results['dose'])), Results['dose'], yerr=Results['error'], fmt=' ', capsize=5, elinewidth=1, capthick=1)
+    plt.title('Dose per tile')
+    plt.xlabel('Tile number')
+    plt.ylabel('Dose [kRad]')
+    plt.yscale('log')
+    plt.grid(which='both')
+
+    # Plot the relative error
+    plt.figure(1)
+    plt.plot(100 * Results['error'] / Results['dose'], '.')
+    plt.title('Relative Error in %')
+    plt.xlabel('Tile number')
+    plt.ylabel('Relative Error [%]')
+    plt.grid(which='both')
+
+    # Plot the number of non-zero entries
+    plt.figure(2)
+    plt.plot(Results['non-zeros'], '.')
+    plt.title('Number of non-zero entries')
+    plt.xlabel('Tile number')
+    plt.ylabel('Number of non-zero entries')
+    plt.yscale('log')
+    plt.grid(which='both')
     plt.show()
+
