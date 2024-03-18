@@ -4,7 +4,7 @@ import csv
 from GRAS.GPT4Experiments.MergeBins import merge_bins
 
 
-def readGRASHistos(file):
+def readDoseHistos(file):
     DoseHistDict = {
         'lower': [],    #   rad/s
         'upper': [],    #   rad/s
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     path = "/l/triton_work/Histograms/Cobalt-60/Res/"
     file = "Electrons_627965_97150.csv"
 
-    DoseHist, PrimaryHist = readGRASHistos(path + file)
+    DoseHist, PrimaryHist = readDoseHistos(path + file)
 
     #print("DoseHist Shape", np.shape(PrimaryHist))
     #PrimaryHist = merge_bins(PrimaryHist, 10)
