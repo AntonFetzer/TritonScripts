@@ -25,9 +25,12 @@ def readDose(file):
                 if "'End of Block'" in line:
                     break
                 else:
-                    values = [float(x) for x in line.split(',')]
-                    for i, key in enumerate(keys):
-                        TID[key].append(values[i])
+                    # Split the line into parts based on the comma
+                    values = line.split(',')
+                    TID['dose'].append(float(values[0]))
+                    TID['error'].append(float(values[1]))
+                    TID['entries'].append(int(float(values[2])))
+                    TID['non-zeros'].append(int(float(values[3])))
 
     # Convert lists inside the dicts to numpy arrays
     for key in keys:
@@ -63,7 +66,9 @@ if __name__ == "__main__":
     plt.xlabel('Tile number')
     plt.ylabel('Dose [kRad]')
     plt.yscale('log')
-    plt.grid(which='both')
+    plt.minorticks_on()
+    plt.grid(axis='x', which='both')
+    plt.grid(axis='y', which='major')
 
     # Plot the relative error
     plt.figure(1)
@@ -80,6 +85,8 @@ if __name__ == "__main__":
     plt.xlabel('Tile number')
     plt.ylabel('Number of non-zero entries')
     plt.yscale('log')
-    plt.grid(which='both')
+    plt.minorticks_on()
+    plt.grid(axis='x', which='both')
+    plt.grid(axis='y', which='major')
     plt.show()
 

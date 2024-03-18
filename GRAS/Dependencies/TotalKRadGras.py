@@ -1,125 +1,130 @@
 import os
 import numpy as np
-from GRAS.Read.ReadGRASdose import readGRASdose
+from GRAS.Read.ReadDose import readDose
 import matplotlib.pyplot as plt
 import sys
 
 
-def totalkRadGras(path, particle: str):
-    print("")
-    print("Reading in all", particle, "files in folder:", path)
+def totalkRadGras(path):
+    print("\nReading in all csv files in folder:", path)
 
     # Get list of all csv files in Path
-    Files = [f for f in os.listdir(path) if particle in f]
+    Files = [f for f in os.listdir(path) if '.csv' in f]
 
     if not Files:
         sys.exit("ERROR !!! No files found")
 
-    RawData = []
+    keys = ['dose', 'error', 'entries', 'non-zeros']
+    TID = {key: [] for key in keys}
+    # Ionising dose in kRad
+    # Number of entries is the same for each tile, because each detected particle causes an entry at all tiles. Most of these entries are therefore empty.
+    # Number of non-zero entries is different for each tile.
 
-    for File in Files:
-        RawData.append(readGRASdose(path + File))
+    # RawData is a list of dictionaries.
+    # Each dictionary contains the dose, error, entries and non-zero entries for each file.
+    RawData = [readDose(os.path.join(path, file)) for file in Files]
 
-    # RawData[File][Variable][Tile]
+    # Initialize numpy arrays for dose, error, entries, and non-zeros using the first file to get the correct shape.
+    for key in keys:
+        TID[key] = np.zeros_like(RawData[0][key])
 
-    # Ionising dose in rad
-    Dose = np.zeros(np.shape(RawData[0][0]), dtype=np.float64)
+    for raw in RawData:
+        #print(raw['dose'] * raw['entries'])
+        TID['dose'] += raw['dose'] * raw['entries']  # Weighted average of all the dose results. Multiply dose by number of entries, then later divide by the total number of entries.
+        TID['entries'] += raw['entries']  # Summed up number of entries from all files
+        TID['non-zeros'] += raw['non-zeros']  # Summed up number of Non Zero Entries from all files
 
-    # Number of entries. This number is the same for each tile, because each detected particle causes an entry at all tiles. Most of these entries are therefore empty.
-    Entries = np.zeros(np.shape(RawData[0][2]), dtype=np.float64)
+    # Calculate the weighted average of the dose.
+    TID['dose'] = TID['dose'] / TID['entries']  # Divide by summed up number of entries to get the weighted average of the dose results
 
-    # Number of non-zero entries for each tile. This number is different for each tile.
-    NonZeroEntries = np.zeros(np.shape(RawData[0][3]), dtype=np.float64)
+    # Error estimation based on the standard deviation of the population and distance from the mean.
+    ErrTerm = np.zeros_like(TID['error'])
+    for raw in RawData:
+        ErrTerm += raw['entries'] ** 2 * (raw['error'] ** 2 + (raw['dose'] - TID['dose']) ** 2)
 
-    for Temp in RawData:
-        #print(Temp[0] * Temp[2])
-        Dose += Temp[0] * Temp[2]  # Weighted average of all the dose results. Multiply dose by number of entries to
-        Entries += Temp[2]  # Summed up number of entries from all files
-        NonZeroEntries += Temp[3]  # Summed up number of Non Zero Entries from all files
-
-    Dose = Dose / Entries  # Divide by summed up number of entries to get the weighted average of the dose results
-
-
-    # Error estimation based on the standard deviaiton of the poulation and distance from the mean.
-    ErrTerm = np.zeros(np.shape(RawData[0][1]), dtype=np.float64)
-
-    for Temp in RawData:
-        ErrTerm += Temp[2] ** 2 * (Temp[1] ** 2 + (Temp[0] - Dose) ** 2)
-        #ErrTerm += Temp[2] ** 2 * (Temp[1] ** 2)
-
-    Error = np.sqrt(ErrTerm) / Entries
-
-
-    # plt.plot(100 * Error / Dose, '.')
-    # plt.show()
+    TID['error'] = np.sqrt(ErrTerm) / TID['entries']
 
     # Entries is the same for all tiles, because each tile gets an entry if a particle is detected in any tile.
-    TotalEntries = Entries[0]
+    TotalEntries = TID['entries'][0]
+    # Check if the number of entries is the same for all tiles.
+    if not np.all(TID['entries'] == TID['entries'][0]):
+        sys.exit("ERROR !!! Number of entries is not the same for all tiles")
 
-    NumTiles = len(Dose)
+    NumTiles = len(TID['dose'])
+    MinNZE = min(TID['non-zeros'])   # Minimum number of non-zero entries
+    LowestTile = np.argmin(TID['non-zeros'])
+    ParticlesPerTile = TID['entries'][0] / NumTiles
 
-    MinZE = min(NonZeroEntries)
-    LowestTile = np.argmin(NonZeroEntries)
-    PartPerTile = Entries / NumTiles
+    print("Total number of particles:", f"{TotalEntries:.3g}")
+    print("Average number of Particles per tile:", f"{ParticlesPerTile:.3g}")
+    print("Minimum number of non Zero Entries:", f"{MinNZE:.3g}", "at Tile number", str(LowestTile))
 
 
-    print("Total number of particles:", f"{TotalEntries:.2}")
-    print("Minimum Particles per tile:", f"{min(PartPerTile):.2}")
-    print("Minimum number of non Zero Entries:", f"{MinZE:.2}", "at Tile number", str(LowestTile))
+    if MinNZE < 100:
+        print("ERROR !!! Tile", LowestTile, "has only", MinNZE, "Non-Zero entries !!!")
 
-    if MinZE < 100:
-        print("ERROR !!! Tile", LowestTile, "has only", MinZE, "Non-Zero entries !!!")
-
-    RelativeError = Error / Dose
+    RelativeError = TID['error'] / TID['dose']
     MaxRelativeError = max(RelativeError)
-    # print(RelativeError)
     MaxRelativeErrorTile = np.argmax(RelativeError)
-    print("Maximum relative error =", str(round(MaxRelativeError * 100, 2)), "% at Tile number", str(MaxRelativeErrorTile))
+    print("Maximum relative error =", f"{MaxRelativeError * 100:.2f} % at Tile number {MaxRelativeErrorTile}")
 
-    PartNumRequired = (MaxRelativeError/0.01)**2 * TotalEntries  # Number of Particles required to get less than 1% relative error
-    FullRunns = PartNumRequired/2e9
+    PartNumRequired = (MaxRelativeError / 0.01) ** 2 * TotalEntries
+    ParticleMultipleRequired = PartNumRequired / TotalEntries
 
-    print("The number of particles required to achieve 1% err is:", f"{PartNumRequired:.2}", "or", round((MaxRelativeError/0.01)**2, 3), " times the number of particles in the run")
+    print(f"The number of particles required to achieve 1% error is: {PartNumRequired:.3g} or {ParticleMultipleRequired:.3g} times the number of particles in the run")
 
     if MaxRelativeError > 1:
-        print("ERROR !!! Tile " + str(MaxRelativeErrorTile) + " has " + str(MaxRelativeError * 100) + " % relative error!!!")
+        print(f"ERROR !!! Tile {MaxRelativeErrorTile} has {MaxRelativeError * 100:.2f} % relative error!!!")
 
-    Data = np.asarray([Dose, Error, Entries, NonZeroEntries])
-
-    return Data
+    # Print datatypes and shapes of the arrays
+    #for key in keys:
+    #    print(key, type(TID[key]), TID[key].shape)
+        # print data type of the array entries
+    #    print(key, TID[key].dtype)
+        
+    return TID
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/ShieldingCurves/Carrington/CarringtonElectronDiffPowTabelated-10mm/Res/"
+    Path = "/l/triton_work/ShieldingCurves/Carrington/Carrington-SEP-Expected-Int-With0/Res/"
 
-    TID = totalkRadGras(Path, "")
+    Results = totalkRadGras(Path)
 
-    # Relative Error in %
+    # Plot the dose with error bars
+    plt.figure(0)
+    plt.errorbar(np.arange(len(Results['dose'])), Results['dose'], yerr=Results['error'], fmt=' ', capsize=5, elinewidth=1, capthick=1)
+    plt.title('Dose per tile')
+    plt.xlabel('Tile number')
+    plt.ylabel('Dose [kRad]')
+    plt.yscale('log')
+    plt.minorticks_on()
+    plt.grid(axis='x', which='both')
+    plt.grid(axis='y', which='major')
+
+    plt.savefig(Path + "../Plot/Dose.pdf", format='pdf', bbox_inches="tight")
+
+    # Plot the relative error
     plt.figure(1)
-    plt.plot(100 * TID[1] / TID[0], '.')  # Relative Error in %
-    plt.grid(which="both")
-    plt.title("Relative Error in %")
+    plt.plot(100 * Results['error'] / Results['dose'], '.')
+    plt.title('Relative Error in %')
+    plt.xlabel('Tile number')
+    plt.ylabel('Relative Error [%]')
+    plt.grid(which='both')
 
-    plt.savefig("/l/triton_work/ShieldingCurves/Carrington/CarringtonElectronDiffPowTabelated-10mm/Plot/RelativeError.pdf", format='pdf', bbox_inches="tight")
+    plt.savefig(Path + "../Plot/RelativeError.pdf", format='pdf', bbox_inches="tight")
 
-    # Number of non-zero entries
+    # Plot the number of non-zero entries
     plt.figure(2)
-    plt.plot(TID[3], '.')
-    plt.grid(which="both")
-    plt.yscale("log")
-    plt.title("Number of non-Zero Entries")
+    plt.plot(Results['non-zeros'], '.')
+    plt.title('Number of non-zero entries')
+    plt.xlabel('Tile number')
+    plt.ylabel('Number of non-zero entries')
+    plt.yscale('log')
+    plt.minorticks_on()
+    plt.grid(axis='x', which='both')
+    plt.grid(axis='y', which='major')
 
-    plt.savefig("/l/triton_work/ShieldingCurves/Carrington/CarringtonElectronDiffPowTabelated-10mm/Plot/NonZeroEntries.pdf", format='pdf', bbox_inches="tight")
-
-    # Total Dose
-    x = np.linspace(0, len(TID[0])-1, num=len(TID[0]), dtype=int, endpoint=True)
-    plt.figure(3)
-    plt.errorbar(x, TID[0], yerr=TID[1], fmt=' ', capsize=5)
-    plt.grid(which="both")
-    plt.yscale("log")
-    plt.title("Dose")
-
-    plt.savefig("/l/triton_work/ShieldingCurves/Carrington/CarringtonElectronDiffPowTabelated-10mm/Plot/Dose.pdf", format='pdf', bbox_inches="tight")
+    plt.savefig(Path + "../Plot/NonZeroEntries.pdf", format='pdf', bbox_inches="tight")
 
     #plt.show()
 
