@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import sys
 
 
-def totalkRadGras(path):
+def totalDose(path):
     print("\nReading in all csv files in folder:", path)
 
     # Get list of all csv files in Path
@@ -88,7 +88,7 @@ def totalkRadGras(path):
 if __name__ == "__main__":
     Path = "/l/triton_work/ShieldingCurves/MultilayerPaper/AE9-GTO/Res/"
 
-    Results = totalkRadGras(Path)
+    Results = totalDose(Path)
 
     # Plot the dose with error bars
     plt.figure(0)

@@ -36,13 +36,13 @@ def readDose(file):
     for key in keys:
         TID[key] = np.array(TID[key])
 
-    # Dose data is in rad/s --> multiply with number of seconds in a month to get to dose per months.
-    # Dose is given per generated particle --> need to divide by the number of files
-    # Dose is given in rad --> divide by 1000 to get to krad.
-    ScaleFactor = 30 * 24 * 60 * 60 / 1000
+    # The default dose unit in GRAS is rad.
+    # Most spectra are flux spectra. The resulting dose is therefore given in rad/s.
+    # --> divide by 1000 to get to krad.
+    radToKrad = 1 / 1000
 
     for key in ['dose', 'error']:
-        TID[key] = TID[key] * ScaleFactor
+        TID[key] = TID[key] * radToKrad
 
     return TID  # 4xNumTiles matrix
     # data[0]: kRad per particle for each volume
