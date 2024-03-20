@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import mpltern  # noqa: F401
 import numpy as np
 import os
-from GRAS.Dependencies.TotalKRadGras import totalkRadGras
+from GRAS.Dependencies.TotalDose import totalkRadGras
 from matplotlib import cm
 import matplotlib as mpl
 from uncertainties import ufloat

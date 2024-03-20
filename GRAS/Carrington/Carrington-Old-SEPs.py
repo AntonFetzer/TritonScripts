@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import sympy as sp
 from GRAS.Read.ReadSpenvis_tri import readSpenvis_tri
 from scipy.optimize import curve_fit
-from GRAS.Dependencies.TotalGRASHistos import totalGRASHistos
+from GRAS.Dependencies.TotalDoseHistos import totalGRASHistos
 
 def DiffSpec(E, Int):
     # f = Fi - Fi-1 / dE
@@ -59,10 +59,10 @@ AE9DiffTEST = DiffSpec(AP9Ener, AP9Int)
 DiffF = DiffSpec(NewEner, NewIntF)
 #plt.plot(NewEner, DiffF, label="Differential Fluence")
 plt.legend()
-plt.savefig("/l/triton_work/Spectra/Carrington/SEPIntegralSpectrumPythonFix.eps", format='eps', bbox_inches="tight")
+#plt.savefig("/l/triton_work/Spectra/Carrington/SEPIntegralSpectrumPythonFix.eps", format='eps', bbox_inches="tight")
 #plt.show()
 
-'''
+
 FitRes = curve_fit(PowerLawFunc, Ener, np.log(IntF), p0=np.asarray([1e8, 1, 1]), bounds=(0, np.inf))
 
 print(FitRes[0])
@@ -75,6 +75,5 @@ for f in Fit:
 
 plt.plot(Ener, Fit, label="Fit")
 
-plt.savefig("/l/triton_work/Spectra/Carrington/SEPIntegralSpectrumPython.eps", format='eps', bbox_inches="tight")
+#plt.savefig("/l/triton_work/Spectra/Carrington/SEPIntegralSpectrumPython.eps", format='eps', bbox_inches="tight")
 plt.show()
-'''

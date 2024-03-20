@@ -36,19 +36,19 @@ f_high = PowerLawFunction(F0_high, a_high, E0, "Diff")
 
 Evals = np.geomspace(10, 200, num=100)
 
-print("Integral")
-for E in Evals:
-    print(f"{E:.4}", f"{F_mean(E):.4}")
+#print("Integral")
+#for E in Evals:
+#    print(f"{E:.4}", f"{F_mean(E):.4}")
 
 #print("Differential")
 #for E in Evals:
 #    print(f"{E:.4}", f"{-f_high(E):.4}")
 
 
-'''
+
 ## Import AP9 AE9 Data
 
-file = "/l/triton_work/Spectra/A9/spenvis_tri.txt"
+file = "/l/triton_work/Spectra/A9-GTO/spenvis_tri.txt"
 
 Protons, Electrons = readSpenvis_tri(file)
 
@@ -69,7 +69,7 @@ plt.title("Integral Spectra Comparison")
 plt.xlabel("Kinetic energy [MeV]")
 plt.ylabel("Integral Flux [cm-2 s-1]")
 
-plt.savefig("/l/triton_work/CARRINGTON/IntegralSpectrumComparison.pdf", format='pdf', bbox_inches="tight")
+#plt.savefig("/l/triton_work/CARRINGTON/IntegralSpectrumComparison.pdf", format='pdf', bbox_inches="tight")
 
 ## Differential Plot
 
@@ -88,6 +88,5 @@ plt.title("Differential Spectra Comparison")
 plt.xlabel("Kinetic energy [MeV]")
 plt.ylabel("Differential flux [cm-2 s-1 MeV-1]")
 
-plt.savefig("/l/triton_work/CARRINGTON/DifferentialSpectrumComparison.pdf", format='pdf', bbox_inches="tight")
-#plt.show()
-'''
+#plt.savefig("/l/triton_work/CARRINGTON/DifferentialSpectrumComparison.pdf", format='pdf', bbox_inches="tight")
+plt.show()

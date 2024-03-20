@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import scipy.odr as odr
 import pandas as pd
-from GRAS.Dependencies.TotalKRadGras import totalkRadGras
+from GRAS.Dependencies.TotalDose import totalkRadGras
 
 
 def simpleFilter(data, window_size=5):

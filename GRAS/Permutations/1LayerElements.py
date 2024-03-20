@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from uncertainties import ufloat
 
-from GRAS.Dependencies.TotalKRadGras import totalkRadGras
+from GRAS.Dependencies.TotalDose import totalkRadGras
 
 Names = ["G4_lH2", "G4_He", "G4_Li", "G4_Be", "G4_B", "G4_C", "G4_lN2", "G4_lO2", "G4_F", "G4_Ne", "G4_Na", "G4_Mg",
          "G4_Al", "G4_Si", "G4_P", "G4_S", "G4_Cl", "G4_lAr", "G4_K", "G4_Ca", "G4_Sc", "G4_Ti", "G4_V", "G4_Cr",

@@ -27,3 +27,12 @@ if __name__ == "__main__":
 
     print(F(10))
 
+    # Plot the function
+    E = np.geomspace(1, 100, 1000)
+    print(E)
+    plt.plot(E, F(E))
+    #plt.yscale('log')
+    #plt.xscale('log')
+    plt.grid(which='both')
+    plt.show()
+

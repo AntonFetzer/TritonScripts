@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from GRAS.Read.ReadGRASHistos import readGRASHistos
+from GRAS.Read.ReadDoseHistos import readDoseHistos
 import sys
 import os
 
@@ -18,14 +18,14 @@ def totalGRASHistos(path, particle: str):
         sys.exit("ERROR !!! No files found")
 
     # Initialize Data dictionary with the first file
-    DoseData, PrimaryData = readGRASHistos(path + Files[0])
+    DoseData, PrimaryData = readDoseHistos(path + Files[0])
 
     TotalDoseEntries = DoseData['entries'].copy()
     TotalPrimaryEntries = PrimaryData['entries'].copy()
 
     # Start from the second file
     for File in Files[1:]:
-        DoseFileData, PrimaryFileData = readGRASHistos(path + File)
+        DoseFileData, PrimaryFileData = readDoseHistos(path + File)
 
         # Check that the bins for DoseHist align
         if not np.allclose(DoseData['lower'], DoseFileData['lower']) or \

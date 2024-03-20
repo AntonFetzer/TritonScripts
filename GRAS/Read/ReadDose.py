@@ -81,6 +81,8 @@ if __name__ == "__main__":
     # Plot the number of non-zero entries
     plt.figure(2)
     plt.plot(Results['non-zeros'], '.')
+    # Add horizontal line at 1
+    plt.axhline(y=1, color='r', linestyle='--')
     plt.title('Number of non-zero entries')
     plt.xlabel('Tile number')
     plt.ylabel('Number of non-zero entries')

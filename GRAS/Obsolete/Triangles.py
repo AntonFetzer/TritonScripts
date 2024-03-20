@@ -1,7 +1,7 @@
 from matplotlib.patches import Polygon
 import matplotlib.pyplot as plt
 import numpy as np
-from GRAS.Dependencies.TotalKRadGras import totalkRadGras
+from GRAS.Dependencies.TotalDose import totalkRadGras
 from matplotlib import cm
 
 Path = "/l/triton_work/3MatTriangles/DONE/PE-Al-Pb/Res/"

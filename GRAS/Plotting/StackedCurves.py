@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from GRAS.Dependencies.TotalKRadGras import totalkRadGras
+from GRAS.Dependencies.TotalDose import totalkRadGras
 from scipy import signal
 
 Path = "/l/triton_work/2LayerStackedCurves/"

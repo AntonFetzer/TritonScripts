@@ -1,12 +1,12 @@
-from GRAS.Dependencies.TotalKRadGras import totalkRadGras
+from GRAS.Dependencies.TotalDose import totalkRadGras
 import numpy as np
 import matplotlib.pyplot as plt
 
-Path = "/l/triton_work/ShieldingCurves/Carrington/Res/"
+Path = "/l/triton_work/ShieldingCurves/Carrington/CarringtonElectronDiffPowTabelated-10mm/Res/"
 
-Data = totalkRadGras(Path, "Elec")
+Data = totalkRadGras(Path)
 
-NumTiles = np.shape(Data)[1]
+NumTiles = np.shape(Data['dose'])[0]
 
 fig1 = plt.figure(1)
 
@@ -18,7 +18,7 @@ Fluence = [0.9833, 1.934, 3.741, 7.008, 12.35, 19.54, 26.14, 29.13]
 
 for h, hour in enumerate(Hours):
     Factor = Fluence[h]/(30*24)
-    plt.errorbar(x, Data[0]*Factor, Data[1]*Factor, fmt=' ', capsize=5, label="T=" + str(hour) + " hours")
+    plt.errorbar(x, Data['dose']*Factor, Data['error']*Factor, fmt=' ', capsize=5, label="T=" + str(hour) + " hours")
 
 
 ####### Plot 10kRad line #########

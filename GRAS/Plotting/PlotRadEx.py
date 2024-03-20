@@ -1,10 +1,10 @@
 import os
 import numpy as np
-from GRAS.Dependencies.TotalKRadGrasSingle import totalkRadGrasSingle
+from GRAS.Dependencies.TotalDoseSingle import totalkRadGrasSingle
 import matplotlib.pyplot as plt
 import pandas as pd
 from natsort import natsorted
-from GRAS.Dependencies.TotalKRadGras import totalkRadGras
+from GRAS.Dependencies.TotalDose import totalkRadGras
 
 Path = "/l/triton_work/RadEx/"
 

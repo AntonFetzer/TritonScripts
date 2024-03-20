@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from GRAS.Dependencies.TotalGRASHistos import totalGRASHistos
+from GRAS.Dependencies.TotalDoseHistos import totalGRASHistos
 import os
 from natsort import natsorted
 import numpy as np

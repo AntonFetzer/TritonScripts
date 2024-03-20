@@ -1,4 +1,4 @@
-from GRAS.Dependencies.TotalKRadGras import totalkRadGras
+from GRAS.Dependencies.TotalDose import totalkRadGras
 import numpy as np
 import matplotlib.pyplot as plt
 

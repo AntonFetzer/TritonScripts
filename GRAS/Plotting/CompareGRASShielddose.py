@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from GRAS.Read.ReadSD2Q import readSDQ2
-from GRAS.Dependencies.TotalKRadGras import totalkRadGras
+from GRAS.Dependencies.TotalDose import totalkRadGras
 
 Path = "/l/triton_work/ShieldingCurves"
 

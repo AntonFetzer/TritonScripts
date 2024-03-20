@@ -2,7 +2,7 @@ import os
 import csv
 import numpy as np
 from ReadGRASCSV1Tile import readGrasCsv1Tile
-from GRAS.Dependencies.MeVtokRad2DGras import MeVtokRad_2D
+from GRAS.Obsolete.MeVtokRad2DGras import MeVtokRad_2D
 import matplotlib.pyplot as plt
 
 

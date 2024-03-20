@@ -55,7 +55,7 @@ def readSourceHistos(file):
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/SourceHistograms/A9-FS1/AE9/Res/"
+    Path = "/l/triton_work/SourceHistograms/Carrington/CarringtonElectronINTEGRALPowTabelated/Res/"
     # Find the first .csv file in the specified directory
     FullPath = next(iglob(os.path.join(Path, '*.csv')), None)
     # Construct the path for the 'Plot' directory

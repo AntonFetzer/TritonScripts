@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sp
-from GRAS.Dependencies.TotalGRASLETHistos import totalGRASLETHistos
+from GRAS.Dependencies.TotalLETHistos import totalGRASLETHistos
 from uncertainties import ufloat
 
 '''

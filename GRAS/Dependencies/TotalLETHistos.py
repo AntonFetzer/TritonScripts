@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from GRAS.Read.ReadGRASLETHistos import readGRASLETHistos
+from GRAS.Read.ReadLETHistos import readLETHistos
 import sys
 import os
 
@@ -38,7 +38,7 @@ def totalGRASLETHistos(path):
     MeanCountList = None
     
     for File in Files:
-        LETHistDict, _ = readGRASLETHistos(os.path.join(path, File))
+        LETHistDict, _ = readLETHistos(os.path.join(path, File))
         
         # Initialize TotalLETHist bin edges with the first file's data
         if TotalLETHist['lower'] is None:
