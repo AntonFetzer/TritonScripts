@@ -4,59 +4,47 @@ import csv
 
 
 def readGPSMacro(file):
-    Energy = []
-    DiffFlux = []
+
+    keys = ['Energy', 'Flux']
+    # Generating the dictionary from the list of keys
+    GPS = {key: [] for key in keys}
+
     ReadFlag = 0
 
     print("Reading in File: " + file)
     with open(file, 'r') as f:
-        reader = csv.reader(f)
-        for line in reader:
-            # print(line)
+        for line in f:
             if ReadFlag == 0:
                 if '/gps/hist/type arb' in line:
                     ReadFlag = 1
-                    # print(line)
             elif ReadFlag == 1:
-                if "/gps/hist/inter " in line[0]:
+                if "/gps/hist/inter" in line:
                     ReadFlag = 2
-                    # print(line)
                 else:
-                    Text = line[0]
-                    Text = Text.split()
-                    # print(float(Text[1]), float(Text[2]))
-                    Energy.append(float(Text[1]))
-                    DiffFlux.append(float(Text[2]))
+                    # Split the line into parts based on the comma
+                    values = line.split('  ')
+                    GPS['Energy'].append(float(values[1]))
+                    GPS['Flux'].append(float(values[2]))
 
-    return np.asarray([Energy, DiffFlux])
+    # Convert lists inside the dicts to numpy arrays
+    for key in keys:
+        GPS[key] = np.array(GPS[key])
+
+    return GPS
 
 
 if __name__ == "__main__":
-    files = [
-        "/l/triton_work/Spectra/Carrington/Electron/CarringtonElectronDiffPowTabelated.mac",
-        "/l/triton_work/Spectra/A9-GTO/AE9/AE9Mission.mac",
-        "/l/triton_work/Spectra/FS1/A9-FS1/AE9-FS1-mission.mac"
-        ]
     
-    labels = [
-        "Carrington Electron Flux",
-        "AE9-GTO",
-        "AE9-LEO"
-        ]
+    Data = readGPSMacro("/l/triton_work/Spectra/Carrington/SEP-Final/Carrington-SEP-Expected-Int-With0.mac")
     
-    for file in files:
-        Data = readGPSMacro(file)
-        plt.plot(Data[0], Data[1], label=labels[files.index(file)], marker=".")
+    plt.plot(Data['Energy'], Data['Flux'])
 
     plt.yscale("log")
     plt.xscale("log")
     plt.grid(which="both")
     plt.legend()
-    plt.title("Differential Electron Flux Comparison")
+    plt.title("GPS")
     plt.xlabel("Kinetic energy [MeV]")
-    plt.ylabel("Differential Flux [cm-2 s-1 MeV-1]")
-    plt.xlim(0.1, 20)
-    plt.ylim(1e1, 1e13)
+    plt.ylabel("Ingetgal or Differential Flux")
 
-    #plt.show()
-    plt.savefig("/u/02/fetzera1/unix/Desktop/TritonPlots/CarringtonPaper/ElectronFluxComparison.pdf", format='pdf', bbox_inches="tight")
+    plt.show()
