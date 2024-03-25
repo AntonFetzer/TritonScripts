@@ -39,25 +39,35 @@ def readSpenvis_tri(file):
     ProtonData = np.asarray([PE, PI, PD])
     ElectronData = np.asarray([EE, EI, ED])
 
+    # Remove trailing zeros
+    # Check if in the last row collumn 1 or 2 contain zeros
+    # If yes, remove the last row
+    if ProtonData[1][-1] == 0 or ProtonData[2][-1] == 0:
+        ProtonData = np.delete(ProtonData, -1, axis=1)
+
+    if ElectronData[1][-1] == 0 or ElectronData[2][-1] == 0:
+        ElectronData = np.delete(ElectronData, -1, axis=1)
+
     return ProtonData, ElectronData
 
 
 
 if __name__ == "__main__":
 
-    file = "/l/triton_work/SuperGTO/spenvis_tri.txt"
+    file = "/l/triton_work/Spectra/ISS/spenvis_tri.txt"
 
     Protons, Electrons = readSpenvis_tri(file)
 
     print(np.shape(Protons))
 
-    for l in range(np.shape(Protons)[1]):
-        if Protons[1, l] == 0 or Protons[2, l] == 0:
-            Protons = np.delete(Protons, l, 1)
+    # Remove trailing zeros
+    # Check if in the last row collumn 1 or 2 contain zeros
+    # If yes, remove the last row
+    # if Protons[1][-1] == 0 or Protons[2][-1] == 0:
+    #     Protons = np.delete(Protons, -1, axis=1)
 
-    for l in range(np.shape(Electrons)[1]):
-        if Electrons[1, l] == 0 or Electrons[2, l] == 0:
-            Electrons = np.delete(Electrons, l, 1)
+    # if Electrons[1][-1] == 0 or Electrons[2][-1] == 0:
+    #     Electrons = np.delete(Electrons, -1, axis=1)
 
 
     plt.plot(Protons[0], Protons[1], label="Trapped Protons")
