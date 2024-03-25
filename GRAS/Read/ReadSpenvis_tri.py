@@ -5,50 +5,64 @@ import csv
 
 def readSpenvis_tri(file):
 
-    PE = []
-    PI = []
-    PD = []
-    EE = []
-    EI = []
-    ED = []
+    keys = ["Energy", "Integral", "Differential"]
+    Protons = {key: [] for key in keys}
+    Electrons = {key: [] for key in keys}
+
     ReadFlag = 0
 
+    # Open the file and read line by line
     print("Reading in File: " + file)
     with open(file, 'r') as f:
-        reader = csv.reader(f)
-        for line in reader:
+        for line in f:
             if ReadFlag == 0 and "'Differential Flux'" in line:
                 ReadFlag = 1
             elif ReadFlag == 1:
                 if "'End of Block'" in line:
                     ReadFlag = 2
                 else:
-                    PE.append(float(line[0]))
-                    PI.append(float(line[1]))
-                    PD.append(float(line[2]))
+                    # Split the line into parts based on the comma
+                    values = line.split(',')
+                    Protons["Energy"].append(float(values[0]))
+                    Protons["Integral"].append(float(values[1]))
+                    Protons["Differential"].append(float(values[2]))
             elif ReadFlag == 2 and "'Differential Flux'" in line:
                 ReadFlag = 3
             elif ReadFlag == 3:
                 if "'End of File'" in line:
                     ReadFlag = 4
                 else:
-                    EE.append(float(line[0]))
-                    EI.append(float(line[1]))
-                    ED.append(float(line[2]))
-
-    ProtonData = np.asarray([PE, PI, PD])
-    ElectronData = np.asarray([EE, EI, ED])
+                    # Split the line into parts based on the comma
+                    values = line.split(',')
+                    Electrons["Energy"].append(float(values[0]))
+                    Electrons["Integral"].append(float(values[1]))
+                    Electrons["Differential"].append(float(values[2]))
 
     # Remove trailing zeros
     # Check if in the last row collumn 1 or 2 contain zeros
     # If yes, remove the last row
-    if ProtonData[1][-1] == 0 or ProtonData[2][-1] == 0:
-        ProtonData = np.delete(ProtonData, -1, axis=1)
+    if Protons["Energy"][-1] == 0 or Protons["Integral"][-1] == 0:
+        for key in keys:
+            Protons[key].pop(-1)
+    
+    if Electrons["Energy"][-1] == 0 or Electrons["Integral"][-1] == 0:
+        for key in keys:
+            Electrons[key].pop(-1)
 
-    if ElectronData[1][-1] == 0 or ElectronData[2][-1] == 0:
-        ElectronData = np.delete(ElectronData, -1, axis=1)
+    # Convert lists inside the dicts to numpy arrays
+    for key in keys:
+        Protons[key] = np.array(Protons[key])
+        Electrons[key] = np.array(Electrons[key])
 
-    return ProtonData, ElectronData
+    # Print out the proton data
+    for i in range(len(Protons["Energy"])):
+        print(f"{Protons['Energy'][i]:.2f} {Protons['Integral'][i]:.2e} {Protons['Differential'][i]:.2e}")
+
+    # Print out the electron data
+    for i in range(len(Electrons["Energy"])):
+        print(f"{Electrons['Energy'][i]:.2f} {Electrons['Integral'][i]:.2e} {Electrons['Differential'][i]:.2e}")
+
+    return Protons, Electrons
 
 
 
@@ -58,32 +72,26 @@ if __name__ == "__main__":
 
     Protons, Electrons = readSpenvis_tri(file)
 
-    print(np.shape(Protons))
-
-    # Remove trailing zeros
-    # Check if in the last row collumn 1 or 2 contain zeros
-    # If yes, remove the last row
-    # if Protons[1][-1] == 0 or Protons[2][-1] == 0:
-    #     Protons = np.delete(Protons, -1, axis=1)
-
-    # if Electrons[1][-1] == 0 or Electrons[2][-1] == 0:
-    #     Electrons = np.delete(Electrons, -1, axis=1)
-
-
-    plt.plot(Protons[0], Protons[1], label="Trapped Protons")
-    #plt.plot(Protons[0], Protons[2], label="Proton Differential")
-    plt.plot(Electrons[0], Electrons[1], label="Trapped Electrons")
-    #plt.plot(Electrons[0], Electrons[2], label="Electron Differential")
-
-
-
+    plt.figure(1)
+    plt.plot(Protons['Energy'], Protons['Integral'], label="Integral Protons")
+    plt.plot(Electrons['Energy'], Electrons['Integral'], label="Integral Electrons")
     plt.yscale("log")
     plt.xscale("log")
-    plt.grid(which="both")
-
-    plt.title("AP-9/AE-9 and SAPPHIRE particle flux on Super-GTO")
-    plt.xlabel("Kinetic energy [MeV]")
+    plt.xlabel("Energy [MeV]")
     plt.ylabel("Integral Flux [cm-2 s-1]")
-    #plt.ylabel("Differential Flux [cm-2 s-1 MeV-1]")
+    plt.title("Integral Flux of Protons and Electrons")
+    plt.grid(which='both')
+    plt.legend()
+
+    plt.figure(2)
+    plt.plot(Protons['Energy'], Protons['Differential'], label="Differential Protons")
+    plt.plot(Electrons['Energy'], Electrons['Differential'], label="Differential Electrons")
+    plt.yscale("log")
+    plt.xscale("log")
+    plt.xlabel("Energy [MeV]")
+    plt.ylabel("Differential Flux [cm-2 s-1 MeV-1]")
+    plt.title("Differential Flux of Protons and Electrons")
+    plt.grid(which='both')
+    plt.legend()
 
     plt.show()
