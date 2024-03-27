@@ -69,13 +69,13 @@ def readSpenvis_gcf(fileName):
 
 if __name__ == "__main__":
 
-    Path = "/l/triton_work/Spectra/ISO-GTO/"
+    Path = "/l/triton_work/Spectra/ISS"
 
     DataT = readSpenvis_gcf(Path + "/spenvis_gcf.txt")
     #plt.bar(range(93), DataT[:, 0, 1])
     #print(DataT[:, 0, 1])
 
-    IntorDiff = 2  # 1 for Int 2 for Diff
+    IntorDiff = 1  # 1 for Int 2 for Diff
 
     Species = ['H ', 'He', 'Li', 'Be', 'B ', 'C ', 'N ', 'O ', 'F ', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P ', 'S ', 'Cl',
                'Ar', 'K ', 'Ca', 'Sc', 'Ti', 'V ', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se',
@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
     for Specie in range(np.shape(DataT)[0]):
         FluxMax = np.max(DataT[Specie, :, IntorDiff] * DataT[Specie, :, 0])
-        if FluxMax > 0.009:
+        if FluxMax > 10:
             print(f"Species: {Species[Specie]}, Max Flux * Energy: {FluxMax}")
             plt.plot(DataT[Specie, :, 0], DataT[Specie, :, IntorDiff], label=Species[Specie])
             for Energy, Flux in zip(DataT[Specie, :, 0], DataT[Specie, :, IntorDiff]):
@@ -108,6 +108,5 @@ if __name__ == "__main__":
     plt.xlabel("Energy [MeV]")
     plt.legend()
     plt.grid(which='both')
-    #plt.show()
-    plt.savefig(Path + "/CosmicFlux.pdf", format='pdf', bbox_inches="tight")
+    plt.show()
 

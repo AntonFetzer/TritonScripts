@@ -54,13 +54,13 @@ def readSpenvis_tri(file):
         Protons[key] = np.array(Protons[key])
         Electrons[key] = np.array(Electrons[key])
 
-    # Print out the proton data
-    for i in range(len(Protons["Energy"])):
-        print(f"{Protons['Energy'][i]:.2f} {Protons['Integral'][i]:.2e} {Protons['Differential'][i]:.2e}")
+    # # Print out the proton data
+    # for i in range(len(Protons["Energy"])):
+    #     print(f"{Protons['Energy'][i]:.2f} {Protons['Integral'][i]:.2e} {Protons['Differential'][i]:.2e}")
 
-    # Print out the electron data
-    for i in range(len(Electrons["Energy"])):
-        print(f"{Electrons['Energy'][i]:.2f} {Electrons['Integral'][i]:.2e} {Electrons['Differential'][i]:.2e}")
+    # # Print out the electron data
+    # for i in range(len(Electrons["Energy"])):
+    #     print(f"{Electrons['Energy'][i]:.2f} {Electrons['Integral'][i]:.2e} {Electrons['Differential'][i]:.2e}")
 
     return Protons, Electrons
 

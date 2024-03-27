@@ -64,9 +64,9 @@ def readSpenvis_sef(fileName):
 if __name__ == "__main__":
     ############ SAPPHIRE Spectra are in Fluence with minimum duration 6 months !!! ###############################
     ############ Check duration and normalisation of the spectrum #################################################
-    DataT = readSpenvis_sef("/l/triton_work/Spectra/SAPPHIRE-GTO/spenvis_sef.txt")
+    DataT = readSpenvis_sef("/l/triton_work/Spectra/ISS/spenvis_sef.txt")
 
-    IntorDiff = 2  # 1 for Int 2 for Diff
+    IntorDiff = 1  # 1 for Int 2 for Diff
 
     #plt.bar(range(93), DataT[:, 0, 1])
     #print(DataT[:, 0, 1])
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
     for Specie in range(np.shape(DataT)[0]):
         FluxMaxE = np.max(DataT[Specie, :, IntorDiff] * DataT[Specie, :, 0])
-        if FluxMaxE > 15:
+        if FluxMaxE > 1e-10:
             print(f"Species: {Species[Specie]}, Max Flux * Energy: {FluxMaxE}")
             plt.plot(DataT[Specie, :, 0], DataT[Specie, :, IntorDiff], label=Species[Specie])
             #for Energy, Flux in zip(DataT[Specie, :, 0], DataT[Specie, :, IntorDiff]):
@@ -104,5 +104,5 @@ if __name__ == "__main__":
     plt.xlabel("Energy [MeV]")
     plt.legend()
     plt.grid(which='both')
-    #plt.show()
-    plt.savefig("/l/triton_work/Spectra/SAPPHIRE-GTO/SolarFlux.pdf", format='pdf', bbox_inches="tight")
+    plt.show()
+
