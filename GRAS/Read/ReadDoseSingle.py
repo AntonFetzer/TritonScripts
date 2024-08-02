@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import os
 import sys
 
-def readGRASdoseSingle(file):
-    data = pd.DataFrame(columns=['Dose', 'Error', 'Entries', 'Non zero entries'])
+def readDoseSingle(file):
+    data = pd.DataFrame(columns=['dose', 'error', 'entries', 'Non zero entries'])
 
     read_values = False
 
@@ -19,9 +19,9 @@ def readGRASdoseSingle(file):
                     break
 
                 values = line.split(',')
-                data.at[0, 'Dose'] = float(values[0])
-                data.at[0, 'Error'] = float(values[1])
-                data.at[0, 'Entries'] = float(values[2])
+                data.at[0, 'dose'] = float(values[0])
+                data.at[0, 'error'] = float(values[1])
+                data.at[0, 'entries'] = float(values[2])
                 data.at[0, 'Non zero entries'] = float(values[3])
 
     # Dose data is in rad/s --> multiply with number of seconds in a month to get to dose per months.
@@ -31,8 +31,8 @@ def readGRASdoseSingle(file):
     scale_factor = 1 / 1000
 
     # Use in-place operations to update the data array
-    data['Dose'] *= scale_factor
-    data['Error'] *= scale_factor
+    data['dose'] *= scale_factor
+    data['error'] *= scale_factor
 
     return data  # 4xNumTiles matrix
     # data[0]: kRad per particle for each volume
@@ -57,19 +57,24 @@ if __name__ == "__main__":
     RawData = []
 
     for File in Files:
-        Results = readGRASdoseSingle(path + File)
+        Results = readDoseSingle(path + File)
 
     print(Results)
 
-    relative_dose_error_percent = (Results['Error'][0] / Results['Dose'][0]) * 100
+    print("Total number of entries:", Results['entries'][0])
+    print("Number of non Zero Entries:", Results['Non zero entries'][0])
+    print("Dose Datatype:", type(Results['dose']))
 
-    ax1 = Results[['Dose']].plot(kind='bar', yerr=Results['Error'], capsize=5, logy=True, legend=False)
+
+    relative_dose_error_percent = (Results['error'][0] / Results['dose'][0]) * 100
+
+    ax1 = Results[['dose']].plot(kind='bar', yerr=Results['error'], capsize=5, logy=True, legend=False)
     ax1.set_ylabel('Dose (krad)')
     ax1.set_title(f'Dose with Error (Relative Error: {relative_dose_error_percent:.2f}%)')
-    ax1.set_xticklabels(['Dose'], rotation=0)
+    ax1.set_xticklabels(['dose'], rotation=0)
 
     # Reshape the data for side-by-side bar plot
-    reshaped_data = Results.melt(value_vars=['Entries', 'Non zero entries'])
+    reshaped_data = Results.melt(value_vars=['entries', 'Non zero entries'])
     ax2 = reshaped_data.plot(x='variable', y='value', kind='bar', logy=True, legend=False)
     ax2.set_ylabel('Count (log scale)')
     ax2.set_title('Entries and Non Zero Entries')

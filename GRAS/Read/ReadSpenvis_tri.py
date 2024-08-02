@@ -73,8 +73,8 @@ if __name__ == "__main__":
     Protons, Electrons = readSpenvis_tri(file)
 
     plt.figure(1)
-    plt.plot(Protons['Energy'], Protons['Integral'], label="Integral Protons")
     plt.plot(Electrons['Energy'], Electrons['Integral'], label="Integral Electrons")
+    plt.plot(Protons['Energy'], Protons['Integral'], label="Integral Protons")
     plt.yscale("log")
     plt.xscale("log")
     plt.xlabel("Energy [MeV]")
@@ -84,8 +84,8 @@ if __name__ == "__main__":
     plt.legend()
 
     plt.figure(2)
-    plt.plot(Protons['Energy'], Protons['Differential'], label="Differential Protons")
     plt.plot(Electrons['Energy'], Electrons['Differential'], label="Differential Electrons")
+    plt.plot(Protons['Energy'], Protons['Differential'], label="Differential Protons")
     plt.yscale("log")
     plt.xscale("log")
     plt.xlabel("Energy [MeV]")
