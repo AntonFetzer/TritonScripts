@@ -3,6 +3,13 @@ import matplotlib.pyplot as plt
 # import sympy as sp
 from GRAS.Read.ReadSpenvis_tri import readSpenvis_tri
 
+Expected = 'C0' # Blue
+PlusColor = 'C1'        # Green
+MinusColor = 'C2'       # Orange
+ISSColor = 'C8'         # yellow
+GEOColor = 'C7'         # grey
+VABColor = 'C3'         # Red
+
 ## Carrington Integral Electron Spectrum Parameters from EVT Analysis of Adnane Osmane
 f0 = 10 ** 10   # cm-2 s-1 sr-1 
 E0 = 0.13       # MeV
@@ -39,7 +46,7 @@ for E in Energies:
 ## Plotting
 plt.figure(1)
 
-plt.plot(Energies, f(Energies), '.-', label="Carrington Peak Electron Flux", linewidth=2.5)
+plt.plot(Energies, f(Energies), '.-', label="Carrington Peak Electron Flux", linewidth=2.5, color=Expected)
 
 
 ## Read in ISS A9 spectrum
@@ -47,21 +54,21 @@ ISS_file = "/l/triton_work/Spectra/ISS/spenvis_tri.txt"
 
 Protons, Electrons = readSpenvis_tri(ISS_file)
 
-plt.plot(Electrons['Energy'], Electrons['Integral'], '.-', label="AE9 LEO Electron Flux")
+plt.plot(Electrons['Energy'], Electrons['Integral'], '.-', label="AE9 LEO Electron Flux", color=ISSColor)
 
 ## Read in Geostationary A9 spectrum
 GEO_file = "/l/triton_work/Spectra/GEO/spenvis_tri.txt"
 
 Protons, Electrons = readSpenvis_tri(GEO_file)
 
-plt.plot(Electrons['Energy'], Electrons['Integral'], '.-.', label="AE9 GEO Electron Flux")
+plt.plot(Electrons['Energy'], Electrons['Integral'], '.-.', label="AE9 GEO Electron Flux", color=GEOColor)
 
 ## Read in Van-Allen Belt Probes A9 spectrum
 VAB_file = "/l/triton_work/Spectra/Van-Allen-Belt-Probes/spenvis_tri.txt"
 
 Protons, Electrons = readSpenvis_tri(VAB_file)
 
-plt.plot(Electrons['Energy'], Electrons['Integral'], '.:', label="AE9 Van-Allen-Belt Electron Flux")
+plt.plot(Electrons['Energy'], Electrons['Integral'], '.:', label="AE9 Van-Allen-Belt Electron Flux", color=VABColor)
 
 """ 
 ## Electron fluxes from paper:
