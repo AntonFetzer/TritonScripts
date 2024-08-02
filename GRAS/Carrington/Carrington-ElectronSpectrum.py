@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import sympy as sp
+# import sympy as sp
 from GRAS.Read.ReadSpenvis_tri import readSpenvis_tri
 
 ## Carrington Integral Electron Spectrum Parameters from EVT Analysis of Adnane Osmane
@@ -9,34 +9,37 @@ E0 = 0.13       # MeV
 a = 3.7
 
 # Define symbolic variables and function
-Energy = sp.Symbol('Energy')
-f = 4 * sp.pi * f0 * (Energy / E0) ** (-a)
-print('Funciton f:', f)
+# Energy = sp.Symbol('Energy')
+# f = 4 * sp.pi * f0 * (Energy / E0) ** (-a)
+# print('Funciton f:', f)
 
 # Calculate the derivative of the function with respect to Energy
 # fdiff = sp.diff(f, Energy)
 # print('Function fdiff:', fdiff)
 
 # Convert the symbolic functions to numerical functions
-f = sp.lambdify(Energy, f, "numpy")
+# f = sp.lambdify(Energy, f, "numpy")
 # fdiff = sp.lambdify(Energy, fdiff, "numpy")
 
-Evals = np.geomspace(0.13, 100, num=10)
+def f(Energy):
+    return 4 * np.pi * f0 * (Energy / E0) ** (-a)
+
+Energies = np.geomspace(0.13, 100, num=10)
 
 # print("Differential")
-# for E in Evals:
+# for E in Energies:
 #     print(f"{E:.4}", f"{-fdiff(E):.4}")
     #print("/gps/hist/point", f"{E:.4}", f"{-fdiff(E):.4}")
 
-# print("Integral")
-# for E in Evals:
-#     print(f"{E:.4}", f"{f(E):.4}")
+print("Integral")
+for E in Energies:
+    print(f"{E:.4}", f"{f(E):.4}")
 
 
 ## Plotting
 plt.figure(1)
 
-plt.plot(Evals, f(Evals), label="Carrington Peak Electron Flux", linewidth=2.5)
+plt.plot(Energies, f(Energies), '.-', label="Carrington Peak Electron Flux", linewidth=2.5)
 
 
 ## Read in ISS A9 spectrum
@@ -60,7 +63,7 @@ Protons, Electrons = readSpenvis_tri(VAB_file)
 
 plt.plot(Electrons['Energy'], Electrons['Integral'], '.:', label="AE9 Van-Allen-Belt Electron Flux")
 
-
+""" 
 ## Electron fluxes from paper:
 # "Proton, helium, and electron spectra during the large solar particle events of October–November 2003"
 # doi:10.1029/2005JA011038
@@ -89,7 +92,7 @@ IntegralPETFlux = -PETNorm / (PETSlope + 1) * (PETEnergy ** (PETSlope + 1))
 
 plt.plot(EPAMEnergy, IntegralEPAMFlux, label="10/28/03 EPAM Electron Flux")
 plt.plot(PETEnergy, IntegralPETFlux, label="10/28/03 PET Electron Flux")
-
+ """
 
 
 ## Plot formatting
