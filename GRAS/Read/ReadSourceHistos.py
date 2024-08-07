@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-from glob import iglob
 
 
 def readSourceHistos(file):
@@ -27,6 +26,9 @@ def readSourceHistos(file):
                 hist_data = pd.read_csv(file, skiprows=start_line, nrows=end_line - start_line, header=None, engine='python')
                 hist_data.columns = ['lower', 'upper', 'mean', 'value', 'error', 'entries']
 
+                # Convert columns to numpy arrays and store in dictionary
+                hist_dict = {col: hist_data[col].to_numpy() for col in hist_data.columns}
+
                 # Check if we have reached beyond the known histogram names
                 if current_histo_idx >= len(histo_names):
                     raise ValueError("More histogram blocks in file than expected.")
@@ -35,7 +37,7 @@ def readSourceHistos(file):
                 current_histo_name = histo_names[current_histo_idx]
 
                 # Store the data in the dictionary
-                histograms[current_histo_name] = hist_data
+                histograms[current_histo_name] = hist_dict
 
                 # Reset tracking variables for next histogram block
                 start_line = None
@@ -57,14 +59,20 @@ def readSourceHistos(file):
 if __name__ == "__main__":
     Path = "/l/triton_work/SourceHistograms/Carrington/CarringtonElectronINTEGRALPowTabelated/Res/"
     # Find the first .csv file in the specified directory
-    FullPath = next(iglob(os.path.join(Path, '*.csv')), None)
+    FullPath = next((os.path.join(Path, f) for f in os.listdir(Path) if f.endswith('.csv')), None)
+    # Print the full path of the file
+    print("Reading in file: ", FullPath)
     # Construct the path for the 'Plot' directory
     PlotDir = os.path.join(os.path.dirname(Path), '../Plot')
 
     histograms = readSourceHistos(FullPath)
 
+    # Set the grid to be behind the plot
+    plt.rc('axes', axisbelow=True)
+
     # Plot the 'Energy' histogram
     data = histograms['Energy']
+
     plt.figure(0)
     plt.bar(data['lower'], data['value'], width=data['upper'] - data['lower'], yerr=data['error'], align='edge')
     plt.xlabel('Energy [MeV]')
@@ -72,7 +80,9 @@ if __name__ == "__main__":
     plt.title('Kinetic Energy Spectrum')
     plt.xscale('log')
     plt.yscale('log')
+    plt.grid(which='both')
 
+    print("Saving Energy Histogram: ", os.path.join(PlotDir, 'Energy Source Spectrum.pdf'))
     plt.savefig(os.path.join(PlotDir, 'Energy Source Spectrum.pdf'), format='pdf', bbox_inches='tight')
 
     # Plot the 'Momentum' histogram
@@ -84,7 +94,9 @@ if __name__ == "__main__":
     plt.title('Momentum Spectrum')
     plt.xscale('log')
     plt.yscale('log')
+    plt.grid(which='both')
 
+    print("Saving Momentum Histogram: ", os.path.join(PlotDir, 'Momentum Source Spectrum.pdf'))
     plt.savefig(os.path.join(PlotDir, 'Momentum Source Spectrum.pdf'), format='pdf', bbox_inches='tight')
 
     # Plot the 'Phi' histogram
@@ -94,9 +106,9 @@ if __name__ == "__main__":
     plt.xlabel('Phi [degrees]')
     plt.ylabel('Counts per bin')
     plt.title('Phi Distribution')
-    plt.xscale('linear')
-    plt.yscale('linear')
+    plt.grid(which='both')
 
+    print("Saving Phi Histogram: ", os.path.join(PlotDir, 'Phi Source Distribution.pdf'))
     plt.savefig(os.path.join(PlotDir, 'Phi Source Distribution.pdf'), format='pdf', bbox_inches='tight')
 
     # Plot the 'Theta' histogram
@@ -106,9 +118,9 @@ if __name__ == "__main__":
     plt.xlabel('Theta [degrees]')
     plt.ylabel('Counts per bin')
     plt.title('Theta Distribution')
-    plt.xscale('linear')
-    plt.yscale('linear')
+    plt.grid(which='both')
 
+    print("Saving Theta Histogram: ", os.path.join(PlotDir, 'Theta Source Distribution.pdf'))
     plt.savefig(os.path.join(PlotDir, 'Theta Source Distribution.pdf'), format='pdf', bbox_inches='tight')
 
     # Plot the 'Weights' histogram
@@ -120,7 +132,9 @@ if __name__ == "__main__":
     plt.title('Weights Distribution')
     plt.xscale('log')
     plt.yscale('log')
+    plt.grid(which='both')
 
+    print("Saving Weights Histogram: ", os.path.join(PlotDir, 'Weights Source Distribution.pdf'))
     plt.savefig(os.path.join(PlotDir, 'Weights Source Distribution.pdf'), format='pdf', bbox_inches='tight')
 
     #plt.show()

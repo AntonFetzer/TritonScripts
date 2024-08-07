@@ -4,7 +4,7 @@ from GRAS.Read.ReadLETHistos import readLETHistos
 import sys
 import os
 
-def totalGRASLETHistos(path):
+def totalLETHistos(path):
     """
     Accumulates and processes GRAS LEThistos from multiple files.
 
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     # Only works if all input files have the same number of particle!!!!!
     path = "/l/triton_work/LET/Foresail1-Hercules/FS1-SolarProtons/0mm/Res/"
 
-    LET = totalGRASLETHistos(path)
+    LET = totalLETHistos(path)
 
     print("LETHist Shape", np.shape(LET))
 
