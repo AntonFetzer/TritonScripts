@@ -90,4 +90,9 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid()
 
+    # Print the diffeential flux spectrum as a table
+    print("Energy [MeV] | Differential Peak Flux [cm^-2 s^-1 MeV^-1]")
+    for i in range(len(Results['Energy'])):
+        print(f"{Results['Energy'][i]:.2e} {Results['DFlux'][i]:.2e}")
+
     plt.show()

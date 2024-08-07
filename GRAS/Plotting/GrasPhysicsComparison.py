@@ -1,7 +1,7 @@
 import os
 import csv
 import numpy as np
-from ReadGRASCSV1Tile import readGrasCsv1Tile
+from GRAS.Read.ReadDoseSingle import readDoseSingle
 from GRAS.Obsolete.MeVtokRad2DGras import MeVtokRad_2D
 import matplotlib.pyplot as plt
 
@@ -21,12 +21,12 @@ NORM_FACTOR_SPECTRUM_Elec = 7.891281E+14
 NORM_FACTOR_SPECTRUM_Prot = 3.389664E+11
 
 for key in Elec:
-    Elec[key] = readGrasCsv1Tile(path + "/Results/" + key)
+    Elec[key] = readDoseSingle(path + "/Results/" + key)
     Elec[key]["Dose"] = MeVtokRad_2D(Elec[key]["Dose"], NORM_FACTOR_SPECTRUM_Elec)
     Elec[key]["Error"] = MeVtokRad_2D(Elec[key]["Error"], NORM_FACTOR_SPECTRUM_Elec)
 
 for key in Prot:
-    Prot[key] = readGrasCsv1Tile(path + "/Results/" + key)
+    Prot[key] = readDoseSingle(path + "/Results/" + key)
     Prot[key]["Dose"] = MeVtokRad_2D(Prot[key]["Dose"], NORM_FACTOR_SPECTRUM_Prot)
     Prot[key]["Error"] = MeVtokRad_2D(Prot[key]["Error"], NORM_FACTOR_SPECTRUM_Prot)
 
