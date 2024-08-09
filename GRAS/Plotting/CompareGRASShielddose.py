@@ -1,134 +1,161 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from GRAS.Read.ReadSD2Q import readSDQ2
-from GRAS.Dependencies.TotalDose import totalkRadGras
+from GRAS.Dependencies.TotalDose import totalDose
 
-Path = "/l/triton_work/ShieldingCurves"
+##### SHIELDOSE #####
 
-Electrons = totalkRadGras(Path + "/MultilayerPaper/AE9-GTO/Res/", "")
-Protons = totalkRadGras(Path + "/MultilayerPaper/AP9-GTO/Res/", "")
-
-x = np.linspace(0, 2.5, num=101, dtype=float)
-
-fig1 = plt.figure(1, [4.5, 5.5])
+plt.figure(0, [5, 8])
 # ------------------------------- Import and Plot SHIELDOSE Data -------------------------------------------------------
 ConvertKrad = 1 / 1000  #  1/1000 to convert to krad
-mmtogcm2 = 0.27  # 0.27 to convert mm to g/cm2 of aliminium
-
-SDData = readSDQ2("/l/triton_work/Spectra/A9-GTO/Shieldose/spenvis_sqo.txt")
+# mmtogcm2 = 0.27  # 0.27 to convert mm to g/cm2 of aliminium
+""" 
+SDData = readSDQ2("/l/triton_work/Spectra/Van-Allen-Belt-Probes/Shieldose/spenvis_sqo.txt")
 # SDDataCollumns = ['Aluminium Thickness', 'Total Dose', 'Electrons', 'Bremsstrahlung', 'Protons']
-plt.plot(SDData[:, 0] * mmtogcm2, ( SDData[:, 2]+SDData[:, 3] ) * ConvertKrad, 'C0--', label="SHIELDOSE-2Q trapped Electrons")
+plt.plot(SDData[:, 0], ( SDData[:, 2]+SDData[:, 3] ) * ConvertKrad, 'C0--', label="SHIELDOSE-2Q trapped Electrons")
 #plt.plot(SDData[:, 0] * mmtogcm2, SDData[:, 3] * ConvertKrad, 'C1-..', label="SHIELDOSE-2Q Bremsstrahlung")
-plt.plot(SDData[:, 0] * mmtogcm2, SDData[:, 4] * ConvertKrad, 'C1-', label="SHIELDOSE-2Q trapped Protons")
-plt.plot(SDData[:, 0] * mmtogcm2, SDData[:, 1] * ConvertKrad, 'C2:', label="SHIELDOSE-2Q Total trapped particles")
+plt.plot(SDData[:, 0], SDData[:, 4] * ConvertKrad, 'C1-', label="SHIELDOSE-2Q trapped Protons")
+plt.plot(SDData[:, 0], SDData[:, 1] * ConvertKrad, 'C2:', label="SHIELDOSE-2Q Total trapped particles")
+ """
+####### GRAS #######
 
-####### Plot 10kRad line #########
-CriticalDose = [1] * 101
-plt.plot(x, CriticalDose, color='k', linewidth=2, label='1 krad per month')
+Path = "/l/triton_work/Shielding_Curves/Carrington/"
+res_suffix = "/Res/"
 
-# ----------------------------------------- Plot electrons500kev ---------------------------------------------------------
-plt.errorbar(x, Electrons[0], Electrons[1], fmt='C0 ', capsize=4, label="Geant4 trapped Electrons", elinewidth=1, capthick=1)
+Names = [
+    # 'Carrington-SEP-Expected-Diff',
+    # 'Carrington-SEP-Expected-Int',
 
-# ----------------------------------------- Plot protons10MeV -------------------------------------------------------
-plt.errorbar(x, Protons[0], Protons[1], fmt='C1 ', capsize=4, label="Geant4 trapped Protons", elinewidth=1, capthick=1)
+    'Carrington-SEP-Expected-Int-With0',
+    'Carrington-SEP-Minus2Sigma-Int-With0',
+    'Carrington-SEP-Plus2Sigma-Int-With0',
 
-Total = Electrons
-Total[0] = Electrons[0] + Protons[0]
-Total[1] = np.sqrt(Electrons[1] * Electrons[1] + Protons[1] * Protons[1])
+    # 'CarringtonElectronDiffPow',
+    # 'CarringtonElectronDiffPowTabelated',
+    'CarringtonElectronINTEGRALPowTabelated',
 
-# ----------------------------------------- Plot Total -------------------------------------------------------
-plt.errorbar(x, Total[0], Total[1], fmt='C2 ', capsize=4, label="Geant4 Total trapped particles", elinewidth=1, capthick=1)
+    # 'GEO-AE9-mission',# Similar but slightly less than VAB-AE9-mission, therefore not interesting for shielding
+    # 'GEO-AP9-mission', # The trapped proton spectrum on GEO ends at 8MeV, therefore not intetrsting for shielding
 
+    # 'GEO-SolarProton-mission',
+    # 'GEO-SolarProton-5minPeakFlux', # Similar Flux as the carrington protons, but onlf for 5 minutes, this makes the TID negligible
 
+    # 'GEO-CosmicProton-mission',  # Cosmics have super low fluxes --> negligible TID
+    # 'GEO-CosmicIron-mission',    # Cosmics have super low fluxes --> negligible TID
 
-## Solar Energetic Particles
+    'ISS-AE9-mission',
+    'ISS-AP9-mission',
 
-SEP_Paths = [
-    "/l/triton_work/ShieldingCurves/MultilayerPaper/SolarGTO-Protons/Res/",
-    "/l/triton_work/ShieldingCurves/MultilayerPaper/SolarGTO-He/Res/",
-    "/l/triton_work/ShieldingCurves/MultilayerPaper/SolarGTO-C/Res/",
-    "/l/triton_work/ShieldingCurves/MultilayerPaper/SolarGTO-O/Res/",
-    "/l/triton_work/ShieldingCurves/MultilayerPaper/SolarGTO-Ne/Res/",
-    "/l/triton_work/ShieldingCurves/MultilayerPaper/SolarGTO-Mg/Res/",
-    "/l/triton_work/ShieldingCurves/MultilayerPaper/SolarGTO-Si/Res/",
-    "/l/triton_work/ShieldingCurves/MultilayerPaper/SolarGTO-Fe/Res/"
+    'VAB-AE9-mission',
+    'VAB-AP9-mission',
 ]
 
-SEP_Data = []
-for i, path in enumerate(SEP_Paths):
-    SEP_Data.append(totalkRadGras(path, ""))
-
-# Calculate total dose and error for SEP particles
-Total_SEP_Dose = sum([data[0] for data in SEP_Data])
-Total_SEP_Error = np.sqrt(sum([data[1]**2 for data in SEP_Data]))
-
-# ----------------------------------------- Plot Solar Particles -------------------------------------------------------
-plt.errorbar(x, Total_SEP_Dose, Total_SEP_Error, fmt='C8. ', capsize=4, label="Geant4 Solar particles", elinewidth=1, capthick=1)
+ShieldingCurves = {}
+for name in Names:
+   path = Path + name + res_suffix
+   ShieldingCurves[name] = totalDose(path)
+   ShieldingCurves[name]['color'] = 'C' + str(Names.index(name))
+   ShieldingCurves[name]['label'] = name
 
 
-## Cosmic Particles
+# The carrington fluxes are per second, but we are interested in the event fluence which corresponds to 1.23 days
+for name in Names:
+    if "Carrington" in name:
+        ShieldingCurves[name]['dose'] *= 1.23 * 24 * 60 * 60
+        ShieldingCurves[name]['error'] *= 1.23 * 24 * 60 * 60
+    # # The peak fluxes are per second, but we are interested in the event fluence which corresponds to 5 minutes
+    # if "PeakFlux" in name:
+    #     ShieldingCurves[name]['dose'] *= 5 * 60
+    #     ShieldingCurves[name]['error'] *= 5 * 60
+    # The ISS fluxes are per month, but they are so low that we better show the 1 year dose
+    if "ISS" in name: 
+        ShieldingCurves[name]['dose'] *= 12
+        ShieldingCurves[name]['error'] *= 12
+    # # The GEO solar protons are per month, but TID would be low, so we show the 1 year dose
+    # if "GEO-SolarProton" in name:
+    #     ShieldingCurves[name]['dose'] *= 120
+    #     ShieldingCurves[name]['error'] *= 120
 
-Cosmic_Paths = [
-    "/l/triton_work/ShieldingCurves/MultilayerPaper/ISO-GTO-Protons-mission/Res/",
-    "/l/triton_work/ShieldingCurves/MultilayerPaper/ISO-GTO-He-mission/Res/",
-    "/l/triton_work/ShieldingCurves/MultilayerPaper/ISO-GTO-C-mission/Res/",
-    "/l/triton_work/ShieldingCurves/MultilayerPaper/ISO-GTO-N-mission/Res/",
-    "/l/triton_work/ShieldingCurves/MultilayerPaper/ISO-GTO-O-mission/Res/",
-    "/l/triton_work/ShieldingCurves/MultilayerPaper/ISO-GTO-Mg-mission/Res/",
-    "/l/triton_work/ShieldingCurves/MultilayerPaper/ISO-GTO-Si-mission/Res/",
-    "/l/triton_work/ShieldingCurves/MultilayerPaper/ISO-GTO-Fe-mission/Res/"
+ShieldingCurves['Carrington-SEP-Expected-Int-With0']['label'] = 'Carrington Proton Event Fluence'
+ShieldingCurves['Carrington-SEP-Minus2Sigma-Int-With0']['label'] = 'Carrington Proton − 2\u03C3'
+ShieldingCurves['Carrington-SEP-Plus2Sigma-Int-With0']['label'] = 'Carrington Proton + 2\u03C3'
+ShieldingCurves['Carrington-SEP-Expected-Int-With0']['color'] = 'red'
+
+ShieldingCurves['CarringtonElectronINTEGRALPowTabelated']['label'] = 'Carrington Electrons Event Fluence'
+ShieldingCurves['CarringtonElectronINTEGRALPowTabelated']['color'] = 'blue'
+
+ShieldingCurves['ISS-AE9-mission']['label'] = '1 year dose ISS trapped Electrons'
+ShieldingCurves['ISS-AP9-mission']['label'] = '1 year dose ISS trapped Protons'
+
+ShieldingCurves['VAB-AE9-mission']['label'] = '1 month dose VAB trapped Electrons'
+ShieldingCurves['VAB-AP9-mission']['label'] = '1 month dose VAB trapped Protons'
+
+
+NumTiles = len(ShieldingCurves[Names[0]]['dose'])
+
+## Plot shielding curves with error bars
+x = np.linspace(0, 10, num=101, dtype=float, endpoint=True)
+# print(x)
+
+
+Ex = ShieldingCurves['Carrington-SEP-Expected-Int-With0']
+
+for key, Curve in ShieldingCurves.items():
+    # Fill the area between the expected and 2 sigma curves
+    if "Plus" in key:
+        plt.fill_between(x, Curve['dose'], Ex['dose'], color=Curve['color'], alpha=0.5, label=Curve['label'])
+    elif "Minus" in key:
+        plt.fill_between(x, Ex['dose'], Curve['dose'], color=Curve['color'], alpha=0.5, label=Curve['label'])
+    else:
+        plt.errorbar(x, Curve['dose'], Curve['error'], fmt='', markersize=2, capsize=2, label=Curve['label'], color=Curve['color'], linestyle='')
+    
+
+####### Plot 1kRad line #########
+CriticalDose = [1 for i in x]
+plt.plot(x, CriticalDose, color='k', linewidth=2, label='1 krad')
+CriticalDose = [10 for i in x]
+plt.plot(x, CriticalDose, '--', color='k', linewidth=2, label='10 krad')
+# CriticalDose = [100 for i in x]
+# plt.plot(x, CriticalDose, '--', color='k', linewidth=2, label='100 krad')
+
+
+plt.title("Ionising Dose Behind Shielding of Varying Thickness")
+plt.xlabel("Aluminium Shielding Thickness [mm]")
+plt.ylabel("Total Ionising Dose [krad]")
+plt.yscale("log")
+# plt.xscale("log")
+# Increase the number of ticks on the y-axis
+# plt.yticks(np.logspace(-4, 4, num=9))
+
+plt.xlim(0.5, 10)
+plt.ylim(1e-4, 2e+2)
+plt.grid(which='both')
+
+# Get handles and labels from the plot
+handles, labels = plt.gca().get_legend_handles_labels()
+
+# Define desired order of labels
+desired_order = [
+    '1 krad', 
+    '10 krad', 
+    'Carrington Proton + 2σ',
+    'Carrington Proton Event Fluence',
+    'Carrington Proton − 2σ',
+    'Carrington Electrons Event Fluence',
+    '1 year dose ISS trapped Electrons',
+    '1 year dose ISS trapped Protons',
+    '1 month dose VAB trapped Electrons',
+    '1 month dose VAB trapped Protons'
 ]
 
-Cosmic_Data = []
-for i, path in enumerate(Cosmic_Paths):
-    Cosmic_Data.append(totalkRadGras(path, ""))
+# Reorder handles and labels according to the desired order
+ordered_handles = [handles[labels.index(label)] for label in desired_order if label in labels]
+ordered_labels = [label for label in desired_order if label in labels]
 
-seconds_in_a_month = 60 * 60 * 24 * 30.44  # number of seconds in a month
-
-# Calculate total dose and error for Cosmic particles
-Total_Cosmic_Dose = sum([data[0] for data in Cosmic_Data])/ seconds_in_a_month
-Total_Cosmic_Error = np.sqrt(sum([data[1]**2 for data in Cosmic_Data])) / seconds_in_a_month
-# Create a new dataset for Cosmic with the same structure
-Total_Cosmic_Data = [Total_Cosmic_Dose, Total_Cosmic_Error]
-
-# ----------------------------------------- Plot Cosmic Particles -------------------------------------------------------
-plt.errorbar(x, Total_Cosmic_Dose, Total_Cosmic_Error, fmt='C7* ', capsize=4, label="Geant4 Cosmic particles", elinewidth=1, capthick=1)
+plt.legend(ordered_handles, ordered_labels)
 
 
 
-plt.xlim(0.25, 2.5)
-plt.ylim(1e-4, 2e2)
-plt.yscale("log")
 
-plt.grid(which='both', linestyle='-', linewidth=0.5)
-plt.title("Comparison between Geant4 and SHIELDOSE-2Q", x=0.425)
-plt.xlabel("Aluminium Shielding Depth [g/cm2]")
-plt.ylabel("Ionizing dose in silicon [krad per month]")
-plt.legend(loc='lower left', framealpha=0.75)
-#plt.savefig("/l/TritonPlots/Paper/ShielddoseComparison.pdf", format='pdf', bbox_inches="tight")
-'''
-
-
-fig2 = plt.figure(2)
-plt.title(Folder)
-plt.plot(x, Electrons[3], 'C0.', label="GRAS Electrons > " + str(ElecMeV) + " MeV")
-plt.plot(x, Protons[3], 'C1.', label="GRAS Protons > " + str(ProtMeV) + " MeV")
-plt.legend()
-plt.xlabel("Aluminium Shield Thickness [g/cm2]")
-plt.ylabel("Number of Non Zero Entries")
-plt.grid(which='both')
-plt.yscale("log")
-#plt.savefig(Path + Folder + "/NonZeroEntries.eps", format='eps', bbox_inches="tight")
-
-fig3 = plt.figure(3)
-plt.title(Folder)
-plt.plot(x, 100 * Electrons[1] / Electrons[0], 'C0.', label="GRAS Electrons > " + str(ElecMeV) + " MeV")
-plt.plot(x, 100 * Protons[1] / Protons[0], 'C1.', label="GRAS Protons > " + str(ProtMeV) + " MeV")
-plt.legend()
-plt.xlabel("Aluminium Shield Thickness [g/cm2]")
-plt.ylabel("Relative Error in %")
-plt.grid(which='both')
-#plt.yscale("log")
-#plt.savefig(Path + Folder + "/RelativeError.eps", format='eps', bbox_inches="tight")
-'''
-plt.show()
+plt.savefig(Path + "CompareGRASShieldose.pdf", format='pdf', bbox_inches="tight")
+# plt.show()

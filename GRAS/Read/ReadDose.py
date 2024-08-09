@@ -3,6 +3,19 @@ import matplotlib.pyplot as plt
 
 
 def readDose(file):
+    """ 
+    Reads the TID values of all sensitive volumes of a GRAS CSV output file.
+
+    Args:
+        file (str): The path to the CSV file.
+    
+    Returns:
+        dict: A dictionary containing the following keys:
+            - 'dose': A numpy array containing the dose values in kRad
+            - 'error': A numpy array containing the absolute dose error in kRad
+            - 'entries': A numpy array containing the number of entries.
+            - 'non-zeros': A numpy array containing the number of non-zero entries
+    """
 
     keys = ['dose', 'error', 'entries', 'non-zeros']
 
@@ -37,58 +50,72 @@ def readDose(file):
         TID[key] = np.array(TID[key])
 
     # The default dose unit in GRAS is rad.
-    # Most spectra are flux spectra. The resulting dose is therefore given in rad/s.
     # --> divide by 1000 to get to krad.
     radToKrad = 1 / 1000
 
     for key in ['dose', 'error']:
         TID[key] = TID[key] * radToKrad
 
-    return TID  # 4xNumTiles matrix
-    # data[0]: kRad per particle for each volume
-    # data[1]: Absolute Error in kRad per particle
-    # data[2]: Number of Entries
-    # data[3]: Number of non zero entries
+    return TID
 
 
 if __name__ == "__main__":
-    File = "/l/triton_work/ShieldingCurves/Carrington/CarringtonElectronDiffPowTabelated-10mm/Res/TID_757480_117187.csv"
+    File = "/l/triton_work/Shielding_Curves/Carrington/VAB-AE9-mission/Res/TID_891597_137936.csv"
+
+    # Plot path is the parent folder of the file path
+    PlotPath = File.split('/')
+    PlotPath = '/'.join(PlotPath[:-2])
 
     Results = readDose(File)
 
-    print(np.shape(Results))
-    #print(Results)
+    NumTiles = len(Results['dose'])
+    # print("Number of tiles: ", NumTiles)
+
+    # print("Results keys: ",Results.keys())
+    # print("Results['dose'] type: ", type(Results['dose']))
+    # print("Results['dose'] ndarray length: ", len(Results['dose']))
 
     # Plot the dose with error bars
     plt.figure(0)
-    plt.errorbar(np.arange(len(Results['dose'])), Results['dose'], yerr=Results['error'], fmt=' ', capsize=5, elinewidth=1, capthick=1)
+    plt.errorbar(np.arange(NumTiles), Results['dose'], yerr=Results['error'], fmt=' ', capsize=5, elinewidth=1, capthick=1, label='Dose')
+    # Add horizontal line at 1 kRad
+    plt.axhline(y=1, color='r', linestyle='--', label='1 kRad')
     plt.title('Dose per tile')
     plt.xlabel('Tile number')
     plt.ylabel('Dose [kRad]')
     plt.yscale('log')
-    plt.minorticks_on()
-    plt.grid(axis='x', which='both')
-    plt.grid(axis='y', which='major')
+    plt.grid(which='both')
+    plt.legend()
+
+    plt.savefig(PlotPath + '/Dose.png', format='pdf', bbox_inches="tight")
 
     # Plot the relative error
     plt.figure(1)
-    plt.plot(100 * Results['error'] / Results['dose'], '.')
+    plt.plot(100 * Results['error'] / Results['dose'], '.', label='Relative Error')
+    # Add horizontal line at 1%
+    plt.axhline(y=1, color='r', linestyle='--', label='1% error')
     plt.title('Relative Error in %')
     plt.xlabel('Tile number')
     plt.ylabel('Relative Error [%]')
     plt.grid(which='both')
+    plt.legend()
+
+    plt.savefig(PlotPath + '/Error.png', format='pdf', bbox_inches="tight")
 
     # Plot the number of non-zero entries
     plt.figure(2)
-    plt.plot(Results['non-zeros'], '.')
+    plt.plot(Results['non-zeros'], '.', label='Non-zero entries')
     # Add horizontal line at 1
-    plt.axhline(y=1, color='r', linestyle='--')
+    plt.axhline(y=1, color='r', linestyle='--', label='1 entry')
     plt.title('Number of non-zero entries')
     plt.xlabel('Tile number')
     plt.ylabel('Number of non-zero entries')
     plt.yscale('log')
-    plt.minorticks_on()
     plt.grid(axis='x', which='both')
     plt.grid(axis='y', which='major')
-    plt.show()
+    plt.legend()
+
+    plt.savefig(PlotPath + '/NonZeros.png', format='pdf', bbox_inches="tight")
+    
+    # plt.show()
 

@@ -6,13 +6,28 @@ import sys
 
 
 def totalDose(path):
+    """
+    Reads the TID values of all sensitive volumes of all GRAS CSV output files in a folder and calculates the total dose for each of the tiles.
+
+    Args:
+        path (str): The path to the folder containing the CSV files.
+    
+    Returns:
+        dict: A dictionary containing the following keys:
+            - 'dose': A numpy array containing the total dose values in kRad for each tile.
+            - 'error': A numpy array containing the absolute total dose error in kRad for each tile.
+            - 'entries': A numpy array containing the number of entries for each tile.
+            - 'non-zeros': A numpy array containing the number of non-zero entries for each tile.    
+    """
+
     print("\nReading in all csv files in folder:", path)
 
     # Get list of all csv files in Path
     Files = [f for f in os.listdir(path) if '.csv' in f]
 
     if not Files:
-        sys.exit("ERROR !!! No files found")
+        # Raise an error if no files are found
+        sys.exit("ERROR !!! No csv files found in folder: " + path)
 
     keys = ['dose', 'error', 'entries', 'non-zeros']
     TID = {key: [] for key in keys}
@@ -61,7 +76,7 @@ def totalDose(path):
 
 
     if MinNZE < 100:
-        print("ERROR !!! Tile", LowestTile, "has only", MinNZE, "Non-Zero entries !!!")
+        print("Warning !!! Tile", LowestTile, "has only", MinNZE, "Non-Zero entries !!!")
 
     RelativeError = TID['error'] / TID['dose']
     MaxRelativeError = max(RelativeError)
@@ -74,7 +89,7 @@ def totalDose(path):
     print(f"The number of particles required to achieve 1% error is: {PartNumRequired:.3g} or {ParticleMultipleRequired:.3g} times the number of particles in the run")
 
     if MaxRelativeError > 1:
-        print(f"ERROR !!! Tile {MaxRelativeErrorTile} has {MaxRelativeError * 100:.2f} % relative error!!!")
+        print(f"Warning !!! Tile {MaxRelativeErrorTile} has {MaxRelativeError * 100:.2f} % relative error!!!")
 
     # Print datatypes and shapes of the arrays
     #for key in keys:
@@ -86,47 +101,58 @@ def totalDose(path):
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/ShieldingCurves/MultilayerPaper/AE9-GTO/Res/"
+    Path = "/l/triton_work/Shielding_Curves/Carrington/GEO-AP9-mission/Res/"
 
     Results = totalDose(Path)
 
+    NumTiles = len(Results['dose'])
+
+    # Multiply dose and error with the number of seconds in a month
+    # to get the dose in kRad per month
+    # Results['dose'] *= 60 * 60 * 24 * 30
+    # Results['error'] *= 60 * 60 * 24 * 30
+
     # Plot the dose with error bars
     plt.figure(0)
-    plt.errorbar(np.arange(len(Results['dose'])), Results['dose'], yerr=Results['error'], fmt=' ', capsize=5, elinewidth=1, capthick=1)
+    plt.errorbar(np.arange(NumTiles), Results['dose'], yerr=Results['error'], fmt=' ', capsize=5, elinewidth=1, capthick=1, label='Dose')
+    # Add horizontal line at 1 kRad
+    plt.axhline(y=1, color='r', linestyle='--', label='1 kRad')
     plt.title('Dose per tile')
     plt.xlabel('Tile number')
     plt.ylabel('Dose [kRad]')
     plt.yscale('log')
-    plt.minorticks_on()
-    plt.grid(axis='x', which='both')
-    plt.grid(axis='y', which='major')
+    plt.grid(which='both')
+    plt.legend()
 
-    plt.savefig(Path + "../Plot/Dose.pdf", format='pdf', bbox_inches="tight")
+    plt.savefig(Path + "..//Dose.pdf", format='pdf', bbox_inches="tight")
 
     # Plot the relative error
     plt.figure(1)
-    plt.plot(100 * Results['error'] / Results['dose'], '.')
+    plt.plot(100 * Results['error'] / Results['dose'], '.', label='Relative Error')
+    # Add horizontal line at 1%
+    plt.axhline(y=1, color='r', linestyle='--', label='1% error')
     plt.title('Relative Error in %')
     plt.xlabel('Tile number')
     plt.ylabel('Relative Error [%]')
     plt.grid(which='both')
+    plt.legend()
 
-    plt.savefig(Path + "../Plot/RelativeError.pdf", format='pdf', bbox_inches="tight")
+    plt.savefig(Path + "../Error.pdf", format='pdf', bbox_inches="tight")
 
     # Plot the number of non-zero entries
     plt.figure(2)
-    plt.plot(Results['non-zeros'], '.')
+    plt.plot(Results['non-zeros'], '.', label='Non-zero entries')
     # Add horizontal line at 1
-    plt.axhline(y=1, color='r', linestyle='--')
+    plt.axhline(y=1, color='r', linestyle='--', label='1 entry')
     plt.title('Number of non-zero entries')
     plt.xlabel('Tile number')
     plt.ylabel('Number of non-zero entries')
     plt.yscale('log')
-    plt.minorticks_on()
     plt.grid(axis='x', which='both')
     plt.grid(axis='y', which='major')
+    plt.legend()
 
-    plt.savefig(Path + "../Plot/NonZeroEntries.pdf", format='pdf', bbox_inches="tight")
+    plt.savefig(Path + "../NonZeros.pdf", format='pdf', bbox_inches="tight")
 
     #plt.show()
 

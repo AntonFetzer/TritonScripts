@@ -1,0 +1,30 @@
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+import sys
+
+def mergeTotalDose(List_of_Dose_Dicts: list) -> dict:
+    """ 
+    Merges the dose dicts in List_of_Dose_Dicts into one dose dict
+
+    Args:
+        List_of_Dose_Dicts (list): A list containing dictionaries of the format:
+            - 'dose': A numpy array containing the total dose values in kRad for each tile.
+            - 'error': A numpy array containing the absolute total dose error in kRad for each tile.
+            - 'entries': A numpy array containing the number of entries for each tile.
+            - 'non-zeros': A numpy array containing the number of non-zero entries for each tile.  
+    
+    Returns:
+        dict: A dictionary containing the following keys:
+            - 'dose': A numpy array containing the total dose values in kRad for each tile.
+            - 'error': A numpy array containing the absolute total dose error in kRad for each tile.
+            - 'entries': A numpy array containing the number of entries for each tile.
+            - 'non-zeros': A numpy array containing the number of non-zero entries for each tile.
+
+    Excepts:
+        If the input is not a list of dicts, a TypeError is raised.
+        If the number of tiles in the dose dictionaries is not the same, a ValueError is raised.
+
+    """
+
+    # 
