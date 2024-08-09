@@ -62,6 +62,6 @@ def mergeHistograms(list_of_histograms):
     TotalHistogram['mean'][non_zero_entries] /= TotalHistogram['entries'][non_zero_entries]
     
     # Calculate the error correctly considering the weighted contributions
-    TotalHistogram['error'][non_zero_entries] = (np.sqrt(TotalHistogram['error'][non_zero_entries]) / TotalHistogram['entries'][non_zero_entries])
+    TotalHistogram['error'][non_zero_entries] = np.sqrt(TotalHistogram['error'][non_zero_entries]) / TotalHistogram['entries'][non_zero_entries]
 
     return TotalHistogram

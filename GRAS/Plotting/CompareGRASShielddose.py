@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from GRAS.Read.ReadSD2Q import readSDQ2
 from GRAS.Dependencies.TotalDose import totalDose
+from GRAS.Dependencies.MergeTotalDose import mergeTotalDose
 
 ##### SHIELDOSE #####
 
@@ -9,14 +10,14 @@ plt.figure(0, [5, 8])
 # ------------------------------- Import and Plot SHIELDOSE Data -------------------------------------------------------
 ConvertKrad = 1 / 1000  #  1/1000 to convert to krad
 # mmtogcm2 = 0.27  # 0.27 to convert mm to g/cm2 of aliminium
-""" 
+
 SDData = readSDQ2("/l/triton_work/Spectra/Van-Allen-Belt-Probes/Shieldose/spenvis_sqo.txt")
 # SDDataCollumns = ['Aluminium Thickness', 'Total Dose', 'Electrons', 'Bremsstrahlung', 'Protons']
 plt.plot(SDData[:, 0], ( SDData[:, 2]+SDData[:, 3] ) * ConvertKrad, 'C0--', label="SHIELDOSE-2Q trapped Electrons")
 #plt.plot(SDData[:, 0] * mmtogcm2, SDData[:, 3] * ConvertKrad, 'C1-..', label="SHIELDOSE-2Q Bremsstrahlung")
 plt.plot(SDData[:, 0], SDData[:, 4] * ConvertKrad, 'C1-', label="SHIELDOSE-2Q trapped Protons")
 plt.plot(SDData[:, 0], SDData[:, 1] * ConvertKrad, 'C2:', label="SHIELDOSE-2Q Total trapped particles")
- """
+
 ####### GRAS #######
 
 Path = "/l/triton_work/Shielding_Curves/Carrington/"
@@ -50,7 +51,7 @@ Names = [
     'VAB-AP9-mission',
 ]
 
-ShieldingCurves = {}
+""" 
 for name in Names:
    path = Path + name + res_suffix
    ShieldingCurves[name] = totalDose(path)
@@ -117,7 +118,7 @@ CriticalDose = [10 for i in x]
 plt.plot(x, CriticalDose, '--', color='k', linewidth=2, label='10 krad')
 # CriticalDose = [100 for i in x]
 # plt.plot(x, CriticalDose, '--', color='k', linewidth=2, label='100 krad')
-
+ """
 
 plt.title("Ionising Dose Behind Shielding of Varying Thickness")
 plt.xlabel("Aluminium Shielding Thickness [mm]")
