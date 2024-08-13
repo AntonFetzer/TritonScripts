@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def readGRASLETHistos(file):
+def readLETHistos(file):
     keys = ['lower', 'upper', 'mean', 'value', 'error', 'entries']
 
     # Initialize dictionaries for LET and Eff histograms
@@ -70,7 +70,7 @@ def readGRASLETHistos(file):
 if __name__ == "__main__":
     file = "/l/triton_work/LET_Histograms/Carrington/ISS-AP9-mission/0mm/Res/LET_384289_59452.csv"
 
-    LET, Eff = readGRASLETHistos(file)
+    LET, Eff = readLETHistos(file)
 
     # For demonstration, replace np.shape(LETHist) with more appropriate operation
     print("LETHist Number of bins", len(LET['entries']))
