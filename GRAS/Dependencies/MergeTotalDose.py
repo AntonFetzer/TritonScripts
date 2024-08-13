@@ -56,14 +56,14 @@ def mergeTotalDose(List_of_Dose_Dicts: list) -> dict:
 
     # Calculate the weighted average of the dose and error
     Total['dose'] = Total['dose']  # Divide by summed up number of entries to get the weighted average of the dose results
-    Total['error'] = np.sqrt(Total['error']) / Total['entries']
+    Total['error'] = np.sqrt(Total['error'])
 
     return Total
 
 
 if __name__ == "__main__":
-    Elec_path = "/l/triton_work/Shielding_Curves/Carrington/VAB-AE9-mission/Res/"
-    Prot_path = "/l/triton_work/Shielding_Curves/Carrington/VAB-AP9-mission/Res/"
+    Elec_path = "/l/triton_work/Shielding_Curves/Carrington/ISS-SolarProton-mission/Res/"
+    Prot_path = "/l/triton_work/Shielding_Curves/Carrington/VAB-SolarProton-mission/Res/"
 
     Elec = totalDose(Elec_path)
     Prot = totalDose(Prot_path)

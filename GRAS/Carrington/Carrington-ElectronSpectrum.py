@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 # import sympy as sp
 from GRAS.Read.ReadSpenvis_tri import readSpenvis_tri
 
-Expected = 'C0' # Blue
+Expected = 'blue' # Blue
 PlusColor = 'C1'        # Green
 MinusColor = 'C2'       # Orange
 ISSColor = 'C8'         # yellow

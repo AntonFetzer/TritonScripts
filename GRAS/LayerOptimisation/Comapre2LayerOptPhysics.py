@@ -2,15 +2,15 @@ from GRAS.Dependencies.TotalDose import totalDose
 import numpy as np
 import matplotlib.pyplot as plt
 
-Path = "/l/triton_work/2LayerOptimisationPhysicsTest10Tiles/Pe-Pb-Protons/"
+Path = "/l/triton_work/2LayerOptimisationPhysicsTest10Tiles/Pe-Pb-Electrons/"
 res_suffix = "/Res/"
 
 
 Labels = [
     "Template",
     ############# Models that all produce the same results as the default #################
-    # "FTFP_BERT",
-    # "QBBC",
+    "FTFP_BERT",
+    "QBBC",
     # "QGSP_BERT",
     # "QGSP_BIC",
     # "binary_ion",
@@ -28,6 +28,9 @@ Labels = [
     # "binary",
     # "firsov",
 
+    "EM3andQBBC",
+    "QBBCandEM3",
+
     ############# Models that dont work at all #################
     # "QGSP_BIC_HP",
     # "QGSP_QMD_HP",
@@ -42,19 +45,19 @@ Labels = [
     # "em_standard",  # Not actually the standard
     # "em_standard_opt1",  # low precision
     # "em_standard_opt2",  # experimental
-    # "em_standard_opt3",
+    "em_standard_opt3",
     "em_standard_opt4",  # Seems to be the default EM ???
 
-    "em_penelope",  # Produces slightly higher dose
-    "em_livermore",
+    # "em_penelope",  # Produces slightly higher dose
+    # "em_livermore",
 
-    "em_lowenergy",  # Does not work for protons and huge deviations for electrons
-    # "em_standard_space",  # Low performance
-    # "em_standard_remizovich",
+    # "em_lowenergy",
+    # "em_standard_space",  # Low performance and significant deviations
+    # "em_standard_remizovich", # No Proton results
 
-    # "em_standardSS",  # terrible performance
-    "em_standardWVI",  # slow
-    # "em_standardNR",  # terrible performance
+    # "em_standardSS",  # terrible performance No Proton results
+    # "em_standardWVI",  # slow
+    # "em_standardNR",  # terrible performance No Proton results
 
     # Does not seem to work at all
     # "secondary_generator",
@@ -75,39 +78,28 @@ Colours = ['C0', 'C1', 'C2', 'C8', 'C3', 'C9', 'C7', 'k', 'C4', 'C5', 'C6',
            'C0', 'C1', 'C2', 'C8', 'C3', 'C9', 'C7', 'k', 'C4', 'C5', 'C6',
            'blue', 'green', 'red', 'cyan', 'magenta', 'yellow', 'black', 'white']
 
-Data = []
-for i, path in enumerate(Paths):
-    Data.append(totalDose(path))
+List_of_Datasets = []
+i = 0
+while i < len(Paths):
+    try:
+        List_of_Datasets.append(totalDose(Paths[i]))
+        i += 1
+    except:
+        print(f"Failed to read in data from {Paths[i]}")
+        # Remove the label and colour for the failed dataset
+        Paths.pop(i)
+        Labels.pop(i)
 
 keys = ['dose', 'error', 'entries', 'non-zeros']
 
-# Compute the weighted average for the Dose.
-total_entries = np.sum([data['entries'] for data in Data], axis=0)
-weighted_doses = np.sum([data['dose'] * data['entries'] for data in Data], axis=0) / total_entries
-
-# New Reference Dataset
-new_reference = {
-    keys[0]: weighted_doses,
-    keys[1]: np.zeros_like(weighted_doses),
-    keys[2]: np.zeros_like(weighted_doses),
-    keys[3]: np.zeros_like(weighted_doses)
-}
-
-# Insert the new reference dataset at the beginning of the Data list
-Data.insert(0, new_reference)
-
-# Update Labels and Colors to include the new reference
-Labels = ["Weighted Average Reference"] + Labels
-Colours = ['grey'] + Colours
-
-NumTiles = np.shape(Data[0]['dose'])[0]
+NumTiles = len(List_of_Datasets[0]['dose'])
 
 plt.figure(1)
 
 x = np.linspace(0, NumTiles - 1, num=NumTiles, dtype=int, endpoint=True)
 
-for i, data in enumerate(Data):
-    plt.errorbar(x, data['dose'], data['error'], fmt='', markersize=5, capsize=5, label=Labels[i], color=Colours[i], linestyle='-')
+for i, TID in enumerate(List_of_Datasets):
+    plt.errorbar(x, TID['dose'], TID['error'], fmt='', markersize=5, capsize=5, label=Labels[i], color=Colours[i], linestyle='-')
 
 ####### Plot 1kRad line #########
 # CriticalDose = [1 for i in x]
@@ -129,12 +121,12 @@ plt.savefig(Path + "/2LayerOpt.pdf", format='pdf', bbox_inches="tight")
 
 plt.figure(2)
 
-# Calculate the difference with the weighted average and plot it
-for i, data in enumerate(Data[1:]):  # Skip the first dataset as it's the new reference
-    DataDiff = data['dose'] - data['dose'][0] # Subtracting the reference dataset
-    plt.plot(x, DataDiff, '-', label=Labels[i + 1], color=Colours[i + 1])  # i+1 as the first dataset is skipped
+# Calculate the difference from the first dataset and plot it
+for i, TID in enumerate(List_of_Datasets[1:]):  # Skip the first dataset as it's the reference
+    TIDDiff = TID['dose'] - List_of_Datasets[0]['dose'] # Subtracting the TID of the first dataset
+    plt.plot(x, TIDDiff, '-', label=Labels[i + 1], color=Colours[i + 1])  # i+1 as the first dataset is skipped
 
-plt.title("Difference from the average")
+plt.title("Difference from the first dataset")
 plt.xlabel("Percentage of shielding mass in top layer [%]")
 plt.ylabel("Difference in Ionising Dose per month [krad]")
 plt.legend()
@@ -143,13 +135,13 @@ plt.savefig(Path + "/Difference.pdf", format='pdf', bbox_inches="tight")
 
 plt.figure(3)
 
-# Calculate the relative deviation with the reference dataset (weighted average) and plot it
-for i, data in enumerate(Data[1:]):  # Skip the first dataset as it's the new reference
-    DataRatio = ((data['dose'] / data['dose'][0]) - 1) * 100  # Dividing by the reference dataset
-    plt.plot(x, DataRatio, '-', label=Labels[i + 1], color=Colours[i + 1])  # i+1 as the first dataset is skipped
+# Calculate the relative deviation with the first dataset and plot it
+for i, TID in enumerate(List_of_Datasets[1:]):  # Skip the first dataset as it's the reference
+    TIDRatio = ((TID['dose'] / List_of_Datasets[0]['dose']) - 1) * 100  # Dividing by the reference dataset
+    plt.plot(x, TIDRatio, '-', label=Labels[i + 1], color=Colours[i + 1])  # i+1 as the first dataset is skipped
 
 # plt.yscale("log")
-plt.title("Relative Deviation from the average")
+plt.title("Relative Deviation from the first dataset")
 plt.xlabel("Percentage of shielding mass in top layer [%]")
 plt.ylabel("Relative Deviation [%]")
 plt.legend()
@@ -162,26 +154,29 @@ min_non_zero_entries = []
 max_relative_error = []
 
 # For CSV File creation and writing
-for i, data in enumerate(Data[1:]):  # Skip the first dataset as it's the new reference
-    O = data['dose']  # Observed values (Dose for the current model)
-    E = data['dose'][0]  # Expected values (Dose for the reference model)
+for i, TID in enumerate(List_of_Datasets[1:]):  # Skip the first List_of_Datasetsset as it's the reference
+    O = TID['dose']  # Observed values (Dose for the current model)
+    E = List_of_Datasets[0]['dose']  # Expected values (Dose for the reference model)
 
     # Calculate the chi-squared value
     chi_squared = np.sum(((O - E) ** 2) / E)
     chi_squared_values.append(chi_squared)
 
     # Calculate the minimum number of non-zero entries
-    min_non_zero_entries.append(np.min(data['non-zeros']))  # data['non-zeros'] is NonZeroEntries for the current model
+    min_non_zero_entries.append(np.min(TID['non-zeros']))
 
     # Calculate the maximum relative error
-    max_relative_error.append(np.max(data['error'] / data['dose']))
+    max_relative_error.append(np.max(TID['error'] / TID['dose']))
 
-# Open a CSV file to write the data
+# Open a CSV file to write the List_of_Datasets
 with open(Path +'../Plotting/model_entries.csv', 'w') as f:
     # Write the header to the CSV file
     f.write("Model Name,Number of Entries,Chi-Squared,Min Non-Zero Entries,Max Relative Error\n")
 
-    # Loop over the Labels and Data to populate the CSV file
-    for i, data in enumerate(Data[1:]):  # Skip the first dataset as it's the reference
-        f.write(
-            f"{Labels[i + 1]},{int(data['entries'][0])},{chi_squared_values[i]},{min_non_zero_entries[i]},{max_relative_error[i]}\n")  # i+1 as the first dataset is skipped
+    # Write the reference model to the CSV file
+    f.write(f"{Labels[0]},{int(sum(List_of_Datasets[0]['entries']))},0,{np.min(List_of_Datasets[0]['non-zeros'])},{np.max(List_of_Datasets[0]['error'] / List_of_Datasets[0]['dose'])}\n")
+
+    # Loop over the Labels and List_of_Datasets to populate the CSV file
+    for i, TID in enumerate(List_of_Datasets[1:]):  # Skip the first List_of_Datasetsset as it's the reference
+        f.write(f"{Labels[i+1]},{int(sum(TID['entries']))},{chi_squared_values[i]},{min_non_zero_entries[i]},{max_relative_error[i]}\n") 
+        # i+1 as the first List_of_Datasetsset is skipped

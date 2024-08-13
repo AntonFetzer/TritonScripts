@@ -7,7 +7,7 @@ from GRAS.Read.ReadSpenvis_sef import readSpenvis_sef
 from GRAS.Read.ReadSpenvis_gcf import readSpenvis_gcf
 from GRAS.Read.ReadSpenvis_sefflare import readSpenvis_sefflare
 
-ExpectedIntColor = 'C0' # Blue
+ExpectedIntColor = 'blue' # Blue
 PlusColor = 'C1'        # Green
 MinusColor = 'C2'       # Orange
 ISSColor = 'C8'         # yellow
@@ -30,13 +30,11 @@ Plus *= 4 * np.pi
 
 plt.figure(1, figsize=(8, 8))
 
-plt.fill_between(Energies, Plus, ExpectedInt, color=PlusColor, alpha=0.5)
-plt.fill_between(Energies, ExpectedInt, Minus, color=MinusColor, alpha=0.5)
-
-plt.plot(Energies, Plus, label="Carrington SEP EVT +2 Sigma", color=PlusColor)
-plt.plot(Energies, ExpectedInt, label="Carrington SEP EVT Expected", color=ExpectedIntColor, linewidth=4)
-plt.plot(Energies, Minus, label="Carrington SEP EVT -2 Sigma", color=MinusColor)
-
+plt.fill_between(Energies, Plus, ExpectedInt, color=PlusColor, alpha=0.5, label="Carrington SEP EVT +2 Sigma")
+#plt.plot(Energies, Plus, '.-', label="Carrington SEP EVT +2 Sigma", color=PlusColor)
+plt.plot(Energies, ExpectedInt, '.-', label="Carrington SEP EVT Expected", color=ExpectedIntColor, linewidth=4, markersize=10)
+#plt.plot(Energies, Minus, '.-', label="Carrington SEP EVT -2 Sigma", color=MinusColor)
+plt.fill_between(Energies, ExpectedInt, Minus, color=MinusColor, alpha=0.5, label="Carrington SEP EVT -2 Sigma")
 
 """ 
 ### 2003 SPE Data ###

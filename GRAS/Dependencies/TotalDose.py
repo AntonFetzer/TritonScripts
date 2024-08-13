@@ -101,60 +101,68 @@ def totalDose(path):
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/Shielding_Curves/Carrington/GEO-AP9-mission/Res/"
+    Path = "/l/triton_work/Shielding_Curves/MultilayerPaper/"
 
-    Results = totalDose(Path)
+    # Find all subdirectories in the given path that contain a "Res" subfolder
+    # and calculate the total dose for each of them
+    for root, dirs, files in os.walk(Path):
+        if 'Res' in dirs:
+            Path = os.path.join(root, 'Res/')
+            print("Calculating total dose for path:", Path)
+            
+            # Calculate the total dose for the given path
+            Results = totalDose(Path)
 
-    NumTiles = len(Results['dose'])
+            NumTiles = len(Results['dose'])
 
-    # Multiply dose and error with the number of seconds in a month
-    # to get the dose in kRad per month
-    # Results['dose'] *= 60 * 60 * 24 * 30
-    # Results['error'] *= 60 * 60 * 24 * 30
+            # Multiply dose and error with the number of seconds in a month
+            # to get the dose in kRad per month
+            # Results['dose'] *= 60 * 60 * 24 * 30
+            # Results['error'] *= 60 * 60 * 24 * 30
 
-    # Plot the dose with error bars
-    plt.figure(0)
-    plt.errorbar(np.arange(NumTiles), Results['dose'], yerr=Results['error'], fmt=' ', capsize=5, elinewidth=1, capthick=1, label='Dose')
-    # Add horizontal line at 1 kRad
-    plt.axhline(y=1, color='r', linestyle='--', label='1 kRad')
-    plt.title('Dose per tile')
-    plt.xlabel('Tile number')
-    plt.ylabel('Dose [kRad]')
-    plt.yscale('log')
-    plt.grid(which='both')
-    plt.legend()
+            # Plot the dose with error bars
+            plt.figure(0)
+            plt.errorbar(np.arange(NumTiles), Results['dose'], yerr=Results['error'], fmt=' ', capsize=5, elinewidth=1, capthick=1, label='Dose')
+            # Add horizontal line at 1 kRad
+            plt.axhline(y=1, color='r', linestyle='--', label='1 kRad')
+            plt.title('Dose per tile')
+            plt.xlabel('Tile number')
+            plt.ylabel('Dose [kRad]')
+            plt.yscale('log')
+            plt.grid(which='both')
+            plt.legend()
 
-    plt.savefig(Path + "..//Dose.pdf", format='pdf', bbox_inches="tight")
+            plt.savefig(Path + "..//Dose.pdf", format='pdf', bbox_inches="tight")
 
-    # Plot the relative error
-    plt.figure(1)
-    plt.plot(100 * Results['error'] / Results['dose'], '.', label='Relative Error')
-    # Add horizontal line at 1%
-    plt.axhline(y=1, color='r', linestyle='--', label='1% error')
-    plt.title('Relative Error in %')
-    plt.xlabel('Tile number')
-    plt.ylabel('Relative Error [%]')
-    plt.grid(which='both')
-    plt.legend()
+            # Plot the relative error
+            plt.figure(1)
+            plt.plot(100 * Results['error'] / Results['dose'], '.', label='Relative Error')
+            # Add horizontal line at 1%
+            plt.axhline(y=1, color='r', linestyle='--', label='1% error')
+            plt.title('Relative Error in %')
+            plt.xlabel('Tile number')
+            plt.ylabel('Relative Error [%]')
+            plt.grid(which='both')
+            plt.legend()
 
-    plt.savefig(Path + "../Error.pdf", format='pdf', bbox_inches="tight")
+            plt.savefig(Path + "../Error.pdf", format='pdf', bbox_inches="tight")
 
-    # Plot the number of non-zero entries
-    plt.figure(2)
-    plt.plot(Results['non-zeros'], '.', label='Non-zero entries')
-    # Add horizontal line at 1
-    plt.axhline(y=1, color='r', linestyle='--', label='1 entry')
-    plt.title('Number of non-zero entries')
-    plt.xlabel('Tile number')
-    plt.ylabel('Number of non-zero entries')
-    plt.yscale('log')
-    plt.grid(axis='x', which='both')
-    plt.grid(axis='y', which='major')
-    plt.legend()
+            # Plot the number of non-zero entries
+            plt.figure(2)
+            plt.plot(Results['non-zeros'], '.', label='Non-zero entries')
+            # Add horizontal line at 1
+            plt.axhline(y=1, color='r', linestyle='--', label='1 entry')
+            plt.title('Number of non-zero entries')
+            plt.xlabel('Tile number')
+            plt.ylabel('Number of non-zero entries')
+            plt.yscale('log')
+            plt.grid(axis='x', which='both')
+            plt.grid(axis='y', which='major')
+            plt.legend()
 
-    plt.savefig(Path + "../NonZeros.pdf", format='pdf', bbox_inches="tight")
-
-    #plt.show()
+            plt.savefig(Path + "../NonZeros.pdf", format='pdf', bbox_inches="tight")
+            plt.close('all')
+            #plt.show()
 
 
 

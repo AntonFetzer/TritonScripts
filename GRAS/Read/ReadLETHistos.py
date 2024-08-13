@@ -68,7 +68,7 @@ def readGRASLETHistos(file):
 
 
 if __name__ == "__main__":
-    file = "/l/triton_work/LET/Foresail1-Hercules/FS1-SolarProtons/0mm/Res/LET_28556_4417.csv"
+    file = "/l/triton_work/LET_Histograms/Carrington/ISS-AP9-mission/0mm/Res/LET_384289_59452.csv"
 
     LET, Eff = readGRASLETHistos(file)
 
