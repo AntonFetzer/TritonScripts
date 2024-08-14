@@ -6,10 +6,10 @@ from uncertainties import ufloat
 
 '''
 The functional form of the Weibull is:
-F(x) = A (1- exp{-[(x-x0)/W]s}) where
+F(x) = A (1- exp{-[(x-x0)/W] ** s}) where
     x = effective LET in MeV-cm2/milligram;
     F(x) = SEE cross-section in square-microns/bit;
-    A = limiting or plateau cross-section;
+    A0 = limiting or plateau cross-section;
     x0 = onset parameter, such that F(x) = 0 for x < x0;
     W = width parameter;
     s = a dimensionless exponent.
@@ -17,7 +17,7 @@ https://creme.isde.vanderbilt.edu/CREME-MC/help/weibull
 '''
 
 Correctable = 1
-ThickList = ["0mm", "1mm", "2mm", "4mm", "8mm", "16mm", ]
+ThickList = ["0mm", "1mm", "2mm", "4mm", "8mm", "16mm"]
 
 for Thick in ThickList:
 

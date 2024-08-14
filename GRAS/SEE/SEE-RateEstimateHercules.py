@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sp
-from GRAS.Dependencies.TotalLETHistos import totalGRASLETHistos
+from GRAS.Dependencies.TotalLETHistos import totalLETHistos
 from uncertainties import ufloat
 
 '''
@@ -88,7 +88,7 @@ for Thick in ThickList:
         path = Path + Thick + "/Res/"
         ## ----------------------------------- LET Read-in -----------------------------------------------------------
         # Only works if all input files have the same number of particle!!!!!
-        LETHist = totalGRASLETHistos(path)
+        LETHist = totalLETHistos(path)
 
         NumberEntriesLETHist = np.sum(LETHist['entries'])
         TotalLET = np.sum(LETHist['mean'] * LETHist['value'])

@@ -66,7 +66,7 @@ for i in range(11):
 # Create a new figure with 2 subplots
 fig, (ax1, ax2) = plt.subplots(2)
 
-xlims = [1e0, 1e3]
+xlims = [1e1, 1e4]
 
 # Plot the LET data
 ax1.plot(data['Electron Energy'], data['Electron LET'], label='ESTAR Electron LET')

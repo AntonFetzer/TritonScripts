@@ -51,7 +51,7 @@ def totalFluenceHistos(path):
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/Fluence_Histograms/Carrington/Van-Allen-Belt-Probes-AP9-mission/Res/"
+    Path = "/l/triton_work/Fluence_Histograms/Carrington/CarringtonElectronINTEGRALPowTabelated/Res/"
     TotalFluenceHists = totalFluenceHistos(Path)
 
     # Construct the path for the 'Plot' directory
