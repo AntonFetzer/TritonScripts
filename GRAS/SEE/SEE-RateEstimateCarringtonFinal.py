@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import sympy as sp
 from GRAS.Dependencies.TotalLETHistos import totalLETHistos
 from uncertainties import ufloat
+import os
+import natsort
 
 '''
 The functional form of the Weibull is:
@@ -16,10 +18,8 @@ F(x) = A (1- exp{-[(x-x0)/W] ** s}) where
 https://creme.isde.vanderbilt.edu/CREME-MC/help/weibull
 '''
 
-
-Correctable = 0
-
-ThickList = ["0mm", "1mm", "2mm", "4mm", "8mm", "16mm"]
+Directory = "/l/triton_work/LET_Histograms/Carrington/"
+Correctable = 1
 
 if Correctable:
     CrossectionName = "LSRAM correctable SBU"
@@ -27,12 +27,12 @@ if Correctable:
     W = 18
     S = 0.98
     A0 = 4.01e-9
-else:
-    CrossectionName = "LSRAM uncorrectable SBU"
-    L0 = 0.4
-    W = 1
-    S = 0.4
-    A0 = 5.5e-14
+# else:
+#     CrossectionName = "LSRAM uncorrectable SBU" # The uncorrectable parameters are only estimated upper bounds. This means the actual cross section is unknown.
+#     L0 = 0.4
+#     W = 1
+#     S = 0.4
+#     A0 = 5.5e-14
 
 
 def f(LET):
@@ -54,57 +54,51 @@ def f(LET):
 
     return result
 
-# List of folders to read in
-# Carrington-SEP-Expected-Int-With0 Carrington-SEP-Plus2Sigma-Int-With0 GEO-AP9-mission GEO-SolarProton-mission  ISS-SolarProton-mission
-# Template VAB-AP9-mission CarringtonElectronINTEGRALPowTabelated Carrington-SEP-Minus2Sigma-Int-With0 GEO-SolarProton-5minPeakFlux 
-# ISS-AP9-mission VAB-AE9-mission  VAB-SolarProton-mission
 
-Paths = [
-    "/l/triton_work/LET_Histograms/Carrington/Carrington-SEP-Expected-Int-With0/",
-    "/l/triton_work/LET_Histograms/Carrington/Carrington-SEP-Plus2Sigma-Int-With0/",
-    "/l/triton_work/LET_Histograms/Carrington/Carrington-SEP-Minus2Sigma-Int-With0/",
+# Open the CSV file to write the results to
+if Correctable:
+    CSVFile = open("/l/triton_work/LET_Histograms/Carrington/SEERatesCorrectable.csv", 'w')
+if not Correctable:
+    CSVFile = open("/l/triton_work/LET_Histograms/Carrington/SEERatesUncorrectable.csv", 'w')
+# Write the header to the file
+header = "Data,Shielding,Crossection,SEE_Rate,SEE_Error,EntriesContributingToSEE"
+CSVFile.write(header + "\n")
 
-    "/l/triton_work/LET_Histograms/Carrington/CarringtonElectronINTEGRALPowTabelated/",
 
-    "/l/triton_work/LET_Histograms/Carrington/ISS-AP9-mission/",
-    "/l/triton_work/LET_Histograms/Carrington/ISS-SolarProton-mission/",
+# Generate list of all folder names in the directory
+FolderList = [f for f in os.listdir(Directory) if os.path.isdir(os.path.join(Directory, f))]
 
-    "/l/triton_work/LET_Histograms/Carrington/VAB-AP9-mission/",
-    "/l/triton_work/LET_Histograms/Carrington/VAB-AE9-mission/",
-    "/l/triton_work/LET_Histograms/Carrington/VAB-SolarProton-mission/",
+for F, Folder in enumerate(FolderList):
 
-    "/l/triton_work/LET_Histograms/Carrington/GEO-AP9-mission/",
-    "/l/triton_work/LET_Histograms/Carrington/GEO-SolarProton-mission/",
-    "/l/triton_work/LET_Histograms/Carrington/GEO-SolarProton-5minPeakFlux/",
-    ]
+    if Folder == "NoSEEs":
+        continue
 
-DataName = [
-    "Carrington SEP EVT",
-    "Carrington SEP +2 Sigma",
-    "Carrington SEP -2 Sigma",
+    # Generate list of all subfolder names in the Folder
+    SubFolderList = [f for f in os.listdir(Directory + Folder) if os.path.isdir(os.path.join(Directory + Folder, f))]
+    
+    # Sort the SubFolderList
+    SubFolderList = natsort.natsorted(SubFolderList)
 
-    "Carrington Electron",
-
-    "ISS AP9",
-    "ISS Solar Proton",
-
-    "VAB AP9",
-    "VAB AE9",
-    "VAB Solar Proton",
-
-    "GEO AP9",
-    "GEO Solar Proton",
-    "GEO Solar Proton 5min Peak Flux",
-    ]
-
-for Thick in ThickList:
-
-    for P, Path in enumerate(Paths):
+    for SubFolder in SubFolderList:
+        # Print a dot for each folder processed as a progress indicator
+        print(".", end='', flush=True)
         
-        path = Path + Thick + "/Res/"
+        path = Directory + Folder + "/" + SubFolder + "/Res/"
         ## ----------------------------------- LET Read-in -----------------------------------------------------------
         # Only works if all input files have the same number of particle!!!!!
-        LETHist, _ = totalLETHistos(path)
+        try:
+            LETHist, _ = totalLETHistos(path)
+        except:
+            print("Error in", path)
+            continue
+
+        # Convert Fluences to Fluxes for comparison.
+        # Path names sets containing Carrington-SEP and CarringtonElectron are fluxes in [cm-2 s-1]
+        # Datasets containing "mission" are 30 day fluences in [cm-2] (per 30 days)
+        if "mission" in Folder:
+            LETHist['value'] = LETHist['value'] / ( 30 * 24 * 3600 ) 
+            LETHist['error'] = LETHist['error'] / ( 30 * 24 * 3600 )
+
 
         NumberEntriesLETHist = np.sum(LETHist['entries'])
         TotalLET = np.sum(LETHist['mean'] * LETHist['value'])
@@ -117,25 +111,23 @@ for Thick in ThickList:
         plt.bar(LETHist['lower'], LETHist['value'], width=LETHist['upper'] - LETHist['lower'], align='edge', alpha=0.3)
         plt.errorbar(LETHist['mean'], LETHist['value'], LETHist['error'], fmt=' ', capsize=5, elinewidth=1,
                      capthick=1, label="LET Histogram")
-        plt.plot([], [], label="SEE cross-section", color='C1')
+        plt.plot([], [], label="SBU Cross Section", color='C1')
         plt.yscale("log")
         plt.xscale("log")
         plt.grid(which='both')
-        plt.title(DataName[P] + " " + Thick + "Al " + CrossectionName + "\nTotal LET = " + str(TotalLETU) + " MeV cm2 mg-1")
+        plt.title(Folder + " " + CrossectionName + " " + SubFolder + " Al\nTotal LET = " + str(TotalLETU) + " MeV cm2 mg-1")
         plt.xlabel("LET [MeV cm2 mg-1]")
-        ax1.legend(loc='center right')
+        ax1.legend(loc='lower left')
         ax1.set_ylabel("Rate per LET bin [cm-2 s-1]", color='C0')
         ax1.tick_params(axis='y', colors='C0')
 
         ax2 = ax1.twinx()
         plt.plot(LETHist['lower'], f(LETHist['lower']), color='C1')
-        ax2.set_ylabel("Cross Section [cm2 bit-1]", color='C1')
+        ax2.set_ylabel(CrossectionName + " Cross Section [cm2 bit-1]", color='C1')
         plt.yscale("log")
         ax2.tick_params(axis='y', colors='C1')
 
-        #plt.savefig(path + "../" + DataName[P] + " " + CrossectionName + " LET.png", dpi=300, bbox_inches='tight')
-        plt.savefig(path + "../" + DataName[P] + " " + DataName[P] + " " + CrossectionName + " " + Thick + " LET-Hist.pdf",
-            format='pdf', bbox_inches="tight")
+        plt.savefig(path + "../" + Folder + " " + CrossectionName + " " + SubFolder + " LET-Hist.pdf", format='pdf', bbox_inches="tight")
         plt.close('all')
         #plt.show()
 
@@ -150,6 +142,7 @@ for Thick in ThickList:
         ################## Calculating total SEE Rate #####################################
 
         SEERate = np.sum(SEEHist['value'])
+
         SEERateError = np.sum(np.square(SEEHist['error']))
         SEERateError = np.sqrt(SEERateError)
         SEERateU = ufloat(SEERate, SEERateError)
@@ -158,46 +151,42 @@ for Thick in ThickList:
         # Only entries with LET > 0.4 MeV cm2 mg-1 are considered
         EntriesContributingToSEE = np.sum(LETHist['entries'][LETHist['mean'] > L0])
 
-        print("The total SEE rate is:", SEERateU, " s-1 bit-1 ")
-        # print("The total number of Errors is:", SEERateU, " during the 3 year mission ")
-        print("or:", SEERateU * 8e+9, " s-1 Gbyte-1 ")
+        #print("The total SEE rate is:", SEERateU, " s-1 bit-1 ")
+        #print("or:", SEERateU * 8e+9, " s-1 Gbyte-1 ")
+
+        # Write the results to the CSV file
+        List = (Folder, SubFolder, CrossectionName, SEERate, SEERateError, EntriesContributingToSEE)
+
+        String = ','.join(map(str, List))
+        #print(String)
+        CSVFile.writelines(String + "\n")
+
+        if SEERate == 0:
+            print("No SEEs in", path)
+            continue
 
         fig, ax1 = plt.subplots(1)
         plt.bar(SEEHist['lower'], SEEHist['value'], width=SEEHist['upper'] - SEEHist['lower'], align='edge', alpha=0.3)
         plt.errorbar(SEEHist['mean'], SEEHist['value'], SEEHist['error'], fmt=' ', capsize=5, elinewidth=1,
-                     capthick=1, label="SEE Histogram")
-        plt.plot([], [], label="SEE cross-section", color='C1')
+                     capthick=1, label="SBU Rate Histogram")
+        plt.plot([], [], label="SBU Cross Section", color='C1')
         plt.yscale("log")
         plt.xscale("log")
         plt.grid(which='both')
-        plt.title(DataName[P] + " " + Thick + "Al " + CrossectionName + "\nTotal SEERate = " + str(SEERateU) + " s-1 bit-1")
-        #plt.title(DataName[P] + " + " + Thick + "Al  +  " + CrossectionName + " \nTotal Number of Errors = " + str(SEERateU) + " during the 3 year mission")
+        plt.title(Folder + " " + CrossectionName + " " + SubFolder + " Al\nTotal SEERate = " + str(SEERateU) + " s-1 bit-1")
         plt.xlabel("LET [MeV cm2 mg-1]")
-        ax1.legend(loc='center right')
-        ax1.set_ylabel("SEE Rate per LET bin [s-1 bit-1]", color='C0')
-        #ax1.set_ylabel("Errors per LET bin", color='C0')
+        ax1.legend(loc='lower left')
+        ax1.set_ylabel("SBU Rate per LET bin [s-1 bit-1]", color='C0')
         ax1.tick_params(axis='y', colors='C0')
 
         ax2 = ax1.twinx()
         plt.plot(LETHist['lower'], f(LETHist['lower']), color='C1')
-        ax2.set_ylabel("Cross Section [cm2 bit-1]", color='C1')
-        #ax2.set_ylabel("Cross Section of the receiver [cm2]", color='C1')
+        ax2.set_ylabel(CrossectionName + " Cross Section [cm2 bit-1]", color='C1')
         plt.yscale("log")
         ax2.tick_params(axis='y', colors='C1')
 
-        # plt.savefig(path + "../" + DataName[P] + " " + CrossectionName + " SEE.png", dpi=300, bbox_inches='tight')
-        plt.savefig(path + "../" + DataName[P] + " " + DataName[P] + " " + CrossectionName + " " + Thick + " SEE-Hist.pdf",
-            format='pdf', bbox_inches="tight")
+        plt.savefig(path + "../" + Folder + " " + CrossectionName + " " + SubFolder + " SEE-Hist.pdf", format='pdf', bbox_inches="tight")
         plt.close('all')
         #plt.show()
-
         
-        CSVFile = open("/l/triton_work/LET_Histograms/Carrington/SEERates.csv", 'a')
-        List = (DataName[P], Thick, CrossectionName, SEERate, SEERateError, EntriesContributingToSEE)
-
-        String = ', '.join(map(str, List))
-        print(String)
-        CSVFile.writelines(String + "\n")
-        CSVFile.close()
-        
-
+CSVFile.close()

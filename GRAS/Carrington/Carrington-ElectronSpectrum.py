@@ -31,7 +31,7 @@ a = 3.7
 def f(Energy):
     return 4 * np.pi * f0 * (Energy / E0) ** (-a)
 
-Energies = np.geomspace(0.13, 100, num=10)
+Energies = np.geomspace(0.13, 10, num=2)
 
 # print("Differential")
 # for E in Energies:
@@ -54,7 +54,7 @@ ISS_file = "/l/triton_work/Spectra/ISS/spenvis_tri.txt"
 
 Protons, Electrons = readSpenvis_tri(ISS_file)
 
-plt.plot(Electrons['Energy'], Electrons['Integral'], '.-', label="AE9 LEO Electron Flux", color=ISSColor)
+plt.plot(Electrons['Energy'], Electrons['Integral'], '.--', label="AE9 LEO Electron Flux", color=ISSColor)
 
 ## Read in Geostationary A9 spectrum
 GEO_file = "/l/triton_work/Spectra/GEO/spenvis_tri.txt"
@@ -64,7 +64,7 @@ Protons, Electrons = readSpenvis_tri(GEO_file)
 plt.plot(Electrons['Energy'], Electrons['Integral'], '.-.', label="AE9 GEO Electron Flux", color=GEOColor)
 
 ## Read in Van-Allen Belt Probes A9 spectrum
-VAB_file = "/l/triton_work/Spectra/Van-Allen-Belt-Probes/spenvis_tri.txt"
+VAB_file = "/l/triton_work/Spectra/VAB/spenvis_tri.txt"
 
 Protons, Electrons = readSpenvis_tri(VAB_file)
 

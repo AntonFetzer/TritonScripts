@@ -32,7 +32,11 @@ plt.figure(1, figsize=(8, 8))
 
 plt.fill_between(Energies, Plus, ExpectedInt, color=PlusColor, alpha=0.5, label="Carrington SEP EVT +2 Sigma")
 #plt.plot(Energies, Plus, '.-', label="Carrington SEP EVT +2 Sigma", color=PlusColor)
-plt.plot(Energies, ExpectedInt, '.-', label="Carrington SEP EVT Expected", color=ExpectedIntColor, linewidth=4, markersize=10)
+plt.plot(Energies, ExpectedInt, '-', color=ExpectedIntColor, linewidth=2, markersize=10)
+# Plot the expected integral flux as error bars with the plus and minus 2 sigma.
+plt.errorbar(Energies, ExpectedInt, yerr=[ExpectedInt - Minus, Plus - ExpectedInt], fmt=' ', label="Carrington SEP EVT Expected", color=ExpectedIntColor, linewidth=2, markersize=10, capsize=5, capthick=2, zorder=2)
+
+
 #plt.plot(Energies, Minus, '.-', label="Carrington SEP EVT -2 Sigma", color=MinusColor)
 plt.fill_between(Energies, ExpectedInt, Minus, color=MinusColor, alpha=0.5, label="Carrington SEP EVT -2 Sigma")
 
@@ -83,7 +87,7 @@ plt.plot(ISS_AE9_Protons['Energy'], ISS_AE9_Protons['Integral'], '.-', label="AP
 # Flux at low energy is high, but then drops to zero at 8 MeV, therefore not plotted
 
 ## Read in Van-Allen Belt Probes A9 spectrum
-VAB_AE9 = "/l/triton_work/Spectra/Van-Allen-Belt-Probes/spenvis_tri.txt"
+VAB_AE9 = "/l/triton_work/Spectra/VAB/spenvis_tri.txt"
 VAB_AE9_Protons, VAB_AE9_Electrons = readSpenvis_tri(VAB_AE9)
 plt.plot(VAB_AE9_Protons['Energy'], VAB_AE9_Protons['Integral'], '.-', label="AP9 Van-Allen-Belt Trapped Proton Flux", color=VABColor)
 
@@ -132,7 +136,7 @@ plt.plot(GEO_Cosmic_Data[0, :, 0], GEO_Cosmic_Data[0, :, 1], '*:', label="ISO GE
 # ## Read in GEO CREME96 spectrum
 GEO_Flare = "/l/triton_work/Spectra/GEO/spenvis_sefflare.txt"
 GEO_Flare_Data = readSpenvis_sefflare(GEO_Flare)
-plt.plot(GEO_Flare_Data['Energy'], GEO_Flare_Data['IFlux'], 'o', label="CREME96 GEO Peak 5min Flux", color=GEOColor, linewidth=5)
+plt.plot(GEO_Flare_Data['Energy'], GEO_Flare_Data['IFlux'], 'o', label="CREME96 GEO Peak 5min Flux", color=GEOColor, linewidth=5, zorder=3)
 
 
 
@@ -164,7 +168,17 @@ plt.xscale("log")
 plt.title("Carrington Solar Energetic Proton Comparison")
 plt.xlabel("Kinetic energy [MeV]")
 plt.ylabel("Integral Flux [cm-2 s-1]")
-plt.legend(loc='lower right')
+
+
+# Adjust legend to ensure proper order
+handles, labels = plt.gca().get_legend_handles_labels()
+order = [0, 7, 1, 2, 3, 4, 5, 6]  # Adjust this list to reorder as needed
+plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='lower right')
+
+#plt.legend(loc='lower right')
+
+
+
 plt.grid(which='both')
 
 plt.savefig("/l/triton_work/Spectra/Carrington/SEP-Final/ProtonSpectrumComparison.pdf", format='pdf', bbox_inches="tight")

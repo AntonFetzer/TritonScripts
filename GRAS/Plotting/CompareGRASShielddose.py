@@ -11,8 +11,8 @@ Path = "/l/triton_work/Shielding_Curves/Carrington/"
 
 #### Carrington SEP fluxes ######
 Ex = totalDose(Path + "Carrington-SEP-Expected-Int-With0/Res")
-Plus = totalDose(Path + "Carrington-SEP-Minus2Sigma-Int-With0/Res")
-Minus = totalDose(Path + "Carrington-SEP-Plus2Sigma-Int-With0/Res")
+Minus = totalDose(Path + "Carrington-SEP-Minus2Sigma-Int-With0/Res")
+Plus = totalDose(Path + "Carrington-SEP-Plus2Sigma-Int-With0/Res")
 # Alternative SEP spectra
 # Carrington_SEP_Expected_Diff = totalDose(Path + "Carrington-SEP-Expected-Diff/Res")
 # Carrington_SEP_Expected_Int = totalDose(Path + "Carrington-SEP-Expected-Int/Res")

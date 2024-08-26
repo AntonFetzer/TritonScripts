@@ -1,0 +1,206 @@
+import csv
+import matplotlib.pyplot as plt
+import numpy as np
+import uncertainties as unc
+
+# Initialize the final data structure
+Dict = {}
+
+# Read the CSV file
+with open('/l/triton_work/LET_Histograms/Carrington/SEERatesCorrectable.csv', mode='r') as file:
+    csv_reader = csv.DictReader(file)
+    CrossectionName = None
+    
+    for row in csv_reader:
+        # Extract relevant data
+        dataset_name = row['Data']
+        shielding = row['Shielding']
+        see_rate = float(row['SEE_Rate'])
+        see_error = float(row['SEE_Error'])
+        entries_contributing_to_see = float(row['EntriesContributingToSEE'])
+        
+        # Initialize the inner dictionary if it doesn't exist
+        if dataset_name not in Dict:
+            Dict[dataset_name] = {'Shielding': [], 'SEE_Rate': [], 'SEE_Error': [], 'EntriesContributingToSEE': []}
+
+        if CrossectionName:
+            if CrossectionName != row['Crossection']:
+                raise ValueError("Crossection name is not the same for all entries")
+        else:
+            CrossectionName = row['Crossection']
+
+        # Remove 0mm shielding
+        if shielding == '0mm':
+            continue
+
+        # Store the data dictionary
+        Dict[dataset_name]['Shielding'].append(shielding)
+        Dict[dataset_name]['SEE_Rate'].append(see_rate)
+        Dict[dataset_name]['SEE_Error'].append(see_error)
+        Dict[dataset_name]['EntriesContributingToSEE'].append(entries_contributing_to_see)
+
+# Convert the lists to numpy arrays
+for key in Dict:
+    for inner_key in Dict[key]:
+        Dict[key][inner_key] = np.array(Dict[key][inner_key])
+
+# Print the final data structure for verification
+# for key in Dict:
+#     print(key)
+#     print(Dict[key].keys())
+#     print(Dict[key]['Shielding'])
+
+# Carrington-SEP-Plus2Sigma-Int-With0
+# Carrington-SEP-Expected-Int-With0
+# Carrington-SEP-Minus2Sigma-Int-With0
+
+# ISS-SolarProton-mission
+# ISS-AP9-mission
+# ISS-CosmicProton-mission
+# ISS-CosmicIron-mission
+
+# GEO-SolarProton-5minPeakFlux
+# GEO-SolarProton-mission
+# GEO-CosmicIron-mission
+# GEO-CosmicProton-mission
+# GEO-AP9-mission
+
+# VAB-SolarProton-mission
+# VAB-AP9-mission
+# VAB-CosmicProton-mission
+# VAB-CosmicIron-mission
+
+# print(Dict['Carrington-SEP-Expected-Int-With0SubFolder'].keys())
+# ['Shielding', 'SEE_Rate', 'SEE_Error', 'EntriesContributingToSEE']
+
+# print(Dict['Carrington-SEP-Expected-Int-With0SubFolder']['Shielding'])
+# ['1mm', '2mm', '4mm', '8mm', '16mm']
+
+plt.figure(0, figsize=(5, 7))
+########################### Carrington SEP ###################################
+
+# Plot +2 Sigma and -2 Sigma as fill between
+plt.fill_between(Dict['Carrington-SEP-Expected-Int-With0']['Shielding'], 
+                 Dict['Carrington-SEP-Expected-Int-With0']['SEE_Rate'], 
+                 Dict['Carrington-SEP-Plus2Sigma-Int-With0']['SEE_Rate'], color='C1', alpha=0.5, label="Carrington SEP EVT +2 Sigma")
+plt.fill_between(Dict['Carrington-SEP-Expected-Int-With0']['Shielding'],
+                 Dict['Carrington-SEP-Expected-Int-With0']['SEE_Rate'],
+                 Dict['Carrington-SEP-Minus2Sigma-Int-With0']['SEE_Rate'], color='C2', alpha=0.5, label="Carrington SEP EVT -2 Sigma")
+# Plot the Carrington-SEP-Expected
+plt.errorbar(Dict['Carrington-SEP-Expected-Int-With0']['Shielding'], Dict['Carrington-SEP-Expected-Int-With0']['SEE_Rate'], 
+             yerr=Dict['Carrington-SEP-Expected-Int-With0']['SEE_Error'], capsize=5, elinewidth=1, capthick=2, label="Carrington SEP EVT SBU Rate Estimate", color='blue')
+
+
+
+########################### ISS ###################################
+# # Plot the ISS AP9
+# plt.errorbar(Dict['ISS-AP9-mission']['Shielding'], Dict['ISS-AP9-mission']['SEE_Rate'], yerr=Dict['ISS-AP9-mission']['SEE_Error']
+#                 , capsize=5, elinewidth=1, capthick=2, label="ISS AP9", color='C8', linestyle='--')
+# # Plot the ISS Solar Proton
+# plt.errorbar(Dict['ISS-SolarProton-mission']['Shielding'], Dict['ISS-SolarProton-mission']['SEE_Rate'], yerr=Dict['ISS-SolarProton-mission']['SEE_Error']
+#                 , capsize=5, elinewidth=1, capthick=2, label="ISS Solar Proton", color='C8', linestyle='-.')
+# # Plot the ISS Cosmic Proton
+# plt.errorbar(Dict['ISS-CosmicProton-mission']['Shielding'], Dict['ISS-CosmicProton-mission']['SEE_Rate'], yerr=Dict['ISS-CosmicProton-mission']['SEE_Error']
+#              , capsize=5, elinewidth=1, capthick=2, label="ISS Cosmic Proton", color='C8', linestyle=':')
+# # Plot the ISS Cosmic Iron
+# plt.errorbar(Dict['ISS-CosmicIron-mission']['Shielding'], Dict['ISS-CosmicIron-mission']['SEE_Rate'], yerr=Dict['ISS-CosmicIron-mission']['SEE_Error']
+#              , capsize=5, elinewidth=1, capthick=2, label="ISS Cosmic Iron", color='C8')
+
+# Combine the ISS AP9, Solar Proton and Cosmic data
+Dict['ISS'] = {}
+Dict['ISS']['Shielding'] = Dict['ISS-SolarProton-mission']['Shielding']
+Dict['ISS']['SEE_Rate'] = Dict['ISS-AP9-mission']['SEE_Rate'] + Dict['ISS-SolarProton-mission']['SEE_Rate'] + Dict['ISS-CosmicProton-mission']['SEE_Rate'] + Dict['ISS-CosmicIron-mission']['SEE_Rate']
+Dict['ISS']['SEE_Error'] = np.sqrt(np.square(Dict['ISS-SolarProton-mission']['SEE_Error']) + np.square(Dict['ISS-AP9-mission']['SEE_Error']) + np.square(Dict['ISS-CosmicProton-mission']['SEE_Error']) + np.square(Dict['ISS-CosmicIron-mission']['SEE_Error']))
+# Plot the ISS combined
+plt.errorbar(Dict['ISS']['Shielding'], Dict['ISS']['SEE_Rate'], yerr=Dict['ISS']['SEE_Error']
+                , capsize=5, elinewidth=1, capthick=2, label="ISS LEO Total Average SBU Rate", color='C8', linestyle='-.')
+
+########################### GEO ###################################
+# Plot the GEO Solar Proton
+# plt.errorbar(Dict['GEO-SolarProton-mission']['Shielding'], Dict['GEO-SolarProton-mission']['SEE_Rate'], yerr=Dict['GEO-SolarProton-mission']['SEE_Error']
+#                 , capsize=5, elinewidth=1, capthick=2, label="GEO Solar Proton", color='C1', linestyle='--')
+# # Plot the GEO Cosmic Iron
+# plt.errorbar(Dict['GEO-CosmicIron-mission']['Shielding'], Dict['GEO-CosmicIron-mission']['SEE_Rate'], yerr=Dict['GEO-CosmicIron-mission']['SEE_Error']
+#                 , capsize=5, elinewidth=1, capthick=2, label="GEO Cosmic Iron", color='C2', linestyle='-.')
+# # Plot the GEO Cosmic Proton
+# plt.errorbar(Dict['GEO-CosmicProton-mission']['Shielding'], Dict['GEO-CosmicProton-mission']['SEE_Rate'], yerr=Dict['GEO-CosmicProton-mission']['SEE_Error']
+#                 , capsize=5, elinewidth=1, capthick=2, label="GEO Cosmic Proton", color='C3', linestyle=':')
+# # Plot the GEO Solar Proton 5min Peak Flux
+plt.errorbar(Dict['GEO-SolarProton-5minPeakFlux']['Shielding'], Dict['GEO-SolarProton-5minPeakFlux']['SEE_Rate'], yerr=Dict['GEO-SolarProton-5minPeakFlux']['SEE_Error']
+                , capsize=5, elinewidth=1, capthick=2, label="GEO Solar Proton 5min Peak SBU Rate", color='C7', linestyle=':')
+# # Combine the GEO Solar Proton, Cosmic and AP9 data
+Dict['GEO'] = {}
+Dict['GEO']['Shielding'] = Dict['GEO-SolarProton-mission']['Shielding']
+Dict['GEO']['SEE_Rate'] = Dict['GEO-SolarProton-mission']['SEE_Rate'] + Dict['GEO-CosmicIron-mission']['SEE_Rate'] + Dict['GEO-CosmicProton-mission']['SEE_Rate']
+Dict['GEO']['SEE_Error'] = np.sqrt(np.square(Dict['GEO-SolarProton-mission']['SEE_Error']) + np.square(Dict['GEO-CosmicIron-mission']['SEE_Error']) + np.square(Dict['GEO-CosmicProton-mission']['SEE_Error']))
+# Plot the GEO combined
+plt.errorbar(Dict['GEO']['Shielding'], Dict['GEO']['SEE_Rate'], yerr=Dict['GEO']['SEE_Error']
+                , capsize=5, elinewidth=1, capthick=2, label="GEO Total Average SBU Rate", color='C7')
+
+# Print the SEE rate for GEO behind 2mm of Aluminium with uncertainties
+print("GEO Total Average SBU Rate: ", unc.ufloat(Dict['GEO']['SEE_Rate'][1], Dict['GEO']['SEE_Error'][1]))
+
+
+
+########################### VAB ###################################
+# # Plot the VAB AP9          Trapped protons totally dominate the SEE rate
+# plt.errorbar(Dict['VAB-AP9-mission']['Shielding'], Dict['VAB-AP9-mission']['SEE_Rate'], yerr=Dict['VAB-AP9-mission']['SEE_Error']
+#                 , capsize=5, elinewidth=1, capthick=2, label="VAB AP9", color='C1', linestyle=':')
+# Plot the VAB Solar Proton
+# plt.errorbar(Dict['VAB-SolarProton-mission']['Shielding'], Dict['VAB-SolarProton-mission']['SEE_Rate'], yerr=Dict['VAB-SolarProton-mission']['SEE_Error']
+#                 , capsize=5, elinewidth=1, capthick=2, label="VAB Solar Proton", color='C2')
+# # Plot the VAB Cosmic Iron
+# plt.errorbar(Dict['VAB-CosmicIron-mission']['Shielding'], Dict['VAB-CosmicIron-mission']['SEE_Rate'], yerr=Dict['VAB-CosmicIron-mission']['SEE_Error']
+#                 , capsize=5, elinewidth=1, capthick=2, label="VAB Cosmic Iron", color='C4', linestyle='-.')
+# # Plot the VAB Cosmic Proton
+# plt.errorbar(Dict['VAB-CosmicProton-mission']['Shielding'], Dict['VAB-CosmicProton-mission']['SEE_Rate'], yerr=Dict['VAB-CosmicProton-mission']['SEE_Error']
+#                 , capsize=5, elinewidth=1, capthick=2, label="VAB Cosmic Proton", color='C5', linestyle='--')
+
+# # Combine the VAB AP9, Solar Proton and Cosmic data
+Dict['VAB'] = {}
+Dict['VAB']['Shielding'] = Dict['VAB-SolarProton-mission']['Shielding']
+Dict['VAB']['SEE_Rate'] = Dict['VAB-AP9-mission']['SEE_Rate'] + Dict['VAB-SolarProton-mission']['SEE_Rate'] + Dict['VAB-CosmicProton-mission']['SEE_Rate'] + Dict['VAB-CosmicIron-mission']['SEE_Rate']
+Dict['VAB']['SEE_Error'] = np.sqrt(np.square(Dict['VAB-SolarProton-mission']['SEE_Error']) + np.square(Dict['VAB-AP9-mission']['SEE_Error']) + np.square(Dict['VAB-CosmicProton-mission']['SEE_Error']) + np.square(Dict['VAB-CosmicIron-mission']['SEE_Error']))
+# Plot the VAB combined
+plt.errorbar(Dict['VAB']['Shielding'], Dict['VAB']['SEE_Rate'], yerr=Dict['VAB']['SEE_Error']
+                , capsize=5, elinewidth=1, capthick=2, label="Van-Allen-Belt Probes Average SBU Rate", color='C3', linestyle='--')
+
+
+
+# plt.axhline(1/8e+3, linestyle='--', label="1 Bit Upset per kB per Second", color='black')
+# plt.axhline(1/8e+6, linestyle=':', label="1 Bit Upset per MByte per Second", color='black')
+plt.axhline(1/8e+9, linestyle='-.', label="1 Bit Upset per GByte per Second", color='black')
+plt.axhline(1/8e+12, linestyle='--', label="1 Bit Upset per TByte per Second", color='black')
+# plt.axhline(1/8e+15, linestyle=':', label="1 Bit Upset per PByte per Second", color='black')
+
+plt.ylim(1.5e-14, 4e-9)
+# plt.ylim(2e-18, 3e-12)
+plt.yscale("log")
+plt.grid()
+plt.title("LSRAM Correctable Single Bit Upset Rate Estimates")
+
+plt.xlabel("Aluminium Shielding Thickness")
+plt.ylabel("Single Bit Upset Rate [s-1 bit-1]")
+
+# Manually add legend entries in the desired order
+handles, labels = plt.gca().get_legend_handles_labels()
+
+# Create a new order for the legend
+order = [
+    labels.index("Carrington SEP EVT +2 Sigma"), 
+    labels.index("Carrington SEP EVT SBU Rate Estimate"), 
+    labels.index("Carrington SEP EVT -2 Sigma"),
+    labels.index("1 Bit Upset per GByte per Second"),
+    labels.index("1 Bit Upset per TByte per Second"),
+    # labels.index("1 Bit Upset per PByte per Second"),
+    labels.index("Van-Allen-Belt Probes Average SBU Rate"),
+    labels.index("GEO Solar Proton 5min Peak SBU Rate"),
+    labels.index("GEO Total Average SBU Rate"),
+    labels.index("ISS LEO Total Average SBU Rate"),
+    ]
+
+plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='lower left', bbox_to_anchor=(0, 0.22))
+# plt.legend(loc='lower left')
+
+plt.savefig("/l/triton_work/LET_Histograms/Carrington/" + CrossectionName + " Rates.pdf", format='pdf', bbox_inches="tight")
+# plt.show()

@@ -20,7 +20,7 @@ def totalLETHistos(path):
         SystemExit: If the histogram bins in a file do not match the bins in the first file.
 
     """
-    print("\nReading in all csv files in folder:", path)
+    # print("\nReading in all csv files in folder:", path)
 
     # Get list of all csv files in Path
     Files = [f for f in os.listdir(path) if "LET" in f and f.endswith(".csv")]
