@@ -50,7 +50,7 @@ def totalLETHistos(path):
 if __name__ == "__main__":
 
     # Only works if all input files have the same number of particle!!!!!
-    path = "/l/triton_work/LET_Histograms/Carrington/ISS-AP9-mission/1mm/Res/"
+    path = "/l/triton_work/LET_Histograms/Carrington/NoSEEs/CarringtonElectronINTEGRALPowTabelated/0mm/Res/"
 
     LET, Eff = totalLETHistos(path)
 

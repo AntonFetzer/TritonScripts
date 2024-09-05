@@ -9,7 +9,6 @@ def readFluenceHistos(file):
 
     Args:
         file: Path to the .csv file containing the fluence histograms
-        particle: Particle type for which the histograms are being read
 
     Returns:
         Dictionary containing the histograms

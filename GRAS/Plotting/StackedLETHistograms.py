@@ -5,7 +5,7 @@ from natsort import natsorted
 import numpy as np
 from uncertainties import ufloat
 
-Directory = "/l/triton_work/LET_Histograms/Carrington/"
+Directory = "/l/triton_work/LET_Histograms/Mono/"
 # Go through all sub folders of the directory
 for SubDir in os.listdir(Directory):
     # Check if the sub folder is not a directory
@@ -20,13 +20,13 @@ for SubDir in os.listdir(Directory):
     Title = Path.split("/")[-2]
 
 
-    Folders = [f for f in os.listdir(Path) if f.endswith('mm')]
+    Folders = [f for f in os.listdir(Path) if f.endswith('MeV')]  # if f.endswith('mm')
     Folders = natsorted(Folders)
 
     ThickList = []
 
     for folder in Folders:
-        ThickList.append(int(folder.split("m")[0]))
+        ThickList.append(int(folder.split("MeV")[0]))
 
     NumberOfThicknesses = len(ThickList)
 
@@ -43,12 +43,8 @@ for SubDir in os.listdir(Directory):
         except:
             print(f"Error in {folder}")
             
-
-    Colours = ['C3', 'C1', 'C8', 'C2', 'C9', 'C0', 'C7']
-    #          red, orange,yellow,green,cyan,blue, grey
-    # Colours = ['C0', 'C1', 'C2', 'C3', 'C4', 'C5']
-    #           blue,orange,green,red,violet,brown
-
+    # 15 Colors in order of the rainbow
+    Colours = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf", "#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff"]
     # C0    blue
     # C1    Orange
     # C2    Green

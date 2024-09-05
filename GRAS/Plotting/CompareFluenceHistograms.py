@@ -66,7 +66,10 @@ for i in range(NumberOfHistograms):
         # plt.bar(Elec['lower'], Elec['value'], width=Elec['upper'] - Elec['lower'], yerr=Elec['error'], align='edge')
 
         # Plot histograms as line plot
-        plt.plot(Elec['mean'], Elec['value'], label=label)
+        # plt.plot(Elec['mean'], Elec['value'], label=label)
+
+        # Plot histograms as line plot with error bars
+        plt.errorbar(Elec['mean'], Elec['value'], Elec['error'], capsize=2, elinewidth=1, capthick=1, label=label)
 
 plt.xlabel('Energy [MeV]')
 plt.ylabel('Fluence [counts/cm2]')

@@ -2,14 +2,26 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def readSDQ2(fileName):
+    """
+    Read the TID vs shielding thickness curves from SHIELDOSE-2Q and store them in a dictionary of numpy arrays
+
+    Args:
+        file: Path to the .csv file containing the shielding curves
+
+    Returns:
+        Dictionary containing the TID vs shielding thickness curves as 1D numpy arrays
+    """
+    ListofCollumns = ['Thickness', 'Total','Electrons','Bremsstrahlung','Trapped Protons','Solar Protons']
+
+    # Generating the dictionary from the list of Collumns
+    SDData = {key: [] for key in ListofCollumns}
+
     print("Reading in", fileName)
     f = open(fileName, "r")
 
-    SDData = []
     ReadFlag = 0
 
     for line in f:
-
         if ReadFlag == 0:
             if "Dose in Si" in line:
                 ReadFlag = 1
@@ -17,28 +29,39 @@ def readSDQ2(fileName):
             if "End of File" in line:
                 ReadFlag = 2
             else:
-                SDData.append(np.fromstring(line, dtype=np.float64, sep=','))
+                values = line.split(',')
+                for i in range(len(ListofCollumns)):
+                    SDData[ListofCollumns[i]].append(float(values[i]))
 
-    # SDDataCollumns = ['Aluminium Thickness', 'Total Dose', 'Electrons', 'Bremsstrahlung', 'Protons']
+    # Convert lists inside the dicts to numpy arrays
+    for key in ListofCollumns:
+        SDData[key] = np.array(SDData[key])
 
-    return np.asarray(SDData)
+    # The default dose unit in SHIELDOSE-2Q is rad.
+    # --> divide by 1000 to get to krad.
+    for key in ['Total','Electrons','Bremsstrahlung','Trapped Protons','Solar Protons']:
+        SDData[key] = SDData[key] / 1000
+
+    return SDData
 
 
 if __name__ == "__main__":
-    Data = readSDQ2("/l/triton_work/Spectra/A9/Shieldose/spenvis_sqo.txt")
+    Data = readSDQ2("/l/triton_work/Spectra/FS1/SHIELDOSE-2Q/spenvis_sqo.txt")
 
     print(np.shape(Data))
 
-    print("Aluminium Thicknesses", Data[:, 0])
-    print("Total Dose", Data[:, 1])
-    print("Electrons", Data[:, 2])
-    print("Bremsstrahlung", Data[:, 3])
-    print("Protons", Data[:, 4])
+    print("Aluminium Thicknesses", Data['Thickness'])
+    print("Total Dose", Data['Total'])
+    print("Electrons", Data['Electrons'])
+    print("Bremsstrahlung", Data['Bremsstrahlung'])
+    print("Trapped Protons", Data['Trapped Protons'])
+    print("Solar Protons", Data['Solar Protons'])
 
-    plt.plot(Data[:, 0], Data[:, 2] / 1000, '.', label="SHIELDOSE-2Q Electrons")
-    plt.plot(Data[:, 0], Data[:, 3] / 1000, '.', label="SHIELDOSE-2Q Bremsstrahlung")
-    plt.plot(Data[:, 0], Data[:, 4] / 1000, '.', label="SHIELDOSE-2Q Protons")
-    plt.plot(Data[:, 0], Data[:, 1] / 1000, '.', label="SHIELDOSE-2Q Total Dose")
+    plt.plot(Data['Thickness'], Data['Electrons'], '.-', label="Electrons")
+    plt.plot(Data['Thickness'], Data['Bremsstrahlung'], '.-', label="Bremsstrahlung")
+    plt.plot(Data['Thickness'], Data['Trapped Protons'], '.-', label="Trapped Protons")
+    plt.plot(Data['Thickness'], Data['Solar Protons'], '.-', label="Solar Protons")
+    plt.plot(Data['Thickness'], Data['Total'], '.-', label="Total Dose")
 
     plt.yscale("log")
     # plt.xscale("log")
