@@ -45,7 +45,7 @@ GEO_AE9_mission = totalDose(Path + "GEO-AE9-mission/Res") # Similar but slightly
 GEO_AP9_mission = totalDose(Path + "GEO-AP9-mission/Res") # The trapped proton spectrum on GEO ends at 8MeV, therefore not intetrsting for shielding
 
 GEO_SolarProton_mission = totalDose(Path + "GEO-SolarProton-mission/Res")
-# GEO_SolarProton_5minPeakFlux = totalDose(Path + "GEO-SolarProton-5minPeakFlux/Res") # Similar Flux as the carrington protons, but onlf for 5 minutes, this makes the TID negligible
+GEO_SolarProton_5minPeakFlux = totalDose(Path + "GEO-SolarProton-5minPeakFlux/Res") # Similar Flux as the carrington protons, but onlf for 5 minutes, this makes the TID negligible
 
 # GEO_CosmicProton_mission = totalDose(Path + "GEO-CosmicProton-mission/Res") # Cosmics have super low fluxes --> negligible TID
 # GEO_CosmicIron_mission = totalDose(Path + "GEO-CosmicIron-mission/Res")     # Cosmics have super low fluxes --> negligible TID
@@ -69,8 +69,11 @@ plt.errorbar(x, ISS_A9_Total['dose'] * 12 * 100, yerr=ISS_A9_Total['error'] * 12
 plt.errorbar(x, GEO_A9_Total['dose'] * 120, yerr=GEO_A9_Total['error'] * 120, capsize=3, linestyle='', color='C7', label="10 year dose on GEO")
 
 # Plot VAB total
-# plt.errorbar(x, VAB_A9_Total['dose'] * 12, yerr=VAB_A9_Total['error'], capsize=3, linestyle='', color='C3', label="1 year dose\nVan-Allen-Belt Probes (GRAS)")
+plt.errorbar(x, VAB_A9_Total['dose'], yerr=VAB_A9_Total['error'], capsize=3, linestyle='', color='C3', label="1 month dose\nVan-Allen-Belt Probes")
 
+# Plot Solar Proton 5min Peak Flux
+# The flux is in 1/s cm2, therefore we need to multiply by to get the event dose in krad
+plt.errorbar(x, GEO_SolarProton_5minPeakFlux['dose'] * 60 * 60 * 24 * 1.23, yerr=GEO_SolarProton_5minPeakFlux['error'] * 60 * 60 * 24 * 1.23, capsize=3, linestyle='', color='C4', label="1 month peak flux on GEO")
 
 ####### Plot 1kRad line #########
 CriticalDose = [1 for i in x]
@@ -102,7 +105,7 @@ plt.errorbar(x, Ex['dose'] * PerStoEvent, Ex['error'] * PerStoEvent, fmt='', mar
 plt.fill_between(x, Plus['dose'] * PerStoEvent, Ex['dose'] * PerStoEvent, color='C1', alpha=0.5, label='Carrington SEP + 2\u03C3')
 plt.fill_between(x, Ex['dose'] * PerStoEvent, Minus['dose'] * PerStoEvent, color='C2', alpha=0.5, label='Carrington SEP − 2\u03C3')
 # Plot Carrington Electron fluxes
-# plt.errorbar(x, CarringtonElectronINTEGRALPowTabelated['dose'] * PerStoEvent, yerr=CarringtonElectronINTEGRALPowTabelated['error'] * PerStoEvent, fmt='', markersize=3, capsize=3, label='Carrington Electron Event Dose', color='blue', linestyle='')
+plt.errorbar(x, CarringtonElectronINTEGRALPowTabelated['dose'] * PerStoEvent, yerr=CarringtonElectronINTEGRALPowTabelated['error'] * PerStoEvent, fmt='', markersize=3, capsize=3, label='Carrington Electron Event Dose', color='blue', linestyle='')
 
 
 
@@ -125,7 +128,8 @@ handles, labels = plt.gca().get_legend_handles_labels()
 
 # Reorder the handles and labels to your desired order
 # Example: Suppose you want to reorder them based on some criteria or the original plotting order
-order = [0, 1, 4, 5, 2, 6, 3]  # specify the desired order of indices
+#order = [0, 1, 4, 5, 2, 6, 7, 3]  # specify the desired order of indices
+order = [0, 1, 2, 7, 3, 4, 5, 6, 8]  # specify the desired order of indices
 
 # Apply the reordering
 handles = [handles[i] for i in order]

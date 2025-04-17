@@ -21,6 +21,12 @@ ExpectedInt = np.array([4.6e4, 8.5e3, 2.3e3, 1.1e3, 2.9e2])     # cm-2 s-1 str-1
 Minus = np.array([2.2e4, 5.6e3, 1.4e3, 4.3e2, 1.1e2])       # cm-2 s-1 str-1
 Plus = np.array([1.3e5, 1.6e4, 5.4e3, 4.4e3, 1.4e3])        # cm-2 s-1 str-1
 
+ExtrapolatedEnergies = np.array([2, 10])      # MeV
+Slope = (np.log(ExpectedInt[1]) - np.log(ExpectedInt[0])) / (np.log(Energies[1]) - np.log(Energies[0]))
+Intercept = np.log(ExpectedInt[0]) - Slope * np.log(Energies[0])
+ExtrapolatedInt = np.exp(Slope * np.log(ExtrapolatedEnergies) + Intercept)
+print(ExtrapolatedInt)
+
 # Convert from str-1 to omnidirectional
 ExpectedInt *= 4 * np.pi
 Minus *= 4 * np.pi
@@ -36,9 +42,11 @@ plt.plot(Energies, ExpectedInt, '-', color=ExpectedIntColor, linewidth=2, marker
 # Plot the expected integral flux as error bars with the plus and minus 2 sigma.
 plt.errorbar(Energies, ExpectedInt, yerr=[ExpectedInt - Minus, Plus - ExpectedInt], fmt=' ', label="Carrington SEP EVT Expected", color=ExpectedIntColor, linewidth=2, markersize=10, capsize=5, capthick=2, zorder=2)
 
-
 #plt.plot(Energies, Minus, '.-', label="Carrington SEP EVT -2 Sigma", color=MinusColor)
 plt.fill_between(Energies, ExpectedInt, Minus, color=MinusColor, alpha=0.5, label="Carrington SEP EVT -2 Sigma")
+
+# Plot the extrapolated values
+plt.plot(ExtrapolatedEnergies, ExtrapolatedInt, '-o', label="Extrapolated Values", color='C4', markersize=10)
 
 """ 
 ### 2003 SPE Data ###
@@ -138,6 +146,8 @@ GEO_Flare = "/l/triton_work/Spectra/GEO/spenvis_sefflare.txt"
 GEO_Flare_Data = readSpenvis_sefflare(GEO_Flare)
 plt.plot(GEO_Flare_Data['Energy'], GEO_Flare_Data['IFlux'], 'o', label="CREME96 GEO Peak 5min Flux", color=GEOColor, linewidth=5, zorder=3)
 
+for energy, flux in zip(GEO_Flare_Data['Energy'], GEO_Flare_Data['IFlux']):
+    print(f"{energy} {flux}")
 
 
 ### Carrington Integral GPS Macros ###
@@ -161,8 +171,8 @@ plt.plot(GEO_Flare_Data['Energy'], GEO_Flare_Data['IFlux'], 'o', label="CREME96 
 # plt.plot(Plus2SigmaIntWith0['Energy'], Plus2SigmaIntWith0['Flux'], label="Carrington SEP EVT +2 Sigma with 0", color='r', linestyle='--')
 
 
-plt.xlim(8, 250)
-plt.ylim(1, 2e6)
+plt.xlim(1, 250)
+plt.ylim(1, 1e7)
 plt.yscale("log")
 plt.xscale("log")
 plt.title("Carrington Solar Energetic Proton Comparison")

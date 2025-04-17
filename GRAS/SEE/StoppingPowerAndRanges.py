@@ -66,7 +66,8 @@ for i in range(11):
 # Create a new figure with 2 subplots
 fig, (ax1, ax2) = plt.subplots(2)
 
-xlims = [1e1, 1e4]
+#xlims = [1e-1, 1e2]
+xlims = [0.1, 12]
 
 # Plot the LET data
 ax1.plot(data['Electron Energy'], data['Electron LET'], label='ESTAR Electron LET')
@@ -98,7 +99,7 @@ ax2.set_xlabel('Energy (MeV)')
 ax2.set_ylabel('Range (mm of Aluminium)')  # Update the y-label
 ax2.grid(True)
 ax2.legend()
-ax2.set_xscale('log')
+# ax2.set_xscale('log')
 # ax2.set_yscale('log')
 ax2.set_xlim(xlims)
 ax2.set_ylim(0, 10)

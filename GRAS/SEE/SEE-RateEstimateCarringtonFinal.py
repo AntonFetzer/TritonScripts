@@ -10,7 +10,7 @@ import natsort
 The functional form of the Weibull is:
 F(x) = A (1- exp{-[(x-x0)/W] ** s}) where
     x = effective LET in MeV-cm2/milligram;
-    F(x) = SEE cross-section in square-microns/bit;
+    F(x) = SEU cross-section in square-microns/bit;
     A0 = limiting or plateau cross-section;
     x0 = onset parameter, such that F(x) = 0 for x < x0;
     W = width parameter;
@@ -19,20 +19,26 @@ https://creme.isde.vanderbilt.edu/CREME-MC/help/weibull
 '''
 
 Directory = "/l/triton_work/LET_Histograms/Carrington/"
-Correctable = 1
+#Correctable = 0
 
-if Correctable:
-    CrossectionName = "LSRAM correctable SBU"
-    L0 = 0.4
-    W = 18
-    S = 0.98
-    A0 = 4.01e-9
+# if Correctable:
+#     CrossectionName = "LSRAM correctable SEU"
+#     L0 = 0.4
+#     W = 18
+#     S = 0.98
+#     A0 = 4.01e-9
 # else:
-#     CrossectionName = "LSRAM uncorrectable SBU" # The uncorrectable parameters are only estimated upper bounds. This means the actual cross section is unknown.
+#     CrossectionName = "LSRAM uncorrectable SEU" # The uncorrectable parameters are only estimated upper bounds. This means the actual cross section is unknown.
 #     L0 = 0.4
 #     W = 1
 #     S = 0.4
 #     A0 = 5.5e-14
+# else:   # nanoXplore https://nanoxplore-wiki.atlassian.net/wiki/spaces/NAN/pages/46497810/NG-MEDIUM+Radiative+Test#Weibull-fitting
+CrossectionName = "nanoXplore SEU"  
+L0 = 0.11 
+W = 36
+S = 4.4
+A0 = 5.2E-09
 
 
 def f(LET):
@@ -56,10 +62,11 @@ def f(LET):
 
 
 # Open the CSV file to write the results to
-if Correctable:
-    CSVFile = open("/l/triton_work/LET_Histograms/Carrington/SEERatesCorrectable.csv", 'w')
-if not Correctable:
-    CSVFile = open("/l/triton_work/LET_Histograms/Carrington/SEERatesUncorrectable.csv", 'w')
+# if Correctable:
+#     CSVFile = open("/l/triton_work/LET_Histograms/Carrington/SEERatesCorrectable.csv", 'w')
+# if not Correctable:
+#     CSVFile = open("/l/triton_work/LET_Histograms/Carrington/SEERatesUncorrectable.csv", 'w')
+CSVFile = open("/l/triton_work/LET_Histograms/Carrington/SEERatesnanoXplore.csv", 'w')
 # Write the header to the file
 header = "Data,Shielding,Crossection,SEE_Rate,SEE_Error,EntriesContributingToSEE"
 CSVFile.write(header + "\n")
@@ -111,10 +118,10 @@ for F, Folder in enumerate(FolderList):
         plt.bar(LETHist['lower'], LETHist['value'], width=LETHist['upper'] - LETHist['lower'], align='edge', alpha=0.3)
         plt.errorbar(LETHist['mean'], LETHist['value'], LETHist['error'], fmt=' ', capsize=5, elinewidth=1,
                      capthick=1, label="LET Histogram")
-        plt.plot([], [], label="SBU Cross Section", color='C1')
+        plt.plot([], [], label="SEU Cross Section", color='C1')
         plt.yscale("log")
         plt.xscale("log")
-        plt.grid(which='both')
+        plt.grid(which='major')
         plt.title(Folder + " " + CrossectionName + " " + SubFolder + " Al\nTotal LET = " + str(TotalLETU) + " MeV cm2 mg-1")
         plt.xlabel("LET [MeV cm2 mg-1]")
         ax1.legend(loc='lower left')
@@ -168,15 +175,15 @@ for F, Folder in enumerate(FolderList):
         fig, ax1 = plt.subplots(1)
         plt.bar(SEEHist['lower'], SEEHist['value'], width=SEEHist['upper'] - SEEHist['lower'], align='edge', alpha=0.3)
         plt.errorbar(SEEHist['mean'], SEEHist['value'], SEEHist['error'], fmt=' ', capsize=5, elinewidth=1,
-                     capthick=1, label="SBU Rate Histogram")
-        plt.plot([], [], label="SBU Cross Section", color='C1')
+                     capthick=1, label="SEU Rate Histogram")
+        plt.plot([], [], label="SEU Cross Section", color='C1')
         plt.yscale("log")
         plt.xscale("log")
-        plt.grid(which='both')
-        plt.title(Folder + " " + CrossectionName + " " + SubFolder + " Al\nTotal SEERate = " + str(SEERateU) + " s-1 bit-1")
+        plt.grid(which='major')
+        plt.title(Folder + " " + CrossectionName + " " + SubFolder + " Al\nTotal SEU Rate = " + str(SEERateU) + " s-1 bit-1")
         plt.xlabel("LET [MeV cm2 mg-1]")
         ax1.legend(loc='lower left')
-        ax1.set_ylabel("SBU Rate per LET bin [s-1 bit-1]", color='C0')
+        ax1.set_ylabel("SEU Rate per LET bin [s-1 bit-1]", color='C0')
         ax1.tick_params(axis='y', colors='C0')
 
         ax2 = ax1.twinx()
