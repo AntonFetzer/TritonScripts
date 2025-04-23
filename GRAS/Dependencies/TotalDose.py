@@ -101,7 +101,7 @@ def totalDose(path):
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/Shielding_Curves/MultilayerPaper/"
+    Path = "/l/triton_work/RadEx/1Tile/"
 
     # Find all subdirectories in the given path that contain a "Res" subfolder
     # and calculate the total dose for each of them
