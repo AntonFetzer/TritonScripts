@@ -91,6 +91,8 @@ def totalDose(path):
     if MaxRelativeError > 1:
         print(f"Warning !!! Tile {MaxRelativeErrorTile} has {MaxRelativeError * 100:.2f} % relative error!!!")
 
+    print("Lowest Dose result:", f"{min(TID['dose']):.3g} +- {TID['error'][np.argmin(TID['dose'])]:.3g} kRad")
+
     # Print datatypes and shapes of the arrays
     #for key in keys:
     #    print(key, type(TID[key]), TID[key].shape)
@@ -101,7 +103,7 @@ def totalDose(path):
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/RadEx/1Tile/"
+    Path = "/l/triton_work/RadEx/RadEx/"
 
     # Find all subdirectories in the given path that contain a "Res" subfolder
     # and calculate the total dose for each of them
@@ -115,8 +117,11 @@ if __name__ == "__main__":
 
             NumTiles = len(Results['dose'])
 
-            # Multiply dose and error with the number of seconds in a month
-            # to get the dose in kRad per month
+            # Multiply dose and error with the number of seconds per hour to get the dose in kRad per hour
+            # Results['dose'] *= 60 * 60
+            # Results['error'] *= 60 * 60
+
+            # Multiply dose and error with the number of seconds in a month to get the dose in kRad per month
             # Results['dose'] *= 60 * 60 * 24 * 30
             # Results['error'] *= 60 * 60 * 24 * 30
 
@@ -132,8 +137,9 @@ if __name__ == "__main__":
             plt.grid(which='both')
             plt.legend()
 
-            plt.savefig(Path + "..//Dose.pdf", format='pdf', bbox_inches="tight")
+            # plt.savefig(Path + "..//Dose.pdf", format='pdf', bbox_inches="tight")
 
+            '''
             # Plot the relative error
             plt.figure(1)
             plt.plot(100 * Results['error'] / Results['dose'], '.', label='Relative Error')
@@ -145,7 +151,7 @@ if __name__ == "__main__":
             plt.grid(which='both')
             plt.legend()
 
-            plt.savefig(Path + "../Error.pdf", format='pdf', bbox_inches="tight")
+            # plt.savefig(Path + "../Error.pdf", format='pdf', bbox_inches="tight")
 
             # Plot the number of non-zero entries
             plt.figure(2)
@@ -160,9 +166,16 @@ if __name__ == "__main__":
             plt.grid(axis='y', which='major')
             plt.legend()
 
-            plt.savefig(Path + "../NonZeros.pdf", format='pdf', bbox_inches="tight")
-            plt.close('all')
-            #plt.show()
+            # plt.savefig(Path + "../NonZeros.pdf", format='pdf', bbox_inches="tight")
+            '''
+            # plt.show()
+            # plt.close('all')
+
+            # Print Results as comma seperated table with collumns for dose and error
+            print("Tile, Dose, Error")
+            for i in range(NumTiles):
+                print(i+1, Results['dose'][i], Results['error'][i], sep=", ")
+
 
 
 

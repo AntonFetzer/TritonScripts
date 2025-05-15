@@ -68,12 +68,9 @@ def readLETHistos(file):
 
 
 if __name__ == "__main__":
-    file = "/l/triton_work/LET_Histograms/Carrington/ISS-AP9-mission/0mm/Res/LET_384289_59452.csv"
+    file = "/l/triton_work/LET_Histograms/Mono/Protons2mmAl-200micronSi/64MeV/Res/LET_24811_3838.csv"
 
     LET, Eff = readLETHistos(file)
-
-    # For demonstration, replace np.shape(LETHist) with more appropriate operation
-    print("LETHist Number of bins", len(LET['entries']))
 
     # Calculate sums and total LET by entries for LETHist
     NumberEntriesLETHist = np.sum(LET['entries'])
@@ -103,6 +100,8 @@ if __name__ == "__main__":
     plt.xlabel("LET [MeV cm2 mg-1]")
     plt.ylabel("Rate per LET bin [cm-2 s-1]")
 
+
+    '''
     # Calculate sums and total Eff by entries for EffHist
     NumberEntriesEffHist = np.sum(Eff['entries'])
     TotalEffbyEntries = np.sum(Eff['mean'] * Eff['entries'])
@@ -130,5 +129,5 @@ if __name__ == "__main__":
     plt.title(f"EffLET Histogram {NumberEntriesEffHist:.2e} entries\nTotal EffLET by Values {TotalEffLETbyValues:.2e} MeV cm2 mg-1")
     plt.xlabel("EffLET [MeV cm2 mg-1]")
     plt.ylabel("Rate per LET bin [cm-2 s-1]")
-
+    '''
     plt.show()

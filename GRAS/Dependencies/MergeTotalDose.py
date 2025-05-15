@@ -62,11 +62,17 @@ def mergeTotalDose(List_of_Dose_Dicts: list) -> dict:
 
 
 if __name__ == "__main__":
-    Elec_path = "/l/triton_work/Shielding_Curves/Carrington/ISS-SolarProton-mission/Res/"
-    Prot_path = "/l/triton_work/Shielding_Curves/Carrington/VAB-SolarProton-mission/Res/"
+    Elec_path = "/l/triton_work/RadEx/RadEx/LEO-Electrons"
+    Prot_path = "/l/triton_work/RadEx/RadEx/LEO-Protons"
 
     Elec = totalDose(Elec_path)
     Prot = totalDose(Prot_path)
+
+    # Multiply dose and error with the number of seconds in a month to get the dose in kRad per month
+    # Elec['dose'] *= 60 * 60 * 24 * 30
+    # Elec['error'] *= 60 * 60 * 24 * 30
+    # Prot['dose'] *= 60 * 60 * 24 * 30
+    # Prot['error'] *= 60 * 60 * 24 * 30
 
     Total = mergeTotalDose([Elec, Prot])
 
@@ -87,3 +93,8 @@ if __name__ == "__main__":
     plt.legend()
 
     plt.show()
+
+    # Print Results as comma seperated table with collumns for total dose, total error, electron dose, electron error, proton dose and proton error
+    print("Tile, Total Dose, Total Error, Electron Dose, Electron Error, Proton Dose, Proton Error")
+    for i in range(NumTiles):
+        print(f"{i+1}, {Total['dose'][i]}, {Total['error'][i]}, {Elec['dose'][i]}, {Elec['error'][i]}, {Prot['dose'][i]}, {Prot['error'][i]}")

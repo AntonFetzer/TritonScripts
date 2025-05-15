@@ -21,7 +21,7 @@ def readDose(file):
     TID = {key: [] for key in keys}
     
     ReadFlag = 0
-    scale_factor = 1 / 1000  # Convert rad to kRad
+    rad_to_krad = 1 / 1000  # Convert rad to kRad
 
     with open(file, 'r') as f:
         for line in f:
@@ -36,16 +36,12 @@ def readDose(file):
                     break  # Done reading relevant block
                 else:
                     # Parse values
-                    values = [v.strip() for v in line.split(',')]
-                    if len(values) < 4:
-                        continue  # Skip malformed lines
-                    try:
-                        TID['dose'].append(float(values[0]))
-                        TID['error'].append(float(values[1]))
-                        TID['entries'].append(int(float(values[2])))
-                        TID['non-zeros'].append(int(float(values[3])))
-                    except ValueError:
-                        continue  # Skip lines that aren't data
+                    values = [value.strip() for value in line.split(',')]
+                    TID['dose'].append(float(values[0]))
+                    TID['error'].append(float(values[1]))
+                    TID['entries'].append(int(float(values[2])))
+                    TID['non-zeros'].append(int(float(values[3])))
+
 
     # Fallback to single-volume block if multi not found
     if ReadFlag == 0:
@@ -70,8 +66,8 @@ def readDose(file):
         TID[key] = np.array(TID[key])
 
     # Apply rad -> kRad conversion
-    TID['dose'] *= scale_factor
-    TID['error'] *= scale_factor
+    TID['dose'] *= rad_to_krad
+    TID['error'] *= rad_to_krad
 
     return TID
 
@@ -102,9 +98,9 @@ if __name__ == "__main__":
         Results = readDose(full_path)
 
         # Multiply dose and error by number of seconds in a month
-        time_scale = 30 * 24 * 60 * 60  # seconds in a month
-        Results['dose'] *= time_scale
-        Results['error'] *= time_scale
+        # time_scale = 30 * 24 * 60 * 60  # seconds in a month
+        # Results['dose'] *= time_scale
+        # Results['error'] *= time_scale
 
         # Aggregate statistics
         dose_total = Results['dose'].sum()

@@ -7,26 +7,23 @@ import os
 
 def totalLETHistos(path):
     """
-    Accumulates and processes GRAS LEThistos from multiple files.
+    Merges GRAS LET histograms from the csv files of identical runs.
 
     Args:
         path (str): The path to the folder containing the csv files.
 
     Returns:
-        dict: A dictionary containing the accumulated LEThistos.
+        dict: A dictionary containing the accumulated LET histograms.
 
     Raises:
         SystemExit: If no files are found in the specified path.
         SystemExit: If the histogram bins in a file do not match the bins in the first file.
 
     """
-    # print("\nReading in all csv files in folder:", path)
+    print("\nReading in all csv files in folder:", path)
 
     # Get list of all csv files in Path
     Files = [f for f in os.listdir(path) if "LET" in f and f.endswith(".csv")]
-
-    NumFiles = len(Files)
-    # print("Number of Files:", NumFiles)
 
     if not Files:
         sys.exit("ERROR !!! No files found")
@@ -34,7 +31,7 @@ def totalLETHistos(path):
     LETList = []
     EffList = []
 
-    # Read the files and accumulate histogram dicts in the list of histograms
+    # Read the files and append histogram dicts to the list of histograms
     for File in Files:
         LETHistDict, EffHistDict = readLETHistos(os.path.join(path, File))
         LETList.append(LETHistDict)
@@ -49,42 +46,53 @@ def totalLETHistos(path):
 
 if __name__ == "__main__":
 
-    # Only works if all input files have the same number of particle!!!!!
-    path = "/l/triton_work/LET_Histograms/Carrington/NoSEEs/CarringtonElectronINTEGRALPowTabelated/0mm/Res/"
+    # Only works if all input files have the same number of particles !!!!!
+    path = "/l/triton_work/LET_Histograms/Mono/Protons4mmPb-200micronSi/"
 
-    LET, Eff = totalLETHistos(path)
+    # Find all subdirectories in the given path that contain a "Res" subfolder
+    # and calculate the total LET histos for each of them
+    for root, dirs, files in os.walk(path):
+        if 'Res' in dirs:
+            folder = os.path.join(root, 'Res/')
 
-    ### LET by Entries ###############
-    # Calculate sums and total LET by entries for LETHist
-    NumberEntriesLETHist = np.sum(LET['entries'])
-    TotalLETbyEntries = np.sum(LET['mean'] * LET['entries'])
+            LET, Eff = totalLETHistos(folder)
 
-    # Plotting LET Histogram by entries
-    plt.figure(0)
-    plt.bar(LET['lower'], LET['entries'], width=LET['upper'] - LET['lower'], align='edge')
-    plt.yscale("log")
-    plt.xscale("log")
-    plt.grid()
-    plt.title("LET Histogram " + f"{NumberEntriesLETHist:.2e}" + " entries\nTotal LET by Entries " + f"{TotalLETbyEntries:.2e}" + " [MeV cm2 mg-1]")
-    plt.xlabel("LET [MeV cm2 mg-1]")
-    plt.ylabel("Number of entries per LET bin")
+            # Check if the LET histogram is empty
+            if LET['entries'].sum() == 0:
+                print("LET histogram is empty, skipping folder:", folder)
+                continue
 
-    plt.savefig(path + "../LET-Entries.pdf", format='pdf', bbox_inches="tight")
+            ### LET by Entries ###############
+            # Calculate sums and total LET by entries for LETHist
+            NumberEntriesLETHist = np.sum(LET['entries'])
+            TotalLETbyEntries = np.sum(LET['mean'] * LET['entries'])
 
-    # Calculate total LET by values for LETHist
-    TotalLETbyValues = np.sum(LET['mean'] * LET['value'])
+            # Plotting LET Histogram by entries
+            plt.figure(0)
+            plt.bar(LET['lower'], LET['entries'], width=LET['upper'] - LET['lower'], align='edge')
+            plt.yscale("log")
+            plt.xscale("log")
+            plt.grid()
+            plt.title("LET Histogram " + f"{NumberEntriesLETHist:.2e}" + " entries\nTotal LET by Entries " + f"{TotalLETbyEntries:.2e}" + " [MeV cm2 mg-1]")
+            plt.xlabel("LET [MeV cm2 mg-1]")
+            plt.ylabel("Number of entries per LET bin")
 
-    # Plotting LET Histogram by values and error bars
-    plt.figure(1)
-    plt.bar(LET['lower'], LET['value'], width=LET['upper'] - LET['lower'], align='edge', alpha=0.3)
-    plt.errorbar(LET['mean'], LET['value'], LET['error'], fmt=' ', capsize=5, elinewidth=1, capthick=1, label="LET Histogram")
-    plt.yscale("log")
-    plt.xscale("log")
-    plt.grid()
-    plt.title("LET Histogram " + f"{NumberEntriesLETHist:.2e}" + " entries\nTotal LET by Values " + f"{TotalLETbyValues:.2e}" + " [MeV cm2 mg-1]")
-    plt.xlabel("LET [MeV cm2 mg-1]")
-    plt.ylabel("Rate per LET bin [cm-2 s-1]")
+            plt.savefig(folder + "../LET-Entries.pdf", format='pdf', bbox_inches="tight")
 
-    plt.savefig(path + "../LET-Values.pdf", format='pdf', bbox_inches="tight")
+            # Calculate total LET by values for LETHist
+            TotalLETbyValues = np.sum(LET['mean'] * LET['value'])
 
-    # plt.show()
+            # Plotting LET Histogram by values and error bars
+            plt.figure(1)
+            plt.bar(LET['lower'], LET['value'], width=LET['upper'] - LET['lower'], align='edge', alpha=0.3)
+            plt.errorbar(LET['mean'], LET['value'], LET['error'], fmt=' ', capsize=5, elinewidth=1, capthick=1, label="LET Histogram")
+            plt.yscale("log")
+            plt.xscale("log")
+            plt.grid()
+            plt.title("LET Histogram " + f"{NumberEntriesLETHist:.2e}" + " entries\nTotal LET by Values " + f"{TotalLETbyValues:.2e}" + " [MeV cm2 mg-1]")
+            plt.xlabel("LET [MeV cm2 mg-1]")
+            plt.ylabel("Rate per LET bin [cm-2 s-1]")
+
+            plt.savefig(folder + "../LET-Values.pdf", format='pdf', bbox_inches="tight")
+            plt.close("all")
+            #plt.show()

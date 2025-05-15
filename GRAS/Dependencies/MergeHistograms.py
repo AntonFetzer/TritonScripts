@@ -24,7 +24,7 @@ def mergeHistograms(list_of_histograms):
     if not list_of_histograms:
         sys.exit("ERROR !!! No histograms found")
 
-    NumHistograms = len(list_of_histograms)
+    # NumHistograms = len(list_of_histograms)
     # print("Number of Histograms:", NumHistograms)
 
     # Initialize TotalHistogram for accumulation with zeros or appropriate structures
@@ -37,8 +37,10 @@ def mergeHistograms(list_of_histograms):
     for Histogram in list_of_histograms:
         # Initialize TotalHistogram bin edges with the data of the first histogram in the list
         if TotalHistogram['lower'] is None:
-            for key in ["lower", "upper"]:
-                TotalHistogram[key] = Histogram[key]
+            
+            TotalHistogram["lower"] = Histogram["lower"]
+            TotalHistogram["upper"] = Histogram["upper"]
+
             for key in ["mean", "value", "error", "entries"]:
                 TotalHistogram[key] = np.zeros_like(Histogram[key], dtype=float)
             # Initialize MeanCountList with zero ints
