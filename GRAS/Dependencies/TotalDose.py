@@ -171,6 +171,10 @@ if __name__ == "__main__":
             # plt.show()
             # plt.close('all')
 
+            # Multiply all doses by 1e12 to scale to proton beam fluence
+            Results['dose'] *= 1e12
+            Results['error'] *= 1e12
+
             # Print Results as comma seperated table with collumns for dose and error
             print("Tile, Dose, Error")
             for i in range(NumTiles):

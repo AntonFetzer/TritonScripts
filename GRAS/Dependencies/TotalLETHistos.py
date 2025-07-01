@@ -47,7 +47,7 @@ def totalLETHistos(path):
 if __name__ == "__main__":
 
     # Only works if all input files have the same number of particles !!!!!
-    path = "/l/triton_work/LET_Histograms/Mono/Protons4mmPb-200micronSi/"
+    path = "/l/triton_work/LET_Histograms/Carrington/"
 
     # Find all subdirectories in the given path that contain a "Res" subfolder
     # and calculate the total LET histos for each of them
