@@ -114,7 +114,7 @@ GEO_SEP_Data = readSpenvis_sef(GEO_SEP)
 plt.plot(GEO_SEP_Data[0, :, 0], GEO_SEP_Data[0, :, 1], '+--', label="SAPPHIRE GEO Solar Proton Flux", color=GEOColor)
 
 # ## Read in Van-Allen Belt Probes SEP spectrum
-# VAB_SEP = "/l/triton_work/Spectra/Van-Allen-Belt-Probes/spenvis_sef.txt"
+# VAB_SEP = "/l/triton_work/Spectra/Van-Allen-Probes/spenvis_sef.txt"
 # VAB_SEP_Data = readSpenvis_sef(VAB_SEP)
 # plt.plot(VAB_SEP_Data[0, :, 0], VAB_SEP_Data[0, :, 1], '+--', label="SAPPHIRE Van-Allen-Belt Solar Proton Flux", color=VABColor)
 # Very similar to the GEO SEP, therefore not plotted
@@ -134,7 +134,7 @@ GEO_Cosmic_Data = readSpenvis_gcf(GEO_Cosmic)
 plt.plot(GEO_Cosmic_Data[0, :, 0], GEO_Cosmic_Data[0, :, 1], '*:', label="ISO GEO Cosmic Proton Flux", color=GEOColor)
 
 # ## Read in Van-Allen Belt Probes Cosmic spectrum
-# VAB_Cosmic = "/l/triton_work/Spectra/Van-Allen-Belt-Probes/spenvis_gcf.txt"
+# VAB_Cosmic = "/l/triton_work/Spectra/Van-Allen-Probes/spenvis_gcf.txt"
 # VAB_Cosmic_Data = readSpenvis_gcf(VAB_Cosmic)
 # plt.plot(VAB_Cosmic_Data[0, :, 0], VAB_Cosmic_Data[0, :, 1], '*:', label="ISO Van-Allen-Belt Cosmic Proton Flux", color=VABColor)
 # Very similar to the GEO Cosmic, therefore not plotted

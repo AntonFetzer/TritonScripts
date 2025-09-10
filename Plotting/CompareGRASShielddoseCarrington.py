@@ -89,7 +89,7 @@ plt.plot(x, CriticalDose, '--', color='k', linewidth=2, label='10 krad')
 # ------------------------------- Import and Plot SHIELDOSE Data -------------------------------------------------------
 ConvertKrad = 1 / 1000  #  1/1000 to convert to krad
 # mmtogcm2 = 0.27  # 0.27 to convert mm to g/cm2 of aliminium
-# SDData = readSDQ2("/l/triton_work/Spectra/Van-Allen-Belt-Probes/Shieldose/spenvis_sqo.txt")
+# SDData = readSDQ2("/l/triton_work/Spectra/Van-Allen-Probes/Shieldose/spenvis_sqo.txt")
 # SDDataCollumns = ['Aluminium Thickness', 'Total Dose', 'Electrons', 'Bremsstrahlung', 'Protons']
 #plt.plot(SDData[:, 0], ( SDData[:, 2]+SDData[:, 3] ) * ConvertKrad, 'C0--', label="SHIELDOSE-2Q trapped Electrons")
 #plt.plot(SDData[:, 0] * mmtogcm2, SDData[:, 3] * ConvertKrad, 'C1-..', label="SHIELDOSE-2Q Bremsstrahlung")

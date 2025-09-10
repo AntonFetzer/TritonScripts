@@ -11,7 +11,7 @@ Paths = [
     "/l/triton_work/Source_Histograms/Carrington/CarringtonElectronDiffPowTabelated/Res",
     "/l/triton_work/Source_Histograms/Carrington/CarringtonElectronDiffPow/Res",
 
-    "/l/triton_work/Source_Histograms/Carrington/Van-Allen-Belt-Probes-AE9-mission/Res",
+    "/l/triton_work/Source_Histograms/Carrington/Van-Allen-Probes-AE9-mission/Res",
 
     # "/l/triton_work/Source_Histograms/Carrington/Carrington-SEP-Expected-Int-With0/Res",
     # "/l/triton_work/Source_Histograms/Carrington/Carrington-SEP-Plus2Sigma-Int-With0/Res",

@@ -11,7 +11,7 @@ Paths = [
     "/l/triton_work/Fluence_Histograms/Carrington/CarringtonElectronDiffPowTabelated/Res",
     "/l/triton_work/Fluence_Histograms/Carrington/CarringtonElectronDiffPow/Res",
 
-    "/l/triton_work/Fluence_Histograms/Carrington/Van-Allen-Belt-Probes-AE9-mission/Res",
+    "/l/triton_work/Fluence_Histograms/Carrington/Van-Allen-Probes-AE9-mission/Res",
 
     "/l/triton_work/Fluence_Histograms/Carrington/Carrington-SEP-Expected-Int-With0/Res",
     "/l/triton_work/Fluence_Histograms/Carrington/Carrington-SEP-Plus2Sigma-Int-With0/Res",
@@ -20,7 +20,7 @@ Paths = [
     # "/l/triton_work/Fluence_Histograms/Carrington/Carrington-SEP-Expected-Diff/Res",
     # "/l/triton_work/Fluence_Histograms/Carrington/Carrington-SEP-Expected-Int/Res",
 
-    "/l/triton_work/Fluence_Histograms/Carrington/Van-Allen-Belt-Probes-AP9-mission/Res",
+    "/l/triton_work/Fluence_Histograms/Carrington/Van-Allen-Probes-AP9-mission/Res",
 
     "/l/triton_work/Fluence_Histograms/Carrington/GEO-SolarProton-5minPeakFlux/Res",
 ]
@@ -48,7 +48,7 @@ for i in range(NumberOfHistograms):
         # Derive the label from the second to last folder name in the path
         label = os.path.basename(os.path.dirname(Paths[i]))
 
-        if label == 'Van-Allen-Belt-Probes-AE9-mission' or label == 'Van-Allen-Belt-Probes-AP9-mission':
+        if label == 'Van-Allen-Probes-AE9-mission' or label == 'Van-Allen-Probes-AP9-mission':
             # Convert from monthly fluence to flux per second
             Elec['value'] /= 30 * 24 * 60 * 60  
             Elec['error'] /= 30 * 24 * 60 * 60
@@ -93,7 +93,7 @@ for i in range(NumberOfHistograms):
     # Derive the label from the second to last folder name in the path
     label = os.path.basename(os.path.dirname(Paths[i]))
 
-    if label == 'Van-Allen-Belt-Probes-AE9-mission' or label == 'Van-Allen-Belt-Probes-AP9-mission':
+    if label == 'Van-Allen-Probes-AE9-mission' or label == 'Van-Allen-Probes-AP9-mission':
         # Convert from monthly fluence to flux per second
         Prot['value'] /= 30 * 24 * 60 * 60  
         Prot['error'] /= 30 * 24 * 60 * 60
