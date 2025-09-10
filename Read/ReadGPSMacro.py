@@ -35,7 +35,7 @@ def readGPSMacro(file):
 
 if __name__ == "__main__":
     
-    Data = readGPSMacro("/l/triton_work/Spectra/Carrington/SEP-Final/Carrington-SEP-Expected-Int-With0.mac")
+    Data = readGPSMacro("/l/triton_work/Spectra/Carrington/Electron/CarringtonElectronDiffPowTabelated.mac")
     
     plt.plot(Data['Energy'], Data['Flux'])
 

@@ -1,14 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 # import sympy as sp
-from GRAS.Read.ReadSpenvis_tri import readSpenvis_tri
+from Read.ReadSpenvis_tri import readSpenvis_tri
 
 Expected = 'blue' # Blue
-PlusColor = 'C1'        # Green
-MinusColor = 'C2'       # Orange
-ISSColor = 'C8'         # yellow
-GEOColor = 'C7'         # grey
-VABColor = 'C3'         # Red
+PlusColor = 'C1'  # Green
+MinusColor = 'C2' # Orange
+ISSColor = 'C8'   # yellow
+GEOColor = 'C7'   # grey
+VABColor = 'C3'   # Red
 
 ## Carrington Integral Electron Spectrum Parameters from EVT Analysis of Adnane Osmane
 f0 = 10 ** 10   # cm-2 s-1 sr-1 
