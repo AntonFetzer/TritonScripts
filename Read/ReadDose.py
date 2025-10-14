@@ -78,7 +78,7 @@ def format_number(n):
 
 
 if __name__ == "__main__":
-    path = "/l/triton_work/RadEx/1Tile/Res/"
+    path = "/l/triton_work/1Tile/GRAS-SPENVIS validation/TID/Res/"
 
     print("Reading in all files in folder:", path)
 

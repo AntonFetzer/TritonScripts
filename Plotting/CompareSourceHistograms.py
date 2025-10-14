@@ -1,6 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from GRAS.Dependencies.TotalSourceHistograms import totalSourceHistos
+from Dependencies.TotalSourceHistograms import totalSourceHistos
 import os
 
 # Set the grid to be behind the plot
@@ -9,9 +9,9 @@ plt.rc('axes', axisbelow=True)
 Paths = [
     "/l/triton_work/Source_Histograms/Carrington/CarringtonElectronINTEGRALPowTabelated/Res",
     "/l/triton_work/Source_Histograms/Carrington/CarringtonElectronDiffPowTabelated/Res",
-    "/l/triton_work/Source_Histograms/Carrington/CarringtonElectronDiffPow/Res",
+    "/l/triton_work/Source_Histograms/Carrington/CarringtonElectronDiffPow3/Res",
 
-    "/l/triton_work/Source_Histograms/Carrington/Van-Allen-Probes-AE9-mission/Res",
+    #"/l/triton_work/Source_Histograms/Carrington/Van-Allen-Probes-AE9-mission/Res",
 
     # "/l/triton_work/Source_Histograms/Carrington/Carrington-SEP-Expected-Int-With0/Res",
     # "/l/triton_work/Source_Histograms/Carrington/Carrington-SEP-Plus2Sigma-Int-With0/Res",
@@ -19,6 +19,8 @@ Paths = [
 
     # "/l/triton_work/Source_Histograms/Carrington/Carrington-SEP-Expected-Diff/Res",
     # "/l/triton_work/Source_Histograms/Carrington/Carrington-SEP-Expected-Int/Res",
+
+    #"/l/triton_work/Source_Histograms/GTOTEST/GTOprotonTestWITH0/Res",
 ]
 
 # List to store the histograms
@@ -62,6 +64,6 @@ plt.legend()
 plt.grid(which='both')
 
 # Save the plot to a file
-plt.savefig("/l/triton_work/Source_Histograms/Carrington/Energy_Histogram_Comparison.pdf", format='pdf', bbox_inches='tight')
+# plt.savefig("/l/triton_work/Source_Histograms/Carrington/Energy_Histogram_Comparison.pdf", format='pdf', bbox_inches='tight')
 
-# plt.show()
+plt.show()

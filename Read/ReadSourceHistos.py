@@ -57,13 +57,13 @@ def readSourceHistos(file):
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/SourceHistograms/Carrington/CarringtonElectronINTEGRALPowTabelated/Res/"
+    Path = "/l/triton_work/Source_Histograms/GTOTEST/GTOprotonTestWITH0/Res/"
     # Find the first .csv file in the specified directory
     FullPath = next((os.path.join(Path, f) for f in os.listdir(Path) if f.endswith('.csv')), None)
     # Print the full path of the file
     print("Reading in file: ", FullPath)
     # Construct the path for the 'Plot' directory
-    PlotDir = os.path.join(os.path.dirname(Path), '../Plot')
+    PlotDir = os.path.join(os.path.dirname(Path), '../')
 
     histograms = readSourceHistos(FullPath)
 

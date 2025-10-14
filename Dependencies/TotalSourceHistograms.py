@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from GRAS.Read.ReadSourceHistos import readSourceHistos
-from GRAS.Dependencies.MergeHistograms import mergeHistograms
+from Read.ReadSourceHistos import readSourceHistos
+from Dependencies.MergeHistograms import mergeHistograms
 import sys
 import os
 

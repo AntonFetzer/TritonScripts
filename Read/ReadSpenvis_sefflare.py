@@ -64,7 +64,7 @@ def readSpenvis_sefflare(file):
 
 
 if __name__ == "__main__":
-    File = "/l/triton_work/Spectra/GEO/spenvis_sefflare.txt"
+    File = "/u/02/fetzera1/unix/Desktop/triton_work/Spectra/Carrington/GEO-Extreme/CREME96/spenvis_sefflare.txt"
 
     Results = readSpenvis_sefflare(File)
 
@@ -93,6 +93,6 @@ if __name__ == "__main__":
     # Print the diffeential flux spectrum as a table
     print("Energy [MeV] | Differential Peak Flux [cm^-2 s^-1 MeV^-1]")
     for i in range(len(Results['Energy'])):
-        print(f"{Results['Energy'][i]:.2e} {Results['DFlux'][i]:.2e}")
+        print(Results['Energy'][i], Results['DFlux'][i])
 
     plt.show()

@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from GRAS.Read.ReadDose import readDose
+from Read.ReadDose import readDose
 import matplotlib.pyplot as plt
 import sys
 
@@ -103,7 +103,7 @@ def totalDose(path):
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/RadEx/RadEx/"
+    Path = "/l/triton_work/1Tile/GRAS-SPENVIS validation/TID/"
 
     # Find all subdirectories in the given path that contain a "Res" subfolder
     # and calculate the total dose for each of them
@@ -171,12 +171,14 @@ if __name__ == "__main__":
             # plt.show()
             # plt.close('all')
 
-            # Multiply all doses by 1e12 to scale to proton beam fluence
-            Results['dose'] *= 1e12
-            Results['error'] *= 1e12
+            Fluence = 1  # protons per cm^2
+
+            # Multiply all doses by Fluence to scale to proton beam fluence
+            Results['dose'] *= Fluence
+            Results['error'] *= Fluence
 
             # Print Results as comma seperated table with collumns for dose and error
-            print("Tile, Dose, Error")
+            print("\nTile, Dose, Error")
             for i in range(NumTiles):
                 print(i+1, Results['dose'][i], Results['error'][i], sep=", ")
 
