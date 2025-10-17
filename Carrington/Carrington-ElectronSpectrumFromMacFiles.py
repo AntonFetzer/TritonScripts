@@ -49,3 +49,5 @@ plt.legend()
 plt.title("Carrington Electron Spectra")
 plt.xlabel("Kinetic energy [MeV]")
 plt.ylabel("Integral Flux [cm$^{-2}$ s$^{-1}$ sr$^{-1}$]")
+
+plt.show()

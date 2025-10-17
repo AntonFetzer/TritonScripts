@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 def readSpenvis_sefflare(file):
     """
-    Reads the proton peak flux from Solar Flare CREME-96 files.
+    Reads the proton peak flux from Solar Flare spenvis_sefflare.txt files.
 
     The spenvis_sefflare.txt file contains the proton peak flux data for a solar flare event.
     Energy in MeV
@@ -31,9 +31,9 @@ def readSpenvis_sefflare(file):
         for line in f:
             if ReadFlag == 0:
                 if "Duration" in line:
-                    print(line)
+                    continue
                 elif "Solar particle model" in line:
-                    print(line)
+                    continue
                 elif "Proton Exposure Time" in line:
                     ReadFlag = 1
             elif ReadFlag == 1:
@@ -50,21 +50,22 @@ def readSpenvis_sefflare(file):
     for key in keys:
         Sefflare[key] = np.array(Sefflare[key])
 
-    # Convert the Integral Flux from m-2 sr-1 s-1 to cm-2 s-1
+    ## Print the integtral flux spectrum as a table
+    # print("Energy [MeV] | Differential Peak Flux [m^-2 sr-1 s^-1 ]")
+    # for i in range(len(Sefflare['Energy'])):
+    #     print(Sefflare['Energy'][i], Sefflare['IFlux'][i])
+
+    # Convert the Fluxes from m-2 sr-1 s-1 to cm-2 s-1
     # m-2 to cm-2 --> 1e-4
     # sr-1 to 1 --> 4 pi
     Sefflare['IFlux'] = Sefflare['IFlux'] * 1e-4 * 4 * np.pi
-
-    # Convert the Differential Flux from m-2 sr-1 s-1 MeV-1 to cm-2 s-1 MeV-1
-    # m-2 to cm-2 --> 1e-4
-    # sr-1 to 1 --> 4 pi
     Sefflare['DFlux'] = Sefflare['DFlux'] * 1e-4 * 4 * np.pi
 
     return Sefflare
 
 
 if __name__ == "__main__":
-    File = "/u/02/fetzera1/unix/Desktop/triton_work/Spectra/Carrington/GEO-Extreme/CREME96/spenvis_sefflare.txt"
+    File = "/u/02/fetzera1/unix/Desktop/triton_work/Spectra/Carrington/GEO-Extreme/SAPPHIRE100yearPeakFlux/spenvis_sefflare.txt"
 
     Results = readSpenvis_sefflare(File)
 
@@ -90,9 +91,9 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid()
 
-    # Print the diffeential flux spectrum as a table
-    print("Energy [MeV] | Differential Peak Flux [cm^-2 s^-1 MeV^-1]")
-    for i in range(len(Results['Energy'])):
-        print(Results['Energy'][i], Results['DFlux'][i])
+    ## Print the diffeential flux spectrum as a table
+    #print("Energy [MeV] | Differential Peak Flux [cm^-2 s^-1 MeV^-1]")
+    #for i in range(len(Results['Energy'])):
+    #    print(Results['Energy'][i], Results['DFlux'][i])
 
     plt.show()

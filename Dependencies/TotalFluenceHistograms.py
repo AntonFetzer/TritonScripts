@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
-from GRAS.Read.ReadFluenceHistos import readFluenceHistos
-from GRAS.Dependencies.MergeHistograms import mergeHistograms
+from Read.ReadFluenceHistos import readFluenceHistos
+from Dependencies.MergeHistograms import mergeHistograms
 import sys
 import os
 
@@ -51,11 +51,11 @@ def totalFluenceHistos(path):
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/Fluence_Histograms/Carrington/CarringtonElectronINTEGRALPowTabelated/Res/"
+    Path = "/l/triton_work/Fluence_Histograms/Carrington/CarringtonElectronDiffPow/Res/"
     TotalFluenceHists = totalFluenceHistos(Path)
 
     # Construct the path for the 'Plot' directory
-    PlotDir = os.path.join(os.path.dirname(Path), '../Plot')
+    PlotDir = os.path.join(os.path.dirname(Path), '../')
     
     # Set the grid to be behind the plot
     plt.rc('axes', axisbelow=True)

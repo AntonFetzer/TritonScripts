@@ -1,6 +1,47 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+def readSpenvis_sef_protons(fileName):
+    """ 
+    Reads the SAPPHIRE solar proton fluence spectrumn from spenvis_sef.txt files.
+
+    Args:
+        file (str): Path to the spenvis_sef.txt file.
+    
+    Returns:
+        dict: Dictionary with numpy arrays of fluence spectrum:
+            - 'Energy': Energy in MeV
+            - 'IFluence': Integral Fluence in cm-2
+            - 'DFluence': Differential Fluence in cm-2 MeV-1
+    """
+    keys = ['Energy', 'IFluence', 'DFluence']
+    ProtonTable = {key: [] for key in keys}
+    
+    ReadFlag = 0
+    with open(fileName, 'r') as f:
+        for line in f:
+            if ReadFlag == 0:
+                if "'Proton Exposure Time'" in line:
+                    ReadFlag = 1  # Found the proton table
+            elif ReadFlag == 1:
+                if "'End of Block'" in line:
+                    break  # Done reading relevant block
+                else:
+                    # Parse values
+                    values = [value.strip() for value in line.split(',')]
+                    ProtonTable['Energy'].append(float(values[0]))
+                    ProtonTable['IFluence'].append(float(values[1]))
+                    ProtonTable['DFluence'].append(float(values[2]))
+    
+    # Convert lists inside the dicts to numpy arrays
+    for key in keys:
+        ProtonTable[key] = np.array(ProtonTable[key])
+
+    return ProtonTable
+
+
+
+
 AtomicMass = [1.008, 4.003, 6.941, 9.012, 10.811, 12.011, 14.007, 15.999, 18.998, 20.18, 22.99, 24.305, 26.982,
               28.086, 30.974, 32.065, 35.453, 39.948, 39.098, 40.078, 44.956, 47.867, 50.942, 51.996, 54.938,
               55.845, 58.933, 58.693, 63.546, 65.39, 69.723, 72.64, 74.922, 78.96, 79.904, 83.8, 85.468, 87.62,
@@ -12,7 +53,7 @@ AtomicMass = [1.008, 4.003, 6.941, 9.012, 10.811, 12.011, 14.007, 15.999, 18.998
 
 ############ SAPPHIRE Spectra are in Fluence with minimum duration 6 months !!! ###############################
 
-def readSpenvis_sef(fileName):
+def readSpenvis_sef_Ions(fileName):
     print("Reading in", fileName)
     f = open(fileName, "r")
 
@@ -41,7 +82,7 @@ def readSpenvis_sef(fileName):
     for i, line in enumerate(Iontable):
         EnergyPerNucleon[i] = line[0]
         IonData[i] = line[1:cols]     # Reading the Fluence
-        IonData[i] /= (1.578e+7)   # The sef.txt contains the Fluence per 6 months not the flux!
+        #IonData[i] /= (1.578e+7)   # The sef.txt contains the Fluence per 6 months not the flux!
 
     # print(Energy)
 
@@ -64,6 +105,14 @@ def readSpenvis_sef(fileName):
 if __name__ == "__main__":
     ############ SAPPHIRE Spectra are in Fluence with minimum duration 6 months !!! ###############################
     ############ Check duration and normalisation of the spectrum #################################################
+
+    Data = readSpenvis_sef_protons("/l/triton_work/Spectra/Carrington/GEO/spenvis_sef.txt")
+
+    print(Data['Energy'])
+    print(Data['IFluence'])
+    print(Data['DFluence'])
+
+    '''
     DataT = readSpenvis_sef("/l/triton_work/Spectra/ISS/spenvis_sef.txt")
 
     IntorDiff = 1  # 1 for Int 2 for Diff
@@ -106,3 +155,4 @@ if __name__ == "__main__":
     plt.grid(which='both')
     plt.show()
 
+'''

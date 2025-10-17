@@ -1,36 +1,54 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from GRAS.Dependencies.TotalFluenceHistograms import totalFluenceHistos
+from Dependencies.TotalFluenceHistograms import totalFluenceHistos
 import os
 
 # Set the grid to be behind the plot
 #plt.rc('axes', axisbelow=True)
+Path = "/l/triton_work/Fluence_Histograms/Carrington/"
 
-Paths = [
-    "/l/triton_work/Fluence_Histograms/Carrington/CarringtonElectronINTEGRALPowTabelated/Res",
-    "/l/triton_work/Fluence_Histograms/Carrington/CarringtonElectronDiffPowTabelated/Res",
-    "/l/triton_work/Fluence_Histograms/Carrington/CarringtonElectronDiffPow/Res",
+Folders = [
+    
+    # "CarringtonElectronDiffPowTabelated/Res",
+    # "CarringtonElectronINTEGRALPowTabelated/Res",
 
-    "/l/triton_work/Fluence_Histograms/Carrington/Van-Allen-Probes-AE9-mission/Res",
+    # "Carrington-SEP-Expected-Diff/Res",
+    # "Carrington-SEP-Expected-Int/Res",
+    "Carrington-SEP-Expected-Int-With0/Res",
+    # "Carrington-SEP-Plus2Sigma-Int-With0/Res",
+    # "Carrington-SEP-Minus2Sigma-Int-With0/Res",
 
-    "/l/triton_work/Fluence_Histograms/Carrington/Carrington-SEP-Expected-Int-With0/Res",
-    "/l/triton_work/Fluence_Histograms/Carrington/Carrington-SEP-Plus2Sigma-Int-With0/Res",
-    "/l/triton_work/Fluence_Histograms/Carrington/Carrington-SEP-Minus2Sigma-Int-With0/Res",
+    # "GEO-cosmic-proton/Res",
+    # "GEO-electron/Res",
+    # "GEO-solar-proton/Res",
+    "GEO-trapped-proton/Res",
 
-    # "/l/triton_work/Fluence_Histograms/Carrington/Carrington-SEP-Expected-Diff/Res",
-    # "/l/triton_work/Fluence_Histograms/Carrington/Carrington-SEP-Expected-Int/Res",
+    # "MEO-cosmic-proton/Res",
+    # "MEO-electron/Res",
+    # "MEO-solar-proton/Res",
+    "MEO-trapped-proton/Res",
 
-    "/l/triton_work/Fluence_Histograms/Carrington/Van-Allen-Probes-AP9-mission/Res",
+    # "VAP-cosmic-proton/Res",
+    # "VAP-electron/Res",
+    # "VAP-electron_Old/Res",
+    # "VAP-solar-proton/Res",
+    "VAP-trapped-proton/Res",
+    "VAP-trapped-proton_Old/Res",
 
-    "/l/triton_work/Fluence_Histograms/Carrington/GEO-SolarProton-5minPeakFlux/Res",
+    # "SolarProton-5minPeakFlux/Res",
+
+    # "LEO-cosmic-proton/Res",
+    # "LEO-electron/Res",
+    # "LEO-solar-proton-NoZero/Res",
+    "LEO-trapped-proton/Res",
 ]
 
 # List to store the histograms
 all_histograms = []
 
 # Read histograms using the provided function
-for path in Paths:
-    histograms = totalFluenceHistos(path)
+for folder in Folders:
+    histograms = totalFluenceHistos(Path + folder)
     all_histograms.append(histograms)
 
 NumberOfHistograms = len(all_histograms)
@@ -43,33 +61,38 @@ for i in range(NumberOfHistograms):
     histograms = all_histograms[i]
     Elec = histograms['Electrons']
 
+    if sum(Elec['value']) == 0:
+        continue
 
-    if Elec['value'].sum() != 0:
-        # Derive the label from the second to last folder name in the path
-        label = os.path.basename(os.path.dirname(Paths[i]))
+    # Derive the label from the second to last folder name in the path
+    label = Folders[i].split('/')[0]
 
-        if label == 'Van-Allen-Probes-AE9-mission' or label == 'Van-Allen-Probes-AP9-mission':
-            # Convert from monthly fluence to flux per second
-            Elec['value'] /= 30 * 24 * 60 * 60  
-            Elec['error'] /= 30 * 24 * 60 * 60
+    if "GEO" in label or "VAP" in label or "LEO" in label or "MEO" in label:
+        # Convert 11 year mission fluence to flux per second
+        Elec['value'] /= (4015 * 24 * 60 * 60)
+        Elec['error'] /= (4015 * 24 * 60 * 60)
 
-        # Replace 0 with NaN using numpy
-        Elec['value'] = np.where(Elec['value'] == 0, np.nan, Elec['value'])
+    if "Old" in label:
+        Elec['value'] *= (4015/30)
+        Elec['error'] *= (4015/30)
 
-        # Plot histogram without error bar
-        # plt.bar(Elec['lower'], Elec['value'], width=Elec['upper'] - Elec['lower'], align='edge', alpha=0.5, label=label)
+    # Replace 0 with NaN using numpy
+    Elec['value'] = np.where(Elec['value'] == 0, np.nan, Elec['value'])
 
-        # Plot histogram as error bars
-        # plt.errorbar(Elec['mean'], Elec['value'], Elec['error'], fmt=' ', capsize=2, elinewidth=1, capthick=1, label=label)
+    # Plot histogram without error bar
+    # plt.bar(Elec['lower'], Elec['value'], width=Elec['upper'] - Elec['lower'], align='edge', alpha=0.5, label=label)
 
-        # Plot histogram with error bars
-        # plt.bar(Elec['lower'], Elec['value'], width=Elec['upper'] - Elec['lower'], yerr=Elec['error'], align='edge')
+    # Plot histogram as error bars
+    # plt.errorbar(Elec['mean'], Elec['value'], Elec['error'], fmt=' ', capsize=2, elinewidth=1, capthick=1, label=label)
 
-        # Plot histograms as line plot
-        # plt.plot(Elec['mean'], Elec['value'], label=label)
+    # Plot histogram with error bars
+    # plt.bar(Elec['lower'], Elec['value'], width=Elec['upper'] - Elec['lower'], yerr=Elec['error'], align='edge')
 
-        # Plot histograms as line plot with error bars
-        plt.errorbar(Elec['mean'], Elec['value'], Elec['error'], capsize=2, elinewidth=1, capthick=1, label=label)
+    # Plot histograms as line plot
+    # plt.plot(Elec['mean'], Elec['value'], label=label)
+
+    # Plot histograms as line plot with error bars
+    plt.errorbar(Elec['mean'], Elec['value'], Elec['error'], capsize=2, elinewidth=1, capthick=1, label=label)
 
 plt.xlabel('Energy [MeV]')
 plt.ylabel('Fluence [counts/cm2]')
@@ -80,7 +103,7 @@ plt.legend()
 plt.grid(which='both')
 
 # Save the plot to a file
-plt.savefig("/l/triton_work/Fluence_Histograms/Carrington/Electrons_Histogram_Comparison.pdf", format='pdf', bbox_inches='tight')
+plt.savefig(Path + "Electrons_Histogram_Comparison.pdf", format='pdf', bbox_inches='tight')
 
 
 # Plotting Proton Histograms
@@ -90,13 +113,20 @@ for i in range(NumberOfHistograms):
     histograms = all_histograms[i]
     Prot = histograms['Protons']
 
-    # Derive the label from the second to last folder name in the path
-    label = os.path.basename(os.path.dirname(Paths[i]))
+    if sum(Prot['value']) == 0:
+        continue
 
-    if label == 'Van-Allen-Probes-AE9-mission' or label == 'Van-Allen-Probes-AP9-mission':
-        # Convert from monthly fluence to flux per second
-        Prot['value'] /= 30 * 24 * 60 * 60  
-        Prot['error'] /= 30 * 24 * 60 * 60
+    # Derive the label from the Folder name
+    label = Folders[i].split('/')[0]
+
+    if "GEO" in label or "VAP" in label or "LEO" in label or "MEO" in label:
+        # Convert 11 year mission fluence to flux per second
+        Prot['value'] /= 4015 * 24 * 60 * 60  
+        Prot['error'] /= 4015 * 24 * 60 * 60
+
+    if "Old" in label:
+        Prot['value'] *= (4015/30)
+        Prot['error'] *= (4015/30)
 
     # Replace 0 with NaN using numpy
     Prot['value'] = np.where(Prot['value'] == 0, np.nan, Prot['value'])
@@ -122,5 +152,5 @@ plt.legend()
 plt.grid(which='both')
 
 # Save the plot to a file
-plt.savefig("/l/triton_work/Fluence_Histograms/Carrington/Protons_Histogram_Comparison.pdf", format='pdf', bbox_inches='tight')
+plt.savefig(Path + "Protons_Histogram_Comparison.pdf", format='pdf', bbox_inches='tight')
 # plt.show()
