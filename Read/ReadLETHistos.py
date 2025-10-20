@@ -57,18 +57,11 @@ def readLETHistos(file):
         LET[key] = LET[key] / AreaNormFactor
         Eff[key] = Eff[key] / AreaNormFactor
 
-    # Adjust for mission duration by dividing by the mission duration in seconds
-    # MissionDuration = 5 * 365.25 * 24 * 3600 # 5 years in seconds
-
-    # for key in ['value', 'error']:
-    #     LET[key] = LET[key] / MissionDuration
-    #     Eff[key] = Eff[key] / MissionDuration
-
     return LET, Eff
 
 
 if __name__ == "__main__":
-    file = "/l/triton_work/LET_Histograms/Mono/Protons2mmAl-200micronSi/64MeV/Res/LET_24811_3838.csv"
+    file = "/l/triton_work/LET_Histograms/Carrington/CarringtonElectronINTEGRALPowTabelated/1mm/Res/LET_68171_10546.csv"
 
     LET, Eff = readLETHistos(file)
 

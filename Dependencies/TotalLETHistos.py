@@ -1,9 +1,14 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from GRAS.Read.ReadLETHistos import readLETHistos
-from GRAS.Dependencies.MergeHistograms import mergeHistograms
 import sys
 import os
+# Add parent directory to sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import numpy as np
+import matplotlib.pyplot as plt
+from Read.ReadLETHistos import readLETHistos
+from Dependencies.MergeHistograms import mergeHistograms
+
+
 
 def totalLETHistos(path):
     """
@@ -26,7 +31,10 @@ def totalLETHistos(path):
     Files = [f for f in os.listdir(path) if "LET" in f and f.endswith(".csv")]
 
     if not Files:
-        sys.exit("ERROR !!! No files found")
+        print("ERROR !!! No files found")
+        # Wait for user input before exiting
+        input("Press Enter to continue")
+        return None, None
 
     LETList = []
     EffList = []
@@ -48,6 +56,7 @@ if __name__ == "__main__":
 
     # Only works if all input files have the same number of particles !!!!!
     path = "/l/triton_work/LET_Histograms/Carrington/"
+    # path = "/scratch/work/fetzera1/LET_Histograms/Carrington/"
 
     # Find all subdirectories in the given path that contain a "Res" subfolder
     # and calculate the total LET histos for each of them

@@ -1,10 +1,23 @@
+import sys
+import os
+# Add parent directory to sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sp
-from GRAS.Dependencies.TotalLETHistos import totalLETHistos
+from Dependencies.TotalLETHistos import totalLETHistos
 from uncertainties import ufloat
 import os
 import natsort
+
+Expected = 'blue' # Blue
+PlusColor = 'C1'  # Orange
+MinusColor = 'C2' # Green
+LEOColor = 'C8'   # Yellow
+MEOColor = 'C9'   # Turquoise
+VAPColor = 'C3'   # Red
+GEOColor = 'C7'   # Grey
 
 '''
 The functional form of the Weibull is:
@@ -19,6 +32,7 @@ https://creme.isde.vanderbilt.edu/CREME-MC/help/weibull
 '''
 
 Directory = "/l/triton_work/LET_Histograms/Carrington/"
+# Directory = "/scratch/work/fetzera1/LET_Histograms/Carrington/"
 #Correctable = 0
 
 # if Correctable:
@@ -66,9 +80,9 @@ def f(LET):
 #     CSVFile = open("/l/triton_work/LET_Histograms/Carrington/SEERatesCorrectable.csv", 'w')
 # if not Correctable:
 #     CSVFile = open("/l/triton_work/LET_Histograms/Carrington/SEERatesUncorrectable.csv", 'w')
-CSVFile = open("/l/triton_work/LET_Histograms/Carrington/SEERatesnanoXplore.csv", 'w')
+CSVFile = open(Directory + "/SEERatesnanoXplore.csv", 'w')
 # Write the header to the file
-header = "Data,Shielding,Crossection,SEE_Rate,SEE_Error,EntriesContributingToSEE"
+header = "Data,Shielding,Crossection,SEE_Rate,SEE_Error,Relative_SEE_Error,Entries_Contributing_To_SEE"
 CSVFile.write(header + "\n")
 
 
@@ -87,30 +101,34 @@ for F, Folder in enumerate(FolderList):
     SubFolderList = natsort.natsorted(SubFolderList)
 
     for SubFolder in SubFolderList:
-        # Print a dot for each folder processed as a progress indicator
-        print(".", end='', flush=True)
         
         path = Directory + Folder + "/" + SubFolder + "/Res/"
         ## ----------------------------------- LET Read-in -----------------------------------------------------------
-        # Only works if all input files have the same number of particle!!!!!
-        try:
-            LETHist, _ = totalLETHistos(path)
-        except:
-            print("Error in", path)
+        LETHist, _ = totalLETHistos(path)
+
+        # Check if the LET histogram is None (no files found)
+        if LETHist is None:
+            print("No LET histogram found in", path, "-> skipping")
             continue
 
-        # Convert Fluences to Fluxes for comparison.
-        # Path names sets containing Carrington-SEP and CarringtonElectron are fluxes in [cm-2 s-1]
-        # Datasets containing "mission" are 30 day fluences in [cm-2] (per 30 days)
-        if "mission" in Folder:
-            LETHist['value'] = LETHist['value'] / ( 30 * 24 * 3600 ) 
-            LETHist['error'] = LETHist['error'] / ( 30 * 24 * 3600 )
+        # Ensure the histogram arrays returned have consistent binning/length.
+        # The script requires 'lower','upper','mean','value','error','entries' to be the same length.
+        required_keys = ['lower', 'upper', 'mean', 'value', 'error', 'entries']
+        lengths = [len(LETHist[k]) for k in required_keys]
+        if not all(l == lengths[0] for l in lengths):
+            print("Inconsistent histogram lengths in", path, "-> skipping")
+            continue
 
+        # Normalise from 11 year fluence to flux
+        if "-electron" in Folder or "-solar-proton" in Folder or "-trapped-proton" in Folder or "-cosmic-proton" in Folder or "-cosmic-iron" in Folder:
+            NormalisationFactor = 4015 * 24 * 3600  # seconds in 11 years
+            LETHist['value'] = LETHist['value'] / NormalisationFactor
+            LETHist['error'] = LETHist['error'] / NormalisationFactor
 
         NumberEntriesLETHist = np.sum(LETHist['entries'])
-        TotalLET = np.sum(LETHist['mean'] * LETHist['value'])
-        TotalLETError = np.sum(np.square(LETHist['error']))
-        TotalLETError = np.sqrt(TotalLETError)
+        TotalLET = np.sum(LETHist['value'] * LETHist['mean'])
+        TotalLETError = np.square(LETHist['error'] * LETHist['mean'])
+        TotalLETError = np.sqrt(np.sum(TotalLETError))
         TotalLETU = ufloat(TotalLET, TotalLETError)
 
         ### LET Histogram ###############
@@ -122,7 +140,7 @@ for F, Folder in enumerate(FolderList):
         plt.yscale("log")
         plt.xscale("log")
         plt.grid(which='major')
-        plt.title(Folder + " " + CrossectionName + " " + SubFolder + " Al\nTotal LET = " + str(TotalLETU) + " MeV cm2 mg-1")
+        plt.title(Folder + " " + CrossectionName + " " + SubFolder + " Al\nTotal LET rate = " + str(TotalLETU) + " MeV cm2 mg-1 s-1")
         plt.xlabel("LET [MeV cm2 mg-1]")
         ax1.legend(loc='lower left')
         ax1.set_ylabel("Rate per LET bin [cm-2 s-1]", color='C0')
@@ -150,19 +168,26 @@ for F, Folder in enumerate(FolderList):
 
         SEERate = np.sum(SEEHist['value'])
 
-        SEERateError = np.sum(np.square(SEEHist['error']))
-        SEERateError = np.sqrt(SEERateError)
+        SEERateError = np.square(SEEHist['error'])
+        SEERateError = np.sqrt(np.sum(SEERateError))
+
         SEERateU = ufloat(SEERate, SEERateError)
+        if SEERate != 0:
+            RelativeError = SEERateError / SEERate
+        else:
+            RelativeError = np.nan
 
         # Calculate number of entries contributing to the total SEE rate
-        # Only entries with LET > 0.4 MeV cm2 mg-1 are considered
-        EntriesContributingToSEE = np.sum(LETHist['entries'][LETHist['mean'] > L0])
+        EntriesContributingToSEE = 0  # Initialize counter
+        for i in range(len(SEEHist['value'])):
+            if SEEHist['value'][i] > 0:
+                EntriesContributingToSEE += SEEHist['entries'][i]
 
-        #print("The total SEE rate is:", SEERateU, " s-1 bit-1 ")
+        print("The total SEE rate is:", SEERateU, " s-1 bit-1 with ", int(EntriesContributingToSEE), " entries contributing to the SEE rate.")
         #print("or:", SEERateU * 8e+9, " s-1 Gbyte-1 ")
 
         # Write the results to the CSV file
-        List = (Folder, SubFolder, CrossectionName, SEERate, SEERateError, EntriesContributingToSEE)
+        List = (Folder, SubFolder, CrossectionName, SEERate, SEERateError, RelativeError, EntriesContributingToSEE)
 
         String = ','.join(map(str, List))
         #print(String)

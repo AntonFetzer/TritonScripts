@@ -39,27 +39,25 @@ SAP_PeakColor = 'C9' # Turquoise
 # They agree, therefore do not need to be plotted again
 
 ## Read in GPS Macro
-ExpectedInt = "/l/triton_work/Spectra/Carrington/SEP-Final/Carrington-SEP-Expected-Int-With0.mac"
-ExpectedIntWith0 = "/l/triton_work/Spectra/Carrington/SEP-Final/Carrington-SEP-Expected-Int-With0.mac"
-Minus2SigmaIntWith0 = "/l/triton_work/Spectra/Carrington/SEP-Final/Carrington-SEP-Minus2Sigma-Int-With0.mac"
-Plus2SigmaIntWith0 = "/l/triton_work/Spectra/Carrington/SEP-Final/Carrington-SEP-Plus2Sigma-Int-With0.mac"
+ExpectedInt = "/l/triton_work/Spectra/Carrington/SEP-Final/Carrington-SEP-Expected-Int.mac"
+Minus2SigmaInt = "/l/triton_work/Spectra/Carrington/SEP-Final/Carrington-SEP-Minus2Sigma-Int.mac"
+Plus2SigmaInt = "/l/triton_work/Spectra/Carrington/SEP-Final/Carrington-SEP-Plus2Sigma-Int.mac"
 
 ExpectedInt = readGPSMacro(ExpectedInt)
-ExpectedIntWith0 = readGPSMacro(ExpectedIntWith0)
-Minus2SigmaIntWith0 = readGPSMacro(Minus2SigmaIntWith0)
-Plus2SigmaIntWith0 = readGPSMacro(Plus2SigmaIntWith0)
+Minus2SigmaInt = readGPSMacro(Minus2SigmaInt)
+Plus2SigmaInt = readGPSMacro(Plus2SigmaInt)
 
 Energies = ExpectedInt['Energy']
 ExpectedInt = ExpectedInt['Flux']
-Minus = Minus2SigmaIntWith0['Flux']
-Plus = Plus2SigmaIntWith0['Flux']
+Minus = Minus2SigmaInt['Flux']
+Plus = Plus2SigmaInt['Flux']
 
 
 plt.figure(1, figsize=(8, 8))
 
 plt.fill_between(Energies, Plus, ExpectedInt, color=PlusColor, alpha=0.5, label="Carrington SEP EVT +2 Sigma Peak Flux")
 #plt.plot(Energies, Plus, '.-', label="Carrington SEP EVT +2 Sigma", color=PlusColor)
-#plt.plot(Energies, ExpectedInt, '-', color=Expected, linewidth=2, markersize=10)
+plt.plot(Energies, ExpectedInt, '-', color=Expected, linewidth=2, markersize=10)
 # Plot the expected integral flux as error bars with the plus and minus 2 sigma.
 plt.errorbar(Energies, ExpectedInt, yerr=[ExpectedInt - Minus, Plus - ExpectedInt], fmt=' ', label="Carrington SEP EVT Expected Peak Flux", color=Expected, linewidth=2, markersize=10, capsize=5, capthick=2, zorder=2)
 
@@ -193,14 +191,14 @@ plt.xlim(8, 250)
 plt.ylim(1, 2e6)
 plt.yscale("log")
 plt.xscale("log")
-plt.title("Carrington Solar Proton Flux Comparison")
+plt.title("Proton Spectra Comparison")
 plt.xlabel("Kinetic energy [MeV]")
 plt.ylabel("Integral Flux [cm-2 s-1]")
 plt.grid(which='both')
 
 # Adjust legend to ensure proper order
 handles, labels = plt.gca().get_legend_handles_labels()
-order = [0, 9, 1, 5, 6, 7, 2, 3, 4, 8]  # Adjust this list to reorder as needed
+order = [0, 9, 1, 7, 6, 5, 3, 4, 2, 8]  # Adjust this list to reorder as needed
 plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='lower right')
 
 plt.savefig("/l/triton_work/Spectra/Carrington/SEP-Final/ProtonSpectrumComparison.pdf", format='pdf', bbox_inches="tight")

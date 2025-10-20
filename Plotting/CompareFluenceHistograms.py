@@ -13,20 +13,22 @@ Folders = [
     # "CarringtonElectronINTEGRALPowTabelated/Res",
 
     # "Carrington-SEP-Expected-Diff/Res",
-    # "Carrington-SEP-Expected-Int/Res",
+    "Carrington-SEP-Expected-Int/Res",
     "Carrington-SEP-Expected-Int-With0/Res",
-    # "Carrington-SEP-Plus2Sigma-Int-With0/Res",
-    # "Carrington-SEP-Minus2Sigma-Int-With0/Res",
+    "Carrington-SEP-Plus2Sigma-Int-With0/Res",
+    "Carrington-SEP-Plus2Sigma-Int/Res",
+    "Carrington-SEP-Minus2Sigma-Int-With0/Res",
+    "Carrington-SEP-Minus2Sigma-Int/Res",
 
     # "GEO-cosmic-proton/Res",
     # "GEO-electron/Res",
     # "GEO-solar-proton/Res",
-    "GEO-trapped-proton/Res",
+    # "GEO-trapped-proton/Res",
 
     # "MEO-cosmic-proton/Res",
     # "MEO-electron/Res",
     # "MEO-solar-proton/Res",
-    "MEO-trapped-proton/Res",
+    # "MEO-trapped-proton/Res",
 
     # "VAP-cosmic-proton/Res",
     # "VAP-electron/Res",
@@ -34,13 +36,14 @@ Folders = [
     # "VAP-solar-proton/Res",
     "VAP-trapped-proton/Res",
     "VAP-trapped-proton_Old/Res",
+    "VAP-trapped-proton-integral/Res",
 
     # "SolarProton-5minPeakFlux/Res",
 
     # "LEO-cosmic-proton/Res",
     # "LEO-electron/Res",
     # "LEO-solar-proton-NoZero/Res",
-    "LEO-trapped-proton/Res",
+    # "LEO-trapped-proton/Res",
 ]
 
 # List to store the histograms

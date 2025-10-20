@@ -5,65 +5,47 @@ import os
 
 def mergeHistograms(list_of_histograms):
     """
-    Merges a list of GRAS histograms into a single total histogram.
-    The histograms in the list must have the same collumns 'lower', 'upper', 'mean', 'value', 'error', 'entries'.
-    The bins must allign.
-
+    Merges a list of GRAS histograms using proper error propagation.
+    
     Args:
-        list_of_histograms (list): A list of dictionaries containing the histograms to be merged.
-
+        list_of_histograms (list): List of histograms with aligned bins
+    
     Returns:
-        dict: A dictionary containing the merged histogram.
-
-    Raises:
-        SystemExit: If the list of histograms is empty.
-        SystemExit: If the histogram does not have the expected collumns.
-        SystemExit: If the histogram bins in a histogram do not match the bins in the first file.
+        dict: Merged histogram with proper error propagation
     """
-
     if not list_of_histograms:
         sys.exit("ERROR !!! No histograms found")
 
-    # NumHistograms = len(list_of_histograms)
-    # print("Number of Histograms:", NumHistograms)
+    # Validate first histogram has required keys
+    required_keys = ['lower', 'upper', 'mean', 'value', 'error', 'entries']
+    if not all(key in list_of_histograms[0] for key in required_keys):
+        sys.exit("ERROR !!! Missing required histogram keys")
 
-    # Initialize TotalHistogram for accumulation with zeros or appropriate structures
-    # Since we don't have data yet, we'll initialize with None and set appropriately on first read
-    TotalHistogram = {'lower': None, 'upper': None, 'mean': None, 'value': None, 'error': None, 'entries': None}
+    TotalHistogram = {
+        'lower': list_of_histograms[0]['lower'].copy(),
+        'upper': list_of_histograms[0]['upper'].copy(),
+        'value': np.zeros_like(list_of_histograms[0]['value']),
+        'mean': np.zeros_like(list_of_histograms[0]['mean']), 
+        'entries': np.zeros_like(list_of_histograms[0]['entries']),
+        'error': np.zeros_like(list_of_histograms[0]['error'])
+    }
 
-    # List to count how often a bin contained non-zero 'mean' values
-    MeanCountList = None
-    
-    for Histogram in list_of_histograms:
-        # Initialize TotalHistogram bin edges with the data of the first histogram in the list
-        if TotalHistogram['lower'] is None:
+    # First pass: accumulate weighted sums
+    for hist in list_of_histograms:
+        if not np.allclose(TotalHistogram['lower'], hist['lower']) or \
+           not np.allclose(TotalHistogram['upper'], hist['upper']):
+            sys.exit("ERROR !!! Mismatched histogram bins")
             
-            TotalHistogram["lower"] = Histogram["lower"]
-            TotalHistogram["upper"] = Histogram["upper"]
+        entries = hist['entries']
+        TotalHistogram['entries'] += entries
+        TotalHistogram['value'] += hist['value'] * entries  
+        TotalHistogram['mean'] += hist['mean'] * entries
+        TotalHistogram['error'] += (hist['error'] * entries) ** 2
 
-            for key in ["mean", "value", "error", "entries"]:
-                TotalHistogram[key] = np.zeros_like(Histogram[key], dtype=float)
-            # Initialize MeanCountList with zero ints
-            MeanCountList = np.zeros_like(Histogram['mean'], dtype=int)
-        else:
-            # Check if the histogram bins are aligned
-            if not np.allclose(TotalHistogram['lower'], Histogram['lower']) or not np.allclose(TotalHistogram['upper'], Histogram['upper']):
-                # Exit program with error message
-                sys.exit(f"ERROR !!! Histogram bins in a histogram do not match the bins in the first histogram")
-
-        # Accumulate the data
-        TotalHistogram['value'] += Histogram['value'] * Histogram['entries']
-        TotalHistogram['mean'] += Histogram['mean'] * Histogram['entries']
-        TotalHistogram['entries'] += Histogram['entries']
-        TotalHistogram['error'] += np.square(Histogram['error'] * Histogram['entries'])
-
-
-    # Normalize the data and handle zero entries
-    non_zero_entries = TotalHistogram['entries'] > 0
-    TotalHistogram['value'][non_zero_entries] /= TotalHistogram['entries'][non_zero_entries]
-    TotalHistogram['mean'][non_zero_entries] /= TotalHistogram['entries'][non_zero_entries]
-    
-    # Calculate the error correctly considering the weighted contributions
-    TotalHistogram['error'][non_zero_entries] = np.sqrt(TotalHistogram['error'][non_zero_entries]) / TotalHistogram['entries'][non_zero_entries]
+    # Second pass: normalize
+    mask = TotalHistogram['entries'] > 0
+    TotalHistogram['value'][mask] /= TotalHistogram['entries'][mask]
+    TotalHistogram['mean'][mask] /= TotalHistogram['entries'][mask]
+    TotalHistogram['error'][mask] = np.sqrt(TotalHistogram['error'][mask]) / TotalHistogram['entries'][mask]
 
     return TotalHistogram

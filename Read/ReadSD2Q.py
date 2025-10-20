@@ -46,7 +46,7 @@ def readSDQ2(fileName):
 
 
 if __name__ == "__main__":
-    Data = readSDQ2("/l/triton_work/Spectra/FS1/SHIELDOSE-2Q/spenvis_sqo.txt")
+    Data = readSDQ2("/l/triton_work/Spectra/Carrington/VAP/spenvis_sqo.txt")
 
     print(np.shape(Data))
 

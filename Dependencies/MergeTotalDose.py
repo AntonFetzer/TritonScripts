@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from GRAS.Dependencies.TotalDose import totalDose
+from Dependencies.TotalDose import totalDose
 
 def mergeTotalDose(List_of_Dose_Dicts: list) -> dict:
     """ 

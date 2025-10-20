@@ -103,7 +103,7 @@ def totalDose(path):
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/1Tile/GRAS-SPENVIS validation/TID/"
+    Path = "/l/triton_work/Shielding_Curves/Carrington/"
 
     # Find all subdirectories in the given path that contain a "Res" subfolder
     # and calculate the total dose for each of them
@@ -111,35 +111,36 @@ if __name__ == "__main__":
         if 'Res' in dirs:
             Path = os.path.join(root, 'Res/')
             print("Calculating total dose for path:", Path)
+
+            # Extract folder name from root
+            folder_name = os.path.basename(root)
+            print("Folder name:", folder_name)
             
             # Calculate the total dose for the given path
             Results = totalDose(Path)
 
             NumTiles = len(Results['dose'])
 
-            # Multiply dose and error with the number of seconds per hour to get the dose in kRad per hour
-            # Results['dose'] *= 60 * 60
-            # Results['error'] *= 60 * 60
-
-            # Multiply dose and error with the number of seconds in a month to get the dose in kRad per month
-            # Results['dose'] *= 60 * 60 * 24 * 30
-            # Results['error'] *= 60 * 60 * 24 * 30
+            if 'Carrington' in folder_name or 'Peak' in folder_name:
+                # Multiply dose and error with the number of seconds in 1.23 days to get the event dose
+                Results['dose'] *= 60 * 60 * 24 * 1.23
+                Results['error'] *= 60 * 60 * 24 * 1.23
 
             # Plot the dose with error bars
             plt.figure(0)
             plt.errorbar(np.arange(NumTiles), Results['dose'], yerr=Results['error'], fmt=' ', capsize=5, elinewidth=1, capthick=1, label='Dose')
             # Add horizontal line at 1 kRad
             plt.axhline(y=1, color='r', linestyle='--', label='1 kRad')
-            plt.title('Dose per tile')
+            plt.title('Dose per tile ' + folder_name)
             plt.xlabel('Tile number')
             plt.ylabel('Dose [kRad]')
             plt.yscale('log')
             plt.grid(which='both')
             plt.legend()
 
-            # plt.savefig(Path + "..//Dose.pdf", format='pdf', bbox_inches="tight")
+            plt.savefig(Path + "../Dose_" + folder_name + ".pdf", format='pdf', bbox_inches="tight")
 
-            '''
+            
             # Plot the relative error
             plt.figure(1)
             plt.plot(100 * Results['error'] / Results['dose'], '.', label='Relative Error')
@@ -151,7 +152,7 @@ if __name__ == "__main__":
             plt.grid(which='both')
             plt.legend()
 
-            # plt.savefig(Path + "../Error.pdf", format='pdf', bbox_inches="tight")
+            plt.savefig(Path + "../Error_" + folder_name + ".pdf", format='pdf', bbox_inches="tight")
 
             # Plot the number of non-zero entries
             plt.figure(2)
@@ -166,22 +167,7 @@ if __name__ == "__main__":
             plt.grid(axis='y', which='major')
             plt.legend()
 
-            # plt.savefig(Path + "../NonZeros.pdf", format='pdf', bbox_inches="tight")
-            '''
+            plt.savefig(Path + "../NonZeros_" + folder_name + ".pdf", format='pdf', bbox_inches="tight")
+            
             # plt.show()
-            # plt.close('all')
-
-            Fluence = 1  # protons per cm^2
-
-            # Multiply all doses by Fluence to scale to proton beam fluence
-            Results['dose'] *= Fluence
-            Results['error'] *= Fluence
-
-            # Print Results as comma seperated table with collumns for dose and error
-            print("\nTile, Dose, Error")
-            for i in range(NumTiles):
-                print(i+1, Results['dose'][i], Results['error'][i], sep=", ")
-
-
-
-
+            plt.close('all')
