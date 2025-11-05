@@ -103,7 +103,7 @@ def totalDose(path):
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/Shielding_Curves/Carrington/"
+    Path = "/l/triton_work/RadEx/"
 
     # Find all subdirectories in the given path that contain a "Res" subfolder
     # and calculate the total dose for each of them
@@ -121,10 +121,17 @@ if __name__ == "__main__":
 
             NumTiles = len(Results['dose'])
 
-            if 'Carrington' in folder_name or 'Peak' in folder_name:
-                # Multiply dose and error with the number of seconds in 1.23 days to get the event dose
-                Results['dose'] *= 60 * 60 * 24 * 1.23
-                Results['error'] *= 60 * 60 * 24 * 1.23
+            if 'Electron' in folder_name:
+                # Assume fluence of 1e12 electrons/cm2
+                Results['dose'] *= 1e12
+                Results['error'] *= 1e12
+
+
+            # Print the dose results in csv format
+            print(f"Tile, Dose [kRad], Error [kRad], Non-Zero Entries")
+            for i in range(NumTiles):
+                    print(i, Results['dose'][i], Results['error'][i], Results['non-zeros'][i], sep=',')
+
 
             # Plot the dose with error bars
             plt.figure(0)

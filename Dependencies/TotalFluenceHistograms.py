@@ -22,13 +22,15 @@ def totalFluenceHistos(path):
 
     # Get list of all csv files in Path
     Files = [f for f in os.listdir(path) if "Fluence" in f and f.endswith(".csv")]
-
+    
+    if not Files:
+        print("ERROR !!! No files found")
+        # Wait for user input before exiting
+        input("Press Enter to continue")
+        return None
+    
     NumFiles = len(Files)
     print("Number of Files:", NumFiles)
-
-    if not Files:
-        sys.exit("ERROR !!! No files found")
-
 
     # List of known histograms in the expected order
     histo_names = ['Electrons', 'Protons']
@@ -51,7 +53,7 @@ def totalFluenceHistos(path):
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/Fluence_Histograms/Carrington/CarringtonElectronDiffPow/Res/"
+    Path = "/l/triton_work/Fluence_Histograms/CarringtonShielded/Carrington-SEP-Expected-Int/1mm/Res/"
     TotalFluenceHists = totalFluenceHistos(Path)
 
     # Construct the path for the 'Plot' directory

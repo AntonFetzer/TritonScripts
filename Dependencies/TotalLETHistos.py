@@ -1,12 +1,9 @@
-import sys
-import os
-# Add parent directory to sys.path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 import numpy as np
 import matplotlib.pyplot as plt
 from Read.ReadLETHistos import readLETHistos
 from Dependencies.MergeHistograms import mergeHistograms
+import sys
+import os
 
 
 
@@ -54,9 +51,7 @@ def totalLETHistos(path):
 
 if __name__ == "__main__":
 
-    # Only works if all input files have the same number of particles !!!!!
     path = "/l/triton_work/LET_Histograms/Carrington/"
-    # path = "/scratch/work/fetzera1/LET_Histograms/Carrington/"
 
     # Find all subdirectories in the given path that contain a "Res" subfolder
     # and calculate the total LET histos for each of them
