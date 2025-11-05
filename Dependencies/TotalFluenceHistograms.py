@@ -32,38 +32,31 @@ def totalFluenceHistos(path):
     NumFiles = len(Files)
     print("Number of Files:", NumFiles)
 
-    # List of known histograms in the expected order
-    histo_names = ['Electrons', 'Protons']
-
-    # Initialise the total histograms dict
-    # Each histogram type initialised with an empty list, to store the actual histograms
-    TotalFluenceHistos = {name: [] for name in histo_names}
+    # Initialise the histogram lists
+    ElectronHistos = []
+    ProtonHistos = []
 
     for File in Files:
-        FluenceHistos = readFluenceHistos(os.path.join(path, File))
-        
-        for name in histo_names:
-            TotalFluenceHistos[name].append(FluenceHistos[name])
+        ElectronHist, ProtonHist = readFluenceHistos(os.path.join(path, File))
+        ElectronHistos.append(ElectronHist)
+        ProtonHistos.append(ProtonHist)
 
     # Merge the histograms
-    for name in histo_names:
-        TotalFluenceHistos[name] = mergeHistograms(TotalFluenceHistos[name])
+    TotalElectronHistos = mergeHistograms(ElectronHistos)
+    TotalProtonHistos = mergeHistograms(ProtonHistos)
 
-    return TotalFluenceHistos
+    return TotalElectronHistos, TotalProtonHistos
 
 
 if __name__ == "__main__":
     Path = "/l/triton_work/Fluence_Histograms/CarringtonShielded/Carrington-SEP-Expected-Int/1mm/Res/"
-    TotalFluenceHists = totalFluenceHistos(Path)
+    ElectronFluence, ProtonFluence = totalFluenceHistos(Path)
 
     # Construct the path for the 'Plot' directory
     PlotDir = os.path.join(os.path.dirname(Path), '../')
     
     # Set the grid to be behind the plot
     plt.rc('axes', axisbelow=True)
-
-    # Plot the electron histogram
-    ElectronFluence = TotalFluenceHists['Electrons']
 
     if ElectronFluence['value'].sum() != 0:
 
@@ -78,9 +71,6 @@ if __name__ == "__main__":
 
         print("Saving Electron Histogram: ", os.path.join(PlotDir, 'Electron Fluence Spectrum.pdf'))
         plt.savefig(os.path.join(PlotDir, 'Electron Fluence Spectrum.pdf'), format='pdf', bbox_inches='tight')
-
-    # Plot the proton histogram
-    ProtonFluence = TotalFluenceHists['Protons']
 
     if ProtonFluence['value'].sum() != 0:
 

@@ -1,0 +1,6 @@
+"python.analysis.diagnosticSeverityOverrides": {
+    "reportArgumentType": "none",
+    "reportCallIssue": "none",
+    "reportGeneralTypeIssues": "none"
+},
+"python.analysis.typeCheckingMode": "basic"

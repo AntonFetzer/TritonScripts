@@ -68,8 +68,8 @@ for key in Dict:
 plt.figure(0, figsize=(5, 7))
 ########################### Carrington SEP ###################################
 
-plt.errorbar(Dict['Carrington-SEP-Expected-Int']['Shielding'], Dict['Carrington-SEP-Expected-Int']['SEE_Rate'], 
-             yerr=Dict['Carrington-SEP-Expected-Int']['SEE_Error'], capsize=5, elinewidth=1, capthick=2, label="Carrington SEP EVT SEU Rate Estimate", color='blue')
+# plt.errorbar(Dict['Carrington-SEP-Expected-Int']['Shielding'], Dict['Carrington-SEP-Expected-Int']['SEE_Rate'], 
+#              yerr=Dict['Carrington-SEP-Expected-Int']['SEE_Error'], capsize=5, elinewidth=1, capthick=2, label="Carrington SEP EVT SEU Rate Estimate", color='blue')
 
 # plt.fill_between(Dict['Carrington-SEP-Expected-Int']['Shielding'], 
 #                  Dict['Carrington-SEP-Expected-Int']['SEE_Rate'], 
@@ -80,10 +80,10 @@ plt.errorbar(Dict['Carrington-SEP-Expected-Int']['Shielding'], Dict['Carrington-
 
 
 # Other EVT plots. Do not plot for now.
-plt.errorbar(Dict['Carrington-SEP-Plus2Sigma-Int']['Shielding'], Dict['Carrington-SEP-Plus2Sigma-Int']['SEE_Rate'],
-             yerr=Dict['Carrington-SEP-Plus2Sigma-Int']['SEE_Error'], capsize=5, elinewidth=1, capthick=2, label="Carrington SEP EVT +2 Sigma", color='C1')
-plt.errorbar(Dict['Carrington-SEP-Minus2Sigma-Int']['Shielding'], Dict['Carrington-SEP-Minus2Sigma-Int']['SEE_Rate'],
-             yerr=Dict['Carrington-SEP-Minus2Sigma-Int']['SEE_Error'], capsize=5, elinewidth=1, capthick=2, label="Carrington SEP EVT -2 Sigma", color='C2')
+# plt.errorbar(Dict['Carrington-SEP-Plus2Sigma-Int']['Shielding'], Dict['Carrington-SEP-Plus2Sigma-Int']['SEE_Rate'],
+#              yerr=Dict['Carrington-SEP-Plus2Sigma-Int']['SEE_Error'], capsize=5, elinewidth=1, capthick=2, label="Carrington SEP EVT +2 Sigma", color='C1')
+# plt.errorbar(Dict['Carrington-SEP-Minus2Sigma-Int']['Shielding'], Dict['Carrington-SEP-Minus2Sigma-Int']['SEE_Rate'],
+#              yerr=Dict['Carrington-SEP-Minus2Sigma-Int']['SEE_Error'], capsize=5, elinewidth=1, capthick=2, label="Carrington SEP EVT -2 Sigma", color='C2')
 
 # Carrington Electrons
 # plt.errorbar(Dict['CarringtonElectronINTEGRALPowTabelated']['Shielding'], Dict['CarringtonElectronINTEGRALPowTabelated']['SEE_Rate'],

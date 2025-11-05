@@ -16,10 +16,37 @@ def mergeHistograms(list_of_histograms):
     if not list_of_histograms:
         sys.exit("ERROR !!! No histograms found")
 
-    # Validate first histogram has required keys
+    # Validate that all histograms have the required keys
     required_keys = ['lower', 'upper', 'mean', 'value', 'error', 'entries']
-    if not all(key in list_of_histograms[0] for key in required_keys):
-        sys.exit("ERROR !!! Missing required histogram keys")
+    for hist in list_of_histograms:
+        if not all(key in hist for key in required_keys):
+            sys.exit("ERROR !!! Missing required histogram keys")
+
+    # Check that all histograms have the same binning
+    for hist in list_of_histograms[1:]:
+        if not np.allclose(list_of_histograms[0]['lower'], hist['lower']) or \
+           not np.allclose(list_of_histograms[0]['upper'], hist['upper']):
+            sys.exit("ERROR !!! Mismatched histogram bins")
+
+    # Check that all histograms have the same length
+    bin_count = len(list_of_histograms[0]['lower'])
+    for hist in list_of_histograms[1:]:
+        if len(hist['lower']) != bin_count:
+            sys.exit("ERROR !!! Mismatched histogram lengths")
+
+    # Check that all histograms have the correct data types
+    # Floats for 'bins', 'value', 'error', 'mean' and integers for 'entries'
+    for hist in list_of_histograms:
+        for key in ['lower', 'upper', 'mean', 'value', 'error']:
+            if not np.issubdtype(np.array(hist[key]).dtype, np.floating):
+                sys.exit(f"ERROR !!! Histogram key '{key}' must be of float type")
+        if not np.issubdtype(np.array(hist['entries']).dtype, np.integer):
+            sys.exit("ERROR !!! Histogram key 'entries' must be of integer type")
+
+    # Check that all histograms have non zero total value
+    for hist in list_of_histograms:
+        if np.sum(hist['value']) == 0:
+            sys.exit("ERROR !!! One of the histograms has zero total value")
 
     TotalHistogram = {
         'lower': list_of_histograms[0]['lower'].copy(),

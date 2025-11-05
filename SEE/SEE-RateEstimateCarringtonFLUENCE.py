@@ -83,39 +83,24 @@ for F, Folder in enumerate(FolderList):
         
         path = Directory + Folder + "/" + SubFolder + "/Res/"
         ## ----------------------------------- Fluence Read-in -----------------------------------------------------------
-        FluenceHist = totalFluenceHistos(path)
-
-        # Check if the Fluence histogram is None (no files found)
-        if FluenceHist is None:
-            print("No Fluence histogram found in", path, "-> skipping")
-            continue
-
-        FluenceHist = FluenceHist['Protons']
-
-        # Ensure the histogram arrays returned have consistent binning/length.
-        # The script requires 'lower','upper','mean','value','error','entries' to be the same length.
-        required_keys = ['lower', 'upper', 'mean', 'value', 'error', 'entries']
-        lengths = [len(FluenceHist[k]) for k in required_keys]
-        if not all(l == lengths[0] for l in lengths):
-            print("Inconsistent histogram lengths in", path, "-> skipping")
-            continue
+        ElectronHist, ProtonHist = totalFluenceHistos(path)
 
         # Normalise from 11 year fluence to flux
         if "-solar-proton" in Folder or "-trapped-proton" in Folder or "-cosmic-proton" in Folder:
             NormalisationFactor = 4015 * 24 * 3600  # seconds in 11 years
-            FluenceHist['value'] = FluenceHist['value'] / NormalisationFactor
-            FluenceHist['error'] = FluenceHist['error'] / NormalisationFactor
+            ProtonHist['value'] = ProtonHist['value'] / NormalisationFactor
+            ProtonHist['error'] = ProtonHist['error'] / NormalisationFactor
 
-        NumberEntriesFluenceHist = np.sum(FluenceHist['entries'])
-        TotalFluence = np.sum(FluenceHist['value'] * FluenceHist['mean'])
-        TotalFluenceError = np.square(FluenceHist['error'] * FluenceHist['mean'])
+        NumberEntriesProtonHist = np.sum(ProtonHist['entries'])
+        TotalFluence = np.sum(ProtonHist['value'] * ProtonHist['mean'])
+        TotalFluenceError = np.square(ProtonHist['error'] * ProtonHist['mean'])
         TotalFluenceError = np.sqrt(np.sum(TotalFluenceError))
         TotalFluenceU = ufloat(TotalFluence, TotalFluenceError)
 
         ### Fluence Histogram ###############
         fig, ax1 = plt.subplots(1)
-        plt.bar(FluenceHist['lower'], FluenceHist['value'], width=FluenceHist['upper'] - FluenceHist['lower'], align='edge', alpha=0.3)
-        plt.errorbar(FluenceHist['mean'], FluenceHist['value'], FluenceHist['error'], fmt=' ', capsize=5, elinewidth=1,
+        plt.bar(ProtonHist['lower'], ProtonHist['value'], width=ProtonHist['upper'] - ProtonHist['lower'], align='edge', alpha=0.3) # pyright: ignore[reportCallIssue, reportArgumentType]
+        plt.errorbar(ProtonHist['mean'], ProtonHist['value'], ProtonHist['error'], fmt=' ', capsize=5, elinewidth=1, # pyright: ignore[reportArgumentType] # pyright: ignore[reportCallIssue] # pyright: ignore[reportCallIssue] # type: ignore
                      capthick=1, label="Fluence Histogram")
         plt.plot([], [], label="SEU Cross Section", color='C1')
         plt.yscale("log")
@@ -128,7 +113,7 @@ for F, Folder in enumerate(FolderList):
         ax1.tick_params(axis='y', colors='C0')
 
         ax2 = ax1.twinx()
-        plt.plot(FluenceHist['lower'], f(FluenceHist['lower']), color='C1')
+        plt.plot(ProtonHist['lower'], f(ProtonHist['lower']), color='C1')
         ax2.set_ylabel(CrossectionName + " Cross Section [cm2 bit-1]", color='C1')
         plt.yscale("log")
         ax2.tick_params(axis='y', colors='C1')
@@ -140,10 +125,10 @@ for F, Folder in enumerate(FolderList):
 
         ### SEE rate ###############
 
-        SEEHist = FluenceHist
+        SEEHist = ProtonHist
         # Scale the value and error by the cross section fuction
-        SEEHist['value'] = FluenceHist['value'] * f(FluenceHist['mean'])
-        SEEHist['error'] = FluenceHist['error'] * f(FluenceHist['mean'])
+        SEEHist['value'] = ProtonHist['value'] * f(ProtonHist['mean'])
+        SEEHist['error'] = ProtonHist['error'] * f(ProtonHist['mean'])
 
         ################## Calculating total SEE Rate #####################################
 
@@ -165,7 +150,6 @@ for F, Folder in enumerate(FolderList):
                 EntriesContributingToSEE += SEEHist['entries'][i]
 
         print("The total SEE rate is:", SEERateU, " s-1 bit-1 with ", int(EntriesContributingToSEE), " entries contributing to the SEE rate.")
-        #print("or:", SEERateU * 8e+9, " s-1 Gbyte-1 ")
 
         # Write the results to the CSV file
         List = (Folder, SubFolder, CrossectionName, SEERate, SEERateError, RelativeError, EntriesContributingToSEE)
@@ -193,7 +177,7 @@ for F, Folder in enumerate(FolderList):
         ax1.tick_params(axis='y', colors='C0')
 
         ax2 = ax1.twinx()
-        plt.plot(FluenceHist['lower'], f(FluenceHist['lower']), color='C1')
+        plt.plot(ProtonHist['lower'], f(ProtonHist['lower']), color='C1')
         ax2.set_ylabel(CrossectionName + " Cross Section [cm2 bit-1]", color='C1')
         plt.yscale("log")
         ax2.tick_params(axis='y', colors='C1')

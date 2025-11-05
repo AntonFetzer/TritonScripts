@@ -1,10 +1,19 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
-from GRAS.GPT4Experiments.MergeBins import merge_bins
 
 
 def readDoseHistos(file):
+    """
+    Read the dose histograms from a .csv file and store them in a dictionary
+    Args:
+        file: Path to the .csv file containing the dose histograms
+    Returns:
+        Tuple of two dictionaries:
+            - DoseHistDict: Dictionary containing the dose histogram
+            - PrimaryHistDict: Dictionary containing the primary energy histogram
+    """
+    
     DoseHistDict = {
         'lower': [],    #   rad/s
         'upper': [],    #   rad/s
