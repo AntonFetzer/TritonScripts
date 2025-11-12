@@ -21,7 +21,7 @@ GEOColor = 'C7'   # Grey
 Dict = {}
 
 # Read the CSV file
-with open('/l/triton_work/LET_Histograms/Carrington/SEERatesnanoXplore.csv', mode='r') as file:
+with open('/l/triton_work/Fluence_Histograms/CarringtonShielded/SEERatesnanoXplorePROTON.csv', mode='r') as file:
     csv_reader = csv.DictReader(file)
     CrossectionName = None
     
@@ -54,6 +54,9 @@ for key in Dict:
     for inner_key in Dict[key]:
         Dict[key][inner_key] = np.array(Dict[key][inner_key])
 
+
+#,linestyle='', capsize=1.5, capthick=2, elinewidth=1
+
 plt.figure(0, figsize=(5, 7))
 ########################### Carrington SEP ###################################
 
@@ -70,6 +73,7 @@ plt.fill_between(Dict['Carrington-SEP-Expected-Int']['Shielding'],
                  Dict['Carrington-SEP-Minus2Sigma-Int']['SEE_Rate']
                  , color=MinusColor, alpha=0.5, label="EVT peak SEP flux -2\u03C3")
 
+
 # Other EVT plots. Do not plot for now.
 # plt.errorbar(Dict['Carrington-SEP-Plus2Sigma-Int']['Shielding'], Dict['Carrington-SEP-Plus2Sigma-Int']['SEE_Rate'],
 #             yerr=Dict['Carrington-SEP-Plus2Sigma-Int']['SEE_Error'], label="Carrington SEP EVT +2\u03C3"
@@ -78,65 +82,49 @@ plt.fill_between(Dict['Carrington-SEP-Expected-Int']['Shielding'],
 #             yerr=Dict['Carrington-SEP-Minus2Sigma-Int']['SEE_Error'], label="Carrington SEP EVT -2\u03C3"
 #             , color=MinusColor, **default_errorbar_style)
 
-# Carrington Electrons
-# plt.errorbar(Dict['CarringtonElectronINTEGRALPowTabelated']['Shielding'], Dict['CarringtonElectronINTEGRALPowTabelated']['SEE_Rate'],
-                # yerr=Dict['CarringtonElectronINTEGRALPowTabelated']['SEE_Error'], capsize=5, elinewidth=1, capthick=2, label="Carrington Electron SEU Rate", color='C3')
-
-# Plot the GEO Solar Proton 5min Peak flux
+# Plot the GEO Solar Proton 5min Peak Flux
 plt.errorbar(Dict['GEO-SolarProton-5minPeakFlux']['Shielding'], Dict['GEO-SolarProton-5minPeakFlux']['SEE_Rate'],
               yerr=Dict['GEO-SolarProton-5minPeakFlux']['SEE_Error'], label="CREME96 GEO peak 5 min flux"
               , color=GEOColor, linestyle=':', **default_errorbar_style)
 
 
 ########################### LEO ###################################
-# plt.errorbar(Dict['LEO-electron']['Shielding'], Dict['LEO-electron']['SEE_Rate'],
-#               yerr=Dict['LEO-electron']['SEE_Error'], label="LEO Electron", capsize=5, capthick=2)
 # plt.errorbar(Dict['LEO-trapped-proton']['Shielding'], Dict['LEO-trapped-proton']['SEE_Rate'], 
 #              yerr=Dict['LEO-trapped-proton']['SEE_Error'], label="LEO trapped proton", capsize=5, capthick=2)
 # plt.errorbar(Dict['LEO-solar-proton']['Shielding'], Dict['LEO-solar-proton']['SEE_Rate'], 
 #              yerr=Dict['LEO-solar-proton']['SEE_Error'], label="LEO Solar Proton", capsize=5, capthick=2)
 # plt.errorbar(Dict['LEO-cosmic-proton']['Shielding'], Dict['LEO-cosmic-proton']['SEE_Rate'], 
 #              yerr=Dict['LEO-cosmic-proton']['SEE_Error'], label="LEO Cosmic Proton", capsize=5, capthick=2)
-# plt.errorbar(Dict['LEO-cosmic-iron']['Shielding'], Dict['LEO-cosmic-iron']['SEE_Rate'], 
-#              yerr=Dict['LEO-cosmic-iron']['SEE_Error'], label="LEO Cosmic Iron", capsize=5, capthick=2)
 
 # Combine the LEO trapped proton, Solar Proton and Cosmic data
 Dict['LEO'] = {}
 Dict['LEO']['Shielding'] = Dict['LEO-solar-proton']['Shielding']
-Dict['LEO']['SEE_Rate'] = ( Dict['LEO-electron']['SEE_Rate'] 
-                           + Dict['LEO-trapped-proton']['SEE_Rate'] 
+
+Dict['LEO']['SEE_Rate'] = (  Dict['LEO-trapped-proton']['SEE_Rate'] 
                            + Dict['LEO-solar-proton']['SEE_Rate'] 
-                           + Dict['LEO-cosmic-proton']['SEE_Rate'] 
-                           + Dict['LEO-cosmic-iron']['SEE_Rate'] )
+                           + Dict['LEO-cosmic-proton']['SEE_Rate'] )
+
 Dict['LEO']['SEE_Error'] = ( np.sqrt(np.square(Dict['LEO-trapped-proton']['SEE_Error'])
                                      + np.square(Dict['LEO-solar-proton']['SEE_Error']) 
-                                     + np.square(Dict['LEO-cosmic-proton']['SEE_Error']) 
-                                     + np.square(Dict['LEO-cosmic-iron']['SEE_Error'])) )
+                                     + np.square(Dict['LEO-cosmic-proton']['SEE_Error']) ) )
 
 plt.errorbar(Dict['LEO']['Shielding'], Dict['LEO']['SEE_Rate'], yerr=Dict['LEO']['SEE_Error'],
                 label="LEO total average SEU rate", color=LEOColor, linestyle='-.', **default_errorbar_style)
 
 ########################### GEO ###################################
-# plt.errorbar(Dict['GEO-electron']['Shielding'], Dict['GEO-electron']['SEE_Rate'],
-#                 yerr=Dict['GEO-electron']['SEE_Error'], label="GEO Electron", capsize=5, capthick=2)
-# plt.errorbar(Dict['GEO-trapped-proton']['Shielding'], Dict['GEO-trapped-proton']['SEE_Rate'],
-#                 yerr=Dict['GEO-trapped-proton']['SEE_Error'], label="GEO trapped proton", capsize=5, capthick=2)
 # plt.errorbar(Dict['GEO-solar-proton']['Shielding'], Dict['GEO-solar-proton']['SEE_Rate'],
                 # yerr=Dict['GEO-solar-proton']['SEE_Error'], label="GEO Solar Proton", capsize=5, capthick=2)
 # plt.errorbar(Dict['GEO-cosmic-proton']['Shielding'], Dict['GEO-cosmic-proton']['SEE_Rate'],
 #                 yerr=Dict['GEO-cosmic-proton']['SEE_Error'], label="GEO Cosmic Proton", capsize=5, capthick=2)
-# plt.errorbar(Dict['GEO-cosmic-iron']['Shielding'], Dict['GEO-cosmic-iron']['SEE_Rate'],
-#                 yerr=Dict['GEO-cosmic-iron']['SEE_Error'], label="GEO Cosmic Iron", capsize=5, capthick=2)
-
 
 # # Combine the GEO Solar Proton, Cosmic and trapped proton data
 Dict['GEO'] = {}
 Dict['GEO']['Shielding'] = Dict['GEO-solar-proton']['Shielding']
-Dict['GEO']['SEE_Rate'] = ( Dict['GEO-solar-proton']['SEE_Rate'] 
-                           + Dict['GEO-cosmic-iron']['SEE_Rate'] 
+
+Dict['GEO']['SEE_Rate'] = ( Dict['GEO-solar-proton']['SEE_Rate']  
                            + Dict['GEO-cosmic-proton']['SEE_Rate'] )
-Dict['GEO']['SEE_Error'] = ( np.sqrt(np.square(Dict['GEO-solar-proton']['SEE_Error']) 
-                                     + np.square(Dict['GEO-cosmic-iron']['SEE_Error']) 
+
+Dict['GEO']['SEE_Error'] = ( np.sqrt(np.square(Dict['GEO-solar-proton']['SEE_Error'])  
                                      + np.square(Dict['GEO-cosmic-proton']['SEE_Error'])) )
 
 plt.errorbar(Dict['GEO']['Shielding'], Dict['GEO']['SEE_Rate'], yerr=Dict['GEO']['SEE_Error'],
@@ -144,29 +132,24 @@ plt.errorbar(Dict['GEO']['Shielding'], Dict['GEO']['SEE_Rate'], yerr=Dict['GEO']
 
 
 ########################### VAP ###################################
-# plt.errorbar(Dict['VAP-electron']['Shielding'], Dict['VAP-electron']['SEE_Rate'],
-#                 yerr=Dict['VAP-electron']['SEE_Error'], label="VAP Electron", capsize=5, capthick=2)
 # plt.errorbar(Dict['VAP-trapped-proton']['Shielding'], Dict['VAP-trapped-proton']['SEE_Rate'],
                 # yerr=Dict['VAP-trapped-proton']['SEE_Error'], label="VAP trapped proton", capsize=5, capthick=2)
 # plt.errorbar(Dict['VAP-solar-proton']['Shielding'], Dict['VAP-solar-proton']['SEE_Rate'],
 #                 yerr=Dict['VAP-solar-proton']['SEE_Error'], label="VAP Solar Proton", capsize=5, capthick=2)
 # plt.errorbar(Dict['VAP-cosmic-proton']['Shielding'], Dict['VAP-cosmic-proton']['SEE_Rate'],
 #                 yerr=Dict['VAP-cosmic-proton']['SEE_Error'], label="VAP Cosmic Proton", capsize=5, capthick=2)
-# plt.errorbar(Dict['VAP-cosmic-iron']['Shielding'], Dict['VAP-cosmic-iron']['SEE_Rate'],
-#                 yerr=Dict['VAP-cosmic-iron']['SEE_Error'], label="VAP Cosmic Iron", capsize=5, capthick=2)
 
 # Combine the VAP Solar Proton, Cosmic and trapped proton data
 Dict['VAP'] = {}
 Dict['VAP']['Shielding'] = Dict['VAP-solar-proton']['Shielding']
-Dict['VAP']['SEE_Rate'] = ( Dict['VAP-electron']['SEE_Rate'] 
-                           + Dict['VAP-trapped-proton']['SEE_Rate'] 
+
+Dict['VAP']['SEE_Rate'] = (+ Dict['VAP-trapped-proton']['SEE_Rate'] 
                            + Dict['VAP-solar-proton']['SEE_Rate'] 
-                           + Dict['VAP-cosmic-proton']['SEE_Rate'] 
-                           + Dict['VAP-cosmic-iron']['SEE_Rate'] )
+                           + Dict['VAP-cosmic-proton']['SEE_Rate'] )
+
 Dict['VAP']['SEE_Error'] = ( np.sqrt(np.square(Dict['VAP-trapped-proton']['SEE_Error'])
                                      + np.square(Dict['VAP-solar-proton']['SEE_Error']) 
-                                     + np.square(Dict['VAP-cosmic-proton']['SEE_Error']) 
-                                     + np.square(Dict['VAP-cosmic-iron']['SEE_Error'])) )
+                                     + np.square(Dict['VAP-cosmic-proton']['SEE_Error']) ) )
 
 plt.errorbar(Dict['VAP']['Shielding'], Dict['VAP']['SEE_Rate'], yerr=Dict['VAP']['SEE_Error']
                 , label="VAP total average SEU rate", color=VAPColor, linestyle='--', **default_errorbar_style)
@@ -178,7 +161,7 @@ plt.axhline(1/(8e+9 * 60 * 60 * 24), linestyle=':', label="1 upset per GByte per
 plt.ylim(1e-17, 2e-11)
 plt.yscale("log")
 plt.grid()
-plt.title("NanoXplore NG-Medium\nLET Cross Section SEU Rate Estimates")
+plt.title("NanoXplore NG-Medium\nProton Fluence Cross Section SEU Rate Estimates")
 
 plt.xlabel("Aluminium Shielding Thickness")
 plt.ylabel("Single Event Upset Rate [s-1 bit-1]")
@@ -202,5 +185,5 @@ order = [
 plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='lower right')
 # plt.legend()
 
-plt.savefig("/l/triton_work/LET_Histograms/Carrington/" + CrossectionName + " Rates.pdf", format='pdf', bbox_inches="tight")
+plt.savefig("/l/triton_work/Fluence_Histograms/CarringtonShielded/" + CrossectionName + " Rates.pdf", format='pdf', bbox_inches="tight")
 # plt.show()

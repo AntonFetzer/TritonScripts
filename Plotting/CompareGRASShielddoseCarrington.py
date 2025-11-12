@@ -4,6 +4,13 @@ from Read.ReadSD2Q import readSDQ2
 from Dependencies.TotalDose import totalDose
 from Dependencies.MergeTotalDose import mergeTotalDose
 
+Expected = 'blue' # Blue
+PlusColor = 'C1'  # Orange
+MinusColor = 'C2' # Green
+LEOColor = 'C8'   # Yellow
+MEOColor = 'C9'   # Turquoise
+VAPColor = 'C3'   # Red
+GEOColor = 'C7'   # Grey
 
 plt.figure(0, [4, 6])
 # Aluminium Shielding Thickness [mm]
@@ -32,10 +39,10 @@ Plus = totalDose(Path + "Carrington-SEP-Plus2Sigma-Int/Res")
 
 # Plot Carrington SEP fluxes
 plt.errorbar(x, Ex['dose'] * PerStoEvent, Ex['error'] * PerStoEvent, fmt='', label='Carrington SEP Event Dose', 
-             color=Expected, linestyle='', capsize=1.5, capthick=2)
-plt.fill_between(x, Plus['dose'] * PerStoEvent, Ex['dose'] * PerStoEvent, color='C1', alpha=0.5, 
+             color=Expected, linestyle='', capsize=1.5, capthick=2, elinewidth=1)
+plt.fill_between(x, Plus['dose'] * PerStoEvent, Ex['dose'] * PerStoEvent, color=PlusColor, alpha=0.5, 
                  label='Carrington SEP + 2\u03C3')
-plt.fill_between(x, Ex['dose'] * PerStoEvent, Minus['dose'] * PerStoEvent, color='C2', alpha=0.5, 
+plt.fill_between(x, Ex['dose'] * PerStoEvent, Minus['dose'] * PerStoEvent, color=MinusColor, alpha=0.5, 
                  label='Carrington SEP − 2\u03C3')
 
 # Alternative SEP spectra
@@ -50,11 +57,11 @@ plt.fill_between(x, Ex['dose'] * PerStoEvent, Minus['dose'] * PerStoEvent, color
 
 # MinusWith0 = totalDose(Path + "Carrington-SEP-Minus2Sigma-Int-With0/Res")
 # plt.errorbar(x, MinusWith0['dose'] * PerStoEvent, MinusWith0['error'] * PerStoEvent, fmt='', markersize=2, capsize=2, 
-#              label='Carrington SEP − 2\u03C3 With 0', color='orange')
+#              label='Carrington SEP − 2\u03C3 With 0')
 
 # PlusWith0 = totalDose(Path + "Carrington-SEP-Plus2Sigma-Int-With0/Res")
 # plt.errorbar(x, PlusWith0['dose'] * PerStoEvent, PlusWith0['error'] * PerStoEvent, fmt='', markersize=2, capsize=2, 
-#              label='Carrington SEP + 2\u03C3 With 0', color='green')
+#              label='Carrington SEP + 2\u03C3 With 0')
 
 
 
@@ -67,7 +74,7 @@ plt.fill_between(x, Ex['dose'] * PerStoEvent, Minus['dose'] * PerStoEvent, color
 # Plot Carrington Electron fluxes
 # plt.errorbar(x, CarringtonElectronINTEGRALPowTabelated['dose'] * PerStoEvent, 
             #  yerr=CarringtonElectronINTEGRALPowTabelated['error'] * PerStoEvent, label='Carrington Electron\nEvent Dose', 
-            #  color=Expected, linestyle='', capsize=1.5, capthick=2)
+            #  color=Expected, linestyle='', capsize=1.5, capthick=2, elinewidth=0.5)
 
 
 
@@ -80,7 +87,7 @@ plt.fill_between(x, Ex['dose'] * PerStoEvent, Minus['dose'] * PerStoEvent, color
 # Plot Solar Proton 5min Peak Flux
 # The flux is in 1/s cm2, therefore we need to multiply by to get the event dose in krad
 # plt.errorbar(x, solar_proton_5minPeakFlux['dose'] * 60 * 60 * 24 * 1.23, 
-#              yerr=solar_proton_5minPeakFlux['error'] * 60 * 60 * 24 * 1.23, capsize=3, linestyle='', color='C4', 
+#              yerr=solar_proton_5minPeakFlux['error'] * 60 * 60 * 24 * 1.23, capsize=3, linestyle='', color=GEOColor, 
 #              label="1 month peak flux on GEO")
 # plt.errorbar(x, solar_proton_5minPeakFlux_New['dose'] * 60 * 60 * 24 * 1.23, 
 #              yerr=solar_proton_5minPeakFlux_New['error'] * 60 * 60 * 24 * 1.23, capsize=3, linestyle='', color='C9', 
@@ -109,7 +116,7 @@ LEO_cosmic_iron = totalDose(Path + "LEO-cosmic-iron/Res") # Negiligible
 
 LEO_Total = mergeTotalDose([LEO_electron, LEO_trapped_proton, LEO_solar_proton, LEO_cosmic_proton, LEO_cosmic_iron])
 plt.errorbar(x, LEO_Total['dose'] * 100/11, yerr=LEO_Total['error'] * 100/11, color=LEOColor, 
-             label="LEO 100 Year Dose", linestyle='', capsize=1.5, capthick=2)
+             label="LEO 100 Year Dose", linestyle='', capsize=1.5, capthick=2, elinewidth=1)
 
 # LEO_SD = readSDQ2("/l/triton_work/Spectra/Carrington/LEO/spenvis_sqo.txt")
 # plt.plot(LEO_SD['Thickness'], ( LEO_SD['Electrons'] + LEO_SD['Bremsstrahlung'] ), 
@@ -138,7 +145,7 @@ plt.errorbar(x, LEO_Total['dose'] * 100/11, yerr=LEO_Total['error'] * 100/11, co
 
 # MEO_Total = mergeTotalDose([MEO_electron, MEO_trapped_proton, MEO_solar_proton, MEO_cosmic_proton, MEO_cosmic_iron])
 # plt.errorbar(x, MEO_Total['dose'], yerr=MEO_Total['error'], capsize=1, linestyle='', color=MEOColor, 
-#              label="MEO Total", capthick=2)
+#              label="MEO Total", capthick=2, elinewidth=0.5)
 
 # MEO_SD = readSDQ2("/l/triton_work/Spectra/Carrington/MEO/spenvis_sqo.txt")
 # plt.plot(MEO_SD['Thickness'], ( MEO_SD['Electrons'] + MEO_SD['Bremsstrahlung'] ), 
@@ -169,7 +176,7 @@ plt.errorbar(x, LEO_Total['dose'] * 100/11, yerr=LEO_Total['error'] * 100/11, co
 #              linestyle='', capsize=1, color='C4')
 
 # VAP_Total = mergeTotalDose([VAP_electron, VAP_trapped_proton, VAP_solar_proton, VAP_cosmic_proton, VAP_cosmic_rron])
-# plt.errorbar(x, VAP_Total['dose'] /11, yerr=VAP_Total['error'] /11, label="VAP 1 Year Dose\n(GRAS)", color=VAPColor, linestyle='', capsize=1.5, capthick=2)
+# plt.errorbar(x, VAP_Total['dose'] /11, yerr=VAP_Total['error'] /11, label="VAP 1 Year Dose\n(GRAS)", color=VAPColor, linestyle='', capsize=1.5, capthick=2, elinewidth=0.5)
 
 # VAP_SD = readSDQ2("/l/triton_work/Spectra/Carrington/VAP/spenvis_sqo.txt")
 # plt.plot(VAP_SD['Thickness'], ( VAP_SD['Electrons'] + VAP_SD['Bremsstrahlung'] ), label="SHIELDOSE-2Q VAP Electrons + Bremsstrahlung", color='C0')
@@ -191,7 +198,8 @@ GEO_cosmic_iron = totalDose(Path + "GEO-cosmic-iron/Res")     # Cosmics have sup
 # plt.errorbar(x, GEO_cosmic_iron['dose'], yerr=GEO_cosmic_iron['error'], label="GEO Cosmic Iron", linestyle='', capsize=1, color='C4')
 
 GEO_Total = mergeTotalDose([GEO_electron, GEO_trapped_proton, GEO_solar_proton, GEO_cosmic_proton, GEO_cosmic_iron])
-plt.errorbar(x, GEO_Total['dose'] * 10/11, yerr=GEO_Total['error'] * 10/11, color=GEOColor, label="GEO 10 year Dose", linestyle='', capsize=1.5, capthick=2)
+plt.errorbar(x, GEO_Total['dose'] * 10/11, yerr=GEO_Total['error'] * 10/11, color=GEOColor, label="GEO 10 year Dose"
+             ,linestyle='', capsize=1.5, capthick=2, elinewidth=1)
 
 # GEO_SD = readSDQ2("/l/triton_work/Spectra/Carrington/GEO/spenvis_sqo.txt")
 # plt.plot(GEO_SD['Thickness'], ( GEO_SD['Electrons'] + GEO_SD['Bremsstrahlung'] ), label="SHIELDOSE-2Q GEO Electrons + Bremsstrahlung", color='C0')

@@ -1,11 +1,7 @@
-import sys
 import os
-# Add parent directory to sys.path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 import matplotlib.pyplot as plt
-import sympy as sp
 from Dependencies.TotalLETHistos import totalLETHistos
 from uncertainties import ufloat
 import os
@@ -48,7 +44,7 @@ Directory = "/l/triton_work/LET_Histograms/Carrington/"
 #     S = 0.4
 #     A0 = 5.5e-14
 # else:   # nanoXplore https://nanoxplore-wiki.atlassian.net/wiki/spaces/NAN/pages/46497810/NG-MEDIUM+Radiative+Test#Weibull-fitting
-CrossectionName = "nanoXplore SEU"  
+CrossectionName = "NanoXplore SEU"  
 L0 = 0.11 
 W = 36
 S = 4.4
@@ -140,9 +136,9 @@ for F, Folder in enumerate(FolderList):
         plt.yscale("log")
         plt.xscale("log")
         plt.grid(which='major')
-        plt.title(Folder + " " + CrossectionName + " " + SubFolder + " Al\nTotal LET rate = " + str(TotalLETU) + " MeV cm2 mg-1 s-1")
+        plt.title(Folder + " LET Histogram behind " + SubFolder + " Al\nTotal LET rate = " + str(TotalLETU) + " MeV cm2 mg-1 s-1\nTotal Entries = " + str(int(NumberEntriesLETHist)))
         plt.xlabel("LET [MeV cm2 mg-1]")
-        ax1.legend(loc='lower left')
+        ax1.legend(loc='center right')
         ax1.set_ylabel("Rate per LET bin [cm-2 s-1]", color='C0')
         ax1.tick_params(axis='y', colors='C0')
 
@@ -197,6 +193,8 @@ for F, Folder in enumerate(FolderList):
             print("No SEEs in", path)
             continue
 
+        ### SEE Histogram ###############
+
         fig, ax1 = plt.subplots(1)
         plt.bar(SEEHist['lower'], SEEHist['value'], width=SEEHist['upper'] - SEEHist['lower'], align='edge', alpha=0.3)
         plt.errorbar(SEEHist['mean'], SEEHist['value'], SEEHist['error'], fmt=' ', capsize=5, elinewidth=1,
@@ -205,9 +203,9 @@ for F, Folder in enumerate(FolderList):
         plt.yscale("log")
         plt.xscale("log")
         plt.grid(which='major')
-        plt.title(Folder + " " + CrossectionName + " " + SubFolder + " Al\nTotal SEU Rate = " + str(SEERateU) + " s-1 bit-1")
+        plt.title(Folder + " SEU Rate Histogram behind " + SubFolder + " Al\nTotal SEU Rate = " + str(SEERateU) + " s-1 bit-1")
         plt.xlabel("LET [MeV cm2 mg-1]")
-        ax1.legend(loc='lower left')
+        ax1.legend(loc='center left')
         ax1.set_ylabel("SEU Rate per LET bin [s-1 bit-1]", color='C0')
         ax1.tick_params(axis='y', colors='C0')
 

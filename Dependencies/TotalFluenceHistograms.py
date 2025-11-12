@@ -30,7 +30,7 @@ def totalFluenceHistos(path):
         return None
     
     NumFiles = len(Files)
-    print("Number of Files:", NumFiles)
+    # print("Number of Files:", NumFiles)
 
     # Initialise the histogram lists
     ElectronHistos = []
@@ -40,6 +40,10 @@ def totalFluenceHistos(path):
         ElectronHist, ProtonHist = readFluenceHistos(os.path.join(path, File))
         ElectronHistos.append(ElectronHist)
         ProtonHistos.append(ProtonHist)
+
+    if NumFiles == 1:
+        print("Only one file found, no merging required.")
+        return ElectronHistos[0], ProtonHistos[0]
 
     # Merge the histograms
     TotalElectronHistos = mergeHistograms(ElectronHistos)

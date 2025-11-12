@@ -51,7 +51,7 @@ plt.figure(1)
 ## Read in Carrington EVT spectrum
 EVT_file = "/l/triton_work/Spectra/Carrington/Electron/CarringtonElectronINTEGRALPowTabelated.mac"
 EVT_Data = readGPSMacro(EVT_file)
-plt.plot(EVT_Data["Energy"], EVT_Data["Flux"], '-', label="Carrington peak Electron Flux", linewidth=2.5, color=Expected)
+plt.plot(EVT_Data["Energy"], EVT_Data["Flux"], '-', label="EVT peak Electron Flux", linewidth=2.5, color=Expected)
 
 ## FLUMIC spectrum
 # FLUMIC Energy in MeV
@@ -122,7 +122,7 @@ plt.plot(PETEnergy, IntegralPETFlux, label="10/28/03 PET Electron Flux")
 plt.legend()
 plt.yscale("log")
 plt.xscale("log")
-plt.title("Electron Spectra Comparison")
+plt.title("Electron Spectra")
 plt.xlabel("Electron Kinetic Energy [MeV]")
 plt.ylabel("Integral Flux [cm-2 s-1]")
 plt.xlim(0.1, 10)
@@ -137,5 +137,5 @@ plt.yticks(y_ticks)
 x_ticks = [0.1, 0.2, 0.5, 1, 2, 5, 10]
 plt.xticks(x_ticks, labels=[str(tick) for tick in x_ticks])
 
-plt.savefig("/l/triton_work/Spectra/Carrington/Electron/ElectronSpectrumComparison_NEW.pdf", format='pdf', bbox_inches="tight")
+plt.savefig("/l/triton_work/Spectra/Carrington/Electron/ElectronSpectra.pdf", format='pdf', bbox_inches="tight")
 #plt.show()

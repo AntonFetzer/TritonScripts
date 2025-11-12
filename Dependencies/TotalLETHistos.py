@@ -29,9 +29,7 @@ def totalLETHistos(path):
 
     if not Files:
         print("ERROR !!! No files found")
-        # Wait for user input before exiting
-        input("Press Enter to continue")
-        return None, None
+        exit()
 
     LETList = []
     EffList = []

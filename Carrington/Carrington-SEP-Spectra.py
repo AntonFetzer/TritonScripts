@@ -55,14 +55,14 @@ Plus = Plus2SigmaInt['Flux']
 
 plt.figure(1, figsize=(8, 8))
 
-plt.fill_between(Energies, Plus, ExpectedInt, color=PlusColor, alpha=0.5, label="Carrington SEP EVT +2 Sigma Peak Flux")
+plt.fill_between(Energies, Plus, ExpectedInt, color=PlusColor, alpha=0.5, label="EVT peak SEP flux +2\u03C3")
 #plt.plot(Energies, Plus, '.-', label="Carrington SEP EVT +2 Sigma", color=PlusColor)
 plt.plot(Energies, ExpectedInt, '-', color=Expected, linewidth=2, markersize=10)
 # Plot the expected integral flux as error bars with the plus and minus 2 sigma.
-plt.errorbar(Energies, ExpectedInt, yerr=[ExpectedInt - Minus, Plus - ExpectedInt], fmt=' ', label="Carrington SEP EVT Expected Peak Flux", color=Expected, linewidth=2, markersize=10, capsize=5, capthick=2, zorder=2)
+plt.errorbar(Energies, ExpectedInt, yerr=[ExpectedInt - Minus, Plus - ExpectedInt], fmt=' ', label="EVT peak SEP flux", color=Expected, linewidth=2, markersize=10, capsize=5, capthick=2, zorder=2)
 
 #plt.plot(Energies, Minus, '.-', label="Carrington SEP EVT -2 Sigma", color=MinusColor)
-plt.fill_between(Energies, ExpectedInt, Minus, color=MinusColor, alpha=0.5, label="Carrington SEP EVT -2 Sigma Peak Flux")
+plt.fill_between(Energies, ExpectedInt, Minus, color=MinusColor, alpha=0.5, label="EVT peak SEP flux -2\u03C3")
 
 # Plot the extrapolated values
 #plt.plot(ExtrapolatedEnergies, ExtrapolatedInt, '-o', label="Extrapolated Values", color='C4', markersize=10)
@@ -105,18 +105,18 @@ plt.plot(Energies, Carrington_Townsend_Flux, ':', label="Carrington Estimate Tow
 ## Read in LEO A9 spectrum
 LEO_AE9 = "/l/triton_work/Spectra/Carrington/LEO/spenvis_tri.txt"
 LEO_AE9_Protons, LEO_AE9_Electrons = readSpenvis_tri(LEO_AE9)
-plt.plot(LEO_AE9_Protons['Energy'], LEO_AE9_Protons['Integral'], '.-', label="AP9 mean LEO Trapped Proton Flux", color=LEOColor)
+plt.plot(LEO_AE9_Protons['Energy'], LEO_AE9_Protons['Integral'], '.-', label="AP9 mean LEO trapped proton flux", color=LEOColor)
 
 ## Read in GEO A9 spectrum
 # GEO_AE9 = "/l/triton_work/Spectra/Carrington/GEO/spenvis_tri.txt"
 # GEO_AE9_Protons, GEO_AE9_Electrons = readSpenvis_tri(GEO_AE9)
-# plt.plot(GEO_AE9_Protons['Energy'], GEO_AE9_Protons['Integral'], '.-', label="AP9 mean GEO Trapped Proton Flux", color=GEOColor)
+# plt.plot(GEO_AE9_Protons['Energy'], GEO_AE9_Protons['Integral'], '.-', label="AP9 mean GEO trapped proton flux", color=GEOColor)
 # Flux at low energy is high, but then drops to zero at 8 MeV, therefore not plotted
 
 ## Read in VAP A9 spectrum
 VAP_AE9 = "/l/triton_work/Spectra/Carrington/VAP/spenvis_tri.txt"
 VAP_AE9_Protons, VAP_AE9_Electrons = readSpenvis_tri(VAP_AE9)
-plt.plot(VAP_AE9_Protons['Energy'], VAP_AE9_Protons['Integral'], '.-', label="AP9 mean VAP Trapped Proton Flux", color=VAPColor)
+plt.plot(VAP_AE9_Protons['Energy'], VAP_AE9_Protons['Integral'], '.-', label="AP9 mean VAP trapped proton flux", color=VAPColor)
 
 
 ### SAPPHIRE Solar Proton Spectra ###
@@ -128,7 +128,7 @@ plt.plot(VAP_AE9_Protons['Energy'], VAP_AE9_Protons['Integral'], '.-', label="AP
 # Convert from Fluence to Flux. Mission duration is 4015 days
 # LEO_SEP_Flux = LEO_SEP_Fluence / (4015 * 24 * 3600)
 
-# plt.plot(LEO_SEP_Data['Energy'], LEO_SEP_Flux, '+--', label="SAPPHIRE mean LEO Solar Proton Flux", color=LEOColor)
+# plt.plot(LEO_SEP_Data['Energy'], LEO_SEP_Flux, '+--', label="SAPPHIRE mean LEO Solar Proton flux", color=LEOColor)
 # Earth mangetosphere shields LEO from SEP, therefore flux is below 1e-3 cm-2 s-1, therefore not plotted
 
 # ## Read in Geostationary SEP spectrum
@@ -138,7 +138,7 @@ GEO_SEP_Fluence = GEO_SEP_Data['IFluence']
 # Convert from Fluence to Flux. Mission duration is 4015 days
 GEO_SEP_Flux = GEO_SEP_Fluence / (4015 * 24 * 3600)
 
-plt.plot(GEO_SEP_Data['Energy'], GEO_SEP_Flux, '+--', label="SAPPHIRE mean GEO Solar Proton Flux", color=GEOColor)
+plt.plot(GEO_SEP_Data['Energy'], GEO_SEP_Flux, '+--', label="SAPPHIRE mean GEO solar proton flux", color=GEOColor)
 
 # ## Read in VAP SEP spectrum
 # VAP_SEP = "/l/triton_work/Spectra/Carrington/VAP/spenvis_sef.txt"
@@ -146,7 +146,7 @@ plt.plot(GEO_SEP_Data['Energy'], GEO_SEP_Flux, '+--', label="SAPPHIRE mean GEO S
 # VAP_SEP_Fluence = VAP_SEP_Data['IFluence']
 # Convert from Fluence to Flux. Mission duration is 4015 days
 # VAP_SEP_Flux = VAP_SEP_Fluence / (4015 * 24 * 3600)
-# plt.plot(VAP_SEP_Data['Energy'], VAP_SEP_Flux, '+--', label="SAPPHIRE mean VAP Solar Proton Flux", color=VAPColor)
+# plt.plot(VAP_SEP_Data['Energy'], VAP_SEP_Flux, '+--', label="SAPPHIRE mean VAP Solar Proton flux", color=VAPColor)
 # Very similar to the GEO SEP, therefore not plotted
 
 
@@ -154,18 +154,18 @@ plt.plot(GEO_SEP_Data['Energy'], GEO_SEP_Flux, '+--', label="SAPPHIRE mean GEO S
 # Read in GEO CREME96 spectrum
 GEO_Flare = "/l/triton_work/Spectra/Carrington/GEO-Extreme/CREME96/spenvis_sefflare.txt"
 GEO_Flare_Data = readSpenvis_sefflare(GEO_Flare)
-plt.plot(GEO_Flare_Data['Energy'], GEO_Flare_Data['IFlux'], 'o', label="CREME96 Peak 5 min Flux", color=CREME96Color, linewidth=5, zorder=3)
+plt.plot(GEO_Flare_Data['Energy'], GEO_Flare_Data['IFlux'], 'o', label="CREME96 GEO peak 5 min flux", color=CREME96Color, linewidth=5, zorder=3)
 
 ## SAPPHIRE 1 in n year Solar Proton Event Peak Fluxes
 # Read in GEO 1 in 100 year SEP Peak Flux
 GEO_SEP_100yr = "/l/triton_work/Spectra/Carrington/GEO-Extreme/SAPPHIRE100yearPeakFlux/spenvis_sefflare.txt"
 GEO_SEP_100yr_Data = readSpenvis_sefflare(GEO_SEP_100yr)
-plt.plot(GEO_SEP_100yr_Data['Energy'], GEO_SEP_100yr_Data['IFlux'], 'P', label="SAPPHIRE 1-in-100 year Proton Peak Flux", color=SAP_PeakColor, zorder=4)
+plt.plot(GEO_SEP_100yr_Data['Energy'], GEO_SEP_100yr_Data['IFlux'], 'P', label="SAPPHIRE GEO 1-in-100 year flux", color=SAP_PeakColor, zorder=4)
 
 # Read in GEO 1 in 300 year SEP Peak Flux
 GEO_SEP_300yr = "/l/triton_work/Spectra/Carrington/GEO-Extreme/SAPPHIRE300yearPeakFlux/spenvis_sefflare.txt"
 GEO_SEP_300yr_Data = readSpenvis_sefflare(GEO_SEP_300yr)
-plt.plot(GEO_SEP_300yr_Data['Energy'], GEO_SEP_300yr_Data['IFlux'], 'X', label="SAPPHIRE 1-in-300 year Proton Peak Flux", color=SAP_PeakColor, zorder=4)
+plt.plot(GEO_SEP_300yr_Data['Energy'], GEO_SEP_300yr_Data['IFlux'], 'X', label="SAPPHIRE GEO 1-in-300 year flux", color=SAP_PeakColor, zorder=4)
 
 
 ### ISO Cosmic Spectra ###
@@ -173,25 +173,25 @@ plt.plot(GEO_SEP_300yr_Data['Energy'], GEO_SEP_300yr_Data['IFlux'], 'X', label="
 ## Read in LEO Cosmic spectrum
 # LEO_Cosmic = "/l/triton_work/Spectra/Carrington/LEO/spenvis_gcf.txt"
 # LEO_Cosmic_Data = readSpenvis_gcf(LEO_Cosmic)
-# plt.plot(LEO_Cosmic_Data[0, :, 0], LEO_Cosmic_Data[0, :, 1], '*:', label="ISO mean LEO Cosmic Proton Flux", color=LEOColor)
+# plt.plot(LEO_Cosmic_Data[0, :, 0], LEO_Cosmic_Data[0, :, 1], '*:', label="ISO mean LEO Cosmic Proton flux", color=LEOColor)
 # Cosmics are below 1 cm-2 s-1, therefore not plotted
 
 # ## Read in Geostationary Cosmic spectrum
 GEO_Cosmic = "/l/triton_work/Spectra/Carrington/GEO/spenvis_gcf.txt"
 GEO_Cosmic_Data = readSpenvis_gcf(GEO_Cosmic)
-plt.plot(GEO_Cosmic_Data[0, :, 0], GEO_Cosmic_Data[0, :, 1], '*:', label="ISO mean GEO Cosmic Proton Flux", color=GEOColor)
+plt.plot(GEO_Cosmic_Data[0, :, 0], GEO_Cosmic_Data[0, :, 1], '*:', label="ISO mean GEO cosmic proton flux", color=GEOColor)
 
 # ## Read in Van-Allen Belt Probes Cosmic spectrum
 # VAP_Cosmic = "/l/triton_work/Spectra/Carrington/VAP/spenvis_gcf.txt"
 # VAP_Cosmic_Data = readSpenvis_gcf(VAP_Cosmic)
-# plt.plot(VAP_Cosmic_Data[0, :, 0], VAP_Cosmic_Data[0, :, 1], '*:', label="ISO mean VAP Cosmic Proton Flux", color=VAPColor)
+# plt.plot(VAP_Cosmic_Data[0, :, 0], VAP_Cosmic_Data[0, :, 1], '*:', label="ISO mean VAP Cosmic Proton flux", color=VAPColor)
 # Very similar to the GEO Cosmic, therefore not plotted
 
 plt.xlim(8, 250)
 plt.ylim(1, 2e6)
 plt.yscale("log")
 plt.xscale("log")
-plt.title("Proton Spectra Comparison")
+plt.title("Proton Spectra")
 plt.xlabel("Kinetic energy [MeV]")
 plt.ylabel("Integral Flux [cm-2 s-1]")
 plt.grid(which='both')
@@ -201,5 +201,5 @@ handles, labels = plt.gca().get_legend_handles_labels()
 order = [0, 9, 1, 7, 6, 5, 3, 4, 2, 8]  # Adjust this list to reorder as needed
 plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='lower right')
 
-plt.savefig("/l/triton_work/Spectra/Carrington/SEP-Final/ProtonSpectrumComparison.pdf", format='pdf', bbox_inches="tight")
+plt.savefig("/l/triton_work/Spectra/Carrington/SEP-Final/ProtonSpectra.pdf", format='pdf', bbox_inches="tight")
 # plt.show()

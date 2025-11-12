@@ -32,20 +32,47 @@ def readFluenceHistos(file):
         reader = csv.reader(f)
         for line in reader:
             if ReadFlag == 0:
+
+                # if "'OVERFLOW_ENTRIES'" in line:
+                #     OverflowEntriesElectron = int(float(line[2]))
+                #     if OverflowEntriesElectron != 0:
+                #         print("Warning: Electron histogram has overflow entries:", OverflowEntriesElectron)
+
+                # if "'UNDERFLOW_ENTRIES'" in line:
+                #     UnderflowEntriesElectron = int(float(line[2]))
+                #     if UnderflowEntriesElectron != 0:
+                #         print("Warning: Electron histogram has underflow entries:", UnderflowEntriesElectron)
+
                 if "'Bin entries'" in line:
                     ReadFlag = 1
             elif ReadFlag == 1:
+
                 if "'End of Block'" in line:
                     ReadFlag = 2
+
                 else:
                     for i, key in enumerate(keys):
                         ElectronHist[key].append(float(line[i]))
+
             elif ReadFlag == 2:
+
+                if "'OVERFLOW_ENTRIES'" in line:
+                    OverflowEntriesProton = int(float(line[2]))
+                    if OverflowEntriesProton != 0:
+                        print("Warning: Proton histogram has overflow entries:", OverflowEntriesProton)
+                
+                # if "'UNDERFLOW_ENTRIES'" in line:
+                #     UnderflowEntriesProton = int(float(line[2]))
+                #     if UnderflowEntriesProton != 0:
+                #         print("Warning: Proton histogram has underflow entries:", UnderflowEntriesProton)
+
                 if "'Bin entries'" in line:
                     ReadFlag = 3
+
             elif ReadFlag == 3:
                 if "'End of Block'" in line:
                     ReadFlag = 4
+
                 else:
                     for i, key in enumerate(keys):
                         ProtonHist[key].append(float(line[i]))

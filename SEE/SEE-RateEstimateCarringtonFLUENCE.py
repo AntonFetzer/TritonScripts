@@ -31,11 +31,12 @@ https://creme.isde.vanderbilt.edu/CREME-MC/help/weibull
 Directory = "/l/triton_work/Fluence_Histograms/CarringtonShielded/"
 
 # nanoXplore https://nanoxplore-wiki.atlassian.net/wiki/spaces/NAN/pages/46497810/NG-MEDIUM+Radiative+Test#Weibull-fitting
-CrossectionName = "nanoXplore PROTON SEU"  
-L0 = 29.99900 
+CrossectionName = "NanoXplore Proton SEU"  
+L0 = 29.999
 W = 29.68
 S = 502E-3
-A0 = 4.85E-016
+A0 = 4.85E-016 # From NanoXplore wiki in cm2 bit-1
+#A0 = 1.52E-15 # From CERN test in cm2 bit-1
 
 
 def f(Fluence):
@@ -106,10 +107,10 @@ for F, Folder in enumerate(FolderList):
         plt.yscale("log")
         plt.xscale("log")
         plt.grid(which='major')
-        plt.title(Folder + " " + CrossectionName + " " + SubFolder + " Al\nTotal Fluence rate = " + str(TotalFluenceU) + " MeV cm2 mg-1 s-1")
-        plt.xlabel("Fluence [MeV cm2 mg-1]")
-        ax1.legend(loc='lower left')
-        ax1.set_ylabel("Rate per Fluence bin [cm-2 s-1]", color='C0')
+        plt.title(Folder + " " + CrossectionName + " " + SubFolder + " Al\nTotal Fluence = " + str(TotalFluenceU) + " cm-2 s-1")
+        plt.xlabel("Energy [MeV]")
+        ax1.legend(loc='center right')
+        ax1.set_ylabel("Fluence per Energy bin [cm-2 s-1]", color='C0')
         ax1.tick_params(axis='y', colors='C0')
 
         ax2 = ax1.twinx()
@@ -171,9 +172,9 @@ for F, Folder in enumerate(FolderList):
         plt.xscale("log")
         plt.grid(which='major')
         plt.title(Folder + " " + CrossectionName + " " + SubFolder + " Al\nTotal SEU Rate = " + str(SEERateU) + " s-1 bit-1")
-        plt.xlabel("Fluence [MeV cm2 mg-1]")
-        ax1.legend(loc='lower left')
-        ax1.set_ylabel("SEU Rate per Fluence bin [s-1 bit-1]", color='C0')
+        plt.xlabel("Energy [MeV]")
+        ax1.legend(loc='center right')
+        ax1.set_ylabel("SEU Rate per Energy bin [s-1 bit-1]", color='C0')
         ax1.tick_params(axis='y', colors='C0')
 
         ax2 = ax1.twinx()
