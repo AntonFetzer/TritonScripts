@@ -4,6 +4,14 @@ from Read.ReadSD2Q import readSDQ2
 from Dependencies.TotalDose import totalDose
 from Dependencies.MergeTotalDose import mergeTotalDose
 
+# Define default errorbar style
+default_errorbar_style = {
+    'capsize': 1.5,     # Size of the error bar caps
+    'elinewidth': 1.5,    # Width of the error bar lines
+    'capthick': 2,      # Thickness of the error bar caps
+    'linestyle':''      # No line connecting the points
+}
+
 Expected = 'blue' # Blue
 PlusColor = 'C1'  # Orange
 MinusColor = 'C2' # Green
@@ -38,12 +46,12 @@ Minus = totalDose(Path + "Carrington-SEP-Minus2Sigma-Int/Res")
 Plus = totalDose(Path + "Carrington-SEP-Plus2Sigma-Int/Res")
 
 # Plot Carrington SEP fluxes
-plt.errorbar(x, Ex['dose'] * PerStoEvent, Ex['error'] * PerStoEvent, fmt='', label='Carrington SEP Event Dose', 
-             color=Expected, linestyle='', capsize=1.5, capthick=2, elinewidth=1)
+plt.errorbar(x, Ex['dose'] * PerStoEvent, Ex['error'] * PerStoEvent, fmt='', label='EVT SEP event dose', 
+             color=Expected, **default_errorbar_style)
 plt.fill_between(x, Plus['dose'] * PerStoEvent, Ex['dose'] * PerStoEvent, color=PlusColor, alpha=0.5, 
-                 label='Carrington SEP + 2\u03C3')
+                 label='EVT SEP + 2\u03C3')
 plt.fill_between(x, Ex['dose'] * PerStoEvent, Minus['dose'] * PerStoEvent, color=MinusColor, alpha=0.5, 
-                 label='Carrington SEP − 2\u03C3')
+                 label='EVT SEP − 2\u03C3')
 
 # Alternative SEP spectra
 # Carrington_SEP_Expected_Diff = totalDose(Path + "Carrington-SEP-Expected-Diff/Res")
@@ -73,8 +81,8 @@ plt.fill_between(x, Ex['dose'] * PerStoEvent, Minus['dose'] * PerStoEvent, color
 
 # Plot Carrington Electron fluxes
 # plt.errorbar(x, CarringtonElectronINTEGRALPowTabelated['dose'] * PerStoEvent, 
-            #  yerr=CarringtonElectronINTEGRALPowTabelated['error'] * PerStoEvent, label='Carrington Electron\nEvent Dose', 
-            #  color=Expected, linestyle='', capsize=1.5, capthick=2, elinewidth=0.5)
+#              yerr=CarringtonElectronINTEGRALPowTabelated['error'] * PerStoEvent, label='EVT electron\nevent dose', 
+#              color=Expected, **default_errorbar_style)
 
 
 
@@ -116,7 +124,7 @@ LEO_cosmic_iron = totalDose(Path + "LEO-cosmic-iron/Res") # Negiligible
 
 LEO_Total = mergeTotalDose([LEO_electron, LEO_trapped_proton, LEO_solar_proton, LEO_cosmic_proton, LEO_cosmic_iron])
 plt.errorbar(x, LEO_Total['dose'] * 100/11, yerr=LEO_Total['error'] * 100/11, color=LEOColor, 
-             label="LEO 100 Year Dose", linestyle='', capsize=1.5, capthick=2, elinewidth=1)
+             label="LEO 100 year dose", **default_errorbar_style)
 
 # LEO_SD = readSDQ2("/l/triton_work/Spectra/Carrington/LEO/spenvis_sqo.txt")
 # plt.plot(LEO_SD['Thickness'], ( LEO_SD['Electrons'] + LEO_SD['Bremsstrahlung'] ), 
@@ -155,12 +163,12 @@ plt.errorbar(x, LEO_Total['dose'] * 100/11, yerr=LEO_Total['error'] * 100/11, co
 
 
 #### VAP ######
-# VAP_electron = totalDose(Path + "VAP-electron/Res")
-# VAP_trapped_proton = totalDose(Path + "VAP-trapped-proton/Res")
-# VAP_trapped_proton_integral = totalDose(Path + "VAP-trapped-proton-integral/Res")
-# VAP_solar_proton = totalDose(Path + "VAP-solar-proton/Res")
-# VAP_cosmic_proton = totalDose(Path + "VAP-cosmic-proton/Res")
-# VAP_cosmic_rron = totalDose(Path + "VAP-cosmic-iron/Res")
+VAP_electron = totalDose(Path + "VAP-electron/Res")
+VAP_trapped_proton = totalDose(Path + "VAP-trapped-proton/Res")
+VAP_trapped_proton_integral = totalDose(Path + "VAP-trapped-proton-integral/Res")
+VAP_solar_proton = totalDose(Path + "VAP-solar-proton/Res")
+VAP_cosmic_proton = totalDose(Path + "VAP-cosmic-proton/Res")
+VAP_cosmic_rron = totalDose(Path + "VAP-cosmic-iron/Res")
 
 # plt.errorbar(x, VAP_electron['dose'], yerr=VAP_electron['error'], label="VAP Electrons", 
 #              linestyle='', capsize=1, color='C0')
@@ -176,12 +184,13 @@ plt.errorbar(x, LEO_Total['dose'] * 100/11, yerr=LEO_Total['error'] * 100/11, co
 #              linestyle='', capsize=1, color='C4')
 
 # VAP_Total = mergeTotalDose([VAP_electron, VAP_trapped_proton, VAP_solar_proton, VAP_cosmic_proton, VAP_cosmic_rron])
-# plt.errorbar(x, VAP_Total['dose'] /11, yerr=VAP_Total['error'] /11, label="VAP 1 Year Dose\n(GRAS)", color=VAPColor, linestyle='', capsize=1.5, capthick=2, elinewidth=0.5)
+# plt.errorbar(x, VAP_Total['dose'] /11, yerr=VAP_Total['error'] /11, 
+#              label="VAP 1 year dose\n(GRAS)", color=VAPColor, **default_errorbar_style)
 
 # VAP_SD = readSDQ2("/l/triton_work/Spectra/Carrington/VAP/spenvis_sqo.txt")
 # plt.plot(VAP_SD['Thickness'], ( VAP_SD['Electrons'] + VAP_SD['Bremsstrahlung'] ), label="SHIELDOSE-2Q VAP Electrons + Bremsstrahlung", color='C0')
 # plt.plot(VAP_SD['Thickness'], VAP_SD['Trapped Protons'], label="SHIELDOSE-2Q VAP Trapped Protons", color='C1')
-# plt.plot(VAP_SD['Thickness'], VAP_SD['Total'] /11, '.', label="VAP 1 Year Dose\n(SHIELDOSE-2Q)", color=VAPColor)
+# plt.plot(VAP_SD['Thickness'], VAP_SD['Total'] /11, '.', label="VAP 1 year dose\n(SHIELDOSE-2Q)", color=VAPColor)
 
 
 # #### GEO ######
@@ -198,8 +207,8 @@ GEO_cosmic_iron = totalDose(Path + "GEO-cosmic-iron/Res")     # Cosmics have sup
 # plt.errorbar(x, GEO_cosmic_iron['dose'], yerr=GEO_cosmic_iron['error'], label="GEO Cosmic Iron", linestyle='', capsize=1, color='C4')
 
 GEO_Total = mergeTotalDose([GEO_electron, GEO_trapped_proton, GEO_solar_proton, GEO_cosmic_proton, GEO_cosmic_iron])
-plt.errorbar(x, GEO_Total['dose'] * 10/11, yerr=GEO_Total['error'] * 10/11, color=GEOColor, label="GEO 10 year Dose"
-             ,linestyle='', capsize=1.5, capthick=2, elinewidth=1)
+plt.errorbar(x, GEO_Total['dose'] * 10/11, yerr=GEO_Total['error'] * 10/11, color=GEOColor, label="GEO 10 year dose"
+             , **default_errorbar_style)
 
 # GEO_SD = readSDQ2("/l/triton_work/Spectra/Carrington/GEO/spenvis_sqo.txt")
 # plt.plot(GEO_SD['Thickness'], ( GEO_SD['Electrons'] + GEO_SD['Bremsstrahlung'] ), label="SHIELDOSE-2Q GEO Electrons + Bremsstrahlung", color='C0')
@@ -209,7 +218,7 @@ plt.errorbar(x, GEO_Total['dose'] * 10/11, yerr=GEO_Total['error'] * 10/11, colo
 
 ######################## Plot formatting ############################
 
-plt.title("Total Ionising Dose Behind Shielding")
+#plt.title("Total Ionising Dose Behind Shielding")
 plt.xlabel("Aluminium Shielding Thickness [mm]")
 plt.ylabel("Total Ionising Dose [krad]")
 plt.yscale("log")
@@ -218,7 +227,7 @@ plt.yscale("log")
 # plt.yticks(np.logspace(-4, 4, num=9))
 
 plt.xlim(0.5, 10)
-plt.ylim(1e-1, 1e+5)
+plt.ylim(2e-1, 1e+3)
 plt.grid(which='both')
 
 

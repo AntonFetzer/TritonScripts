@@ -1,8 +1,15 @@
+import sys, os
+# Ensure the package root (the "Python" folder) is on sys.path so "from Read.* import ..." works
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import numpy as np
 import matplotlib.pyplot as plt
-# import sympy as sp
+import sympy as sp
 from Read.ReadSpenvis_tri import readSpenvis_tri
 from Read.ReadGPSMacro import readGPSMacro
+
+#Path = "/l/triton_work/"
+Path = "/scratch/work/fetzera1/"
 
 Expected = 'blue' # Blue
 PlusColor = 'C1'  # Green
@@ -11,47 +18,54 @@ LEOColor = 'C8'   # yellow
 GEOColor = 'C7'   # grey
 VAPColor = 'C3'   # Red
 
-'''
+
 ## Carrington Integral Electron Spectrum Parameters from EVT Analysis of Adnane Osmane
 f0 = 10 ** 10   # cm-2 s-1 sr-1 
 E0 = 0.13       # MeV
 a = 3.7
 
-Define symbolic variables and function
+# Define symbolic variables and function
 Energy = sp.Symbol('Energy')
 f = 4 * sp.pi * f0 * (Energy / E0) ** (-a)
 print('Funciton f:', f)
 
-Calculate the derivative of the function with respect to Energy
+# Calculate the derivative of the function with respect to Energy
 fdiff = sp.diff(f, Energy)
 print('Function fdiff:', fdiff)
 
-Convert the symbolic functions to numerical functions
+# Convert the symbolic functions to numerical functions
 f = sp.lambdify(Energy, f, "numpy")
 fdiff = sp.lambdify(Energy, fdiff, "numpy")
 
 def f(Energy):
     return 4 * np.pi * f0 * (Energy / E0) ** (-a)
 
-Energies = np.geomspace(0.13, 10, num=2)
+Energies = [0.13, 1.2]
+Diff = []
+Int = []
 
-print("Differential")
-for E in Energies:
-    print(f"{E:.4}", f"{-fdiff(E):.4}")
-    print("/gps/hist/point", f"{E:.4}", f"{-fdiff(E):.4}")
+# print("Differential")
+# for E in Energies:
+#     print(f"{E:.4}", f"{-fdiff(E):.4}")
+#     print("/gps/hist/point", f"{E:.4}", f"{-fdiff(E):.4}")
 
 print("Integral")
 for E in Energies:
     print(f"{E:.4}", f"{f(E):.4}")
-'''
+    Int.append(f(E))
+
 
 ## Plotting
 plt.figure(1)
 
 ## Read in Carrington EVT spectrum
-EVT_file = "/l/triton_work/Spectra/Carrington/Electron/CarringtonElectronINTEGRALPowTabelated.mac"
+EVT_file = Path + "/Spectra/Carrington/Electron/CarringtonElectronINTEGRALPowTabelated.mac"
 EVT_Data = readGPSMacro(EVT_file)
-plt.plot(EVT_Data["Energy"], EVT_Data["Flux"], '-', label="EVT peak Electron Flux", linewidth=2.5, color=Expected)
+plt.plot(EVT_Data["Energy"], EVT_Data["Flux"], '-', linewidth=2.5, color=Expected)
+
+
+# Plot the data points from the function
+plt.plot(Energies, Int, 'o-', label="EVT peak electron flux", linewidth=2.5, color=Expected)
 
 ## FLUMIC spectrum
 # FLUMIC Energy in MeV
@@ -65,29 +79,29 @@ FLUMIC_Max_Flux = [14921000000, 6546400000, 2872200000, 1260200000, 552890000, 2
 FLUMIC_Average_Flux = np.array(FLUMIC_Average_Flux) * 1e-4 * 4 * np.pi
 FLUMIC_Max_Flux = np.array(FLUMIC_Max_Flux) * 1e-4 * 4 * np.pi
 
-plt.plot(FLUMIC_Energy, FLUMIC_Max_Flux, 'x-', label="FLUMIC GEO max Electron Flux", color='magenta', linewidth=1)
+plt.plot(FLUMIC_Energy, FLUMIC_Max_Flux, 'x-', label="FLUMIC GEO max electron flux", color='magenta', linewidth=1)
 
 ## Read in LEO A9 spectrum
-LEO_file = "/l/triton_work/Spectra/Carrington/LEO/spenvis_tri.txt"
+LEO_file = Path + "/Spectra/Carrington/LEO/spenvis_tri.txt"
 Protons, Electrons = readSpenvis_tri(LEO_file)
-plt.plot(Electrons['Energy'], Electrons['Integral'], '+--', label="AE9 LEO mean Electron Flux", color=LEOColor)
+plt.plot(Electrons['Energy'], Electrons['Integral'], '+--', label="AE9 mean LEO electron flux", color=LEOColor)
 
 ## Read in Geostationary A9 spectrum
-GEO_file = "/l/triton_work/Spectra/Carrington/GEO/spenvis_tri.txt"
+GEO_file = Path + "/Spectra/Carrington/GEO/spenvis_tri.txt"
 Protons, Electrons = readSpenvis_tri(GEO_file)
-plt.plot(Electrons['Energy'], Electrons['Integral'], '1-.', label="AE9 GEO mean Electron Flux", color=GEOColor)
+plt.plot(Electrons['Energy'], Electrons['Integral'], '1-.', label="AE9 mean GEO electron flux", color=GEOColor)
 
 ## Read in Van-Allen Belt Probes A9 spectrum
-VAP_file = "/l/triton_work/Spectra/Carrington/VAP/spenvis_tri.txt"
+VAP_file = Path + "/Spectra/Carrington/VAP/spenvis_tri.txt"
 Protons, Electrons = readSpenvis_tri(VAP_file)
-plt.plot(Electrons['Energy'], Electrons['Integral'], '2:', label="AE9 VAP mean Electron Flux", color=VAPColor)
+plt.plot(Electrons['Energy'], Electrons['Integral'], '2:', label="AE9 mean VAP electron flux", color=VAPColor)
 
 
 
 
 
 """ 
-## Electron fluxes from paper:
+## electron fluxes from paper:
 # "Proton, helium, and electron spectra during the large solar particle events of October–November 2003"
 # doi:10.1029/2005JA011038
 # Event 10/28/03 Table 7
@@ -113,8 +127,8 @@ PETEnergy = np.geomspace(1.6, 8, num=10)
 IntegralEPAMFlux = -EPAMNorm / (EPAMSlope + 1) * (EPAMEnergy ** (EPAMSlope + 1))
 IntegralPETFlux = -PETNorm / (PETSlope + 1) * (PETEnergy ** (PETSlope + 1))
 
-plt.plot(EPAMEnergy, IntegralEPAMFlux, label="10/28/03 EPAM Electron Flux")
-plt.plot(PETEnergy, IntegralPETFlux, label="10/28/03 PET Electron Flux")
+plt.plot(EPAMEnergy, IntegralEPAMFlux, label="10/28/03 EPAM electron flux")
+plt.plot(PETEnergy, IntegralPETFlux, label="10/28/03 PET electron flux")
  """
 
 
@@ -123,8 +137,8 @@ plt.legend()
 plt.yscale("log")
 plt.xscale("log")
 plt.title("Electron Spectra")
-plt.xlabel("Electron Kinetic Energy [MeV]")
-plt.ylabel("Integral Flux [cm-2 s-1]")
+plt.xlabel("Electron kinetic energy [MeV]")
+plt.ylabel("Integral flux [cm-2 s-1]")
 plt.xlim(0.1, 10)
 plt.ylim(1e1, 1e12)
 plt.minorticks_on()
@@ -137,5 +151,5 @@ plt.yticks(y_ticks)
 x_ticks = [0.1, 0.2, 0.5, 1, 2, 5, 10]
 plt.xticks(x_ticks, labels=[str(tick) for tick in x_ticks])
 
-plt.savefig("/l/triton_work/Spectra/Carrington/Electron/ElectronSpectra.pdf", format='pdf', bbox_inches="tight")
+plt.savefig(Path + "/Spectra/Carrington/Electron/ElectronSpectra.pdf", format='pdf', bbox_inches="tight")
 #plt.show()
