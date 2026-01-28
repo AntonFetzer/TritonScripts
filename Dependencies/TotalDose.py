@@ -3,6 +3,7 @@ import numpy as np
 from Read.ReadDose import readDose
 import matplotlib.pyplot as plt
 import sys
+from uncertainties import ufloat
 
 
 def totalDose(path):
@@ -103,7 +104,7 @@ def totalDose(path):
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/RadEx/"
+    Path = "/l/triton_work/RadEx/RadEx-SinglePCB-4mm"
 
     # Find all subdirectories in the given path that contain a "Res" subfolder
     # and calculate the total dose for each of them
@@ -127,10 +128,24 @@ if __name__ == "__main__":
                 Results['error'] *= 1e12
 
 
-            # Print the dose results in csv format
-            print(f"Tile, Dose [kRad], Error [kRad], Non-Zero Entries")
-            for i in range(NumTiles):
-                    print(i, Results['dose'][i], Results['error'][i], Results['non-zeros'][i], sep=',')
+            # Print the dose results in csv format scientifically rounded and safe them to a csv file
+            output_file = os.path.join(Path, "../TotalDose_" + folder_name + ".csv")
+            with open(output_file, 'w') as f:
+                Header = "Tile, Dose [kRad], Error [kRad], Non-Zero Entries"
+                print("\n" + Header)
+                f.write(Header + "\n")
+            
+                for i in range(NumTiles):
+                    DoseWithError = ufloat(Results['dose'][i], Results['error'][i])
+                    # Force uncertainties-style rounding (2 sig digits in uncertainty)
+                    DoseWithErrorString = f"{DoseWithError:.2u}"            # "value+/-error" (rounded)
+                    RoundedDose, RoundedError = DoseWithErrorString.split('+/-')
+
+                    RoundedDose = float(RoundedDose.strip())
+                    RoundedError = float(RoundedError.strip())
+
+                    print(f"{i}, {RoundedDose}, {RoundedError}, {Results['non-zeros'][i]}")
+                    f.write(f"{i},{RoundedDose},{RoundedError},{Results['non-zeros'][i]}\n")
 
 
             # Plot the dose with error bars

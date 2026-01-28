@@ -7,9 +7,9 @@ import os
 plt.rc('axes', axisbelow=True)
 
 Paths = [
-    "/l/triton_work/Source_Histograms/Carrington/CarringtonElectronINTEGRALPowTabelated/Res",
-    "/l/triton_work/Source_Histograms/Carrington/CarringtonElectronDiffPowTabelated/Res",
-    "/l/triton_work/Source_Histograms/Carrington/CarringtonElectronDiffPow3/Res",
+    # "/l/triton_work/Source_Histograms/Carrington/CarringtonElectronINTEGRALPowTabelated/Res",
+    # "/l/triton_work/Source_Histograms/Carrington/CarringtonElectronDiffPowTabelated/Res",
+    # "/l/triton_work/Source_Histograms/Carrington/CarringtonElectronDiffPow3/Res",
 
     #"/l/triton_work/Source_Histograms/Carrington/Van-Allen-Probes-AE9-mission/Res",
 
@@ -21,6 +21,7 @@ Paths = [
     # "/l/triton_work/Source_Histograms/Carrington/Carrington-SEP-Expected-Int/Res",
 
     #"/l/triton_work/Source_Histograms/GTOTEST/GTOprotonTestWITH0/Res",
+
 ]
 
 # List to store the histograms
