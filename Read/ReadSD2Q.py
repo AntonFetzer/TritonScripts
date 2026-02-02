@@ -30,7 +30,7 @@ def readSDQ2(fileName):
                 ReadFlag = 2
             else:
                 values = line.split(',')
-                for i in range(len(ListofCollumns)):
+                for i in range(len(values)):
                     SDData[ListofCollumns[i]].append(float(values[i]))
 
     # Convert lists inside the dicts to numpy arrays
@@ -46,9 +46,7 @@ def readSDQ2(fileName):
 
 
 if __name__ == "__main__":
-    Data = readSDQ2("/l/triton_work/Spectra/Carrington/VAP/spenvis_sqo.txt")
-
-    print(np.shape(Data))
+    Data = readSDQ2("/l/triton_work/Spectra/OLD/GTO/Shieldose/spenvis_sqo.txt")
 
     print("Aluminium Thicknesses", Data['Thickness'])
     print("Total Dose", Data['Total'])
@@ -60,7 +58,8 @@ if __name__ == "__main__":
     plt.plot(Data['Thickness'], Data['Electrons'], '.-', label="Electrons")
     plt.plot(Data['Thickness'], Data['Bremsstrahlung'], '.-', label="Bremsstrahlung")
     plt.plot(Data['Thickness'], Data['Trapped Protons'], '.-', label="Trapped Protons")
-    plt.plot(Data['Thickness'], Data['Solar Protons'], '.-', label="Solar Protons")
+    if len(Data['Solar Protons']) > 0:
+        plt.plot(Data['Thickness'], Data['Solar Protons'], '.-', label="Solar Protons")
     plt.plot(Data['Thickness'], Data['Total'], '.-', label="Total Dose")
 
     plt.yscale("log")

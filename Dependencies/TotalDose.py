@@ -76,10 +76,20 @@ def totalDose(path):
     print("Minimum number of non Zero Entries:", f"{MinNZE:.3g}", "at Tile number", str(LowestTile))
 
 
-    if MinNZE < 100:
-        print("Warning !!! Tile", LowestTile, "has only", MinNZE, "Non-Zero entries !!!")
+    #if MinNZE < 100:
+    #    print("Warning !!! Tile", LowestTile, "has only", MinNZE, "Non-Zero entries !!!")
 
-    RelativeError = TID['error'] / TID['dose']
+    if TID['dose'][LowestTile] == 0:
+        print("Warning !!! Tile", LowestTile, "has zero dose !!!")
+        RelativeError = np.zeros_like(TID['dose'])
+        for i in range(NumTiles):
+            if TID['dose'][i] != 0:
+                RelativeError[i] = TID['error'][i] / TID['dose'][i]
+            else:
+                RelativeError[i] = 0
+    else:
+        RelativeError = TID['error'] / TID['dose']
+    
     MaxRelativeError = max(RelativeError)
     MaxRelativeErrorTile = np.argmax(RelativeError)
     print("Maximum relative error =", f"{MaxRelativeError * 100:.2f} % at Tile number {MaxRelativeErrorTile}")
@@ -104,7 +114,7 @@ def totalDose(path):
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/RadEx/RadEx-SinglePCB-4mm"
+    Path = "/l/triton_work/2MatThickAl/OLD-GTO/AE9500keV"
 
     # Find all subdirectories in the given path that contain a "Res" subfolder
     # and calculate the total dose for each of them
@@ -121,11 +131,6 @@ if __name__ == "__main__":
             Results = totalDose(Path)
 
             NumTiles = len(Results['dose'])
-
-            if 'Electron' in folder_name:
-                # Assume fluence of 1e12 electrons/cm2
-                Results['dose'] *= 1e12
-                Results['error'] *= 1e12
 
 
             # Print the dose results in csv format scientifically rounded and safe them to a csv file
