@@ -4,9 +4,8 @@ from Dependencies.TotalDose import totalDose
 from Read.ReadSD2Q import readSDQ2
 from Dependencies.MergeTotalDose import mergeTotalDose
 import matplotlib.pyplot as plt
-import sys
 from uncertainties import ufloat, ufloat_fromstr
-from matplotlib.colors import LinearSegmentedColormap, Normalize, TwoSlopeNorm
+from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
 from matplotlib.ticker import FuncFormatter
 
 

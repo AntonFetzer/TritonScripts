@@ -2,10 +2,9 @@ import os
 import numpy as np
 from Dependencies.TotalDose import totalDose
 import matplotlib.pyplot as plt
-import sys
-from uncertainties import ufloat
+from uncertainties import ufloat, ufloat_fromstr
 
-Path = "/l/triton_work/RadEx/RadEx-SinglePCB-4mm"
+Path = "/l/triton_work/RadEx/RadEx-ThickPCB-6mm"
 
 # Find all subdirectories in the given path that contain a "Res" subfolder
 # and calculate the total dose for each of them
@@ -23,10 +22,10 @@ for root, dirs, files in os.walk(Path):
 
         NumTiles = len(Results['dose'])
 
-        if 'Electron' in folder_name:
+        if 'MeVElectron' in folder_name:
             # Assume fluence of 1e12 electrons/cm2
-            Results['dose'] *= 1e12
-            Results['error'] *= 1e12
+            Results['dose'] *= 2e12
+            Results['error'] *= 2e12
 
 
         # Print the dose results in csv format scientifically rounded and safe them to a csv file
@@ -38,15 +37,21 @@ for root, dirs, files in os.walk(Path):
         
             for i in range(NumTiles):
                 DoseWithError = ufloat(Results['dose'][i], Results['error'][i])
-                # Force uncertainties-style rounding (2 sig digits in uncertainty)
-                DoseWithErrorString = f"{DoseWithError:.2u}"            # "value+/-error" (rounded)
-                RoundedDose, RoundedError = DoseWithErrorString.split('+/-')
 
-                RoundedDose = float(RoundedDose.strip())
-                RoundedError = float(RoundedError.strip())
+                # This performs uncertainties-style rounding to match the display (2 sig digits on uncertainty)
+                s = f"{DoseWithError:.2u}"
 
-                print(f"{i}, {RoundedDose}, {RoundedError}, {Results['non-zeros'][i]}")
-                f.write(f"{i},{RoundedDose},{RoundedError},{Results['non-zeros'][i]}\n")
+                # Re-create a ufloat from the rounded string, then extract numeric parts safely
+                DoseRounded = ufloat_fromstr(s)
+
+                RoundedDose = DoseRounded.n
+                RoundedError = DoseRounded.s
+
+                RoundedDoseString = f"{DoseRounded.n:.2g}"
+                RoundedErrorString = f"{DoseRounded.s:.2g}"
+
+                print(f"{i}, {RoundedDoseString}, {RoundedErrorString}, {Results['non-zeros'][i]}")
+                f.write(f"{i},{RoundedDoseString},{RoundedErrorString},{Results['non-zeros'][i]}\n")
 
 
         # Plot the dose with error bars
