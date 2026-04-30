@@ -9,14 +9,14 @@ from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
 from matplotlib.ticker import FuncFormatter
 
 
-Path = "/l/triton_work/2MatThickAl/Apophis-1y-GTO/"
+Path = "/l/triton_work/2MatThickAl/ISS-LEO-11y-mean/"
 
-ElectronFolder = "Apophis-AE9-95p-1y"
-ProtonFolder = "Apophis-AP9-95p-1y"
-SolarFolder = "Apophis-SAPPHIRE-95p-1y"
-TotalFolder = "Apophis-A9-total-95p-1y-mean"
+ElectronFolder = "ISS-LEO-11y-mean-AE9"
+ProtonFolder = "ISS-LEO-11y-mean-AP9"
+SolarFolder = "ISS-LEO-11y-mean-SAPPHIRE"
+TotalFolder = "ISS-LEO-11y-mean-total"
 
-Datset = "P" # Electron, P - Proton, S - Solar, T - Total
+Datset = "S" #E - Electron, P - Proton, S - Solar, T - Total
 
 print("Calculating total dose for Folder name:", Path)
     
@@ -155,7 +155,7 @@ for x in [11]:  # 0%, 50%, 100% PE and Al]:
     plt.plot(shielding_depth, doses, marker='.', label=f'{x*10}% PE' if x < 11 else 'Al')
 
 # Add shielddose data for comparison
-sd2q_file = "/l/triton_work/Spectra/Apophis/spenvis_sqo.txt"
+sd2q_file = "/l/triton_work/Spectra/Carrington/LEO/spenvis_sqo.txt"
 sd2q_data = readSDQ2(sd2q_file)
 #plt.plot(sd2q_data['Thickness'] * 0.27, (sd2q_data['Electrons'] + sd2q_data['Bremsstrahlung'])/ (11*12), '.-', label="Shieldose Electrons")
 if Datset == "E":
