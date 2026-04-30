@@ -8,8 +8,7 @@ import sympy as sp
 from Read.ReadSpenvis_tri import readSpenvis_tri
 from Read.ReadGPSMacro import readGPSMacro
 
-#Path = "/l/triton_work/"
-Path = "/scratch/work/fetzera1/"
+Path = "/l/triton_work/"
 
 Expected = 'blue' # Blue
 PlusColor = 'C1'  # Green
@@ -56,7 +55,7 @@ for E in Energies:
 
 
 ## Plotting
-plt.figure(1)
+plt.figure(1, figsize=(6, 6))
 
 ## Read in Carrington EVT spectrum
 EVT_file = Path + "/Spectra/Carrington/Electron/CarringtonElectronINTEGRALPowTabelated.mac"
@@ -65,7 +64,7 @@ plt.plot(EVT_Data["Energy"], EVT_Data["Flux"], '-', linewidth=2.5, color=Expecte
 
 
 # Plot the data points from the function
-plt.plot(Energies, Int, 'o-', label="EVT peak electron flux", linewidth=2.5, color=Expected)
+plt.plot(Energies, Int, 'o-', label="GEO EVT 1-in-100 year peak 6-min", linewidth=2.5, color=Expected)
 
 ## FLUMIC spectrum
 # FLUMIC Energy in MeV
@@ -79,22 +78,32 @@ FLUMIC_Max_Flux = [14921000000, 6546400000, 2872200000, 1260200000, 552890000, 2
 FLUMIC_Average_Flux = np.array(FLUMIC_Average_Flux) * 1e-4 * 4 * np.pi
 FLUMIC_Max_Flux = np.array(FLUMIC_Max_Flux) * 1e-4 * 4 * np.pi
 
-plt.plot(FLUMIC_Energy, FLUMIC_Max_Flux, 'x-', label="FLUMIC GEO max electron flux", color='magenta', linewidth=1)
+plt.plot(FLUMIC_Energy, FLUMIC_Max_Flux, 'x-', label="GEO FLUMIC worst-case 1-day avg", color='magenta', linewidth=1)
 
-## Read in LEO A9 spectrum
-LEO_file = Path + "/Spectra/Carrington/LEO/spenvis_tri.txt"
-Protons, Electrons = readSpenvis_tri(LEO_file)
-plt.plot(Electrons['Energy'], Electrons['Integral'], '+--', label="AE9 mean LEO electron flux", color=LEOColor)
+
+# Add data point from Meredith 2015 1-in-100 year GOES-W and GOES-E electron fluxes
+# GOES-W 1-in-100 year 2 MeV electron flux: 7.68e5 cm−2 s−1 sr−1
+# GOES-E 1-in-100 year 2 MeV electron flux: 3.25e5 cm−2 s−1 sr−1
+GOES_W_Flux = 7.68e5 * 4 * np.pi  # Convert from sr-1 to omnidirectional
+GOES_E_Flux = 3.25e5 * 4 * np.pi  # Convert from sr-1 to omnidirectional
+plt.plot(2, GOES_W_Flux, 'x', label="GEO GOES-W 1-in-100 year 1-day avg", color='cyan', markersize=8)
+plt.plot(2, GOES_E_Flux, '+', label="GEO GOES-E 1-in-100 year 1-day avg", color='cyan', markersize=8)
 
 ## Read in Geostationary A9 spectrum
 GEO_file = Path + "/Spectra/Carrington/GEO/spenvis_tri.txt"
 Protons, Electrons = readSpenvis_tri(GEO_file)
-plt.plot(Electrons['Energy'], Electrons['Integral'], '1-.', label="AE9 mean GEO electron flux", color=GEOColor)
+plt.plot(Electrons['Energy'], Electrons['Integral'], '1-.', label="GEO AE9 11-year mean", color=GEOColor)
+
+
+## Read in LEO A9 spectrum
+LEO_file = Path + "/Spectra/Carrington/LEO/spenvis_tri.txt"
+Protons, Electrons = readSpenvis_tri(LEO_file)
+plt.plot(Electrons['Energy'], Electrons['Integral'], '+--', label="LEO AE9 11-year mean", color=LEOColor)
 
 ## Read in Van-Allen Belt Probes A9 spectrum
 VAP_file = Path + "/Spectra/Carrington/VAP/spenvis_tri.txt"
 Protons, Electrons = readSpenvis_tri(VAP_file)
-plt.plot(Electrons['Energy'], Electrons['Integral'], '2:', label="AE9 mean VAP electron flux", color=VAPColor)
+plt.plot(Electrons['Energy'], Electrons['Integral'], '2:', label="VAP AE9 11-year mean", color=VAPColor)
 
 
 
@@ -132,15 +141,17 @@ plt.plot(PETEnergy, IntegralPETFlux, label="10/28/03 PET electron flux")
  """
 
 
+
+
 ## Plot formatting
 plt.legend()
 plt.yscale("log")
 plt.xscale("log")
-plt.title("Electron Spectra")
+#plt.title("Electron Flux Spectra")
 plt.xlabel("Electron kinetic energy [MeV]")
-plt.ylabel("Integral flux [cm-2 s-1]")
+plt.ylabel("Integral electron flux [cm-2 s-1]")
 plt.xlim(0.1, 10)
-plt.ylim(1e1, 1e12)
+plt.ylim(1e1, 1e13)
 plt.minorticks_on()
 plt.grid(axis='x', which='both')
 plt.grid(axis='y', which='both')
