@@ -1,5 +1,4 @@
 import os
-
 import numpy as np
 import matplotlib.pyplot as plt
 from Dependencies.TotalLETHistos import totalLETHistos
@@ -28,27 +27,19 @@ https://creme.isde.vanderbilt.edu/CREME-MC/help/weibull
 '''
 
 Directory = "/l/triton_work/LET_Histograms/Carrington/"
-# Directory = "/scratch/work/fetzera1/LET_Histograms/Carrington/"
-#Correctable = 0
 
-# if Correctable:
-#     CrossectionName = "LSRAM correctable SEU"
-#     L0 = 0.4
-#     W = 18
-#     S = 0.98
-#     A0 = 4.01e-9
-# else:
-#     CrossectionName = "LSRAM uncorrectable SEU" # The uncorrectable parameters are only estimated upper bounds. This means the actual cross section is unknown.
-#     L0 = 0.4
-#     W = 1
-#     S = 0.4
-#     A0 = 5.5e-14
-# else:   # nanoXplore https://nanoxplore-wiki.atlassian.net/wiki/spaces/NAN/pages/46497810/NG-MEDIUM+Radiative+Test#Weibull-fitting
+# nanoXplore https://nanoxplore-wiki.atlassian.net/wiki/spaces/NAN/pages/46497810/NG-MEDIUM+Radiative+Test#Weibull-fitting
 CrossectionName = "NanoXplore SEU"  
 L0 = 0.11 
 W = 36
 S = 4.4
 A0 = 5.2E-09
+
+# CrossectionName = "Cypress CY62167GE30-45ZXI"  
+# L0 = 0.1
+# W = 70
+# S = 1.2
+# A0 = 2.6E-07
 
 
 def f(LET):
@@ -76,7 +67,8 @@ def f(LET):
 #     CSVFile = open("/l/triton_work/LET_Histograms/Carrington/SEERatesCorrectable.csv", 'w')
 # if not Correctable:
 #     CSVFile = open("/l/triton_work/LET_Histograms/Carrington/SEERatesUncorrectable.csv", 'w')
-CSVFile = open(Directory + "/SEERatesnanoXplore.csv", 'w')
+CSVFile = open(Directory + "/SEERates_" + CrossectionName + ".csv", 'w')
+# CSVFile = open(Directory + "/SEERatesnanoXplore.csv", 'w')
 # Write the header to the file
 header = "Data,Shielding,Crossection,SEE_Rate,SEE_Error,Relative_SEE_Error,Entries_Contributing_To_SEE"
 CSVFile.write(header + "\n")

@@ -2,6 +2,11 @@ import csv
 import matplotlib.pyplot as plt
 import numpy as np
 
+Directory = "/l/triton_work/LET_Histograms/Carrington/"
+
+CrossectionName = "Cypress CY62167GE30-45ZXI"  
+# CrossectionName = "NanoXplore SEU"  
+
 # Define default errorbar style
 default_errorbar_style = {
     'capsize': 4,        # Size of the error bar caps
@@ -10,18 +15,19 @@ default_errorbar_style = {
 }
 
 Expected = 'blue' # Blue
-PlusColor = 'C1'  # Orange
-MinusColor = 'C2' # Green
-LEOColor = 'C8'   # Yellow
-MEOColor = 'C9'   # Turquoise
+PlusColor = 'C1'  # Green
+MinusColor = 'C2' # Orange
+LEOColor = 'C8'   # yellow
+GEOColor = 'C7'   # grey
 VAPColor = 'C3'   # Red
-GEOColor = 'C7'   # Grey
+CREME96Color = 'C6' # Pink
+SAP_PeakColor = 'C9' # Turquoise
 
 # Initialize the final data structure
 Dict = {}
 
 # Read the CSV file
-with open('/l/triton_work/LET_Histograms/Carrington/SEERatesnanoXplore.csv', mode='r') as file:
+with open(Directory + "/SEERates_" + CrossectionName + ".csv", mode='r') as file:
     csv_reader = csv.DictReader(file)
     CrossectionName = None
     
@@ -56,19 +62,17 @@ for key in Dict:
 
 plt.figure(0, figsize=(5, 7))
 ########################### Carrington SEP ###################################
+Shielding = Dict['Carrington-SEP-Expected-Int']['Shielding']
+ExpectedInt = Dict['Carrington-SEP-Expected-Int']['SEE_Rate']
+Minus = Dict['Carrington-SEP-Minus2Sigma-Int']['SEE_Rate']
+Plus = Dict['Carrington-SEP-Plus2Sigma-Int']['SEE_Rate']
+Error = Dict['Carrington-SEP-Expected-Int']['SEE_Error']
 
-plt.errorbar(Dict['Carrington-SEP-Expected-Int']['Shielding'], Dict['Carrington-SEP-Expected-Int']['SEE_Rate'], 
-             yerr=Dict['Carrington-SEP-Expected-Int']['SEE_Error'], label="EVT peak SEP flux"
+plt.errorbar(Shielding, ExpectedInt, yerr=Error, label="GEO EVT 1-in-150 year peak SEP"
              , color=Expected, **default_errorbar_style)
 
-plt.fill_between(Dict['Carrington-SEP-Expected-Int']['Shielding'], 
-                 Dict['Carrington-SEP-Expected-Int']['SEE_Rate'], 
-                 Dict['Carrington-SEP-Plus2Sigma-Int']['SEE_Rate']
-                 , color=PlusColor, alpha=0.5, label="EVT peak SEP flux +2\u03C3") 
-plt.fill_between(Dict['Carrington-SEP-Expected-Int']['Shielding'],
-                 Dict['Carrington-SEP-Expected-Int']['SEE_Rate'],
-                 Dict['Carrington-SEP-Minus2Sigma-Int']['SEE_Rate']
-                 , color=MinusColor, alpha=0.5, label="EVT peak SEP flux -2\u03C3")
+plt.fill_between(Shielding, ExpectedInt, Plus, color=PlusColor, alpha=0.5, label="GEO EVT 1-in-150 year peak SEP +2\u03C3") 
+plt.fill_between(Shielding, ExpectedInt, Minus, color=MinusColor, alpha=0.5, label="GEO EVT 1-in-150 year peak SEP -2\u03C3")
 
 # Other EVT plots. Do not plot for now.
 # plt.errorbar(Dict['Carrington-SEP-Plus2Sigma-Int']['Shielding'], Dict['Carrington-SEP-Plus2Sigma-Int']['SEE_Rate'],
@@ -84,8 +88,8 @@ plt.fill_between(Dict['Carrington-SEP-Expected-Int']['Shielding'],
 
 # Plot the GEO Solar Proton 5min Peak flux
 plt.errorbar(Dict['GEO-SolarProton-5minPeakFlux']['Shielding'], Dict['GEO-SolarProton-5minPeakFlux']['SEE_Rate'],
-              yerr=Dict['GEO-SolarProton-5minPeakFlux']['SEE_Error'], label="CREME96 GEO peak 5 min flux"
-              , color=GEOColor, linestyle=':', **default_errorbar_style)
+              yerr=Dict['GEO-SolarProton-5minPeakFlux']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min SEP"
+              , color=CREME96Color, linestyle=':', **default_errorbar_style)
 
 
 ########################### LEO ###################################
@@ -114,7 +118,7 @@ Dict['LEO']['SEE_Error'] = ( np.sqrt(np.square(Dict['LEO-trapped-proton']['SEE_E
                                      + np.square(Dict['LEO-cosmic-iron']['SEE_Error'])) )
 
 plt.errorbar(Dict['LEO']['Shielding'], Dict['LEO']['SEE_Rate'], yerr=Dict['LEO']['SEE_Error'],
-                label="LEO total average SEU rate", color=LEOColor, linestyle='-.', **default_errorbar_style)
+                label="LEO total 11-year mean", color=LEOColor, linestyle='-.', **default_errorbar_style)
 
 ########################### GEO ###################################
 # plt.errorbar(Dict['GEO-electron']['Shielding'], Dict['GEO-electron']['SEE_Rate'],
@@ -140,7 +144,7 @@ Dict['GEO']['SEE_Error'] = ( np.sqrt(np.square(Dict['GEO-solar-proton']['SEE_Err
                                      + np.square(Dict['GEO-cosmic-proton']['SEE_Error'])) )
 
 plt.errorbar(Dict['GEO']['Shielding'], Dict['GEO']['SEE_Rate'], yerr=Dict['GEO']['SEE_Error'],
-                label="GEO total average SEU rate", color=GEOColor, **default_errorbar_style)
+                label="GEO total 11-year mean", color=GEOColor, **default_errorbar_style)
 
 
 ########################### VAP ###################################
@@ -169,16 +173,21 @@ Dict['VAP']['SEE_Error'] = ( np.sqrt(np.square(Dict['VAP-trapped-proton']['SEE_E
                                      + np.square(Dict['VAP-cosmic-iron']['SEE_Error'])) )
 
 plt.errorbar(Dict['VAP']['Shielding'], Dict['VAP']['SEE_Rate'], yerr=Dict['VAP']['SEE_Error']
-                , label="VAP total average SEU rate", color=VAPColor, linestyle='--', **default_errorbar_style)
+                , label="VAP total 11-year mean", color=VAPColor, linestyle='--', **default_errorbar_style)
 
-
+plt.axhline(1/(8e+3 * 60 * 60 * 24), linestyle='-', label="1 upset per kByte per day", color='black')
 plt.axhline(1/(8e+6 * 60 * 60 * 24), linestyle='--', label="1 upset per MByte per day", color='black')
-plt.axhline(1/(8e+9 * 60 * 60 * 24), linestyle=':', label="1 upset per GByte per day", color='black')
+# plt.axhline(1/(8e+9 * 60 * 60 * 24), linestyle=':', label="1 upset per GByte per day", color='black')
 
-plt.ylim(1e-17, 2e-11)
+if CrossectionName == "Cypress CY62167GE30-45ZXI":
+    plt.ylim(2e-13, 3e-6)
+    pass
+else:
+    plt.ylim(1e-17, 2e-9)
+
 plt.yscale("log")
 plt.grid()
-plt.title("NanoXplore NG-Medium\nLET Cross Section SEU Rate Estimates")
+plt.title(CrossectionName + "\nLET Cross Section SEU Rate Estimates")
 
 plt.xlabel("Aluminium Shielding Thickness")
 plt.ylabel("Single Event Upset Rate [s-1 bit-1]")
@@ -187,20 +196,9 @@ plt.ylabel("Single Event Upset Rate [s-1 bit-1]")
 handles, labels = plt.gca().get_legend_handles_labels()
 
 # Create a new order for the legend
-order = [
-    labels.index("EVT peak SEP flux +2\u03C3"),
-    labels.index("EVT peak SEP flux"), 
-    labels.index("EVT peak SEP flux -2\u03C3"),
-    labels.index("CREME96 GEO peak 5 min flux"),
-    labels.index("1 upset per MByte per day"),
-    labels.index("1 upset per GByte per day"),
-    labels.index("VAP total average SEU rate"),
-    labels.index("GEO total average SEU rate"),
-    labels.index("LEO total average SEU rate"),
-    ]
-
+handles, labels = plt.gca().get_legend_handles_labels()
+order = [0, 4, 1, 5, 7, 6, 8, 2, 3]  # Adjust this list to reorder as needed
 plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='lower right')
-# plt.legend()
 
 plt.savefig("/l/triton_work/LET_Histograms/Carrington/" + CrossectionName + " Rates.pdf", format='pdf', bbox_inches="tight")
 # plt.show()
