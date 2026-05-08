@@ -28,111 +28,111 @@ https://creme.isde.vanderbilt.edu/CREME-MC/help/weibull
 
 Directory = "/l/triton_work/Fluence_Histograms/CarringtonShielded/"
 
+# CrossectionName = "NanoXplore Proton SEU" 
+CrossectionName = "Cypress CY62167GE30-45ZXI Proton SEU"
+
 # nanoXplore https://nanoxplore-wiki.atlassian.net/wiki/spaces/NAN/pages/46497810/NG-MEDIUM+Radiative+Test#Weibull-fitting
-CrossectionName = "NanoXplore Proton SEU"  
-L0 = 29.999
-W = 29.68
-S = 502E-3
-A0 = 4.85E-016 # From NanoXplore wiki in cm2 bit-1
-#A0 = 1.52E-15 # From CERN test in cm2 bit-1
+if CrossectionName == "NanoXplore Proton SEU":
+    L0 = 29.999
+    W = 29.68
+    S = 502E-3
+    A0 = 4.85E-016 # From NanoXplore wiki in cm2 bit-1
+    #A0 = 1.52E-15 # From CERN test in cm2 bit-1
 
-def f(Energy):
-    """
-    Calculate the rate estimate based on the Linear Energy Transfer (Fluence) values.
+    def f(Energy):
+        """
+        Calculate the rate estimate based on the Linear Energy Transfer (Fluence) values.
 
-    Parameters:
-    Energy (numpy.ndarray): Array of Energy values.
+        Parameters:
+        Energy (numpy.ndarray): Array of Energy values.
 
-    Returns:
-    numpy.ndarray: Array of rate estimates.
-    """
-    
-    result = np.zeros_like(Energy)
-    # Remove all values of Energy that are less than x0
-    mask = Energy > L0
-    # A * (1 - np.exp(-((x - x0) / W) ** s))
-    result[mask] = A0 * (1 - np.exp(-((Energy[mask] - L0) / W) ** S))
+        Returns:
+        numpy.ndarray: Array of rate estimates.
+        """
+        
+        result = np.zeros_like(Energy)
+        # Remove all values of Energy that are less than x0
+        mask = Energy > L0
+        # A * (1 - np.exp(-((x - x0) / W) ** s))
+        result[mask] = A0 * (1 - np.exp(-((Energy[mask] - L0) / W) ** S))
 
-    return result
-
-
-# CrossectionName = "Cypress CY62167GE30-45ZXI Proton SEU"
-
-# E_pts = np.array([
-#         0.6018484958761148,
-#         0.7017038286703828,
-#         0.7990318713533592,
-#         0.9045035097830326,
-#         1.0,
-#         1.1055789050944362,
-#         1.502875750260605,
-#         2.007077315996211,
-#         2.51188643150958,
-#         2.9986313485755667,
-#         4.004645731836126,
-#         5.011872336272722,
-#         40.04645731836127,
-#         80.37633606969334,
-#         123.68233972929845,
-#         164.20433388871635,
-#         183.69721161885397,
-#         # 1000.0,
-#     ], dtype=float)
-
-# S_pts = np.array([
-#     4.0343096658867766e-11,
-#     1.3043213867190094e-10,
-#     1.068676240164437e-9,
-#     8.952061908580012e-10,
-#     1.2757607330635113e-9,
-#     4.2169650342858224e-10,
-#     5.7493054776844584e-11,
-#     4.923882631706752e-12,
-#     1.664002008471059e-12,
-#     6.281696115744896e-13,
-#     1.5229733635477114e-13,
-#     6.713099386829804e-14,
-#     1.0e-13,
-#     9.152473108773893e-14,
-#     8.193350588635765e-14,
-#     7.838460410979093e-14,
-#     7.666822074546222e-14,
-#     # 7.666822074546223e-14,
-# ], dtype=float)
-
-# def f(E_MeV: float | np.ndarray) -> float | np.ndarray:
-#     """
-#     Cypress SRAM proton SEU cross section (cm^2/bit) vs proton energy (MeV),
-#     using ONLY interpolation through the measured points from Coronetti et al. (2021) Figure 3.  
-
-#     Behavior:
-#       - Log-log piecewise linear interpolation between measured (E, sigma) points.
-#       - For E below the lowest point: Zero cross section (no extrapolation below the lowest measured energy, since that would be very uncertain and likely non-physical given the steep drop-off at low energy).
-#       - For E above the highest point: keep cross section constant at the highest-point value.
-
-#     Input:
-#       E_MeV: scalar or array-like proton energy in MeV
-
-#     Output:
-#       sigma in cm^2/bit (scalar if scalar input; numpy array otherwise)
-#     """
-#     # --- LOW-ENERGY PROTON (LEP) EMPIRICAL DATA ---
-#     # Extracted from Coronetti et al. (2021) Figure 3.  
-    
-
-#     # Log-log interpolation
-#     logE_pts = np.log10(E_pts)
-#     logS_pts = np.log10(S_pts)
-#     logS = np.interp(np.log10(E_MeV), logE_pts, logS_pts)
-#     S = 10.0 ** logS
-
-#     # All S values below the lowest measured energy are set to zero (no extrapolation below the lowest measured energy, since that would be very uncertain and likely non-physical given the steep drop-off at low energy).
-#     S = np.where(E_MeV < E_pts[0], 0.0, S)
-
-#     return S
+        return result
 
 
+if CrossectionName == "Cypress CY62167GE30-45ZXI Proton SEU":
 
+    E_pts = np.array([
+            0.6018484958761148,
+            0.7017038286703828,
+            0.7990318713533592,
+            0.9045035097830326,
+            1.0,
+            1.1055789050944362,
+            1.502875750260605,
+            2.007077315996211,
+            2.51188643150958,
+            2.9986313485755667,
+            4.004645731836126,
+            5.011872336272722,
+            40.04645731836127,
+            80.37633606969334,
+            123.68233972929845,
+            164.20433388871635,
+            183.69721161885397,
+            # 1000.0,
+        ], dtype=float)
+
+    S_pts = np.array([
+        4.0343096658867766e-11,
+        1.3043213867190094e-10,
+        1.068676240164437e-9,
+        8.952061908580012e-10,
+        1.2757607330635113e-9,
+        4.2169650342858224e-10,
+        5.7493054776844584e-11,
+        4.923882631706752e-12,
+        1.664002008471059e-12,
+        6.281696115744896e-13,
+        1.5229733635477114e-13,
+        6.713099386829804e-14,
+        1.0e-13,
+        9.152473108773893e-14,
+        8.193350588635765e-14,
+        7.838460410979093e-14,
+        7.666822074546222e-14,
+        # 7.666822074546223e-14,
+    ], dtype=float)
+
+    def f(E_MeV: float | np.ndarray) -> float | np.ndarray:
+        """
+        Cypress SRAM proton SEU cross section (cm^2/bit) vs proton energy (MeV),
+        using ONLY interpolation through the measured points from Coronetti et al. (2021) Figure 3.  
+
+        Behavior:
+        - Log-log piecewise linear interpolation between measured (E, sigma) points.
+        - For E below the lowest point: Zero cross section (no extrapolation below the lowest measured energy, since that would be very uncertain and likely non-physical given the steep drop-off at low energy).
+        - For E above the highest point: keep cross section constant at the highest-point value.
+
+        Input:
+        E_MeV: scalar or array-like proton energy in MeV
+
+        Output:
+        sigma in cm^2/bit (scalar if scalar input; numpy array otherwise)
+        """
+        # --- LOW-ENERGY PROTON (LEP) EMPIRICAL DATA ---
+        # Extracted from Coronetti et al. (2021) Figure 3.  
+        
+
+        # Log-log interpolation
+        logE_pts = np.log10(E_pts)
+        logS_pts = np.log10(S_pts)
+        logS = np.interp(np.log10(E_MeV), logE_pts, logS_pts)
+        S = 10.0 ** logS
+
+        # All S values below the lowest measured energy are set to zero (no extrapolation below the lowest measured energy, since that would be very uncertain and likely non-physical given the steep drop-off at low energy).
+        S = np.where(E_MeV < E_pts[0], 0.0, S)
+
+        return S
 
 
 
@@ -148,8 +148,8 @@ FolderList = [f for f in os.listdir(Directory) if os.path.isdir(os.path.join(Dir
 
 for F, Folder in enumerate(FolderList):
 
-    #if Folder != "Carrington-SEP-Expected-Int-LINEAR":
-    #    continue
+    # if Folder != "Carrington-SEP-Expected-Int":
+    #     continue
 
     # Generate list of all subfolder names in the Folder
     SubFolderList = [f for f in os.listdir(Directory + Folder) if os.path.isdir(os.path.join(Directory + Folder, f))]
@@ -175,23 +175,26 @@ for F, Folder in enumerate(FolderList):
         TotalFluenceError = np.sqrt(np.sum(TotalFluenceError))
         TotalFluenceU = ufloat(TotalFluence, TotalFluenceError)
 
+        BinWidths = ProtonHist['upper'] - ProtonHist['lower']
+
         ### Fluence Histogram ###############
         fig, ax1 = plt.subplots(1)
-        plt.bar(ProtonHist['lower'], ProtonHist['value'], width=ProtonHist['upper'] - ProtonHist['lower'], align='edge', alpha=0.3) # pyright: ignore[reportCallIssue, reportArgumentType]
-        plt.errorbar(ProtonHist['mean'], ProtonHist['value'], ProtonHist['error'], fmt=' ', capsize=5, elinewidth=1, # pyright: ignore[reportArgumentType] # pyright: ignore[reportCallIssue] # pyright: ignore[reportCallIssue] # type: ignore
+        plt.bar(ProtonHist['lower'], ProtonHist['value'], width=BinWidths, align='edge', alpha=0.3) # pyright: ignore[reportCallIssue, reportArgumentType]
+        plt.errorbar(ProtonHist['mean'], ProtonHist['value'], ProtonHist['error'], fmt=' ', capsize=2, elinewidth=1, # pyright: ignore[reportArgumentType] # pyright: ignore[reportCallIssue] # pyright: ignore[reportCallIssue] # type: ignore
                      capthick=1, label="Fluence Histogram")
         plt.plot([], [], label="SEU Cross Section", color='C1')
         plt.yscale("log")
         plt.xscale("log")
+        plt.xlim(5e-1, 1.5e2)
         plt.grid(which='major')
         plt.title(Folder + " " + CrossectionName + " " + SubFolder + " Al\nTotal Fluence = " + str(TotalFluenceU) + " cm-2 s-1")
         plt.xlabel("Energy [MeV]")
-        ax1.legend(loc='center right')
+        ax1.legend(loc='upper left')
         ax1.set_ylabel("Fluence per Energy bin [cm-2 s-1]", color='C0')
         ax1.tick_params(axis='y', colors='C0')
 
         ax2 = ax1.twinx()
-        #plt.plot(E_pts, S_pts, '.-', color='C1')
+        # plt.plot(E_pts, S_pts, '.-', color='C1')
         plt.plot(ProtonHist['lower'], f(ProtonHist['lower']), color='C1')
         ax2.set_ylabel(CrossectionName + " Cross Section [cm2 bit-1]", color='C1')
         plt.yscale("log")
@@ -249,8 +252,8 @@ for F, Folder in enumerate(FolderList):
             continue
 
         fig, ax1 = plt.subplots(1)
-        plt.bar(SEEHist['lower'], SEEHist['value'], width=SEEHist['upper'] - SEEHist['lower'], align='edge', alpha=0.3)
-        plt.errorbar(SEEHist['mean'], SEEHist['value'], SEEHist['error'], fmt=' ', capsize=5, elinewidth=1,
+        plt.bar(SEEHist['lower'], SEEHist['value'], width=BinWidths, align='edge', alpha=0.3)
+        plt.errorbar(SEEHist['mean'], SEEHist['value'], SEEHist['error'], fmt=' ', capsize=2, elinewidth=1,
                      capthick=1, label="SEU Rate Histogram")
         plt.plot([], [], label="SEU Cross Section", color='C1')
         plt.yscale("log")
@@ -258,14 +261,16 @@ for F, Folder in enumerate(FolderList):
         plt.grid(which='major')
         plt.title(Folder + " " + CrossectionName + " " + SubFolder + " Al\nTotal SEU Rate = " + str(SEERateU) + " s-1 bit-1")
         plt.xlabel("Energy [MeV]")
-        ax1.legend(loc='center right')
+        ax1.legend()
         ax1.set_ylabel("SEU Rate per Energy bin [s-1 bit-1]", color='C0')
         ax1.tick_params(axis='y', colors='C0')
 
         ax2 = ax1.twinx()
+        # plt.plot(E_pts, S_pts, '.-', color='C1')
         plt.plot(SEEHist['lower'], f(SEEHist['lower']), color='C1')
         ax2.set_ylabel(CrossectionName + " Cross Section [cm2 bit-1]", color='C1')
         plt.yscale("log")
+        plt.xlim(5e-1, 1.5e2)
         ax2.tick_params(axis='y', colors='C1')
 
         plt.savefig(path + "../" + Folder + " " + CrossectionName + " " + SubFolder + " SEE-Hist.pdf", format='pdf', bbox_inches="tight")

@@ -4,8 +4,8 @@ import numpy as np
 
 Directory = "/l/triton_work/Fluence_Histograms/CarringtonShielded/"
 
-# CrossectionName = "NanoXplore Proton SEU"  
-CrossectionName = "Cypress CY62167GE30-45ZXI Proton SEU"
+CrossectionName = "NanoXplore Proton SEU"  
+# CrossectionName = "Cypress CY62167GE30-45ZXI Proton SEU"
 
 # Define default errorbar style
 default_errorbar_style = {
