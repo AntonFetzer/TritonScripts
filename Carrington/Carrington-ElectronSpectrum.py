@@ -64,7 +64,7 @@ plt.plot(EVT_Data["Energy"], EVT_Data["Flux"], '-', linewidth=2.5, color=Expecte
 
 
 # Plot the data points from the function
-plt.plot(Energies, Int, 'o-', label="GEO EVT 1-in-100 year peak 6-min", linewidth=2.5, color=Expected)
+plt.plot(Energies, Int, 'o-', label="GEO EVT 1-in-150 year peak 6-min", linewidth=2.5, color=Expected)
 
 ## FLUMIC spectrum
 # FLUMIC Energy in MeV

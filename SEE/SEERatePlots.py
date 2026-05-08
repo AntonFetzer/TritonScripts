@@ -5,7 +5,7 @@ import numpy as np
 Directory = "/l/triton_work/LET_Histograms/Carrington/"
 
 CrossectionName = "Cypress CY62167GE30-45ZXI"  
-# CrossectionName = "NanoXplore SEU"  
+# CrossectionName = "NanoXplore SEU"
 
 # Define default errorbar style
 default_errorbar_style = {
