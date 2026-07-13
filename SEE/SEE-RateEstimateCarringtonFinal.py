@@ -1,5 +1,7 @@
 import os
 import numpy as np
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import matplotlib.pyplot as plt
 from Dependencies.TotalLETHistos import totalLETHistos
 from uncertainties import ufloat
@@ -26,20 +28,20 @@ F(x) = A (1- exp{-[(x-x0)/W] ** s}) where
 https://creme.isde.vanderbilt.edu/CREME-MC/help/weibull
 '''
 
-Directory = "/l/triton_work/LET_Histograms/Carrington/"
+Directory = "/scratch/work/fetzera1/GRAS/LET_Histograms/Carrington/"
 
 # nanoXplore https://nanoxplore-wiki.atlassian.net/wiki/spaces/NAN/pages/46497810/NG-MEDIUM+Radiative+Test#Weibull-fitting
-CrossectionName = "NanoXplore SEU"  
-L0 = 0.11 
-W = 36
-S = 4.4
-A0 = 5.2E-09
+# CrossectionName = "NanoXplore SEU"  
+# L0 = 0.11 
+# W = 36
+# S = 4.4
+# A0 = 5.2E-09
 
-# CrossectionName = "Cypress CY62167GE30-45ZXI"  
-# L0 = 0.1
-# W = 70
-# S = 1.2
-# A0 = 2.6E-07
+CrossectionName = "Cypress CY62167GE30-45ZXI"  
+L0 = 0.1
+W = 70
+S = 1.2
+A0 = 2.6E-07
 
 
 def f(LET):
@@ -108,7 +110,7 @@ for F, Folder in enumerate(FolderList):
             continue
 
         # Normalise from 11 year fluence to flux
-        if "-electron" in Folder or "-solar-proton" in Folder or "-trapped-proton" in Folder or "-cosmic-proton" in Folder or "-cosmic-iron" in Folder:
+        if "-electron" in Folder or "-solar-proton" in Folder or "-trapped-proton" in Folder or "-cosmic-proton" in Folder or "-cosmic-iron" in Folder or "-solar-helium" in Folder or "-solar-oxygen" in Folder or "-solar-iron" in Folder or "-solar-nickel" in Folder:
             NormalisationFactor = 4015 * 24 * 3600  # seconds in 11 years
             LETHist['value'] = LETHist['value'] / NormalisationFactor
             LETHist['error'] = LETHist['error'] / NormalisationFactor
@@ -119,6 +121,7 @@ for F, Folder in enumerate(FolderList):
         TotalLETError = np.sqrt(np.sum(TotalLETError))
         TotalLETU = ufloat(TotalLET, TotalLETError)
 
+        '''
         ### LET Histogram ###############
         fig, ax1 = plt.subplots(1)
         plt.bar(LETHist['lower'], LETHist['value'], width=LETHist['upper'] - LETHist['lower'], align='edge', alpha=0.3)
@@ -143,7 +146,7 @@ for F, Folder in enumerate(FolderList):
         plt.savefig(path + "../" + Folder + " " + CrossectionName + " " + SubFolder + " LET-Hist.pdf", format='pdf', bbox_inches="tight")
         plt.close('all')
         #plt.show()
-
+        '''
 
         ### SEE rate ###############
 
@@ -186,7 +189,7 @@ for F, Folder in enumerate(FolderList):
             continue
 
         ### SEE Histogram ###############
-
+        '''
         fig, ax1 = plt.subplots(1)
         plt.bar(SEEHist['lower'], SEEHist['value'], width=SEEHist['upper'] - SEEHist['lower'], align='edge', alpha=0.3)
         plt.errorbar(SEEHist['mean'], SEEHist['value'], SEEHist['error'], fmt=' ', capsize=5, elinewidth=1,
@@ -210,5 +213,5 @@ for F, Folder in enumerate(FolderList):
         plt.savefig(path + "../" + Folder + " " + CrossectionName + " " + SubFolder + " SEE-Hist.pdf", format='pdf', bbox_inches="tight")
         plt.close('all')
         #plt.show()
-        
+        '''
 CSVFile.close()

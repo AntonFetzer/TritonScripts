@@ -124,29 +124,20 @@ plt.plot(VAP_AE9_Protons['Energy'], VAP_AE9_Protons['Integral'], '.-', label="VA
 ## Read in LEO SEP spectrum
 # LEO_SEP = "/l/triton_work/Spectra/Carrington/LEO/spenvis_sef.txt"
 # LEO_SEP_Data = readSpenvis_sef_protons(LEO_SEP)
-# LEO_SEP_Fluence = LEO_SEP_Data['IFluence']
-# Convert from Fluence to Flux. Mission duration is 4015 days
-# LEO_SEP_Flux = LEO_SEP_Fluence / (4015 * 24 * 3600)
 
-# plt.plot(LEO_SEP_Data['Energy'], LEO_SEP_Flux, '+--', label="SAPPHIRE mean LEO Solar Proton flux", color=LEOColor)
+# plt.plot(LEO_SEP_Data['Energy'], LEO_SEP_Data['IFlux'], '+--', label="SAPPHIRE mean LEO Solar Proton flux", color=LEOColor)
 # Earth mangetosphere shields LEO from SEP, therefore flux is below 1e-3 cm-2 s-1, therefore not plotted
 
 # ## Read in Geostationary SEP spectrum
 GEO_SEP = "/l/triton_work/Spectra/Carrington/GEO/spenvis_sef.txt"
 GEO_SEP_Data = readSpenvis_sef_protons(GEO_SEP)
-GEO_SEP_Fluence = GEO_SEP_Data['IFluence']
-# Convert from Fluence to Flux. Mission duration is 4015 days
-GEO_SEP_Flux = GEO_SEP_Fluence / (4015 * 24 * 3600)
 
-plt.plot(GEO_SEP_Data['Energy'], GEO_SEP_Flux, '+--', label="GEO SAPPHIRE 11-year mean SEP", color=GEOColor)
+plt.plot(GEO_SEP_Data['Energy'], GEO_SEP_Data['IFlux'], '+--', label="GEO SAPPHIRE 11-year mean SEP", color=GEOColor)
 
 # ## Read in VAP SEP spectrum
 # VAP_SEP = "/l/triton_work/Spectra/Carrington/VAP/spenvis_sef.txt"
 # VAP_SEP_Data = readSpenvis_sef_protons(VAP_SEP)
-# VAP_SEP_Fluence = VAP_SEP_Data['IFluence']
-# Convert from Fluence to Flux. Mission duration is 4015 days
-# VAP_SEP_Flux = VAP_SEP_Fluence / (4015 * 24 * 3600)
-# plt.plot(VAP_SEP_Data['Energy'], VAP_SEP_Flux, '+--', label="SAPPHIRE mean VAP Solar Proton flux", color=VAPColor)
+# plt.plot(VAP_SEP_Data['Energy'], VAP_SEP_Data['IFlux'], '+--', label="SAPPHIRE mean VAP Solar Proton flux", color=VAPColor)
 # Very similar to the GEO SEP, therefore not plotted
 
 

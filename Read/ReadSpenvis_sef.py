@@ -1,22 +1,56 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+def integrated_spectral_energy(energy, differential_spectrum):
+    """Return integral(E * dPhi/dE dE) over the available energy range."""
+    valid = np.isfinite(energy) & np.isfinite(differential_spectrum)
+    energy = energy[valid]
+    differential_spectrum = differential_spectrum[valid]
+    if energy.size < 2:
+        return 0.0
+
+    order = np.argsort(energy)
+    energy = energy[order]
+    differential_spectrum = differential_spectrum[order]
+    return np.trapz(energy * differential_spectrum, energy)
+
+
+def readSpenvis_sef_duration(fileName):
+    """Return the total mission duration in seconds from the MIS_DUR header line.
+
+    The tabulated SAPPHIRE fluences already include the per-energy attenuation
+    and exposure-time effects, so dividing by the total mission duration gives
+    the mission-averaged flux.
+    """
+    with open(fileName, 'r') as f:
+        for line in f:
+            if "'MIS_DUR'" in line:
+                days = float(line.split(',')[2])
+                return days * 86400.0
+    raise ValueError(f"{fileName}: no 'MIS_DUR' header line found")
+
+
 def readSpenvis_sef_protons(fileName):
-    """ 
-    Reads the SAPPHIRE solar proton fluence spectrumn from spenvis_sef.txt files.
+    """
+    Reads the SAPPHIRE solar proton fluence spectrum from spenvis_sef.txt files
+    and converts it to mission-averaged flux.
 
     Args:
         file (str): Path to the spenvis_sef.txt file.
-    
+
     Returns:
-        dict: Dictionary with numpy arrays of fluence spectrum:
+        dict: Dictionary with numpy arrays of flux spectrum:
             - 'Energy': Energy in MeV
-            - 'IFluence': Integral Fluence in cm-2
-            - 'DFluence': Differential Fluence in cm-2 MeV-1
+            - 'IFlux': Integral Flux in cm-2 s-1
+            - 'DFlux': Differential Flux in cm-2 s-1 MeV-1
+            - 'Duration': Mission duration in s (multiply back for fluence)
     """
-    keys = ['Energy', 'IFluence', 'DFluence']
+    keys = ['Energy', 'IFlux', 'DFlux']
     ProtonTable = {key: [] for key in keys}
-    
+
+    Duration = readSpenvis_sef_duration(fileName)
+
     ReadFlag = 0
     with open(fileName, 'r') as f:
         for line in f:
@@ -30,12 +64,14 @@ def readSpenvis_sef_protons(fileName):
                     # Parse values
                     values = [value.strip() for value in line.split(',')]
                     ProtonTable['Energy'].append(float(values[0]))
-                    ProtonTable['IFluence'].append(float(values[1]))
-                    ProtonTable['DFluence'].append(float(values[2]))
-    
+                    ProtonTable['IFlux'].append(float(values[1]) / Duration)
+                    ProtonTable['DFlux'].append(float(values[2]) / Duration)
+
     # Convert lists inside the dicts to numpy arrays
     for key in keys:
         ProtonTable[key] = np.array(ProtonTable[key])
+
+    ProtonTable['Duration'] = Duration
 
     return ProtonTable
 
@@ -51,10 +87,13 @@ AtomicMass = [1.008, 4.003, 6.941, 9.012, 10.811, 12.011, 14.007, 15.999, 18.998
               190.23, 192.217, 195.078, 196.967, 200.59, 204.383, 207.2, 208.98, 209, 210, 222, 223, 226, 227,
               232.038, 231.036, 238.029]
 
-############ SAPPHIRE Spectra are in Fluence with minimum duration 6 months !!! ###############################
-
-def readSpenvis_sef_Ions(fileName):
+def readSpenvis_sef_Ions(fileName, masses=AtomicMass):
+    """Read the 92-species SAPPHIRE ion fluence table and return mission-averaged
+    flux as Data[Z-1, point, (Energy MeV, IFlux cm-2 s-1, DFlux cm-2 s-1 MeV-1)]."""
     print("Reading in", fileName)
+
+    Duration = readSpenvis_sef_duration(fileName)
+
     f = open(fileName, "r")
 
     # Ignore the Proton Table, because the same data is also in the Ion table.
@@ -81,44 +120,50 @@ def readSpenvis_sef_Ions(fileName):
 
     for i, line in enumerate(Iontable):
         EnergyPerNucleon[i] = line[0]
-        IonData[i] = line[1:cols]     # Reading the Fluence
-        #IonData[i] /= (1.578e+7)   # The sef.txt contains the Fluence per 6 months not the flux!
+        # The sef.txt tabulates the mission Fluence (attenuation and exposure
+        # already included); divide by the mission duration to get the flux.
+        IonData[i] = line[1:cols] / Duration
 
     # print(Energy)
 
     Data = np.zeros((NumSpecies, len(Iontable), 3), dtype=float)
 
     for i in range(NumSpecies):
-        Energy = EnergyPerNucleon*AtomicMass[i]
+        Energy = EnergyPerNucleon*masses[i]
         #print("Species:", i)
         #print("AtomicMass:", AtomicMass[i])
         #print("Energy:", Energy)
         #print("IonData:", IonData[:, i+1])
         Data[i, :, 0] = Energy
         Data[i, :, 1] = IonData[:, i]  # Integral Flux
-        Data[i, :, 2] = IonData[:, NumSpecies+i]  # Differential Flux
+        Data[i, :, 2] = IonData[:, NumSpecies+i] / masses[i]  # per MeV/nuc -> per MeV
 
     return Data
 # Data[ Z-NUmber , DatapointNum, Energy or Integral Flux or Differential Flux ]
 
 
 if __name__ == "__main__":
-    ############ SAPPHIRE Spectra are in Fluence with minimum duration 6 months !!! ###############################
-    ############ Check duration and normalisation of the spectrum #################################################
 
-    Data = readSpenvis_sef_protons("/l/triton_work/Spectra/Carrington/GEO/spenvis_sef.txt")
+    File = "/home/anton/triton_work/Spectra/Carrington/GEO/spenvis_sef.txt"
 
-    print(Data['Energy'])
-    print(Data['IFluence'])
-    print(Data['DFluence'])
+    # Use integer isotope masses so the MeV/nuc -> MeV conversion matches
+    # the isotope specified in the Geant4 GPS macro.
+    SelectedSpecies = {'H-1': (0, 1), 'He-4': (1, 4), 'C-12': (5, 12), 'O-16': (7, 16),
+                       'Fe-56': (25, 56), 'Si-28': (13, 28), 'Ca-40': (19, 40), 'Ni-58': (27, 58)}
 
-    '''
-    DataT = readSpenvis_sef("/l/triton_work/Spectra/ISS/spenvis_sef.txt")
+    IsotopeMasses = list(AtomicMass)
+    for index, A in SelectedSpecies.values():
+        IsotopeMasses[index] = A
 
-    IntorDiff = 1  # 1 for Int 2 for Diff
+    IonDataIso = readSpenvis_sef_Ions(File, masses=IsotopeMasses)
 
-    #plt.bar(range(93), DataT[:, 0, 1])
-    #print(DataT[:, 0, 1])
+    for name, (Z, A) in SelectedSpecies.items():
+        print(f"\n{name}: Energy [MeV] | Differential Flux [cm^-2 s^-1 MeV^-1]")
+        for E, D in zip(IonDataIso[Z, :, 0], IonDataIso[Z, :, 2]):
+            print(f"{E:.17g} {D:.17g}")
+
+    # Compare species using natural-abundance atomic weights for ranking.
+    IonData = readSpenvis_sef_Ions(File)
 
     Species = ['H ', 'He', 'Li', 'Be', 'B ', 'C ', 'N ', 'O ', 'F ', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P ', 'S ', 'Cl',
                'Ar', 'K ', 'Ca', 'Sc', 'Ti', 'V ', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se',
@@ -127,19 +172,23 @@ if __name__ == "__main__":
                'Tm', 'Yb', 'Lu', 'Hf', 'Ta', 'W ', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At',
                'Rn', 'Fr', 'Ra', 'Ac', 'Th', 'Pa', 'U ']
 
-    #print(np.shape(DataT))
+    IntorDiff = 1  # 1 for Int 2 for Diff
 
-    for Specie in range(np.shape(DataT)[0]):
-        FluxMaxE = np.max(DataT[Specie, :, IntorDiff] * DataT[Specie, :, 0])
-        if FluxMaxE > 1e-10:
-            print(f"Species: {Species[Specie]}, Max Flux * Energy: {FluxMaxE}")
-            plt.plot(DataT[Specie, :, 0], DataT[Specie, :, IntorDiff], label=Species[Specie])
-            #for Energy, Flux in zip(DataT[Specie, :, 0], DataT[Specie, :, IntorDiff]):
-                #if Energy > 10:
-                    #print(f"{Energy} {Flux}")
+    # Rank spectra by total particle energy flux, not by their value at one
+    # arbitrarily selected energy: integral(E * differential flux dE).
+    SpectralEnergy = np.zeros(np.shape(IonData)[0])
+    for Specie in range(np.shape(IonData)[0]):
+        SpectralEnergy[Specie] = integrated_spectral_energy(
+            IonData[Specie, :, 0], IonData[Specie, :, 2]
+        )
 
-    #plt.xlim(10, 1e5)
-    #plt.ylim(1e-5, 1e6)
+    TopSpecies = np.argsort(SpectralEnergy)[::-1][:20]
+
+    print(f"\nTop {len(TopSpecies)} species by total energy flux:")
+    for Specie in TopSpecies:
+        print(f"Species: {Species[Specie]}, Energy Flux: {SpectralEnergy[Specie]:.3e} MeV cm^-2 s^-1")
+        plt.plot(IonData[Specie, :, 0], IonData[Specie, :, IntorDiff], label=Species[Specie])
+
     plt.xscale("log")
     plt.yscale("log")
 
@@ -154,5 +203,3 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid(which='both')
     plt.show()
-
-'''

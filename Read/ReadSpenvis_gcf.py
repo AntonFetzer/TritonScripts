@@ -10,7 +10,7 @@ AtomicMass = [1.008, 4.003, 6.941, 9.012, 10.811, 12.011, 14.007, 15.999, 18.998
               157.25, 158.925, 162.5, 164.93, 167.259, 168.934, 173.04, 174.967, 178.49, 180.948, 183.84, 186.207,
               190.23, 192.217, 195.078, 196.967, 200.59, 204.383, 207.2, 208.98, 209, 210, 222, 223, 226, 227,
               232.038, 231.036, 238.029]
-def readSpenvis_gcf(fileName):
+def readSpenvis_gcf(fileName, masses=AtomicMass):
     print("Reading in", fileName)
     f = open(fileName, "r")
 
@@ -54,14 +54,14 @@ def readSpenvis_gcf(fileName):
 
     # Fill the data array with energy, integral flux, and differential flux for each species
     for i in range(NumSpecies):
-        Energy = EnergyPerNucleon*AtomicMass[i]
+        Energy = EnergyPerNucleon*masses[i]
         #print("Species:", i)
         #print("AtomicMass:", AtomicMass[i])
         #print("Energy:", Energy)
         #print("IonData:", IonData[:, i+1])
         Data[i, :, 0] = Energy
         Data[i, :, 1] = IonData[:, i]  # Integral Flux
-        Data[i, :, 2] = IonData[:, NumSpecies+i]  # Differential Flux
+        Data[i, :, 2] = IonData[:, NumSpecies+i] / masses[i]  # per MeV/nuc -> per MeV
 
     return Data
 # Data[ Z-NUmber , DatapointNum, Energy or Integral Flux or Differential Flux ]

@@ -2,6 +2,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+def integrated_spectral_power(energy, differential_flux):
+    """Return integral(E * dPhi/dE dE) over the available energy range."""
+    valid = np.isfinite(energy) & np.isfinite(differential_flux)
+    energy = energy[valid]
+    differential_flux = differential_flux[valid]
+    if energy.size < 2:
+        return 0.0
+
+    order = np.argsort(energy)
+    energy = energy[order]
+    differential_flux = differential_flux[order]
+    return np.trapz(energy * differential_flux, energy)
+
+
 def readSpenvis_sefflare(file):
     """
     Reads the proton peak flux from Solar Flare spenvis_sefflare.txt files.
@@ -159,7 +173,7 @@ if __name__ == "__main__":
     # Print differential ion peak flux tables for selected species,
     # using integer isotope masses (H-1, He-4, C-12, O-16, Fe-56) so the
     # MeV/nuc -> MeV conversion matches the isotope specified in the Geant4 GPS macro.
-    SelectedSpecies = {'H-1': (0, 1), 'He-4': (1, 4), 'C-12': (5, 12), 'O-16': (7, 16), 'Fe-56': (25, 56)}
+    SelectedSpecies = {'H-1': (0, 1), 'He-4': (1, 4), 'C-12': (5, 12), 'O-16': (7, 16), 'Fe-56': (25, 56), 'Si-28': (13, 28), 'Ca-40': (19, 40)}
 
     IsotopeMasses = list(AtomicMass)
     for index, A in SelectedSpecies.values():
@@ -172,7 +186,7 @@ if __name__ == "__main__":
         for E, D in zip(IonDataIso[Z, :, 0], IonDataIso[Z, :, 2]):
             print(f"{E:.17g} {D:.17g}")
 
-    # Compare the ion species and plot the top candidates for integral flux around 100 MeV
+    # Compare the ion species and plot the top candidates by total spectral power.
     # (natural-abundance atomic weights are fine here, it is only a ranking)
     IonData = readSpenvis_sefflare_Ions(File)
 
@@ -183,24 +197,23 @@ if __name__ == "__main__":
                'Tm', 'Yb', 'Lu', 'Hf', 'Ta', 'W ', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At',
                'Rn', 'Fr', 'Ra', 'Ac', 'Th', 'Pa', 'U ']
 
-    EvalEnergy = 200  # MeV
     IntorDiff = 1  # 1 for Int 2 for Diff
 
-    # Integral flux of each species interpolated at EvalEnergy
-    FluxAtE = np.zeros(np.shape(IonData)[0])
+    # Rank spectra by total particle energy flux, not by their value at one
+    # arbitrarily selected energy: integral(E * differential flux dE).
+    SpectralPower = np.zeros(np.shape(IonData)[0])
     for Specie in range(np.shape(IonData)[0]):
-        Energy = IonData[Specie, :, 0]
-        if Energy[0] <= EvalEnergy <= Energy[-1]:
-            FluxAtE[Specie] = np.interp(EvalEnergy, Energy, IonData[Specie, :, 1])
+        SpectralPower[Specie] = integrated_spectral_power(
+            IonData[Specie, :, 0], IonData[Specie, :, 2]
+        )
 
-    TopSpecies = np.argsort(FluxAtE)[::-1][:5]
+    TopSpecies = np.argsort(SpectralPower)[::-1][:95]
 
-    print(f"\nTop 10 species by integral flux at {EvalEnergy} MeV:")
+    print(f"\nTop {len(TopSpecies)} species by total spectral power:")
     for Specie in TopSpecies:
-        print(f"Species: {Species[Specie]}, Integral Flux: {FluxAtE[Specie]:.3e} cm^-2 s^-1")
+        print(f"Species: {Species[Specie]}, Spectral Power: {SpectralPower[Specie]:.3e} MeV cm^-2 s^-1")
         plt.plot(IonData[Specie, :, 0], IonData[Specie, :, IntorDiff], label=Species[Specie])
 
-    plt.axvline(EvalEnergy, color='grey', linestyle='--', linewidth=1)
     plt.xscale("log")
     plt.yscale("log")
 
