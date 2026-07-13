@@ -34,16 +34,24 @@ def totalLETHistos(path):
     LETList = []
     EffList = []
 
-    # Read the files and append histogram dicts to the list of histograms
+    # Read the files and append histogram dicts to the list of histograms.
+    # Files without histogram data (0 kB csvs from jobs killed while writing
+    # a checkpoint) are skipped; readLETHistos already warns about them.
     for File in Files:
         LETHistDict, EffHistDict = readLETHistos(os.path.join(path, File))
+        if len(LETHistDict['lower']) == 0:
+            continue
         LETList.append(LETHistDict)
         EffList.append(EffHistDict)
+
+    if not LETList:
+        print(f"ERROR !!! None of the {len(Files)} csv files in {path} contains histogram data")
+        return None, None
 
     # Merge the histograms
     TotalLETHist = mergeHistograms(LETList)
     TotalEffHist = mergeHistograms(EffList)
-    
+
     return TotalLETHist, TotalEffHist
 
 

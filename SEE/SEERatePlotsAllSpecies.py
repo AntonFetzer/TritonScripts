@@ -3,9 +3,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 Directories = {
-    "CREME96": "/home/anton/triton_work/GRAS/LET_Histograms/Carrington-GEO-CREME96-All-Species/",
-    "SAPPHIRE": "/home/anton/triton_work/GRAS/LET_Histograms/Carrington-GEO-SAPPHIRE-All-Species/",
-    "GCR": "/home/anton/triton_work/GRAS/LET_Histograms/Carrington-GEO-GCR-All-Species/",
+    "GEO-CREME96": "/home/anton/triton_work/GRAS/LET_Histograms/Carrington-GEO-CREME96-All-Species/",
+    "GEO-SAPPHIRE": "/home/anton/triton_work/GRAS/LET_Histograms/Carrington-GEO-SAPPHIRE-All-Species/",
+    "GEO-GCR": "/home/anton/triton_work/GRAS/LET_Histograms/Carrington-GEO-GCR-All-Species/",
+    "LEO-SAPPHIRE": "/home/anton/triton_work/GRAS/LET_Histograms/Carrington-LEO-SAPPHIRE-All-Species/",
+    "LEO-GCR": "/home/anton/triton_work/GRAS/LET_Histograms/Carrington-LEO-GCR-All-Species/",
 }
 
 CrossectionNames = ["Cypress CY62167GE30-45ZXI", "NanoXplore SEU"]

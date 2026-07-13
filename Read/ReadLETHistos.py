@@ -11,6 +11,7 @@ def readLETHistos(file):
     Eff = {key: [] for key in keys}
 
     ReadFlag = 0
+    NumOfEvt = 0.0
 
     # Open the file and read line by line
     with open(file, 'r') as f:
@@ -36,23 +37,15 @@ def readLETHistos(file):
                     values = [float(x) for x in line.split(',')]  # Adjust split as necessary
                     for i, key in enumerate(keys):
                         Eff[key].append(values[i])
-            # elif ReadFlag == 4:
-            #     if "'Error on number of steps'" in line:
-            #         ReadFlag = 5
-            # elif ReadFlag == 5:
-            #     NumEvents = int(float(line.split(',')[0]))
-
-            #     if NumEvents != 2000000000:
-            #         # Delete the file to avoid using it later
-            #         try: 
-            #             print("WARNING !!! Number of events is not 2e9 but " + str(NumEvents) + " Deleting file !!!")
-            #             os.remove(file)
-            #             time.sleep(0.1)
-            #         except OSError as e:
-            #             print("Could not delete file", file, ":", e)
-            #     #else:
-            #     #    print("Number of events:", NumEvents)
-            #     break  # Finished reading relevant data
+            elif ReadFlag == 4:
+                if "'NumOfEvt'" in line:
+                    ReadFlag = 5
+            elif ReadFlag == 5:
+                # Skip the remaining header lines of the 'general' block; the
+                # first numeric line starts with the number of primary events.
+                if not line.strip().startswith("'"):
+                    NumOfEvt = float(line.split(',')[0])
+                    break
 
     # Convert entries lists to integers
     LET['entries'] = [int(x) for x in LET['entries']]
@@ -63,15 +56,17 @@ def readLETHistos(file):
         LET[key] = np.array(LET[key])
         Eff[key] = np.array(Eff[key])
 
-    # Check that the histogram has non zero total value
-    if np.sum(LET['value']) == 0:
-        print("ERROR !!! LET histogram ", file, " has zero total value")
-        # delete the file to avoid using it later
-        try:
-            input("Press enter to delete file with zero LET value histogram")
-            os.remove(file)
-        except OSError as e:
-            print("Could not delete file", file, ":", e)
+    # Number of simulated primaries; the correct weight when merging jobs
+    # (an empty histogram from a completed run is a valid zero measurement).
+    LET['events'] = NumOfEvt
+    Eff['events'] = NumOfEvt
+
+    if len(LET['lower']) == 0:
+        # Typically a 0 kB csv from a job killed while writing a checkpoint.
+        print("WARNING: no histogram data in", file, "(empty or truncated csv)")
+    elif np.sum(LET['value']) == 0:
+        print("WARNING: LET histogram", file, "has zero total value",
+              f"({NumOfEvt:.0f} primaries recorded nothing)")
 
     ## Convert bin edges from [MeV/cm] to [MeV cm2 mg-1]
     C = 2330  # to convert from MeV/cm to Mev cm2 mg-1 in silicon with silicion density being 2.33 g/cm3

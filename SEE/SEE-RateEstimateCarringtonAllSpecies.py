@@ -48,7 +48,9 @@ DATA_ROOT = Path("/home/anton/triton_work/GRAS/LET_Histograms")
 DEFAULT_DIRECTORIES = (
     #DATA_ROOT / "Carrington-GEO-CREME96-All-Species",
     #DATA_ROOT / "Carrington-GEO-SAPPHIRE-All-Species",
-    DATA_ROOT / "Carrington-GEO-GCR-All-Species",
+    #DATA_ROOT / "Carrington-GEO-GCR-All-Species",
+    DATA_ROOT / "Carrington-LEO-SAPPHIRE-All-Species",
+    DATA_ROOT / "Carrington-LEO-GCR-All-Species",
 )
 
 
@@ -81,9 +83,11 @@ def analyse_directory(directory, parameters):
         print(f"Dataset directory does not exist: {directory}", file=sys.stderr)
         return False
 
-    # Only fluence-normalised datasets (SAPPHIRE SEF) are divided by the
-    # mission duration; flux-normalised datasets (CREME96) already are rates.
-    normalisation = NORMALISATION_SECONDS if "SAPPHIRE" in directory.name else 1.0
+    # The GEO SAPPHIRE campaign was simulated with the old fluence-normalised
+    # macros (cm-2 per 4015-day mission) and must be divided by the mission
+    # duration.  All macros generated since 2026-07-13 (including the LEO
+    # SAPPHIRE set) are flux-normalised (cm-2 s-1) and are already rates.
+    normalisation = NORMALISATION_SECONDS if "GEO-SAPPHIRE" in directory.name else 1.0
 
     cross_section_name = parameters["name"]
     output_path = directory / f"SEERates_{cross_section_name}.csv"
@@ -119,6 +123,9 @@ def analyse_directory(directory, parameters):
                     continue
 
                 let_hist, _ = totalLETHistos(os.fspath(result_directory))
+                if let_hist is None:
+                    print(f"Only empty csv files in {result_directory} -> skipping")
+                    continue
                 required_keys = ("lower", "upper", "mean", "value", "error", "entries")
                 lengths = [len(let_hist[key]) for key in required_keys]
                 if not lengths or any(length != lengths[0] for length in lengths):

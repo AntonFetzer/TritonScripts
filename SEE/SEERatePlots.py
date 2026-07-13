@@ -144,39 +144,39 @@ for CrossectionName in CrossectionNames:
     ########################### LEO ###################################
     # plt.errorbar(Dict['LEO-electron']['Shielding'], Dict['LEO-electron']['SEE_Rate'],
     #               yerr=Dict['LEO-electron']['SEE_Error'], label="LEO Electron", capsize=5, capthick=2)
-    # plt.errorbar(Dict['LEO-trapped-proton']['Shielding'], Dict['LEO-trapped-proton']['SEE_Rate'], 
-    #              yerr=Dict['LEO-trapped-proton']['SEE_Error'], label="LEO trapped proton", capsize=5, capthick=2)
-    # plt.errorbar(Dict['LEO-solar-proton']['Shielding'], Dict['LEO-solar-proton']['SEE_Rate'], 
-    #              yerr=Dict['LEO-solar-proton']['SEE_Error'], label="LEO Solar Proton", capsize=5, capthick=2)
-    # plt.errorbar(Dict['LEO-cosmic-proton']['Shielding'], Dict['LEO-cosmic-proton']['SEE_Rate'], 
-    #              yerr=Dict['LEO-cosmic-proton']['SEE_Error'], label="LEO Cosmic Proton", capsize=5, capthick=2)
-    # plt.errorbar(Dict['LEO-cosmic-iron']['Shielding'], Dict['LEO-cosmic-iron']['SEE_Rate'], 
-    #              yerr=Dict['LEO-cosmic-iron']['SEE_Error'], label="LEO Cosmic Iron", capsize=5, capthick=2)
+    plt.errorbar(Dict['LEO-trapped-proton']['Shielding'], Dict['LEO-trapped-proton']['SEE_Rate'], 
+                 yerr=Dict['LEO-trapped-proton']['SEE_Error'], label="LEO trapped proton", capsize=5, capthick=2)
+    plt.errorbar(Dict['LEO-solar-proton']['Shielding'], Dict['LEO-solar-proton']['SEE_Rate'], 
+                 yerr=Dict['LEO-solar-proton']['SEE_Error'], label="LEO Solar Proton", capsize=5, capthick=2)
+    plt.errorbar(Dict['LEO-cosmic-proton']['Shielding'], Dict['LEO-cosmic-proton']['SEE_Rate'], 
+                 yerr=Dict['LEO-cosmic-proton']['SEE_Error'], label="LEO Cosmic Proton", capsize=5, capthick=2)
+    plt.errorbar(Dict['LEO-cosmic-iron']['Shielding'], Dict['LEO-cosmic-iron']['SEE_Rate'], 
+                 yerr=Dict['LEO-cosmic-iron']['SEE_Error'], label="LEO Cosmic Iron", capsize=5, capthick=2)
 
     # Combine the LEO trapped proton, Solar Proton and Cosmic data
-    # Dict['LEO'] = {}
-    # Dict['LEO']['Shielding'] = Dict['LEO-solar-proton']['Shielding']
-    # Dict['LEO']['SEE_Rate'] = ( Dict['LEO-electron']['SEE_Rate'] 
-    #                            + Dict['LEO-trapped-proton']['SEE_Rate'] 
-    #                            + Dict['LEO-solar-proton']['SEE_Rate'] 
-    #                            + Dict['LEO-cosmic-proton']['SEE_Rate'] 
-    #                            + Dict['LEO-cosmic-iron']['SEE_Rate'] )
-    # Dict['LEO']['SEE_Error'] = ( np.sqrt(np.square(Dict['LEO-electron']['SEE_Error'])
-    #                                      + np.square(Dict['LEO-trapped-proton']['SEE_Error'])
-    #                                      + np.square(Dict['LEO-solar-proton']['SEE_Error']) 
-    #                                      + np.square(Dict['LEO-cosmic-proton']['SEE_Error']) 
-    #                                      + np.square(Dict['LEO-cosmic-iron']['SEE_Error'])) )
+    Dict['LEO'] = {}
+    Dict['LEO']['Shielding'] = Dict['LEO-solar-proton']['Shielding']
+    Dict['LEO']['SEE_Rate'] = (# Dict['LEO-electron']['SEE_Rate'] 
+                               Dict['LEO-trapped-proton']['SEE_Rate'] 
+                               + Dict['LEO-solar-proton']['SEE_Rate'] 
+                               + Dict['LEO-cosmic-proton']['SEE_Rate'] 
+                               + Dict['LEO-cosmic-iron']['SEE_Rate'] )
+    Dict['LEO']['SEE_Error'] = ( np.sqrt(#np.square(Dict['LEO-electron']['SEE_Error'])
+                                         np.square(Dict['LEO-trapped-proton']['SEE_Error'])
+                                         + np.square(Dict['LEO-solar-proton']['SEE_Error']) 
+                                         + np.square(Dict['LEO-cosmic-proton']['SEE_Error']) 
+                                         + np.square(Dict['LEO-cosmic-iron']['SEE_Error'])) )
 
-    # plt.errorbar(Dict['LEO']['Shielding'], Dict['LEO']['SEE_Rate'], yerr=Dict['LEO']['SEE_Error'],
-    #                 label="LEO total 11-year mean", color=LEOColor, linestyle='-.', **default_errorbar_style)
+    plt.errorbar(Dict['LEO']['Shielding'], Dict['LEO']['SEE_Rate'], yerr=Dict['LEO']['SEE_Error'],
+                    label="LEO total 11-year mean", color=LEOColor, linestyle='-.', **default_errorbar_style)
 
     ########################### GEO ###################################
     # plt.errorbar(Dict['GEO-electron']['Shielding'], Dict['GEO-electron']['SEE_Rate'],
     #                 yerr=Dict['GEO-electron']['SEE_Error'], label="GEO Electron", capsize=5, capthick=2)
     # plt.errorbar(Dict['GEO-trapped-proton']['Shielding'], Dict['GEO-trapped-proton']['SEE_Rate'],
     #                 yerr=Dict['GEO-trapped-proton']['SEE_Error'], label="GEO trapped proton", capsize=5, capthick=2)
-    plt.errorbar(Dict['GEO-solar-proton']['Shielding'], Dict['GEO-solar-proton']['SEE_Rate'],
-                    yerr=Dict['GEO-solar-proton']['SEE_Error'], label="GEO Solar Proton", capsize=5, capthick=2)
+    # plt.errorbar(Dict['GEO-solar-proton']['Shielding'], Dict['GEO-solar-proton']['SEE_Rate'],
+    #                 yerr=Dict['GEO-solar-proton']['SEE_Error'], label="GEO Solar Proton", capsize=5, capthick=2)
     # plt.errorbar(Dict['GEO-solar-helium']['Shielding'], Dict['GEO-solar-helium']['SEE_Rate'],
     #                 yerr=Dict['GEO-solar-helium']['SEE_Error'], label="GEO Solar Helium", capsize=5, capthick=2)
     # plt.errorbar(Dict['GEO-solar-oxygen']['Shielding'], Dict['GEO-solar-oxygen']['SEE_Rate'],
@@ -185,46 +185,46 @@ for CrossectionName in CrossectionNames:
     #                 yerr=Dict['GEO-solar-iron']['SEE_Error'], label="GEO Solar Iron", capsize=5, capthick=2)
     # plt.errorbar(Dict['GEO-solar-nickel']['Shielding'], Dict['GEO-solar-nickel']['SEE_Rate'],
     #                 yerr=Dict['GEO-solar-nickel']['SEE_Error'], label="GEO Solar Nickel", capsize=5, capthick=2)
-    plt.errorbar(Dict['GEO-cosmic-proton']['Shielding'], Dict['GEO-cosmic-proton']['SEE_Rate'],
-                    yerr=Dict['GEO-cosmic-proton']['SEE_Error'], label="GEO Cosmic Proton", capsize=5, capthick=2)
+    # plt.errorbar(Dict['GEO-cosmic-proton']['Shielding'], Dict['GEO-cosmic-proton']['SEE_Rate'],
+    #                 yerr=Dict['GEO-cosmic-proton']['SEE_Error'], label="GEO Cosmic Proton", capsize=5, capthick=2)
     # plt.errorbar(Dict['GEO-cosmic-iron']['Shielding'], Dict['GEO-cosmic-iron']['SEE_Rate'],
     #                 yerr=Dict['GEO-cosmic-iron']['SEE_Error'], label="GEO Cosmic Iron", capsize=5, capthick=2)
 
 
-    plt.errorbar(Dict['GEO-SAPPHIRE-Solar-AllHeavyIons']['Shielding'], Dict['GEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Rate'],
-                    yerr=Dict['GEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Error'], label="GEO SAPPHIRE Solar Heavy Ions", color=SAP_PeakColor, capsize=5, capthick=2)
-    plt.errorbar(Dict['GEO-GCR-AllHeavyIons']['Shielding'], Dict['GEO-GCR-AllHeavyIons']['SEE_Rate'],
-                    yerr=Dict['GEO-GCR-AllHeavyIons']['SEE_Error'], label="GEO GCR Heavy Ions", color='C4', capsize=5, capthick=2)
+    # plt.errorbar(Dict['GEO-SAPPHIRE-Solar-AllHeavyIons']['Shielding'], Dict['GEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Rate'],
+    #                 yerr=Dict['GEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Error'], label="GEO SAPPHIRE Solar Heavy Ions", color=SAP_PeakColor, capsize=5, capthick=2)
+    # plt.errorbar(Dict['GEO-GCR-AllHeavyIons']['Shielding'], Dict['GEO-GCR-AllHeavyIons']['SEE_Rate'],
+    #                 yerr=Dict['GEO-GCR-AllHeavyIons']['SEE_Error'], label="GEO GCR Heavy Ions", color='C4', capsize=5, capthick=2)
 
 
     # # Combine the GEO Solar Proton, Cosmic and trapped proton data
-    Dict['GEO'] = {}
-    Dict['GEO']['Shielding'] = Dict['GEO-solar-proton']['Shielding']
-    Dict['GEO']['SEE_Rate'] = (#Dict['GEO-electron']['SEE_Rate'] 
-                               # Dict['GEO-trapped-proton']['SEE_Rate']
-                            Dict['GEO-solar-proton']['SEE_Rate']
-                            #+ Dict['GEO-solar-helium']['SEE_Rate']
-                            #+ Dict['GEO-solar-oxygen']['SEE_Rate']
-                            #+ Dict['GEO-solar-iron']['SEE_Rate']
-                            #+ Dict['GEO-solar-nickel']['SEE_Rate']
-                            #+ Dict['GEO-cosmic-iron']['SEE_Rate'] 
-                            + Dict['GEO-cosmic-proton']['SEE_Rate']
-                            + Dict['GEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Rate']
-                            + Dict['GEO-GCR-AllHeavyIons']['SEE_Rate'])
-    Dict['GEO']['SEE_Error'] = ( np.sqrt(#np.square(Dict['GEO-electron']['SEE_Error']) 
-                                        #np.square(Dict['GEO-trapped-proton']['SEE_Error'])
-                                        np.square(Dict['GEO-solar-proton']['SEE_Error']) 
-                                        #+ np.square(Dict['GEO-solar-helium']['SEE_Error'])
-                                        #+ np.square(Dict['GEO-solar-oxygen']['SEE_Error'])
-                                        #+ np.square(Dict['GEO-solar-iron']['SEE_Error'])
-                                        #+ np.square(Dict['GEO-solar-nickel']['SEE_Error'])
-                                        #+ np.square(Dict['GEO-cosmic-iron']['SEE_Error']) 
-                                        + np.square(Dict['GEO-cosmic-proton']['SEE_Error'])) 
-                                        + np.square(Dict['GEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Error']
-                                        + np.square(Dict['GEO-GCR-AllHeavyIons']['SEE_Error'])))
+    # Dict['GEO'] = {}
+    # Dict['GEO']['Shielding'] = Dict['GEO-solar-proton']['Shielding']
+    # Dict['GEO']['SEE_Rate'] = (#Dict['GEO-electron']['SEE_Rate'] 
+    #                            # Dict['GEO-trapped-proton']['SEE_Rate']
+    #                         Dict['GEO-solar-proton']['SEE_Rate']
+    #                         #+ Dict['GEO-solar-helium']['SEE_Rate']
+    #                         #+ Dict['GEO-solar-oxygen']['SEE_Rate']
+    #                         #+ Dict['GEO-solar-iron']['SEE_Rate']
+    #                         #+ Dict['GEO-solar-nickel']['SEE_Rate']
+    #                         #+ Dict['GEO-cosmic-iron']['SEE_Rate'] 
+    #                         + Dict['GEO-cosmic-proton']['SEE_Rate']
+    #                         + Dict['GEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Rate']
+    #                         + Dict['GEO-GCR-AllHeavyIons']['SEE_Rate'])
+    # Dict['GEO']['SEE_Error'] = ( np.sqrt(#np.square(Dict['GEO-electron']['SEE_Error']) 
+    #                                     #np.square(Dict['GEO-trapped-proton']['SEE_Error'])
+    #                                     np.square(Dict['GEO-solar-proton']['SEE_Error']) 
+    #                                     #+ np.square(Dict['GEO-solar-helium']['SEE_Error'])
+    #                                     #+ np.square(Dict['GEO-solar-oxygen']['SEE_Error'])
+    #                                     #+ np.square(Dict['GEO-solar-iron']['SEE_Error'])
+    #                                     #+ np.square(Dict['GEO-solar-nickel']['SEE_Error'])
+    #                                     #+ np.square(Dict['GEO-cosmic-iron']['SEE_Error']) 
+    #                                     + np.square(Dict['GEO-cosmic-proton']['SEE_Error'])) 
+    #                                     + np.square(Dict['GEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Error']
+    #                                     + np.square(Dict['GEO-GCR-AllHeavyIons']['SEE_Error'])))
 
-    plt.errorbar(Dict['GEO']['Shielding'], Dict['GEO']['SEE_Rate'], yerr=Dict['GEO']['SEE_Error'],
-                    label="GEO total 11-year mean", color=GEOColor, **default_errorbar_style)
+    # plt.errorbar(Dict['GEO']['Shielding'], Dict['GEO']['SEE_Rate'], yerr=Dict['GEO']['SEE_Error'],
+    #                 label="GEO total 11-year mean", color=GEOColor, **default_errorbar_style)
 
 
     ########################### VAP ###################################

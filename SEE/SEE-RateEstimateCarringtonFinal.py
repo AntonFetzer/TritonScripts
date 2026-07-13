@@ -31,17 +31,17 @@ https://creme.isde.vanderbilt.edu/CREME-MC/help/weibull
 Directory = "/scratch/work/fetzera1/GRAS/LET_Histograms/Carrington/"
 
 # nanoXplore https://nanoxplore-wiki.atlassian.net/wiki/spaces/NAN/pages/46497810/NG-MEDIUM+Radiative+Test#Weibull-fitting
-# CrossectionName = "NanoXplore SEU"  
-# L0 = 0.11 
-# W = 36
-# S = 4.4
-# A0 = 5.2E-09
+CrossectionName = "NanoXplore SEU"  
+L0 = 0.11 
+W = 36
+S = 4.4
+A0 = 5.2E-09
 
-CrossectionName = "Cypress CY62167GE30-45ZXI"  
-L0 = 0.1
-W = 70
-S = 1.2
-A0 = 2.6E-07
+# CrossectionName = "Cypress CY62167GE30-45ZXI"  
+# L0 = 0.1
+# W = 70
+# S = 1.2
+# A0 = 2.6E-07
 
 
 def f(LET):
