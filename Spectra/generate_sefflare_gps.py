@@ -4,8 +4,12 @@
 The ion table is read with readSpenvis_sefflare_Ions, which returns total
 kinetic energy in MeV and flux in cm-2 s-1 (differential per MeV) as required
 by Geant4 GPS.  One macro is written for every element having a non-zero
-spectrum.  The generated layout and normalization aliases match SPENVIS's
-manual GPS export.
+spectrum.  The layout follows SPENVIS's manual GPS export, but the
+NORM_FACTOR_SPECTRUM alias is set to the difference of the tabulated integral
+column across the written energy range: the exact model flux over the range
+GPS actually samples (SPENVIS instead re-integrates the exported points with a
+trapezoid rule, and anchoring at the lowest tabulated energy would count flux
+outside the histogram range).
 
 By default this converts the Carrington CREME96 data set used by this project
 and writes the macros into a ``GPS-AllSpecies`` directory beside the input.
@@ -69,20 +73,27 @@ MASS_NUMBERS = (
 
 
 def render_macro(data, species_index, mass_number, source_name):
-    """Render one SPENVIS-compatible GPS macro, or None for a zero spectrum.
+    """Render one GPS macro, or None for a spectrum with fewer than two
+    non-zero points (GPS arb histograms need at least one segment).
 
     ``data`` is the reader's array: Data[Z-1, point, (Energy MeV, Integral,
     Differential per MeV)], already in cm-2 (s-1) units.
+
+    Returns (macro_text, normalization).
     """
     atomic_number = species_index + 1
     spectrum = data[species_index]
-    points = [(energy, flux) for energy, _, flux in spectrum if flux > 0]
-    if not points:
+    positive = [row for row in spectrum if row[2] > 0]
+    if len(positive) < 2:
         return None
+    points = [(row[0], row[2]) for row in positive]
 
-    # SPENVIS uses the tabulated integral flux at the lowest energy as the
-    # absolute spectrum normalization.  GPS normalizes the arb histogram itself.
-    normalization = spectrum[0, 1]
+    # Absolute normalization: the integral flux over the sampled energy range,
+    # taken as the difference of the tabulated integral column between the
+    # first and last written points.  This is exact model data (no numerical
+    # re-integration) and excludes the flux outside the histogram range, which
+    # GPS never generates.
+    normalization = positive[0][1] - positive[-1][1]
     if normalization <= 0:
         raise ValueError(
             f"Z={atomic_number}: positive differential spectrum but "
@@ -118,7 +129,7 @@ def render_macro(data, species_index, mass_number, source_name):
             "",
         )
     )
-    return "\n".join(lines)
+    return "\n".join(lines), normalization
 
 
 def write_macros(data, output_dir: Path, prefix: str, source_name: str):
@@ -129,13 +140,14 @@ def write_macros(data, output_dir: Path, prefix: str, source_name: str):
     for index, (symbol, name, mass_number) in enumerate(
         zip(SYMBOLS, ELEMENT_NAMES, MASS_NUMBERS)
     ):
-        macro = render_macro(data, index, mass_number, source_name)
-        if macro is None:
+        rendered = render_macro(data, index, mass_number, source_name)
+        if rendered is None:
             skipped.append(symbol)
             continue
+        macro, normalization = rendered
         filename = f"{prefix}-{name}.mac"
         (output_dir / filename).write_text(macro, encoding="ascii")
-        manifest.append((index + 1, symbol, mass_number, data[index, 0, 1], filename))
+        manifest.append((index + 1, symbol, mass_number, normalization, filename))
 
     manifest_path = output_dir / f"{prefix}-manifest.csv"
     with manifest_path.open("w", encoding="ascii", newline="") as stream:
