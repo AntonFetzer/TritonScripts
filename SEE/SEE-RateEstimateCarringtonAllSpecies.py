@@ -46,8 +46,9 @@ NORMALISATION_SECONDS = 4015 * 24 * 3600
 
 DATA_ROOT = Path("/home/anton/triton_work/GRAS/LET_Histograms")
 DEFAULT_DIRECTORIES = (
-    DATA_ROOT / "Carrington-CREME96-All-Species",
-    DATA_ROOT / "Carrington-SAPPHIRE-All-Species",
+    #DATA_ROOT / "Carrington-GEO-CREME96-All-Species",
+    #DATA_ROOT / "Carrington-GEO-SAPPHIRE-All-Species",
+    DATA_ROOT / "Carrington-GEO-GCR-All-Species",
 )
 
 

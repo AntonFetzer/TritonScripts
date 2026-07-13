@@ -121,7 +121,7 @@ for F, Folder in enumerate(FolderList):
         TotalLETError = np.sqrt(np.sum(TotalLETError))
         TotalLETU = ufloat(TotalLET, TotalLETError)
 
-        '''
+        
         ### LET Histogram ###############
         fig, ax1 = plt.subplots(1)
         plt.bar(LETHist['lower'], LETHist['value'], width=LETHist['upper'] - LETHist['lower'], align='edge', alpha=0.3)
@@ -146,7 +146,7 @@ for F, Folder in enumerate(FolderList):
         plt.savefig(path + "../" + Folder + " " + CrossectionName + " " + SubFolder + " LET-Hist.pdf", format='pdf', bbox_inches="tight")
         plt.close('all')
         #plt.show()
-        '''
+        
 
         ### SEE rate ###############
 
@@ -189,7 +189,7 @@ for F, Folder in enumerate(FolderList):
             continue
 
         ### SEE Histogram ###############
-        '''
+        
         fig, ax1 = plt.subplots(1)
         plt.bar(SEEHist['lower'], SEEHist['value'], width=SEEHist['upper'] - SEEHist['lower'], align='edge', alpha=0.3)
         plt.errorbar(SEEHist['mean'], SEEHist['value'], SEEHist['error'], fmt=' ', capsize=5, elinewidth=1,
@@ -213,5 +213,5 @@ for F, Folder in enumerate(FolderList):
         plt.savefig(path + "../" + Folder + " " + CrossectionName + " " + SubFolder + " SEE-Hist.pdf", format='pdf', bbox_inches="tight")
         plt.close('all')
         #plt.show()
-        '''
+        
 CSVFile.close()

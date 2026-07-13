@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 Directories = {
-    "CREME96": "/home/anton/triton_work/GRAS/LET_Histograms/Carrington-CREME96-All-Species/",
-    "SAPPHIRE": "/home/anton/triton_work/GRAS/LET_Histograms/Carrington-SAPPHIRE-All-Species/",
+    "CREME96": "/home/anton/triton_work/GRAS/LET_Histograms/Carrington-GEO-CREME96-All-Species/",
+    "SAPPHIRE": "/home/anton/triton_work/GRAS/LET_Histograms/Carrington-GEO-SAPPHIRE-All-Species/",
+    "GCR": "/home/anton/triton_work/GRAS/LET_Histograms/Carrington-GEO-GCR-All-Species/",
 }
 
 CrossectionNames = ["Cypress CY62167GE30-45ZXI", "NanoXplore SEU"]
@@ -58,6 +59,21 @@ for ModelName, Directory in Directories.items():
         for inner_key in Dict[key]:
             Dict[key][inner_key] = np.array(Dict[key][inner_key])
 
+    # Every species must have the same shielding points, otherwise the total
+    # over species would silently miss contributions (e.g. runs that produced
+    # no LET histogram and were skipped by the rate-estimate script).
+    Shieldings = {tuple(Dict[name]['Shielding']) for name in Dict}
+    if len(Shieldings) > 1:
+        expected = max(Shieldings, key=len)
+        for name in sorted(Dict):
+            missing = set(expected) - set(Dict[name]['Shielding'])
+            if missing:
+                print(f"{name}: missing shielding {sorted(str(m) for m in missing)}")
+        raise ValueError(
+            f"{ModelName}: species have inconsistent shielding points -- "
+            "rerun the missing simulations and the rate-estimate script"
+        )
+
     plt.figure(FigureNumber, figsize=(5, 7))
 
     # Sort the datasets by their SEE rate at 4mm shielding, so the legend
@@ -78,6 +94,23 @@ for ModelName, Directory in Directories.items():
     Total_Ex3['Shielding'] = Dict[sorted_names[0]]['Shielding']
     Total_Ex3['SEE_Rate'] = np.sum([Dict[name]['SEE_Rate'] for name in RestNames], axis=0)
     Total_Ex3['SEE_Error'] = np.sqrt(np.sum([np.square(Dict[name]['SEE_Error']) for name in RestNames], axis=0))
+
+    # Combine all non-proton species into a total heavy-ion rate and print it
+    # in the structure of the main SEERates CSV summary files, ready to be
+    # copied there.
+    HeavyNames = [name for name in sorted_names if not name.endswith("Proton")]
+    HeavyRate = np.sum([Dict[name]['SEE_Rate'] for name in HeavyNames], axis=0)
+    HeavyError = np.sqrt(np.sum([np.square(Dict[name]['SEE_Error']) for name in HeavyNames], axis=0))
+    HeavyEntries = np.sum([Dict[name]['Entries_Contributing_To_SEE'] for name in HeavyNames], axis=0)
+    SummaryName = (sorted_names[0].rsplit("-", 1)[0]) + "-AllHeavyIons"
+
+    print(f"\nTotal non-proton heavy-ion rates ({ModelName}, {CrossectionName}), "
+          "copy into the main SEERates CSV:")
+    for i, shielding in enumerate(Total['Shielding']):
+        RelativeError = HeavyError[i] / HeavyRate[i] if HeavyRate[i] else float('nan')
+        print(f"{SummaryName},{shielding},{CrossectionName},"
+              f"{HeavyRate[i]},{HeavyError[i]},{RelativeError},{int(HeavyEntries[i])}")
+    print()
 
     plt.errorbar(Total['Shielding'], Total['SEE_Rate'], yerr=Total['SEE_Error'],
                  label="Total", color='black', linewidth=3, **default_errorbar_style)
