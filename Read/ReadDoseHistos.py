@@ -33,6 +33,7 @@ def readDoseHistos(file):
     }
 
     ReadFlag = 0
+    NumOfEvt = 0.0
     with open(file, 'r') as f:
         reader = csv.reader(f)
         for line in reader:
@@ -54,11 +55,29 @@ def readDoseHistos(file):
                 else:
                     for i, key in enumerate(PrimaryHistDict):
                         PrimaryHistDict[key].append(float(line[i]))
+            elif ReadFlag == 4:
+                if "'NumOfEvt'" in line:
+                    ReadFlag = 5
+            elif ReadFlag == 5:
+                # Skip the remaining header lines of the 'general' block; the
+                # first numeric line starts with the number of primary events.
+                if line and not line[0].strip().startswith("'"):
+                    NumOfEvt = float(line[0])
+                    break
 
     # Convert lists to numpy arrays
     for key in DoseHistDict:
         DoseHistDict[key] = np.array(DoseHistDict[key])
         PrimaryHistDict[key] = np.array(PrimaryHistDict[key])
+
+    # Entries are counts; mergeHistograms requires integer dtype
+    DoseHistDict['entries'] = DoseHistDict['entries'].astype(int)
+    PrimaryHistDict['entries'] = PrimaryHistDict['entries'].astype(int)
+
+    # Number of simulated primaries; the correct weight when merging jobs
+    # (an empty histogram from a completed run is a valid zero measurement).
+    DoseHistDict['events'] = NumOfEvt
+    PrimaryHistDict['events'] = NumOfEvt
 
     # Dose data is in rad/s --> multiply with number of seconds in a month to get to dose per months.
     # Dose is given per generated particle --> need to divide by the number of files

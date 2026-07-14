@@ -1,19 +1,10 @@
 import matplotlib.pyplot as plt
-from GRAS.Dependencies.TotalDoseHistos import totalGRASHistos
+from Dependencies.TotalDoseHistograms import totalDoseHistograms
 import os
 from natsort import natsorted
 import numpy as np
-from GRAS.GPT4Experiments.MergeBins import merge_bins
 
 Path = "/l/triton_work/LunarBackscatter/LunarGCR-WideHist/"
-MergeBinns = 1
-
-lowerID = 0
-upperID = 1
-meanID = 2
-valueID = 3
-errorID = 4
-entriesID = 5
 
 Folders = [f for f in os.listdir(Path) if f.endswith('mm')]
 Folders = natsorted(Folders)
@@ -32,17 +23,13 @@ PrimaryHists = []
 TotalNumberEntries = []
 
 for i in range(len(Folders)):
-    Data = totalGRASHistos(Path + Folders[i] + "/Res/", "")
-    #print("Shape of Data:", np.shape(Data))
-    TotalNumberEntries.append(sum(Data[0][:, entriesID]))
+    DoseHist, PrimaryHist = totalDoseHistograms(Path + Folders[i] + "/Res/")
+    TotalNumberEntries.append(sum(DoseHist['entries']))
     print("Total number of particles = " + f"{TotalNumberEntries[i]:.3}")
-    print("Number of Data points for", str(ThickList[i]) + "mm:", "{:,}".format(len(Data[0])))
+    print("Number of Data points for", str(ThickList[i]) + "mm:", "{:,}".format(len(DoseHist['lower'])))
 
-    DoseHists.append(merge_bins(Data[0], MergeBinns))
-    PrimaryHists.append(merge_bins(Data[1], MergeBinns))
-
-print("Shape of DoseHists:", np.shape(DoseHists))
-# [Thickness][Bin][Variable]
+    DoseHists.append(DoseHist)
+    PrimaryHists.append(PrimaryHist)
 
 Colours = ['C3', 'C1', 'C8', 'C2', 'C9', 'C0', 'C7']
 #          red, orange,yellow,green,cyan,blue, grey
@@ -64,7 +51,7 @@ Colours = ['C3', 'C1', 'C8', 'C2', 'C9', 'C0', 'C7']
 plt.figure(2)
 
 for i in range(len(Folders)):
-    plt.bar(PrimaryHists[i][:, lowerID], PrimaryHists[i][:, valueID], width=PrimaryHists[i][:, upperID] - PrimaryHists[i][:, lowerID], align='edge', color=Colours[i], label=str(ThickList[i]) + "mm Al")
+    plt.bar(PrimaryHists[i]['lower'], PrimaryHists[i]['value'], width=PrimaryHists[i]['upper'] - PrimaryHists[i]['lower'], align='edge', color=Colours[i], label=str(ThickList[i]) + "mm Al")
 
 plt.yscale("log")
 plt.xscale("log")
@@ -80,7 +67,7 @@ plt.savefig(Path + "DoseVSPrimary.pdf", format='pdf', bbox_inches="tight")
 plt.figure(3)
 
 for i in range(len(Folders)):
-    plt.bar(PrimaryHists[i][:, lowerID], PrimaryHists[i][:, entriesID], width=PrimaryHists[i][:, upperID] - PrimaryHists[i][:, lowerID], align='edge', color=Colours[i], label=str(ThickList[i]) + "mm Al")
+    plt.bar(PrimaryHists[i]['lower'], PrimaryHists[i]['entries'], width=PrimaryHists[i]['upper'] - PrimaryHists[i]['lower'], align='edge', color=Colours[i], label=str(ThickList[i]) + "mm Al")
 
 plt.yscale("log")
 plt.xscale("log")
