@@ -53,15 +53,37 @@ def totalDose(path):
     # Calculate the weighted average of the dose.
     TID['dose'] = TID['dose'] / TID['entries']  # Divide by summed up number of entries to get the weighted average of the dose results
 
-    # Error estimation via the within/between sum-of-squares identity (ANOVA / Chan-Golub-LeVeque):
-    # SS = sum(N_i^2 * sigma_i^2) + sum(N_i * (D_i - D)^2), err = sqrt(SS) / sum(N_i).
-    # The between-file scatter term carries N_i (not N_i^2), otherwise the statistical
-    # error is counted twice and the result is inflated by up to sqrt(2).
-    ErrTerm = np.zeros_like(TID['error'])
+    # Pooled statistical error: err = sqrt(sum(N_i^2 * sigma_i^2)) / sum(N_i).
+    # The between-file scatter term of the full ANOVA identity would enter with
+    # weight N_i (never N_i^2, which double-counts the statistical error and
+    # inflates the result by up to sqrt(2)); at that weight it is a relative
+    # O(1/N_i) correction (~1e-10 for typical runs), so it is dropped here and
+    # the scatter is used as a consistency diagnostic below instead.
+    InternalErrSq = np.zeros_like(TID['error'])
+    ExternalErrSq = np.zeros_like(TID['error'])
     for raw in RawData:
-        ErrTerm += raw['entries'] ** 2 * raw['error'] ** 2 + raw['entries'] * (raw['dose'] - TID['dose']) ** 2
+        InternalErrSq += raw['entries'] ** 2 * raw['error'] ** 2
+        ExternalErrSq += raw['entries'] ** 2 * (raw['dose'] - TID['dose']) ** 2
 
-    TID['error'] = np.sqrt(ErrTerm) / TID['entries']
+    TID['error'] = np.sqrt(InternalErrSq) / TID['entries']
+
+    # Consistency diagnostic (Birge ratio): for files that differ only by their
+    # random seed, the observed between-file scatter is fully explained by the
+    # quoted statistical errors, so external/internal ~ 1.  A ratio well above 1
+    # means the files genuinely differ (configuration, build, or a corrupt csv)
+    # -- a bug signal, not extra statistics, so halt and let the user look.
+    if len(RawData) > 1:
+        Birge = np.sqrt(np.divide(ExternalErrSq, InternalErrSq,
+                                  out=np.zeros_like(InternalErrSq), where=InternalErrSq > 0))
+        MaxBirge = max(Birge)
+        print("Maximum Birge ratio (scatter / quoted errors):", f"{MaxBirge:.2f}", "at Tile number", np.argmax(Birge))
+        if MaxBirge > 2:
+            print("ERROR !!! Inconsistent files: the between-file scatter exceeds the quoted statistical errors")
+            print("  The files differ by more than their random seed, or a csv file is corrupt.")
+            try:
+                input("  Press Enter to continue anyway...")
+            except EOFError:
+                print("  (non-interactive run, continuing)")
 
     # Entries is the same for all tiles, because each tile gets an entry if a particle is detected in any tile.
     TotalEntries = TID['entries'][0]
