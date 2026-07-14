@@ -49,8 +49,10 @@ DEFAULT_DIRECTORIES = (
     #DATA_ROOT / "Carrington-GEO-CREME96-All-Species",
     #DATA_ROOT / "Carrington-GEO-SAPPHIRE-All-Species",
     #DATA_ROOT / "Carrington-GEO-GCR-All-Species",
-    DATA_ROOT / "Carrington-LEO-SAPPHIRE-All-Species",
-    DATA_ROOT / "Carrington-LEO-GCR-All-Species",
+    #DATA_ROOT / "Carrington-LEO-SAPPHIRE-All-Species",
+    #DATA_ROOT / "Carrington-LEO-GCR-All-Species",
+    DATA_ROOT / "Carrington-VAP-GCR-All-Species",
+    DATA_ROOT / "Carrington-VAP-SAPPHIRE-All-Species",
 )
 
 

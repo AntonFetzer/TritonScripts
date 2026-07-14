@@ -62,7 +62,8 @@ def readLETHistos(file):
     Eff['events'] = NumOfEvt
 
     if len(LET['lower']) == 0:
-        # Typically a 0 kB csv from a job killed while writing a checkpoint.
+        # Corrupt csvs are deleted upstream (TotalLETHistos checks for the
+        # 'End of File' terminator), so this only fires on standalone reads.
         print("WARNING: no histogram data in", file, "(empty or truncated csv)")
     elif np.sum(LET['value']) == 0:
         print("WARNING: LET histogram", file, "has zero total value",

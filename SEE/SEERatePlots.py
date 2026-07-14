@@ -4,7 +4,7 @@ import numpy as np
 
 Directory = "/home/anton/triton_work/GRAS/LET_Histograms/Carrington/"
 
-CrossectionNames = ["Cypress CY62167GE30-45ZXI", "NanoXplore SEU"]  
+CrossectionNames = ["Cypress CY62167GE30-45ZXI", "NanoXplore NG-Medium"]  # List of cross-section names to process
 
 # Define default errorbar style
 default_errorbar_style = {
@@ -31,7 +31,6 @@ for CrossectionName in CrossectionNames:
     # Read the CSV file
     with open(Directory + "/SEERates_" + CrossectionName + ".csv", mode='r') as file:
         csv_reader = csv.DictReader(file)
-        CrossectionName = None
         
         for row in csv_reader:
             # Extract relevant data
@@ -45,11 +44,8 @@ for CrossectionName in CrossectionNames:
             if dataset_name not in Dict:
                 Dict[dataset_name] = {'Shielding': [], 'SEE_Rate': [], 'SEE_Error': [], 'Entries_Contributing_To_SEE': []}
 
-            if CrossectionName:
-                if CrossectionName != row['Crossection']:
-                    raise ValueError("Crossection name is not the same for all entries")
-            else:
-                CrossectionName = row['Crossection']
+            if CrossectionName != row['Crossection']:
+                raise ValueError("Crossection name is not the same for all entries")
 
             # Store the data dictionary
             Dict[dataset_name]['Shielding'].append(shielding)
@@ -62,7 +58,7 @@ for CrossectionName in CrossectionNames:
         for inner_key in Dict[key]:
             Dict[key][inner_key] = np.array(Dict[key][inner_key])
 
-    plt.figure(figsize=(5, 7))
+    plt.figure(figsize=(5, 8))
     ########################### Carrington SEP ###################################
     Shielding = Dict['Carrington-SEP-Expected-Int']['Shielding']
     ExpectedInt = Dict['Carrington-SEP-Expected-Int']['SEE_Rate']
@@ -92,7 +88,7 @@ for CrossectionName in CrossectionNames:
 
     # # Plot the GEO Solar Proton 5min Peak flux
     plt.errorbar(Dict['GEO-SolarProton-5minPeakFlux']['Shielding'], Dict['GEO-SolarProton-5minPeakFlux']['SEE_Rate'],
-                  yerr=Dict['GEO-SolarProton-5minPeakFlux']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min SEP Proton"
+                  yerr=Dict['GEO-SolarProton-5minPeakFlux']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min Proton"
                   , color=CREME96Color, linestyle=':', **default_errorbar_style)
 
     # plt.errorbar(Dict['GEO-CREME96-Solar-Helium']['Shielding'], Dict['GEO-CREME96-Solar-Helium']['SEE_Rate'],
@@ -120,8 +116,9 @@ for CrossectionName in CrossectionNames:
     #                 , color='C7', linestyle='-.', **default_errorbar_style)
 
     plt.errorbar(Dict['GEO-CREME96-Solar-AllHeavyIons']['Shielding'], Dict['GEO-CREME96-Solar-AllHeavyIons']['SEE_Rate'],
-                  yerr=Dict['GEO-CREME96-Solar-AllHeavyIons']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min SEP Heavy Ions"
+                  yerr=Dict['GEO-CREME96-Solar-AllHeavyIons']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min\nHeavy Ions GRAS LET Folding"
                     , color=CREME96IonColor, linestyle='-.', **default_errorbar_style)
+
 
     # Dict['GEO-CREME96-Solar-Total'] = {}
     # Dict['GEO-CREME96-Solar-Total']['Shielding'] = Dict['GEO-SolarProton-5minPeakFlux']['Shielding']
@@ -232,9 +229,9 @@ for CrossectionName in CrossectionNames:
                                         #+ np.square(Dict['GEO-solar-oxygen']['SEE_Error'])
                                         #+ np.square(Dict['GEO-solar-iron']['SEE_Error'])
                                         #+ np.square(Dict['GEO-solar-nickel']['SEE_Error'])
-                                        #+ np.square(Dict['GEO-cosmic-iron']['SEE_Error']) 
-                                        + np.square(Dict['GEO-cosmic-proton']['SEE_Error'])) 
-                                        + np.square(Dict['GEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Error']
+                                        #+ np.square(Dict['GEO-cosmic-iron']['SEE_Error'])
+                                        + np.square(Dict['GEO-cosmic-proton']['SEE_Error'])
+                                        + np.square(Dict['GEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Error'])
                                         + np.square(Dict['GEO-GCR-AllHeavyIons']['SEE_Error'])))
 
     plt.errorbar(Dict['GEO']['Shielding'], Dict['GEO']['SEE_Rate'], yerr=Dict['GEO']['SEE_Error'],
@@ -242,8 +239,8 @@ for CrossectionName in CrossectionNames:
 
 
     ########################### VAP ###################################
-    # # plt.errorbar(Dict['VAP-electron']['Shielding'], Dict['VAP-electron']['SEE_Rate'],
-    # #                 yerr=Dict['VAP-electron']['SEE_Error'], label="VAP Electron", capsize=5, capthick=2)
+    # plt.errorbar(Dict['VAP-electron']['Shielding'], Dict['VAP-electron']['SEE_Rate'],
+    #                 yerr=Dict['VAP-electron']['SEE_Error'], label="VAP Electron", capsize=5, capthick=2)
     # plt.errorbar(Dict['VAP-trapped-proton']['Shielding'], Dict['VAP-trapped-proton']['SEE_Rate'],
     #                 yerr=Dict['VAP-trapped-proton']['SEE_Error'], label="VAP trapped proton", capsize=5, capthick=2)
     # plt.errorbar(Dict['VAP-solar-proton']['Shielding'], Dict['VAP-solar-proton']['SEE_Rate'],
@@ -253,6 +250,11 @@ for CrossectionName in CrossectionNames:
     # plt.errorbar(Dict['VAP-cosmic-iron']['Shielding'], Dict['VAP-cosmic-iron']['SEE_Rate'],
     #                 yerr=Dict['VAP-cosmic-iron']['SEE_Error'], label="VAP Cosmic Iron", capsize=5, capthick=2)
 
+    # plt.errorbar(Dict['VAP-SAPPHIRE-Solar-AllHeavyIons']['Shielding'], Dict['VAP-SAPPHIRE-Solar-AllHeavyIons']['SEE_Rate'],
+    #                 yerr=Dict['VAP-SAPPHIRE-Solar-AllHeavyIons']['SEE_Error'], label="VAP SAPPHIRE Solar Heavy Ions", capsize=5, capthick=2)
+    # plt.errorbar(Dict['VAP-GCR-AllHeavyIons']['Shielding'], Dict['VAP-GCR-AllHeavyIons']['SEE_Rate'],
+    #                 yerr=Dict['VAP-GCR-AllHeavyIons']['SEE_Error'], label="VAP GCR Heavy Ions", capsize=5, capthick=2)
+
 
     # # Combine the VAP Solar Proton, Cosmic and trapped proton data
     Dict['VAP'] = {}
@@ -261,25 +263,36 @@ for CrossectionName in CrossectionNames:
                                 Dict['VAP-trapped-proton']['SEE_Rate'] 
                                + Dict['VAP-solar-proton']['SEE_Rate'] 
                                + Dict['VAP-cosmic-proton']['SEE_Rate'] 
-                               + Dict['VAP-cosmic-iron']['SEE_Rate'] )
+                               #+ Dict['VAP-cosmic-iron']['SEE_Rate']
+                               + Dict['VAP-SAPPHIRE-Solar-AllHeavyIons']['SEE_Rate']
+                                 + Dict['VAP-GCR-AllHeavyIons']['SEE_Rate'])
     Dict['VAP']['SEE_Error'] = ( np.sqrt(#np.square(Dict['VAP-electron']['SEE_Error'])
                                           np.square(Dict['VAP-trapped-proton']['SEE_Error'])
                                          + np.square(Dict['VAP-solar-proton']['SEE_Error']) 
                                          + np.square(Dict['VAP-cosmic-proton']['SEE_Error']) 
-                                         + np.square(Dict['VAP-cosmic-iron']['SEE_Error'])) )
-
+                                         #+ np.square(Dict['VAP-cosmic-iron']['SEE_Error'])
+                                         + np.square(Dict['VAP-SAPPHIRE-Solar-AllHeavyIons']['SEE_Error'])
+                                         + np.square(Dict['VAP-GCR-AllHeavyIons']['SEE_Error'])))
     plt.errorbar(Dict['VAP']['Shielding'], Dict['VAP']['SEE_Rate'], yerr=Dict['VAP']['SEE_Error']
                     , label="VAP total 11-year mean", color=VAPColor, linestyle='--', **default_errorbar_style)
 
-    # plt.axhline(1/(8e+3 * 60 * 60 * 24), linestyle='-', label="1 upset per kByte per day", color='black')
     plt.axhline(1/(8e+6 * 60 * 60 * 24), linestyle='--', label="1 upset per MByte per day", color='black')
-    plt.axhline(1/(8e+9 * 60 * 60 * 24), linestyle=':', label="1 upset per GByte per day", color='black')
 
     if CrossectionName == "Cypress CY62167GE30-45ZXI":
         plt.ylim(2e-13, 3e-6)
-        pass
+        plt.axhline(1/(8e+3 * 60 * 60 * 24), linestyle='-', label="1 upset per kByte per day", color='black')
+        # No CREME96 HUP curve: no defensible single-RPP sensitive volume exists for
+        # this part (Serban et al. 2024 require four nested RPPs)
     else:
-        plt.ylim(1e-17, 2e-11)
+        plt.ylim(1e-18, 3e-11)
+        plt.axhline(1/(8e+9 * 60 * 60 * 24), linestyle=':', label="1 upset per GByte per day", color='black')
+
+        # CREME96 HUP (Vanderbilt web tool): GEO peak 5 min SEP heavy ions (Z = 2-92),
+        # IRPP with the vendor-documented Z = 2 um sensitive depth (RADSAGA 2017)
+        CREME96HUPShielding = np.array(['1mm', '2mm', '4mm', '8mm', '16mm'])
+        CREME96HUPRate = np.array([2.45e-11, 8.84e-13, 1.89e-13, 1.73e-14, 2.06e-15])
+        plt.plot(CREME96HUPShielding, CREME96HUPRate, marker='s', label="GEO CREME96 peak 5 min\nHeavy Ions CREME 96 HUP IRPP"
+                    , color='C9', linestyle=':')
 
     plt.yscale("log")
     plt.grid()
@@ -293,7 +306,21 @@ for CrossectionName in CrossectionNames:
 
     # Create a new order for the legend
     handles, labels = plt.gca().get_legend_handles_labels()
-    order = [0, 4, 1, 5, 6, 8, 7, 9, 2, 3]  # Adjust this list to reorder as needed
+    # Order by label: matplotlib groups handles by artist type, so plain indices
+    # shift whenever a line/patch/errorbar is added or removed
+    order = [labels.index(l) for l in [
+        "GEO EVT 1-in-150 year peak SEP +2σ",
+        "GEO EVT 1-in-150 year peak SEP",
+        "GEO EVT 1-in-150 year peak SEP -2σ",
+        "GEO CREME96 peak 5 min Proton",
+        "GEO CREME96 peak 5 min\nHeavy Ions GRAS LET Folding",
+        "GEO CREME96 peak 5 min\nHeavy Ions CREME 96 HUP IRPP",
+        "VAP total 11-year mean",
+        "GEO total 11-year mean",
+        "LEO total 11-year mean",
+        "1 upset per MByte per day",
+        "1 upset per kByte per day" if CrossectionName == "Cypress CY62167GE30-45ZXI" else "1 upset per GByte per day",
+    ] if l in labels]
     plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='lower right')
     # plt.legend(loc='lower right')
 

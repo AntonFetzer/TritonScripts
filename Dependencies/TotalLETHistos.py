@@ -31,12 +31,29 @@ def totalLETHistos(path):
         print("ERROR !!! No files found")
         exit()
 
+    # A job killed while writing its checkpoint leaves an empty or truncated
+    # csv. Complete GRAS csv files always end with an 'End of File' line, so
+    # anything else is corrupt and gets deleted before reading.
+    Complete = []
+    for File in Files:
+        FilePath = os.path.join(path, File)
+        with open(FilePath, 'rb') as f:
+            Tail = f.read()[-64:]
+        if b"'End of File'" in Tail:
+            Complete.append(File)
+        else:
+            print("WARNING: deleting incomplete csv", FilePath)
+            os.remove(FilePath)
+    Files = Complete
+
+    if not Files:
+        print(f"ERROR !!! No complete csv files in {path}")
+        return None, None
+
     LETList = []
     EffList = []
 
     # Read the files and append histogram dicts to the list of histograms.
-    # Files without histogram data (0 kB csvs from jobs killed while writing
-    # a checkpoint) are skipped; readLETHistos already warns about them.
     for File in Files:
         LETHistDict, EffHistDict = readLETHistos(os.path.join(path, File))
         if len(LETHistDict['lower']) == 0:
