@@ -53,10 +53,13 @@ def totalDose(path):
     # Calculate the weighted average of the dose.
     TID['dose'] = TID['dose'] / TID['entries']  # Divide by summed up number of entries to get the weighted average of the dose results
 
-    # Error estimation based on the standard deviation of the population and distance from the mean.
+    # Error estimation via the within/between sum-of-squares identity (ANOVA / Chan-Golub-LeVeque):
+    # SS = sum(N_i^2 * sigma_i^2) + sum(N_i * (D_i - D)^2), err = sqrt(SS) / sum(N_i).
+    # The between-file scatter term carries N_i (not N_i^2), otherwise the statistical
+    # error is counted twice and the result is inflated by up to sqrt(2).
     ErrTerm = np.zeros_like(TID['error'])
     for raw in RawData:
-        ErrTerm += raw['entries'] ** 2 * (raw['error'] ** 2 + (raw['dose'] - TID['dose']) ** 2)
+        ErrTerm += raw['entries'] ** 2 * raw['error'] ** 2 + raw['entries'] * (raw['dose'] - TID['dose']) ** 2
 
     TID['error'] = np.sqrt(ErrTerm) / TID['entries']
 
