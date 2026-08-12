@@ -1,12 +1,12 @@
 # AI Agent Instructions for TritonScripts Repository
 
-This codebase contains Python scripts for analyzing particle radiation effects, shielding calculations, and radiation dose estimation using GRAS (Geant4 Radiation Analysis for Space).
+This codebase contains Python scripts for analyzing particle radiation effects, shielding calculations, and radiation dose estimation based on simulation outputs from GRAS (Geant4 Radiation Analysis for Space).
 
 ## Project Structure
 
 - **Carrington/**: Analysis of Carrington event radiation effects
   - Electron shielding curves, spectra analysis, and time dependence studies
-  - SEE (Single Event Effects) rate calculations
+  - SEE (Single Event Effects) rate calculations specific to the Carrington project
   
 - **Dependencies/**: Core utilities for data processing
   - `TotalDose.py`, `MergeHistograms.py` - Essential histogram processing
@@ -22,17 +22,27 @@ This codebase contains Python scripts for analyzing particle radiation effects, 
 
 - **Plotting/**: Visualization modules
   - Supports various plot types: shielding curves, dose histograms, etc.
-  - Uses matplotlib with project-specific formatting
+  - Use matplotlib defaults where possible
 
 ## Key Design Patterns
 
 1. **Data Processing Pipeline**:
    ```python
-   from Dependencies.TotalDose import totalkRadGras
-   # Read and process radiation data
-   data = totalkRadGras(path, "Elec")  # Common pattern for electron data
-   data = totalkRadGras(path, "Prot")  # Common pattern for proton data
+   from Dependencies.TotalDose import totalDose
+
+   # Point each call at a directory containing one GRAS result dataset.
+   electron = totalDose(electron_results_path)
+   proton = totalDose(proton_results_path)
+
+   electron_dose = electron["dose"]
+   electron_error = electron["error"]
    ```
+
+   `totalDose` returns a dictionary with `dose`, `error`, `entries`, and
+   `non-zeros` arrays. The retired function is not available. For legacy
+   folders containing several datasets, use the optional `filename_contains`
+   argument explicitly, for example
+   `totalDose(path, filename_contains="Elec")`.
 
 2. **Error Handling**:
    - Always check histogram consistency:
@@ -53,7 +63,7 @@ This codebase contains Python scripts for analyzing particle radiation effects, 
 
 1. **Reading Data**:
    ```python
-   from Dependencies.TotalDose import totalkRadGras
+   from Dependencies.TotalDose import totalDose
    from Dependencies.TotalDoseHistos import totalGRASHistos
    from Dependencies.TotalLETHistos import totalLETHistos
    ```
@@ -61,7 +71,7 @@ This codebase contains Python scripts for analyzing particle radiation effects, 
 2. **Error Propagation**:
    ```python
    # Standard error combination for total dose
-   total[1] = np.sqrt(electrons[1]**2 + protons[1]**2)
+   total_error = np.sqrt(electrons["error"]**2 + protons["error"]**2)
    ```
 
 3. **Unit Conversions**:
@@ -72,9 +82,9 @@ This codebase contains Python scripts for analyzing particle radiation effects, 
 ## Integration Points
 
 1. **GRAS Dependencies**:
-   - Core package: `GRAS.Dependencies`
+   - Repository package: `Dependencies`
    - Key modules: TotalDose, MergeHistograms, TotalLETHistos
-   - Import hierarchy matters - use absolute imports
+   - Run from the repository root so absolute `Dependencies.*` imports resolve
 
 2. **Data Formats**:
    - CSV files with specific column structures

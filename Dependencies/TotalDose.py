@@ -6,12 +6,15 @@ import sys
 from uncertainties import ufloat
 
 
-def totalDose(path):
+def totalDose(path, filename_contains=None):
     """
     Reads the TID values of all sensitive volumes of all GRAS CSV output files in a folder and calculates the total dose for each of the tiles.
 
     Args:
         path (str): The path to the folder containing the CSV files.
+        filename_contains (str or None): Optional substring used to select CSV
+            filenames in legacy result folders that contain several particle
+            datasets. Prefer passing a directory containing only one dataset.
     
     Returns:
         dict: A dictionary containing the following keys:
@@ -24,11 +27,18 @@ def totalDose(path):
     print("\nReading in all csv files in folder:", path)
 
     # Get list of all csv files in Path
-    Files = [f for f in os.listdir(path) if '.csv' in f]
+    Files = [
+        f for f in os.listdir(path)
+        if f.endswith('.csv')
+        and (filename_contains is None or filename_contains in f)
+    ]
 
     if not Files:
         # Raise an error if no files are found
-        sys.exit("ERROR !!! No csv files found in folder: " + path)
+        selector = (
+            f" containing {filename_contains!r}" if filename_contains is not None else ""
+        )
+        sys.exit("ERROR !!! No csv files" + selector + " found in folder: " + path)
 
     keys = ['dose', 'error', 'entries', 'non-zeros']
     TID = {key: [] for key in keys}

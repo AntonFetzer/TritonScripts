@@ -1,10 +1,10 @@
-from GRAS.Dependencies.TotalDose import totalkRadGras
+from Dependencies.TotalDose import totalDose
 import numpy as np
 import matplotlib.pyplot as plt
 
 Path = "/l/triton_work/ShieldingCurves/Carrington/CarringtonElectronDiffPowTabelated-10mm/Res/"
 
-Data = totalkRadGras(Path)
+Data = totalDose(Path)
 
 NumTiles = np.shape(Data['dose'])[0]
 

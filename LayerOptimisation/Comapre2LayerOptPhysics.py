@@ -1,4 +1,4 @@
-from GRAS.Dependencies.TotalDose import totalDose
+from Dependencies.TotalDose import totalDose
 import numpy as np
 import matplotlib.pyplot as plt
 

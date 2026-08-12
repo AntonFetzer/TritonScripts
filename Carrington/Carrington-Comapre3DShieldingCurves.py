@@ -1,12 +1,12 @@
-from GRAS.Dependencies.TotalDose import totalkRadGras
+from Dependencies.TotalDose import totalDose
 import numpy as np
 import matplotlib.pyplot as plt
 
 Path = "/l/triton_work/ShieldingCurves/Carrington/CarringtonElectronDiffPowTabelated-10mm/Res/"
 
-Data = totalkRadGras(Path, "")
+Data = totalDose(Path)
 
-NumTiles = np.shape(Data)[1]
+NumTiles = len(Data["dose"])
 
 fig1 = plt.figure(1)
 
@@ -16,7 +16,7 @@ x = np.linspace(0, 10, num=NumTiles, endpoint=True)
 # To get the total dose after the carrington event with 29.52 hours of flux
 ScalingFactor = 29.52/(30*24)
 
-plt.errorbar(x, Data[0] * ScalingFactor, Data[1] * ScalingFactor, fmt=' ', capsize=5, label="Planar Shielding")
+plt.errorbar(x, Data["dose"] * ScalingFactor, Data["error"] * ScalingFactor, fmt=' ', capsize=5, label="Planar Shielding")
 
 ####### Plot 10kRad line #########
 CriticalDose = [10 for i in x]
@@ -33,15 +33,15 @@ ThickList = [1, 2, 4, 8]
 Colours = ['C3', 'C1', 'C8', 'C2', 'C9', 'C7']
 
 for i, folder in enumerate(Folders):
-    Electrons = totalkRadGras(Path + folder + "/Res/", "Elec")
+    Electrons = totalDose(Path + folder + "/Res/", filename_contains="Elec")
     
     x = []
     y = []
     Err = []
-    for vol in range(len(Electrons[0])):
+    for vol in range(len(Electrons["dose"])):
         x.append(ThickList[i])
-        y.append(Electrons[0][vol] * ScalingFactor)
-        Err.append(Electrons[1][vol] * ScalingFactor)
+        y.append(Electrons["dose"][vol] * ScalingFactor)
+        Err.append(Electrons["error"][vol] * ScalingFactor)
     plt.errorbar(x, y, Err, label="3D " + folder, fmt='.', capsize=10, markersize=10, color=Colours[i])
     print(np.average(x), np.average(y), max(y) - min(y))
 

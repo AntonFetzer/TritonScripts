@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from GRAS.Read.ReadSD2Q import readSDQ2
-from GRAS.Dependencies.TotalDose import totalDose
+from Dependencies.TotalDose import totalDose
 from GRAS.Dependencies.MergeTotalDose import mergeTotalDose
 
 

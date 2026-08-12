@@ -1,4 +1,5 @@
-from GRAS.Dependencies.TotalDose import totalkRadGras
+from Dependencies.MergeTotalDose import mergeTotalDose
+from Dependencies.TotalDose import totalDose
 import numpy as np
 import matplotlib.pyplot as plt
 from uncertainties import ufloat, unumpy
@@ -129,7 +130,7 @@ for i, label in enumerate(Labels, start=1):
 
 Data = []
 for i, path in enumerate(Paths):
-    Data.append(totalkRadGras(path, ""))
+    Data.append(totalDose(path))
 
 if ProtElecOrTotal == "Total":
     ElectronData = Data
@@ -140,19 +141,14 @@ if ProtElecOrTotal == "Total":
 
     ProtonData = []
     for i, path in enumerate(ProtonPaths):
-        ProtonData.append(totalkRadGras(path, ""))
+        ProtonData.append(totalDose(path))
 
     TotalData = []
 
     print(np.size(ElectronData))
 
     for i in range(len(ElectronData)):
-        TotalDose = ElectronData[i][0] + ProtonData[i][0]
-        TotalError = np.sqrt(ElectronData[i][1]**2 + ProtonData[i][1]**2)
-        TotalEntries = ElectronData[i][2] + ProtonData[i][2]
-        TotalNonZeroEntries = ElectronData[i][3] + ProtonData[i][3]
-
-        TotalData.append(np.asarray([TotalDose, TotalError, TotalEntries, TotalNonZeroEntries]))
+        TotalData.append(mergeTotalDose([ElectronData[i], ProtonData[i]]))
 
     Data = TotalData
 
@@ -167,12 +163,12 @@ Colours = ['C0', 'C1', 'C2', 'C8', 'C3', 'C9', 'C7', 'k', 'C4', 'C5', 'C6',
 Colours.extend(Colours)
 Colours.extend(Colours)
 
-NumTiles = np.shape(Data[0])[1]
+NumTiles = len(Data[0]["dose"])
 
 x = np.linspace(0, (NumTiles - 1) * 10, num=NumTiles, dtype=int, endpoint=True)
 
 for i, data in enumerate(Data):
-    plt.errorbar(x, data[0], data[1], fmt='', markersize=5, capsize=5, label=Labels[i], color=Colours[i], linestyle='-')
+    plt.errorbar(x, data["dose"], data["error"], fmt='', markersize=5, capsize=5, label=Labels[i], color=Colours[i], linestyle='-')
 
 ####### Plot 1kRad line #########
 CriticalDose = [1 for i in x]
@@ -205,8 +201,8 @@ dose_at_100_data = []
 
 # For CSV File data processing
 for dataset in Data:
-    doses = dataset[0]
-    errors = dataset[1]
+    doses = dataset["dose"]
+    errors = dataset["error"]
 
     # Find min and max doses
     min_dose_idx.append(np.argmin(doses))

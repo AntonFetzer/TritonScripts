@@ -2,7 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from uncertainties import ufloat
 
-from GRAS.Dependencies.TotalDose import totalkRadGras
+from Dependencies.MergeTotalDose import mergeTotalDose
+from Dependencies.TotalDose import totalDose
 
 Names = ["G4_lH2", "G4_He", "G4_Li", "G4_Be", "G4_B", "G4_C", "G4_lN2", "G4_lO2", "G4_F", "G4_Ne", "G4_Na", "G4_Mg",
          "G4_Al", "G4_Si", "G4_P", "G4_S", "G4_Cl", "G4_lAr", "G4_K", "G4_Ca", "G4_Sc", "G4_Ti", "G4_V", "G4_Cr",
@@ -36,20 +37,19 @@ print("Number of Densities:", len(Densities))
 Path = "/l/triton_work/Permutations/1Layer/Res/"
 file_name = Path + "../Analysis/1Layer-Raw.csv"
 
-Electrons = totalkRadGras(Path, "Elec")
-Protons = totalkRadGras(Path, "Prot")
+Electrons = totalDose(Path, filename_contains="Elec")
+Protons = totalDose(Path, filename_contains="Prot")
 
-Total = Electrons + Protons
-Total[1] = np.sqrt(Electrons[1] * Electrons[1] + Protons[1] * Protons[1])
+Total = mergeTotalDose([Electrons, Protons])
 
-NumTiles = np.shape(Electrons)[1]
+NumTiles = len(Electrons["dose"])
 print("NumTiles:", NumTiles)
 
 
 with open(file_name, 'w') as file:
     file.write("Material 1 Z-Number,Material 1,Electron Dose [krad/Month],Electron Err [krad/Month],Proton Dose [krad/Month],Proton Err [krad/Month],Total Dose [krad/Month],Total Err [krad/Month]\n")
     for i in range(NumTiles):
-        line = f"{i+1},{Names[i]},{ufloat(Electrons[0][i], Electrons[1][i])},{ufloat(Protons[0][i], Protons[1][i])},{ufloat(Total[0][i], Total[1][i])}\n"
+        line = f"{i+1},{Names[i]},{ufloat(Electrons['dose'][i], Electrons['error'][i])},{ufloat(Protons['dose'][i], Protons['error'][i])},{ufloat(Total['dose'][i], Total['error'][i])}\n"
         line = line.replace("+/-", ",")
         file.write(line)
 
@@ -58,12 +58,12 @@ with open(file_name, 'w') as file:
 x = np.linspace(1, NumTiles, num=NumTiles, dtype=int)
 
 #for i in x:
-#    print(i, Electrons[0][i-1])
+#    print(i, Electrons["dose"][i-1])
 '''
 fig1 = plt.figure(1)
-plt.errorbar(x, Electrons[0], Electrons[1], fmt='C0', label="AE9 Electrons", linewidth=0.75, capsize=2) #, elinewidth=0.5, capthick=0.5)
-plt.errorbar(x, Protons[0], Protons[1], fmt='C1', label="AP9 Protons", linewidth=0.75, capsize=2) #, elinewidth=0.5, capthick=0.5)
-plt.errorbar(x, Total[0], Total[1], fmt='C2', label="Total dose", linewidth=0.75, capsize=2) #, elinewidth=0.5, capthick=0.5)
+plt.errorbar(x, Electrons["dose"], Electrons["error"], fmt='C0', label="AE9 Electrons", linewidth=0.75, capsize=2) #, elinewidth=0.5, capthick=0.5)
+plt.errorbar(x, Protons["dose"], Protons["error"], fmt='C1', label="AP9 Protons", linewidth=0.75, capsize=2) #, elinewidth=0.5, capthick=0.5)
+plt.errorbar(x, Total["dose"], Total["error"], fmt='C2', label="Total dose", linewidth=0.75, capsize=2) #, elinewidth=0.5, capthick=0.5)
 plt.legend()
 plt.yscale("log")
 plt.yticks([0.25, 0.5, 1, 2], [0.25, 0.5, 1, 2])
@@ -78,9 +78,9 @@ plt.show()
 
 fig1, ax1 = plt.subplots(figsize=(8, 6))
 
-ax1.errorbar(x, Electrons[0], Electrons[1], fmt='.-', color='C0', label="AE9 Electrons", linewidth=1, capsize=5, elinewidth=1.5, capthick=1.5, alpha=0.8)
-ax1.errorbar(x, Protons[0], Protons[1], fmt='.-', color='C1', label="AP9 Protons", linewidth=1, capsize=5, elinewidth=1.5, capthick=1.5, alpha=0.8)
-ax1.errorbar(x, Total[0], Total[1], fmt='.-', color='C2', label="Total dose", linewidth=1, capsize=5, elinewidth=1.5, capthick=1.5, alpha=0.8)
+ax1.errorbar(x, Electrons["dose"], Electrons["error"], fmt='.-', color='C0', label="AE9 Electrons", linewidth=1, capsize=5, elinewidth=1.5, capthick=1.5, alpha=0.8)
+ax1.errorbar(x, Protons["dose"], Protons["error"], fmt='.-', color='C1', label="AP9 Protons", linewidth=1, capsize=5, elinewidth=1.5, capthick=1.5, alpha=0.8)
+ax1.errorbar(x, Total["dose"], Total["error"], fmt='.-', color='C2', label="Total dose", linewidth=1, capsize=5, elinewidth=1.5, capthick=1.5, alpha=0.8)
 
 ax1.legend()
 ax1.set_yscale("log")
@@ -94,4 +94,3 @@ ax1.tick_params(axis='both', which='major', labelsize=12)
 
 plt.tight_layout()
 plt.show()
-

@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from GRAS.Dependencies.TotalDose import totalkRadGras
+from Dependencies.MergeTotalDose import mergeTotalDose
+from Dependencies.TotalDose import totalDose
 from uncertainties import ufloat
 
 Path = "/l/triton_work/2LayerOptimisation"
@@ -16,29 +17,29 @@ Ymax = 1  # Max kRad shown in plots so that every plot has the same scale
 
 Path += "/" + Shield + "/"
 ResultsFolder = "Res/"
-ElecA = totalkRadGras(Path + ResultsFolder, "Electrons2MatA")
-ProtA = totalkRadGras(Path + ResultsFolder, "Protons2MatA")
+ElecA = totalDose(Path + ResultsFolder, filename_contains="Electrons2MatA")
+ProtA = totalDose(Path + ResultsFolder, filename_contains="Protons2MatA")
 
-ElecB = totalkRadGras(Path + ResultsFolder, "Electrons2MatB")
-ProtB = totalkRadGras(Path + ResultsFolder, "Protons2MatB")
+ElecB = totalDose(Path + ResultsFolder, filename_contains="Electrons2MatB")
+ProtB = totalDose(Path + ResultsFolder, filename_contains="Protons2MatB")
 
 x = np.linspace(0, 100, num=101, dtype=int)
 
-print(np.shape(ElecA))
-print(np.shape(ElecB))
-print(np.shape(ProtA))
-print(np.shape(ProtB))
+print(np.shape(ElecA["dose"]))
+print(np.shape(ElecB["dose"]))
+print(np.shape(ProtA["dose"]))
+print(np.shape(ProtB["dose"]))
 
-ElecB = np.flip(ElecB, 1)
-ProtB = np.flip(ProtB, 1)
+ElecB = {key: np.flip(values) for key, values in ElecB.items()}
+ProtB = {key: np.flip(values) for key, values in ProtB.items()}
 
 
 plt.figure(1)
-plt.errorbar(x, ElecA[0], ElecA[1], fmt=' ', capsize=2, label="Electrons " + A + " on " + B) # + " Min=" + str(round(np.min(ElecA[0]), 2)) + " kRad at " + str(round(np.argmin(ElecA[0]))) + " % " + A)
-plt.errorbar(x, ElecB[0], ElecB[1], fmt=' ', capsize=2, label="Electrons " + B + " on " + A) # + " Min=" + str(round(np.min(ElecB[0]), 2)) + " kRad at " + str(round(np.argmin(ElecB[0]))) + " % " + A)
+plt.errorbar(x, ElecA["dose"], ElecA["error"], fmt=' ', capsize=2, label="Electrons " + A + " on " + B)
+plt.errorbar(x, ElecB["dose"], ElecB["error"], fmt=' ', capsize=2, label="Electrons " + B + " on " + A)
 
-plt.errorbar(x, ProtA[0], ProtA[1], fmt=' ', capsize=2, label="Protons " + A + " on " + B) # + " Min=" + str(round(np.min(ProtA[0]), 2)) + " kRad at " + str(round(np.argmin(ProtA[0]))) + " % " + A)
-plt.errorbar(x, ProtB[0], ProtB[1], fmt=' ', capsize=2, label="Protons " + B + " on " + A) # + " Min=" + str(round(np.min(ProtB[0]), 2)) + " kRad at " + str(round(np.argmin(ProtB[0]))) + " % " + A)
+plt.errorbar(x, ProtA["dose"], ProtA["error"], fmt=' ', capsize=2, label="Protons " + A + " on " + B)
+plt.errorbar(x, ProtB["dose"], ProtB["error"], fmt=' ', capsize=2, label="Protons " + B + " on " + A)
 
 #plt.ylim(0, Ymax)
 plt.title("Dose deposited by trapped particles in 0.5 mm Si \n behind " + ShieldingDepth + " g/cm2 of " + MatA + "-" + MatB + " shielding")
@@ -50,17 +51,13 @@ plt.legend()
 plt.show()
 # plt.savefig(Path + Shield + "-Gradient.eps", format='eps', bbox_inches="tight")
 
-TotalA = np.zeros_like(ElecA)
-TotalA[0] = ElecA[0] + ProtA[0]
-TotalA[1] = np.sqrt(ElecA[1] * ElecA[1] + ProtA[1] * ProtA[1])
+TotalA = mergeTotalDose([ElecA, ProtA])
 
-TotalB = np.zeros_like(ElecB)
-TotalB[0] = ElecB[0] + ProtB[0]
-TotalB[1] = np.sqrt(ElecB[1] * ElecB[1] + ProtB[1] * ProtB[1])
+TotalB = mergeTotalDose([ElecB, ProtB])
 
 plt.figure(2)
-plt.errorbar(x, TotalA[0], TotalA[1], fmt=' ', capsize=2, label=MatA + " on top of " + MatB) # + " Min=" + str(round(np.min(TotalA[0]), 2)) + " krad at " + str(round(np.argmin(TotalA[0]))) + " % " + A)
-plt.errorbar(x, TotalB[0], TotalB[1], fmt=' ', capsize=2, label=MatB + " on top of " + MatA) # + " Min=" + str(round(np.min(TotalB[0]), 2)) + " krad at " + str(round(np.argmin(TotalB[0]))) + " % " + A)
+plt.errorbar(x, TotalA["dose"], TotalA["error"], fmt=' ', capsize=2, label=MatA + " on top of " + MatB)
+plt.errorbar(x, TotalB["dose"], TotalB["error"], fmt=' ', capsize=2, label=MatB + " on top of " + MatA)
 
 #plt.ylim(0, Ymax)
 plt.title("Total dose deposited by trapped particles in 0.5 mm Si \n behind " + ShieldingDepth + " g/cm2 of " + MatA + "-" + MatB + " shielding")  # --------
@@ -73,22 +70,22 @@ plt.show()
 # plt.savefig(Path + Shield + "-GradientSum.eps", format='eps', bbox_inches="tight")
 
 
-TotalAmin = np.min(TotalA[0])
-TotalBmin = np.min(TotalB[0])
-TotalAminIndex = np.argmin(TotalA[0])
-TotalBminIndex = np.argmin(TotalB[0])
+TotalAmin = np.min(TotalA["dose"])
+TotalBmin = np.min(TotalB["dose"])
+TotalAminIndex = np.argmin(TotalA["dose"])
+TotalBminIndex = np.argmin(TotalB["dose"])
 
-ElecAmin = ElecA[0][TotalAminIndex]
-ElecBmin = ElecB[0][TotalBminIndex]
+ElecAmin = ElecA["dose"][TotalAminIndex]
+ElecBmin = ElecB["dose"][TotalBminIndex]
 
-ElecAminErr = ElecA[1][TotalAminIndex]
-ElecBminErr = ElecB[1][TotalBminIndex]
+ElecAminErr = ElecA["error"][TotalAminIndex]
+ElecBminErr = ElecB["error"][TotalBminIndex]
 
-ProtAmin = ProtA[0][TotalAminIndex]
-ProtBmin = ProtB[0][TotalBminIndex]
+ProtAmin = ProtA["dose"][TotalAminIndex]
+ProtBmin = ProtB["dose"][TotalBminIndex]
 
-ProtAminErr = ProtA[1][TotalAminIndex]
-ProtBminErr = ProtB[1][TotalBminIndex]
+ProtAminErr = ProtA["error"][TotalAminIndex]
+ProtBminErr = ProtB["error"][TotalBminIndex]
 
 TotalAminErr = np.sqrt(ElecAminErr * ElecAminErr + ProtAminErr * ProtAminErr)
 TotalBminErr = np.sqrt(ElecBminErr * ElecBminErr + ProtBminErr * ProtBminErr)

@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import mpltern  # noqa: F401
 import numpy as np
-from GRAS.Dependencies.TotalDose import totalkRadGras
+from Dependencies.MergeTotalDose import mergeTotalDose
+from Dependencies.TotalDose import totalDose
 from matplotlib import cm
 import matplotlib as mpl
 from uncertainties import ufloat
@@ -16,44 +17,46 @@ def plotTernary(path, particle, materials, mat):
     Data = []
 
     if "Elec" in particle:
-        Data = totalkRadGras(path, particle)
+        Data = totalDose(path, filename_contains=particle)
         Fig = 0
         ColMap = cm.viridis
     elif "Prot" in particle:
-        Data = totalkRadGras(path, particle)
+        Data = totalDose(path, filename_contains=particle)
         Fig = 1
         ColMap = cm.plasma
     if "Total" in particle:
         Fig = 2
-        Prot = totalkRadGras(path, "Prot")
-        Elec = totalkRadGras(path, "Elec")
-        Data = Prot + Elec
-        Data[1] = np.sqrt(Prot[1] ** 2 + Elec[1] ** 2)
+        Prot = totalDose(path, filename_contains="Prot")
+        Elec = totalDose(path, filename_contains="Elec")
+        Data = mergeTotalDose([Prot, Elec])
         ColMap = create_average_colormap(cm.viridis, cm.plasma)
-        Prot = Prot / 2
-        Elec = Elec / 2
+        Prot["dose"] /= 2
+        Prot["error"] /= 2
+        Elec["dose"] /= 2
+        Elec["error"] /= 2
 
-    Data = Data / 2  ############## This is needed becasue GRAS wrongly normalises the surface area of the particle source
+    Data["dose"] /= 2  ############## This is needed becasue GRAS wrongly normalises the surface area of the particle source
+    Data["error"] /= 2
 
     N = 30
     Offset = int((N + 1) * N / 2)
 
-    print("The average Dose is", np.mean(Data[0]))
-    print("The average Dose of the main triangle is", np.mean(Data[0][:Offset]))
-    print("The average Dose of the upside down triangle is", np.mean(Data[0][Offset:]))
-    print("The difference in Dose is", 100 * (np.mean(Data[0][Offset:]) - np.mean(Data[0][:Offset])) / np.mean(Data[0]),
+    print("The average Dose is", np.mean(Data["dose"]))
+    print("The average Dose of the main triangle is", np.mean(Data["dose"][:Offset]))
+    print("The average Dose of the upside down triangle is", np.mean(Data["dose"][Offset:]))
+    print("The difference in Dose is", 100 * (np.mean(Data["dose"][Offset:]) - np.mean(Data["dose"][:Offset])) / np.mean(Data["dose"]),
           "%")
 
-    ColorData = np.log(Data[0])
+    ColorData = np.log(Data["dose"])
     Min = np.min(ColorData)
     ColorData = ColorData - Min
     Max = np.max(ColorData)
     ColorData = ColorData / Max
 
-    Max = np.max(Data[0])
-    Min = np.min(Data[0])
-    MinID = np.argmin(Data[0])
-    MinErr = Data[1][MinID]
+    Max = np.max(Data["dose"])
+    Min = np.min(Data["dose"])
+    MinID = np.argmin(Data["dose"])
+    MinErr = Data["error"][MinID]
 
     Colors = ColMap(ColorData)
     print(len(ColorData))
@@ -157,12 +160,12 @@ def plotTernary(path, particle, materials, mat):
         total_dose_min_err = MinErr
 
         # Extract minimum and its error for Electron Dose
-        elec_dose_min = Elec[0][MinID]
-        elec_dose_min_err = Elec[1][MinID]
+        elec_dose_min = Elec["dose"][MinID]
+        elec_dose_min_err = Elec["error"][MinID]
 
         # Extract minimum and its error for Proton Dose
-        proton_dose_min = Prot[0][MinID]
-        proton_dose_min_err = Prot[1][MinID]
+        proton_dose_min = Prot["dose"][MinID]
+        proton_dose_min_err = Prot["error"][MinID]
 
         CSVFilePath = path + "../" + "MinDoses.csv"
 

@@ -3,12 +3,12 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import scipy.odr as odr
 import pandas as pd
-from GRAS.Dependencies.TotalDose import totalkRadGras
+from Dependencies.TotalDose import totalDose
 
 
 def simpleFilter(data, window_size=5):
-    dose = pd.Series(data[0])
-    error = pd.Series(data[1])
+    dose = pd.Series(data["dose"])
+    error = pd.Series(data["error"])
     dose_windows = dose.rolling(window_size, center=True)
     error_windows = error.rolling(window_size, center=True)
 
@@ -19,45 +19,45 @@ def simpleFilter(data, window_size=5):
         errors.append(new_error)
 
     mov_avg = dose_windows.mean()
-    final_avg = data[0][:int(window_size / 2)].tolist() + mov_avg.tolist()[int(window_size / 2):-int(window_size / 2)] + \
-                data[0][-int(window_size / 2):].tolist()
-    final_error = data[1][:int(window_size / 2)].tolist() + errors[int(window_size / 2):-int(window_size / 2)] + data[
-                                                                                                                     1][
+    final_avg = data["dose"][:int(window_size / 2)].tolist() + mov_avg.tolist()[int(window_size / 2):-int(window_size / 2)] + \
+                data["dose"][-int(window_size / 2):].tolist()
+    final_error = data["error"][:int(window_size / 2)].tolist() + errors[int(window_size / 2):-int(window_size / 2)] + data[
+                                                                                                                     "error"][
                                                                                                                  -int(
                                                                                                                      window_size / 2):].tolist()
 
     # for i in range(len(data) - 4):
-    #     Res[0][i + 2] = (data[0][i] + data[0][i + 1] + data[0][i + 2] + data[0][i + 3] + data[0][i + 4]) / 5
+    #     Res["dose"][i + 2] = sum(data["dose"][i:i + 5]) / 5
     #     # print(Res[i], data[i])
-    #     Res[1][i + 2] = np.sqrt(data[1][i]**2 + data[1][i + 1]**2 + data[1][i + 2]**2 + data[1][i + 3]**2 + data[1][i + 4]**2) / 5
+    #     Res["error"][i + 2] = np.sqrt(np.sum(data["error"][i:i + 5] ** 2)) / 5
 
-    return np.array([final_avg, final_error])
+    return {"dose": np.asarray(final_avg), "error": np.asarray(final_error)}
 
 
 if __name__ == "__main__":
     path = "/l/triton_work/2LayerStackedCurves/PE-Pb-32/Res/"
 
     # Data = readGrasCsv(path)
-    Data = totalkRadGras(path, "Elec")
+    Data = totalDose(path, filename_contains="Elec")
 
     x = np.linspace(0, 100, num=101, dtype=int)
-    #plt.plot(x, Data[0], 'C0.')  # , label="Raw")
-    plt.errorbar(x, Data[0], Data[1], fmt='C0.', capsize=2, label="Raw")
-    plt.plot(np.argmin(Data[0]), min(Data[0]), "C0X",
-             label="Raw Min=%5.2f at %d %%" % (min(Data[0]), np.argmin(Data[0])))
+    #plt.plot(x, Data["dose"], 'C0.')  # , label="Raw")
+    plt.errorbar(x, Data["dose"], Data["error"], fmt='C0.', capsize=2, label="Raw")
+    plt.plot(np.argmin(Data["dose"]), min(Data["dose"]), "C0X",
+             label="Raw Min=%5.2f at %d %%" % (min(Data["dose"]), np.argmin(Data["dose"])))
 
     WindowSize = 10
     SimpleFiltered = simpleFilter(Data, WindowSize)
 
     # for i in range(5):
     #    SimpleFiltered = simpleFilter(SimpleFiltered)
-    plt.errorbar(x, SimpleFiltered[0], SimpleFiltered[1], fmt="C1", capsize=2)  # , label="SimpleFiltered")
-    MinX = np.nanargmin(SimpleFiltered[0])
-    MinY = np.nanmin(SimpleFiltered[0])
+    plt.errorbar(x, SimpleFiltered["dose"], SimpleFiltered["error"], fmt="C1", capsize=2)  # , label="SimpleFiltered")
+    MinX = np.nanargmin(SimpleFiltered["dose"])
+    MinY = np.nanmin(SimpleFiltered["dose"])
     plt.plot(MinX, MinY, "C1X", label="SimpleFiltered Min=%5.2f at %d %%" % (MinY, MinX))
 
     '''
-    savgol = Data[0]
+    savgol = Data["dose"]
     for i in range(1):
         savgol = signal.savgol_filter(savgol, 10, 4)
     plt.plot(x, savgol, "C2", label="savgol")
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
 
     WindowSize = 10
-    Fitsubset = Data[0][MinX-WindowSize:MinX+WindowSize]
+    Fitsubset = Data["dose"][MinX-WindowSize:MinX+WindowSize]
     xSubset = x[MinX-WindowSize:MinX+WindowSize]
     Fit = np.poly1d(np.polyfit(xSubset, Fitsubset, 2))
     Fit = Fit(x)
@@ -80,12 +80,12 @@ if __name__ == "__main__":
     if WindowSize > MinX:
         WindowStart = 0
         WindowEnd = 2 * WindowSize
-    elif WindowSize > len(Data[0]) - MinX:
-        WindowEnd = len(Data[0])
-        WindowStart = len(Data[0]) - 2 * WindowSize
+    elif WindowSize > len(Data["dose"]) - MinX:
+        WindowEnd = len(Data["dose"])
+        WindowStart = len(Data["dose"]) - 2 * WindowSize
 
-    #FitData = [SimpleFiltered[0][WindowStart:WindowEnd], SimpleFiltered[1][WindowStart:WindowEnd]]
-    FitData = [Data[0][WindowStart:WindowEnd], Data[1][WindowStart:WindowEnd]]
+    #FitData = [SimpleFiltered["dose"][WindowStart:WindowEnd], SimpleFiltered["error"][WindowStart:WindowEnd]]
+    FitData = [Data["dose"][WindowStart:WindowEnd], Data["error"][WindowStart:WindowEnd]]
     xSet = x[WindowStart:WindowEnd]
     plt.errorbar(xSet, FitData[0], FitData[1], fmt='C3.', capsize=2)  # , label="FitData")
 

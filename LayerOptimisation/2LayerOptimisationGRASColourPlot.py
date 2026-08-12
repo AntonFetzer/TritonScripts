@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from GRAS.Dependencies.TotalDose import totalkRadGras
+from Dependencies.MergeTotalDose import mergeTotalDose
+from Dependencies.TotalDose import totalDose
 from matplotlib import cm
 
 Path = "/l/triton_work/2LayerOptimisation"
@@ -17,17 +18,17 @@ for i, folder in enumerate(Folders):
     path = Path + "/" + folder + "/Res/"
     print(path)
 
-    ElecA = totalkRadGras(path, "Electrons2MatA")
-    ProtA = totalkRadGras(path, "Protons2MatA")
+    ElecA = totalDose(path, filename_contains="Electrons2MatA")
+    ProtA = totalDose(path, filename_contains="Protons2MatA")
 
-    ElecB = totalkRadGras(path, "Electrons2MatB")
-    ProtB = totalkRadGras(path, "Protons2MatB")
+    ElecB = totalDose(path, filename_contains="Electrons2MatB")
+    ProtB = totalDose(path, filename_contains="Protons2MatB")
 
-    ElecB = np.flip(ElecB, 1)
-    ProtB = np.flip(ProtB, 1)
+    ElecB = {key: np.flip(values) for key, values in ElecB.items()}
+    ProtB = {key: np.flip(values) for key, values in ProtB.items()}
 
-    TotalA = ElecA[0] + ProtA[0]
-    TotalB = ElecB[0] + ProtB[0]
+    TotalA = mergeTotalDose([ElecA, ProtA])["dose"]
+    TotalB = mergeTotalDose([ElecB, ProtB])["dose"]
 
     if(min(TotalA) > min(TotalB)):
         Total = TotalB
@@ -65,7 +66,5 @@ plt.savefig(Path + "/Summary.pdf", format='pdf', bbox_inches="tight")
 #print(Mins)
 
 plt.show()
-
-
 
 

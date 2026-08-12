@@ -1,4 +1,5 @@
-from GRAS.Dependencies.TotalDose import totalkRadGras
+from Dependencies.MergeTotalDose import mergeTotalDose
+from Dependencies.TotalDose import totalDose
 import numpy as np
 from uncertainties import ufloat
 
@@ -31,13 +32,12 @@ Names = Materials
 Path = "/l/triton_work/Permutations/2Layer50/Res/"
 file_name = Path + "../Analysis/2Layer50-Raw.csv"
 
-Electrons = totalkRadGras(Path, "Elec")
-Protons = totalkRadGras(Path, "Prot")
+Electrons = totalDose(Path, filename_contains="Elec")
+Protons = totalDose(Path, filename_contains="Prot")
 
-print("Electrons Shape:", np.shape(Electrons))
+print("Electrons Shape:", np.shape(Electrons["dose"]))
 
-Total = Electrons + Protons
-Total[1] = np.sqrt(Electrons[1] * Electrons[1] + Protons[1] * Protons[1])
+Total = mergeTotalDose([Electrons, Protons])
 # print(Total)
 
 NumMat = 50
@@ -46,20 +46,20 @@ List = []
 #for i1 in range(NumMat):
 #    for i2 in range(NumMat):
 #            i = i1 * NumMat + i2
-#            print(i+1, i1, i2, Materials[i1], Materials[i2], ufloat(Electrons[0][i], Electrons[1][i]), ufloat(Protons[0][i], Protons[1][i]), ufloat(Total[0][i], Total[1][i]))
+#            print(i+1, i1, i2, Materials[i1], Materials[i2], ufloat(Electrons["dose"][i], Electrons["error"][i]), ufloat(Protons["dose"][i], Protons["error"][i]), ufloat(Total["dose"][i], Total["error"][i]))
 
 with open(file_name, 'w') as file:
     file.write("Combination #,Material 1 Z-Number,Material 2 Z-Number,Material 1,Material 2,Electron Dose [krad/Month],Electron Err [krad/Month],Proton Dose [krad/Month],Proton Err [krad/Month],Total Dose [krad/Month],Total Err [krad/Month]\n")
     for i1 in range(NumMat):
         for i2 in range(NumMat):
             i = i1 * NumMat + i2
-            line = f"{i+1},{i1+1},{i2+1},{Materials[i1]},{Materials[i2]},{ufloat(Electrons[0][i], Electrons[1][i])},{ufloat(Protons[0][i], Protons[1][i])},{ufloat(Total[0][i], Total[1][i])}\n"
+            line = f"{i+1},{i1+1},{i2+1},{Materials[i1]},{Materials[i2]},{ufloat(Electrons['dose'][i], Electrons['error'][i])},{ufloat(Protons['dose'][i], Protons['error'][i])},{ufloat(Total['dose'][i], Total['error'][i])}\n"
             line = line.replace("+/-", ",")
             file.write(line)
 
 
 '''
-NumTiles = np.shape(Protons)[1]
+NumTiles = len(Protons["dose"])
 print("NumTiles:", NumTiles)
 
 ProtonMap = np.zeros((NumMat, NumMat), dtype=float)
@@ -68,9 +68,9 @@ TotalMap = np.zeros((NumMat, NumMat), dtype=float)
 
 for x in range(NumMat):
     for y in range(NumMat):
-        ProtonMap[x][y] = Protons[0][x * NumMat + y]
-        ElectronMap[x][y] = Electrons[0][x * NumMat + y]
-        TotalMap[x][y] = Total[0][x * NumMat + y]
+        ProtonMap[x][y] = Protons["dose"][x * NumMat + y]
+        ElectronMap[x][y] = Electrons["dose"][x * NumMat + y]
+        TotalMap[x][y] = Total["dose"][x * NumMat + y]
 
 
 cmapE = cm.viridis

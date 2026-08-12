@@ -1,10 +1,10 @@
 import os
 import numpy as np
-from GRAS.Dependencies.TotalDose import totalDose
+from Dependencies.TotalDose import totalDose
 import matplotlib.pyplot as plt
 import pandas as pd
 from natsort import natsorted
-from GRAS.Dependencies.TotalDose import totalDose
+from Dependencies.TotalDose import totalDose
 
 Path = "/l/triton_work/RadEx/"
 
@@ -109,5 +109,4 @@ ax2.set_ylim(bottom=0)  # Set the lower limit of the y-axis to 0
 '''
 
 #plt.show()
-
 
