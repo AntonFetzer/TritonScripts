@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from GRAS.Dependencies.TotalLETHistos import totalLETHistos
+from Dependencies.TotalLETHistos import totalLETHistos
 import os
 from natsort import natsorted
 import numpy as np

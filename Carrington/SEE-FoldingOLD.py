@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sp
-from GRAS.Dependencies.TotalLETHistos import totalGRASLETHistos
+from Dependencies.TotalLETHistos import totalLETHistos
 from uncertainties import ufloat
 
 '''
@@ -77,36 +77,21 @@ for Thick in ThickList:
     for P, path in enumerate(Paths):
         ## ----------------------------------- LET Read-in -----------------------------------------------------------
 
-        # Only works if all input files have the same number of particle!!!!!
-        LETHist, EffHist = totalGRASLETHistos(path, "")
+        LETHist, EffHist = totalLETHistos(path)
 
-        lowerID = 0
-        upperID = 1
-        meanID = 2
-        valueID = 3
-        errorID = 4
-        entriesID = 5
-
-        C = 2330  # to convert from MeV/cm to Mev cm2 mg-1
-
-        LETHist[:, lowerID] = LETHist[:, lowerID] / C
-        LETHist[:, upperID] = LETHist[:, upperID] / C
-        LETHist[:, meanID] = LETHist[:, meanID] / C
-
-        NumberEntriesLETHist = sum(LETHist[:, entriesID])
-        TotalLET = sum(LETHist[:, meanID] * LETHist[:, valueID])
-        TotalLETError = 0
-        for i in range(len(LETHist[:, valueID])):
-            TotalLETError += LETHist[i, errorID] ** 2
-        TotalLETError = np.sqrt(TotalLETError)
+        # totalLETHistos returns dictionary histograms and already converts
+        # LET coordinates to MeV cm2 mg-1 in ReadLETHistos.
+        NumberEntriesLETHist = np.sum(LETHist['entries'])
+        TotalLET = np.sum(LETHist['mean'] * LETHist['value'])
+        TotalLETError = np.sqrt(np.sum(LETHist['error'] ** 2))
         TotalLET = ufloat(TotalLET, TotalLETError)
 
 
         ### LET Histogram ###############
         fig, ax1 = plt.subplots(1)
         # plt.figure(1)
-        plt.bar(LETHist[:, lowerID], LETHist[:, valueID], width=LETHist[:, upperID] - LETHist[:, lowerID], align='edge', alpha=0.3)
-        plt.errorbar(LETHist[:, meanID], LETHist[:, valueID], LETHist[:, errorID], fmt=' ', capsize=5, elinewidth=1, capthick=1, label="LET Histogram")
+        plt.bar(LETHist['lower'], LETHist['value'], width=LETHist['upper'] - LETHist['lower'], align='edge', alpha=0.3)
+        plt.errorbar(LETHist['mean'], LETHist['value'], LETHist['error'], fmt=' ', capsize=5, elinewidth=1, capthick=1, label="LET Histogram")
         plt.plot([], [], label="SEE cross-section", color='C1')
         plt.yscale("log")
         plt.xscale("log")
@@ -118,7 +103,7 @@ for Thick in ThickList:
         ax1.tick_params(axis='y', colors='C0')
         
         ax2 = ax1.twinx()
-        plt.plot(LETHist[:, lowerID], f(LETHist[:, lowerID]), color='C1')
+        plt.plot(LETHist['lower'], f(LETHist['lower']), color='C1')
         ax2.set_ylabel("Cross Section [cm2 bit-1]", color='C1')
         plt.yscale("log")
         ax2.tick_params(axis='y', colors='C1')
@@ -129,20 +114,18 @@ for Thick in ThickList:
 
         ### SEE rate ###############
 
-        SEEHist = LETHist
+        SEEHist = {
+            key: value.copy() if isinstance(value, np.ndarray) else value
+            for key, value in LETHist.items()
+        }
 
-        SEEHist[:, valueID] = LETHist[:, valueID] * f(LETHist[:, meanID])
-        SEEHist[:, errorID] = LETHist[:, errorID] * f(LETHist[:, meanID])
+        SEEHist['value'] = LETHist['value'] * f(LETHist['mean'])
+        SEEHist['error'] = LETHist['error'] * f(LETHist['mean'])
 
         ################## Calculating total SEE Rate #####################################
 
-        SEERate = np.sum(SEEHist[:, valueID])
-        SEERateError = 0
-
-        for i in range(len(SEEHist[:, valueID])):
-            SEERateError += SEEHist[i, errorID] ** 2
-
-        SEERateError = np.sqrt(SEERateError)
+        SEERate = np.sum(SEEHist['value'])
+        SEERateError = np.sqrt(np.sum(SEEHist['error'] ** 2))
 
         SEERateU = ufloat(SEERate, SEERateError)
 
@@ -150,9 +133,9 @@ for Thick in ThickList:
         print("or:", SEERateU * 8e+6, " s-1 Mbyte-1 ")
 
         fig, ax1 = plt.subplots(1)
-        plt.bar(SEEHist[:, lowerID], SEEHist[:, valueID], width=SEEHist[:, upperID] - SEEHist[:, lowerID], align='edge',
+        plt.bar(SEEHist['lower'], SEEHist['value'], width=SEEHist['upper'] - SEEHist['lower'], align='edge',
                 alpha=0.3)
-        plt.errorbar(SEEHist[:, meanID], SEEHist[:, valueID], SEEHist[:, errorID], fmt=' ', capsize=5, elinewidth=1,
+        plt.errorbar(SEEHist['mean'], SEEHist['value'], SEEHist['error'], fmt=' ', capsize=5, elinewidth=1,
                      capthick=1, label="SEE Histogram")
         plt.plot([], [], label="SEE cross-section", color='C1')
         plt.yscale("log")
@@ -165,7 +148,7 @@ for Thick in ThickList:
         ax1.tick_params(axis='y', colors='C0')
 
         ax2 = ax1.twinx()
-        plt.plot(LETHist[:, lowerID], f(LETHist[:, lowerID]), color='C1')
+        plt.plot(LETHist['lower'], f(LETHist['lower']), color='C1')
         ax2.set_ylabel("Cross Section [cm2 bit-1]", color='C1')
         plt.yscale("log")
         ax2.tick_params(axis='y', colors='C1')

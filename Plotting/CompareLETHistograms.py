@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from GRAS.Dependencies.TotalLETHistos import totalGRASLETHistos
+from Dependencies.TotalLETHistos import totalLETHistos
 import os
 from natsort import natsorted
 import numpy as np
@@ -19,34 +19,26 @@ Labels = ["SEP-Expected", "Minus2Sigma", "Plus2Sigma", "SEP2003", "AE9 GTO", "AP
 
 Colours = ['C1', 'C0', 'C2', 'C8', 'C3', 'C7', 'C9', 'b', 'k']
 
-lowerID = 0
-upperID = 1
-meanID = 2
-valueID = 3
-errorID = 4
-entriesID = 5
-
 LETHist = []
 EffHist = []
 
 for p, path in enumerate(Paths):
-    Temp = totalGRASLETHistos(path, "")
-
-    LETHist.append(Temp[0])
-    EffHist.append(Temp[1])
+    LET, Eff = totalLETHistos(path)
+    LETHist.append(LET)
+    EffHist.append(Eff)
 
 Num = len(Paths)
 '''
 plt.figure(0)
 for i in range(Num):
-    plt.bar(LETHist[i][:, lowerID], LETHist[i][:, entriesID], width=LETHist[i][:, upperID] - LETHist[i][:, lowerID],
+    plt.bar(LETHist[i]['lower'], LETHist[i]['entries'], width=LETHist[i]['upper'] - LETHist[i]['lower'],
             align='edge', alpha=0.5, color=Colours[i])
-    plt.step(LETHist[i][:, lowerID], LETHist[i][:, entriesID], where='post', label=Labels[i], color=Colours[i])
+    plt.step(LETHist[i]['lower'], LETHist[i]['entries'], where='post', label=Labels[i], color=Colours[i])
 plt.yscale("log")
 plt.xscale("log")
 plt.grid()
 plt.title("LET Histogram Carrington SEP vs. 16mm Aluminium")
-plt.xlabel("LET [MeV/cm]")
+plt.xlabel("LET [MeV cm2 mg-1]")
 plt.ylabel("Number of entries per LET bin")
 plt.legend()
 plt.savefig("/l/triton_work/LET/Plots/LETentries.pdf", format='pdf', bbox_inches="tight")
@@ -54,12 +46,12 @@ plt.savefig("/l/triton_work/LET/Plots/LETentries.pdf", format='pdf', bbox_inches
 plt.figure(1)
 for i in range(Num):
     if Labels[i].startswith("A"):
-        LETHist[i][:, valueID] /= 30 * 24 * 60 * 60
-        LETHist[i][:, errorID] /= 30 * 24 * 60 * 60
+        LETHist[i]['value'] /= 30 * 24 * 60 * 60
+        LETHist[i]['error'] /= 30 * 24 * 60 * 60
 
-    plt.bar(LETHist[i][:, lowerID], LETHist[i][:, valueID], width=LETHist[i][:, upperID] - LETHist[i][:, lowerID],
+    plt.bar(LETHist[i]['lower'], LETHist[i]['value'], width=LETHist[i]['upper'] - LETHist[i]['lower'],
             align='edge', alpha=0.5, color=Colours[i])
-    plt.step(LETHist[i][:, lowerID], LETHist[i][:, valueID], where='post', label=Labels[i], color=Colours[i])
+    plt.step(LETHist[i]['lower'], LETHist[i]['value'], where='post', label=Labels[i], color=Colours[i])
 plt.yscale("log")
 plt.xscale("log")
 # plt.ylim(1e-7, 1e5)
@@ -71,30 +63,30 @@ plt.legend()
 # plt.savefig("/l/triton_work/LET/Plots/LETvalues.pdf", format='pdf', bbox_inches="tight")
 # plt.savefig("/l/TritonPlots/Luna/LETHistogramComparison.svg", format='svg', bbox_inches="tight")
 '''
-NumberEntriesEffHist = sum(EffHist[0][:, entriesID])
+NumberEntriesEffHist = sum(EffHist[0]['entries'])
 
 plt.figure(2)
 for i in range(Num):
-    plt.bar(EffHist[i][:, lowerID], EffHist[i][:, entriesID], width=EffHist[i][:, upperID] - EffHist[i][:, lowerID],
+    plt.bar(EffHist[i]['lower'], EffHist[i]['entries'], width=EffHist[i]['upper'] - EffHist[i]['lower'],
             align='edge', label=Labels[i], alpha=0.3)
 plt.yscale("log")
 plt.xscale("log")
 plt.grid()
 plt.title("EffLET Histogram by entries")
-plt.xlabel("EffLET [MeV/cm]")
+plt.xlabel("EffLET [MeV cm2 mg-1]")
 plt.ylabel("Number of entries per EffLET bin")
 plt.legend()
 #plt.savefig("/l/triton_work/LET/EFFentries.eps", format='eps', bbox_inches="tight")
 
 plt.figure(3)
 for i in range(Num):
-    plt.bar(EffHist[i][:, lowerID], EffHist[i][:, valueID], width=EffHist[i][:, upperID] - EffHist[i][:, lowerID],
+    plt.bar(EffHist[i]['lower'], EffHist[i]['value'], width=EffHist[i]['upper'] - EffHist[i]['lower'],
             align='edge', label=Labels[i], alpha=0.3)
 plt.yscale("log")
 plt.xscale("log")
 plt.grid()
 plt.title("EffLET Histogram by values")
-plt.xlabel("EffLET [MeV/cm]")
+plt.xlabel("EffLET [MeV cm2 mg-1]")
 plt.ylabel("Rate per LET bin [s-1]")
 plt.legend()
 #plt.savefig("/l/triton_work/LET/EFFvalues.eps", format='eps', bbox_inches="tight")

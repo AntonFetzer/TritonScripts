@@ -51,8 +51,11 @@ all_histograms = []
 
 # Read histograms using the provided function
 for folder in Folders:
-    histograms = totalFluenceHistos(Path + folder)
-    all_histograms.append(histograms)
+    electron_histogram, proton_histogram = totalFluenceHistos(Path + folder)
+    all_histograms.append({
+        'Electrons': electron_histogram,
+        'Protons': proton_histogram,
+    })
 
 NumberOfHistograms = len(all_histograms)
 

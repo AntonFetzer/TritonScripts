@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from GRAS.Read.ReadLETHistos import readLETHistos
-from GRAS.Dependencies.TotalLETHistos import totalLETHistos
+from Dependencies.TotalLETHistos import totalLETHistos
 
 File = '/l/triton_work/LET_Histograms/Stopping Powers and Ranges/StoppingPower-Ranges.csv'
 

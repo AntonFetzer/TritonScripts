@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from GRAS.Read.ReadDoseHistos import readDoseHistos
+from Read.ReadDoseHistos import readDoseHistos
 import sys
 import os
 
