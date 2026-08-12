@@ -1,10 +1,18 @@
 import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import numpy as np
 from Dependencies.TotalDose import totalDose
 import matplotlib.pyplot as plt
 from uncertainties import ufloat, ufloat_fromstr
 
-Path = "/l/triton_work/RadEx/RadEx-ThickPCB-6mm"
+Path = (
+    sys.argv[1]
+    if len(sys.argv) > 1
+    else "/l/triton_work/RadEx/RadEx-ThickPCB-6mm"
+)
 
 # Find all subdirectories in the given path that contain a "Res" subfolder
 # and calculate the total dose for each of them
