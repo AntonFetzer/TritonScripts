@@ -1,0 +1,15 @@
+'*', 10, 0, 5, 0, 4, 4, 3, 1
+'GRAS_DATA_TITLE',   -1,'TOTAL DOSE FOR INDIVIDUAL VOLUMES'
+'GRAS_DATA_TYPE',   -1,'STAT_DOUBLE'
+'GRAS_MODULE_NAME',   -1,'doseDetector'
+'GRAS_MODULE_TYPE',   -1,'DOSE'
+'VOLUME NAMES',   -3,'Si_vol_0_PV','Si_vol_1_PV','Si_vol_2_PV'
+'Dose','rad',    1,'Dose/energy deposition'
+'Error','rad',    1,'Error dose/energy deposition'
+'Entries','',    1,'Number of entries'
+'Non zero entries','',    1,'Number of non zero entries'
+     1e-06,       2e-07,       1e+06,         100
+     2e-06,       2e-07,       1e+06,         200
+     4e-06,       2e-07,       1e+06,         300
+'End of Block'
+'End of File'
