@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import re
 import sys
 
 def readDose(file):
@@ -70,6 +71,61 @@ def readDose(file):
     TID['error'] *= rad_to_krad
 
     return TID
+
+
+def readDoseModules(file, module_prefix=None):
+    """Read every GRAS single-volume ``TOTAL DOSE`` module in a CSV file.
+
+    Unlike :func:`readDose`, this reader preserves the unit written by GRAS and
+    does not apply the legacy rad-to-kRad conversion. It is intended for files
+    containing several independent dose modules, such as layered phantoms.
+
+    Args:
+        file (str): Path to the GRAS CSV output file.
+        module_prefix (str or None): Optional module-name prefix to retain.
+
+    Returns:
+        dict: Mapping from module name to ``dose``, ``error``, ``entries``,
+        ``non-zeros``, and ``unit``.
+    """
+    number = r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?"
+    data_line = re.compile(
+        rf"^\s*({number})\s*,\s*({number})\s*,\s*({number})\s*,\s*({number})\s*$",
+        re.MULTILINE,
+    )
+    module_name = re.compile(
+        r"'GRAS_MODULE_NAME'\s*,\s*-1\s*,\s*'([^']+)'"
+    )
+    unit_name = re.compile(r"'Dose'\s*,\s*'([^']+)'")
+    total_dose_title = re.compile(
+        r"'GRAS_DATA_TITLE'\s*,\s*-1\s*,\s*'TOTAL DOSE'"
+    )
+
+    with open(file, "r") as stream:
+        contents = stream.read()
+
+    modules = {}
+    for block in re.split(r"(?=^'\*',)", contents, flags=re.MULTILINE):
+        if not total_dose_title.search(block):
+            continue
+        module_match = module_name.search(block)
+        unit_match = unit_name.search(block)
+        values = data_line.findall(block)
+        if not module_match or not unit_match or not values:
+            continue
+        name = module_match.group(1)
+        if module_prefix is not None and not name.startswith(module_prefix):
+            continue
+        dose, error, entries, non_zeros = values[-1]
+        modules[name] = {
+            "dose": float(dose),
+            "error": float(error),
+            "entries": int(float(entries)),
+            "non-zeros": int(float(non_zeros)),
+            "unit": unit_match.group(1),
+        }
+
+    return modules
 
 
 
@@ -164,4 +220,3 @@ if __name__ == "__main__":
     # plt.savefig(PlotPath + '/NonZeros.pdf', format='pdf', bbox_inches="tight")
     
     plt.show()
-
