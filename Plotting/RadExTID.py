@@ -1,4 +1,5 @@
 import os
+import argparse
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -8,11 +9,13 @@ from Dependencies.TotalDose import totalDose
 import matplotlib.pyplot as plt
 from uncertainties import ufloat, ufloat_fromstr
 
-Path = (
-    sys.argv[1]
-    if len(sys.argv) > 1
-    else "/l/triton_work/RadEx/RadEx-ThickPCB-6mm"
-)
+parser = argparse.ArgumentParser(description="Aggregate and plot RadEx TID results.")
+parser.add_argument("path", nargs="?", default="/l/triton_work/RadEx/RadEx-ThickPCB-6mm")
+parser.add_argument("--fluence", type=float, help="Incident fluence in particles/cm2; overrides folder-name convention")
+args = parser.parse_args()
+if args.fluence is not None and (not np.isfinite(args.fluence) or args.fluence <= 0):
+    parser.error("--fluence must be finite and positive")
+Path = args.path
 
 # Find all subdirectories in the given path that contain a "Res" subfolder
 # and calculate the total dose for each of them
@@ -30,10 +33,10 @@ for root, dirs, files in os.walk(Path):
 
         NumTiles = len(Results['dose'])
 
-        if 'MeVElectron' in folder_name:
-            # Assume fluence of 1e12 electrons/cm2
-            Results['dose'] *= 2e12
-            Results['error'] *= 2e12
+        fluence = args.fluence if args.fluence is not None else (2e12 if 'MeVElectron' in folder_name else 1.0)
+        Results['dose'] *= fluence
+        Results['error'] *= fluence
+        print(f"Applied incident fluence: {fluence:g} particles/cm2")
 
 
         # Print the dose results in csv format scientifically rounded and safe them to a csv file
@@ -55,8 +58,8 @@ for root, dirs, files in os.walk(Path):
                 RoundedDose = DoseRounded.n
                 RoundedError = DoseRounded.s
 
-                RoundedDoseString = f"{DoseRounded.n:.2g}"
-                RoundedErrorString = f"{DoseRounded.s:.2g}"
+                RoundedDoseString = f"{DoseRounded.n:.12g}"
+                RoundedErrorString = f"{DoseRounded.s:.12g}"
 
                 print(f"{i}, {RoundedDoseString}, {RoundedErrorString}, {Results['non-zeros'][i]}")
                 f.write(f"{i},{RoundedDoseString},{RoundedErrorString},{Results['non-zeros'][i]}\n")
@@ -67,7 +70,7 @@ for root, dirs, files in os.walk(Path):
         plt.errorbar(np.arange(NumTiles), Results['dose'], yerr=Results['error'], fmt=' ', capsize=5, elinewidth=1, capthick=1, label='Dose')
         # Add horizontal line at 1 kRad
         plt.axhline(y=1, color='r', linestyle='--', label='1 kRad')
-        plt.title('Dose per tile ' + folder_name)
+        plt.title('Dose per tile ' + folder_name, fontsize=10)
         plt.xlabel('Tile number')
         plt.ylabel('Dose [kRad]')
         plt.yscale('log')
@@ -85,6 +88,7 @@ for root, dirs, files in os.walk(Path):
         plt.title('Relative Error in %')
         plt.xlabel('Tile number')
         plt.ylabel('Relative Error [%]')
+        plt.ylim(bottom=0)
         plt.grid(which='both')
         plt.legend()
 

@@ -32,6 +32,8 @@ python3 GenerateInterfaceIndex.py --write
   - `mergeHistograms(...)` -- Merges a list of GRAS histograms of identical runs using proper error
 - `Dependencies.MergeTotalDose`
   - `mergeTotalDose(...)` -- Merges the dose dicts in List_of_Dose_Dicts into one dose dict
+- `Dependencies.PoolDoseModules` -- Pool repeated GRAS single-volume dose modules without changing their units.
+  - `poolDoseModules(...)` -- Entry-weight module doses; return pooled values and replica Birge diagnostics.
 - `Dependencies.TotalDose`
   - `totalDose(...)` -- Reads the TID values of all sensitive volumes of all GRAS CSV output files in a folder and calculates the total dose for each of the tiles.
 - `Dependencies.TotalDoseHistograms`
@@ -101,6 +103,8 @@ python3 GenerateInterfaceIndex.py --write
   - `energy_from_name(...)`
   - `falling_crossing(...)`
   - `main(...)`
+- `Plotting.RadExHUSPDDProduction` -- Validate and inspect the HUS production water response matrix and exploratory fits.
+  - `main(...)`
 - `Plotting.RadExTID`
   - script, no public functions and no module docstring
 - `Plotting.RadExUppsalaProduction` -- Aggregate production TID results for the RadEx Uppsala simulations.
@@ -147,6 +151,8 @@ electron_histogram, proton_histogram = totalFluenceHistos(path)
 Always unpack these tuples explicitly. LET readers already return the repository's documented converted units; do not apply a second density conversion in callers.
 
 ## Implementation conventions
+
+- Always use a linear axis starting at zero for relative-error plots. Their purpose is to identify volumes with high relative errors; resolving the smallest relative errors is not important.
 
 - Run scripts from the repository root when they use absolute `Dependencies.*` or `Read.*` imports.
 - Prefer `pathlib.Path` or `os.path` over constructing new paths with string concatenation.

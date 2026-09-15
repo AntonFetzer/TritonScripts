@@ -161,24 +161,35 @@ def main():
     plt.figure(figsize=(7.2, 4.8))
     plt.plot(DEPTHS_MM, measured_pdd, "ko", ms=3.5, label="HUS measured")
     for energy, curve in sorted(curves.items()):
-        plt.plot(DEPTHS_MM, curve["pdd"], "o-", ms=3, lw=1.2,
-                 color=colors[energy], label=f"{energy:.1f} MeV mono")
+        # Scale the marginal GRAS errors by a fixed observed maximum.
+        # A full ratio uncertainty needs inter-layer covariance, not recorded here.
+        pdd_error = 100 * curve["error"] / np.max(curve["dose"])
+        plt.errorbar(DEPTHS_MM, curve["pdd"], yerr=pdd_error,
+                     fmt="o-", ms=3, lw=1.2, capsize=2.5, elinewidth=0.9,
+                     color=colors[energy], label=f"{energy:.1f} MeV mono")
     plt.xlabel("Nominal measurement depth [mm]")
     plt.ylabel("Dose / maximum [%]")
     plt.grid(alpha=0.3)
     plt.legend()
-    plt.tight_layout()
+    plt.figtext(
+        0.5, 0.015,
+        "Bars: GRAS statistical errors scaled by a fixed maximum.\n"
+        "Shared normalization uncertainty excluded; measured errors unavailable.",
+        ha="center", va="bottom", fontsize=8,
+    )
+    plt.tight_layout(rect=(0, 0.09, 1, 1))
     plt.savefig(run / "PDD-pilot.png", dpi=180)
     plt.savefig(run / "PDD-pilot.pdf")
     plt.close()
 
     plt.figure(figsize=(7.2, 4.8))
     for energy, curve in sorted(curves.items()):
-        plt.semilogy(DEPTHS_MM, curve["relative_error"], "o-", ms=3,
+        plt.plot(DEPTHS_MM, curve["relative_error"], "o-", ms=3,
                      color=colors[energy], label=f"{energy:.1f} MeV")
     plt.axhline(1, color="black", ls="--", lw=1, label="1%")
     plt.xlabel("Nominal measurement depth [mm]")
     plt.ylabel("GRAS relative statistical error [%]")
+    plt.ylim(bottom=0)
     plt.grid(which="both", alpha=0.3)
     plt.legend()
     plt.tight_layout()
