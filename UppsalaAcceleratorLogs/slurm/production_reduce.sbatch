@@ -4,8 +4,8 @@
 #SBATCH --time=01:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=16G
-#SBATCH --output=slurm/reduce-%j.out
-#SBATCH --error=slurm/reduce-%j.err
+#SBATCH --output=logs/slurm/reduce-%j.out
+#SBATCH --error=logs/slurm/reduce-%j.err
 
 set -euo pipefail
 module load scicomp-python-env/2025.2
@@ -16,6 +16,6 @@ export PYTHONPATH="${PYTHON_REPO}:${PYTHONPATH:-}"
 cd "$ANALYSIS_DIR"
 
 python3 -m UppsalaAcceleratorLogs.uppsala_analysis reduce \
-  --manifest manifest.json \
-  --parsed-dir production/parsed \
-  --output-dir production/results
+  --manifest metadata/manifest.json \
+  --parsed-dir cache/parsed \
+  --output-dir results/final

@@ -6,8 +6,8 @@
 #SBATCH --mem=8G
 # Four multi-minute tasks avoid excessive scheduler overhead from short jobs.
 #SBATCH --array=0-3%4
-#SBATCH --output=slurm/parse-%A_%a.out
-#SBATCH --error=slurm/parse-%A_%a.err
+#SBATCH --output=logs/slurm/parse-%A_%a.out
+#SBATCH --error=logs/slurm/parse-%A_%a.err
 
 set -euo pipefail
 module load scicomp-python-env/2025.2
@@ -18,7 +18,7 @@ export PYTHONPATH="${PYTHON_REPO}:${PYTHONPATH:-}"
 cd "$ANALYSIS_DIR"
 
 python3 -m UppsalaAcceleratorLogs.uppsala_analysis parse \
-  --manifest manifest.json \
-  --output-dir production/parsed \
+  --manifest metadata/manifest.json \
+  --output-dir cache/parsed \
   --task-id "$SLURM_ARRAY_TASK_ID" \
   --resume

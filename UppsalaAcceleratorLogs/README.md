@@ -1,7 +1,7 @@
 # Uppsala proton-log analysis
 
 
-Campaign inputs, caches, logs, and results remain under /scratch/work/fetzera1/Radiation Testing/2025-06 Proton/Uppsala Accelerator Logs/fluence_analysis/.
+Campaign inputs, caches, logs, and results remain under /scratch/work/fetzera1/Radiation Testing/2025-06 Proton/Uppsala Accelerator Logs/.
 The version-controlled package contains a streaming parser and Slurm workflow for the Skandion
 Kliniken IBA PBS data-recorder logs from 27–28 June 2025.
 
@@ -9,12 +9,21 @@ The input logs are never modified. Parsing first creates charge-domain products,
 so calibration and plotting can be repeated without rescanning the 14.4 GiB of
 CSV input.
 
+## Campaign layout
+
+- `raw/`: immutable recorder CSVs.
+- `metadata/`: experiment log, conversion table, and file manifest.
+- `cache/parsed/`: regenerable per-record charge products.
+- `results/final/`: calibrated production results.
+- `results/exploratory/`: cadence and time-spatial studies.
+- `logs/slurm/`: retained scheduler logs.
+
 ## Workflow
 
-1. Build `manifest.json` with `python3 -m UppsalaAcceleratorLogs.uppsala_analysis inventory` from the Python repository root.
+1. Build `metadata/manifest.json` with `python3 -m UppsalaAcceleratorLogs.uppsala_analysis inventory` from the Python repository root.
 2. Optionally run a small parse pilot with the `--session-filter` and `--limit` options.
 3. Inspect charge conservation and delivered-versus-planned calibration checks.
-4. From the campaign analysis directory, submit `/scratch/work/fetzera1/Python/UppsalaAcceleratorLogs/slurm/production_array.sbatch` (four byte-balanced, multi-minute tasks).
+4. From the campaign root, submit `/scratch/work/fetzera1/Python/UppsalaAcceleratorLogs/slurm/production_array.sbatch` (four byte-balanced, multi-minute tasks).
 5. Submit `/scratch/work/fetzera1/Python/UppsalaAcceleratorLogs/slurm/production_reduce.sbatch` with an `afterok` dependency.
 
 The facility file's extra values (`7.14E12` and `9.40E12`) equal the Experiment 1
