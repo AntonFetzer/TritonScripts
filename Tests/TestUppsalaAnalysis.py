@@ -171,6 +171,11 @@ class ParserTests(unittest.TestCase):
     def test_radex_area(self):
         self.assertAlmostEqual(ua.RADEX_INSTRUMENT_AREA_CM2, 102.872)
 
+    def test_crds_target_areas(self):
+        self.assertAlmostEqual(ua.CRDS_TARGETS["exp_10"]["area_cm2"], 28.08)
+        self.assertAlmostEqual(ua.CRDS_TARGETS["exp_12"]["area_cm2"], 28.08)
+        self.assertAlmostEqual(ua.CRDS_TARGETS["exp_13"]["area_cm2"], 51.8)
+
     def test_radex_time_rows_use_fixed_instrument_area(self):
         products = {
             "exp_a": {"time_rows": {10: {
@@ -185,6 +190,21 @@ class ParserTests(unittest.TestCase):
         self.assertAlmostEqual(rows[20]["radex_mean_fluence_raw_protons_cm2"], 20.0)
         self.assertAlmostEqual(rows[10]["radex_instrument_area_cm2"], 102.872)
         self.assertAlmostEqual(rows[20]["radex_instrument_area_cm2"], 102.872)
+
+    def test_crds_time_rows_use_per_irradiation_target_area(self):
+        products = {
+            "exp_10": {"time_rows": {10: {
+                "protons_delivered_raw": 2808.0,
+                "protons_delivered_positive": 2527.2}}},
+            "exp_13": {"time_rows": {20: {
+                "protons_delivered_raw": 5180.0,
+                "protons_delivered_positive": 5180.0}}},
+        }
+        rows = ua.build_crds_time_rows(products, ["exp_10", "exp_13"])
+        self.assertAlmostEqual(rows[10]["crds_mean_fluence_raw_protons_cm2"], 100.0)
+        self.assertAlmostEqual(rows[20]["crds_mean_fluence_raw_protons_cm2"], 100.0)
+        self.assertAlmostEqual(rows[10]["crds_target_area_cm2"], 28.08)
+        self.assertAlmostEqual(rows[20]["crds_target_area_cm2"], 51.8)
 
 
 

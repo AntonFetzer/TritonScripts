@@ -61,6 +61,16 @@ FACILITY_CALIBRATION_ENERGY_ALIASES = {64.0: 65.0}
 RADEX_INSTRUMENT_WIDTH_X_MM = 154.0
 RADEX_INSTRUMENT_WIDTH_Y_MM = 66.8
 RADEX_INSTRUMENT_AREA_CM2 = RADEX_INSTRUMENT_WIDTH_X_MM * RADEX_INSTRUMENT_WIDTH_Y_MM / 100.0
+
+# CRDS was irradiated with two requested target fields.  The first three runs
+# used the smaller field and the final run used the larger field, so its fluence
+# denominator must be selected per irradiation rather than once per aggregate.
+CRDS_TARGETS = {
+    "exp_10": {"width_x_cm": 5.2, "width_y_cm": 5.4, "area_cm2": 28.08},
+    "exp_11": {"width_x_cm": 5.2, "width_y_cm": 5.4, "area_cm2": 28.08},
+    "exp_12": {"width_x_cm": 5.2, "width_y_cm": 5.4, "area_cm2": 28.08},
+    "exp_13": {"width_x_cm": 7.0, "width_y_cm": 7.4, "area_cm2": 51.8},
+}
 SESSION_RE = re.compile(r"skandion_irrlogs_(\d{8})_(\d{8})_(\d{6})_\d+\.PBS")
 MAP_RE = re.compile(r"\.map_record_(\d{3})_(part|tuning)_(\d{2})\.csv$")
 
@@ -788,20 +798,66 @@ def grid_geometry(
     )
 
 
-def build_radex_time_rows(experiment_products, group_ids):
+def build_surface_time_rows(
+    experiment_products,
+    group_ids,
+    surface_name,
+    area_by_group_id,
+):
+    prefix = surface_name.lower()
+    area_field = (
+        "radex_instrument_area_cm2"
+        if prefix == "radex"
+        else f"{prefix}_target_area_cm2"
+    )
     result = defaultdict(lambda: defaultdict(float))
     for group_id in group_ids:
+        area_cm2 = float(area_by_group_id[group_id])
+        if area_cm2 <= 0.0:
+            raise ValueError(f"Invalid {surface_name} area for {group_id}: {area_cm2}")
         for second, values in experiment_products[group_id]["time_rows"].items():
             target = result[int(second)]
             for field in ("charge_primary_raw_c", "charge_primary_positive_c", "charge_secondary_raw_c",
                           "protons_delivered_raw", "protons_delivered_positive", "tuning_protons_estimated"):
                 target[field] += float(values.get(field, 0.0))
-            for source, destination in (("protons_delivered_raw", "radex_mean_fluence_raw_protons_cm2"),
-                ("protons_delivered_positive", "radex_mean_fluence_positive_protons_cm2"),
-                ("tuning_protons_estimated", "radex_mean_tuning_fluence_protons_cm2")):
-                target[destination] += float(values.get(source, 0.0)) / RADEX_INSTRUMENT_AREA_CM2
-            target["radex_instrument_area_cm2"] = RADEX_INSTRUMENT_AREA_CM2
+            for source, suffix in (
+                ("protons_delivered_raw", "mean_fluence_raw_protons_cm2"),
+                ("protons_delivered_positive", "mean_fluence_positive_protons_cm2"),
+                ("tuning_protons_estimated", "mean_tuning_fluence_protons_cm2"),
+            ):
+                target[f"{prefix}_{suffix}"] += (
+                    float(values.get(source, 0.0)) / area_cm2
+                )
+            existing_area = target.get(area_field)
+            if existing_area not in (None, 0.0) and not math.isclose(
+                existing_area, area_cm2
+            ):
+                raise ValueError(
+                    f"Overlapping {surface_name} target areas at epoch {second}"
+                )
+            target[area_field] = area_cm2
     return result
+
+
+def build_radex_time_rows(experiment_products, group_ids):
+    return build_surface_time_rows(
+        experiment_products,
+        group_ids,
+        "RadEx",
+        {group_id: RADEX_INSTRUMENT_AREA_CM2 for group_id in group_ids},
+    )
+
+
+def build_crds_time_rows(experiment_products, group_ids):
+    return build_surface_time_rows(
+        experiment_products,
+        group_ids,
+        "CRDS",
+        {
+            group_id: CRDS_TARGETS[group_id]["area_cm2"]
+            for group_id in group_ids
+        },
+    )
 
 
 def write_time_series_csv(
@@ -811,11 +867,19 @@ def write_time_series_csv(
 ) -> None:
     cumulative_raw = 0.0
     cumulative_positive = 0.0
-    cumulative_radex_raw = 0.0
-    cumulative_radex_positive = 0.0
-    include_radex_fluence = any(
-        "radex_mean_fluence_raw_protons_cm2" in row for row in time_rows.values()
-    )
+    surface_prefixes = [
+        prefix
+        for prefix in ("radex", "crds")
+        if any(
+            f"{prefix}_mean_fluence_raw_protons_cm2" in row
+            for row in time_rows.values()
+        )
+    ]
+    if len(surface_prefixes) > 1:
+        raise ValueError("A time series may contain only one surface-fluence definition")
+    surface_prefix = surface_prefixes[0] if surface_prefixes else None
+    cumulative_surface_raw = 0.0
+    cumulative_surface_positive = 0.0
     fields = [
         "time_utc",
         "time_bms_local",
@@ -829,15 +893,20 @@ def write_time_series_csv(
         "cumulative_protons_delivered_positive",
         "tuning_protons_estimated",
     ]
-    if include_radex_fluence:
+    if surface_prefix:
+        area_field = (
+            "radex_instrument_area_cm2"
+            if surface_prefix == "radex"
+            else f"{surface_prefix}_target_area_cm2"
+        )
         fields.extend(
             [
-                "radex_instrument_area_cm2",
-                "radex_mean_fluence_raw_protons_cm2",
-                "cumulative_radex_mean_fluence_raw_protons_cm2",
-                "radex_mean_fluence_positive_protons_cm2",
-                "cumulative_radex_mean_fluence_positive_protons_cm2",
-                "radex_mean_tuning_fluence_protons_cm2",
+                area_field,
+                f"{surface_prefix}_mean_fluence_raw_protons_cm2",
+                f"cumulative_{surface_prefix}_mean_fluence_raw_protons_cm2",
+                f"{surface_prefix}_mean_fluence_positive_protons_cm2",
+                f"cumulative_{surface_prefix}_mean_fluence_positive_protons_cm2",
+                f"{surface_prefix}_mean_tuning_fluence_protons_cm2",
             ]
         )
     with path.open("w", encoding="utf-8", newline="") as handle:
@@ -847,12 +916,13 @@ def write_time_series_csv(
             row = time_rows[second]
             cumulative_raw += row.get("protons_delivered_raw", 0.0)
             cumulative_positive += row.get("protons_delivered_positive", 0.0)
-            cumulative_radex_raw += row.get(
-                "radex_mean_fluence_raw_protons_cm2", 0.0
-            )
-            cumulative_radex_positive += row.get(
-                "radex_mean_fluence_positive_protons_cm2", 0.0
-            )
+            if surface_prefix:
+                cumulative_surface_raw += row.get(
+                    f"{surface_prefix}_mean_fluence_raw_protons_cm2", 0.0
+                )
+                cumulative_surface_positive += row.get(
+                    f"{surface_prefix}_mean_fluence_positive_protons_cm2", 0.0
+                )
             utc_time = datetime.fromtimestamp(second, timezone.utc)
             output = {
                 "time_utc": utc_time.isoformat(),
@@ -875,26 +945,20 @@ def write_time_series_csv(
                     "tuning_protons_estimated", 0.0
                 ),
             }
-            if include_radex_fluence:
+            if surface_prefix:
                 output.update(
                     {
-                        "radex_instrument_area_cm2": row.get(
-                            "radex_instrument_area_cm2", 0.0
+                        area_field: row.get(area_field, 0.0),
+                        f"{surface_prefix}_mean_fluence_raw_protons_cm2": row.get(
+                            f"{surface_prefix}_mean_fluence_raw_protons_cm2", 0.0
                         ),
-                        "radex_mean_fluence_raw_protons_cm2": row.get(
-                            "radex_mean_fluence_raw_protons_cm2", 0.0
+                        f"cumulative_{surface_prefix}_mean_fluence_raw_protons_cm2": cumulative_surface_raw,
+                        f"{surface_prefix}_mean_fluence_positive_protons_cm2": row.get(
+                            f"{surface_prefix}_mean_fluence_positive_protons_cm2", 0.0
                         ),
-                        "cumulative_radex_mean_fluence_raw_protons_cm2": (
-                            cumulative_radex_raw
-                        ),
-                        "radex_mean_fluence_positive_protons_cm2": row.get(
-                            "radex_mean_fluence_positive_protons_cm2", 0.0
-                        ),
-                        "cumulative_radex_mean_fluence_positive_protons_cm2": (
-                            cumulative_radex_positive
-                        ),
-                        "radex_mean_tuning_fluence_protons_cm2": row.get(
-                            "radex_mean_tuning_fluence_protons_cm2", 0.0
+                        f"cumulative_{surface_prefix}_mean_fluence_positive_protons_cm2": cumulative_surface_positive,
+                        f"{surface_prefix}_mean_tuning_fluence_protons_cm2": row.get(
+                            f"{surface_prefix}_mean_tuning_fluence_protons_cm2", 0.0
                         ),
                     }
                 )
@@ -906,7 +970,7 @@ def save_time_series_png(
     time_rows: dict[int, dict[str, float]],
     bms_timezone: timezone,
     title: str,
-    radex_fluence: bool = False,
+    surface_name: str | None = None,
 ) -> None:
     import matplotlib
 
@@ -923,12 +987,13 @@ def save_time_series_png(
     tuning = np.zeros(len(seconds), dtype=np.float64)
     for second, values in time_rows.items():
         index = int(second - first_second)
-        if radex_fluence:
+        if surface_name:
+            prefix = surface_name.lower()
             delivered[index] = values.get(
-                "radex_mean_fluence_raw_protons_cm2", 0.0
+                f"{prefix}_mean_fluence_raw_protons_cm2", 0.0
             )
             tuning[index] = values.get(
-                "radex_mean_tuning_fluence_protons_cm2", 0.0
+                f"{prefix}_mean_tuning_fluence_protons_cm2", 0.0
             )
         else:
             delivered[index] = values.get("protons_delivered_raw", 0.0)
@@ -955,8 +1020,8 @@ def save_time_series_png(
         )
         rate_ax.legend(loc="upper right")
     rate_ax.set_ylabel(
-        "Mean RadEx fluence rate [protons cm$^{-2}$ s$^{-1}$]"
-        if radex_fluence
+        f"Mean {surface_name} fluence rate [protons cm$^{{-2}}$ s$^{{-1}}$]"
+        if surface_name
         else "Delivered protons s$^{-1}$"
     )
     rate_ax.set_title(title)
@@ -965,8 +1030,8 @@ def save_time_series_png(
 
     cumulative_ax.plot(times, cumulative, linewidth=1.5, color="#228833")
     cumulative_ax.set_ylabel(
-        "Cumulative mean RadEx fluence [protons cm$^{-2}$]"
-        if radex_fluence
+        f"Cumulative mean {surface_name} fluence [protons cm$^{{-2}}$]"
+        if surface_name
         else "Cumulative delivered protons"
     )
     cumulative_ax.set_xlabel("BMS local time (+02:00)")
@@ -980,7 +1045,7 @@ def save_time_series_png(
         0.05,
         (
             f"Total: {cumulative[-1]:.4e} protons cm$^{{-2}}$"
-            if radex_fluence
+            if surface_name
             else f"Total: {cumulative[-1]:.4e} protons"
         ),
         transform=cumulative_ax.transAxes,
@@ -1324,12 +1389,31 @@ def reduce_results(args: argparse.Namespace) -> None:
     radex_campaign_time_rows = build_radex_time_rows(
         experiment_products, radex_group_ids
     )
+    crds_group_ids = sorted(
+        group_id for group_id in CRDS_TARGETS if group_id in experiment_products
+    )
+    if set(crds_group_ids) != set(CRDS_TARGETS):
+        missing_crds = sorted(set(CRDS_TARGETS) - set(crds_group_ids))
+        raise RuntimeError(f"Missing documented CRDS experiments: {missing_crds}")
+    crds_campaign_time_rows = build_crds_time_rows(
+        experiment_products, crds_group_ids
+    )
     radex_area_report = {"width_x_mm": RADEX_INSTRUMENT_WIDTH_X_MM,
         "width_y_mm": RADEX_INSTRUMENT_WIDTH_Y_MM, "area_cm2": RADEX_INSTRUMENT_AREA_CM2,
         "uniformity_assurance_percent": 5.0,
         "method": ("Monitor-derived delivered protons divided by the explicitly requested "
         "154.0 mm by 66.8 mm RadEx surface. The facility assured fluence uniformity "
         "within 5%. No X/Y magnification or exp_12/exp_13 fit is applied.")}
+    crds_area_report = {
+        "method": (
+            "Monitor-derived delivered protons divided by the requested CRDS target "
+            "area for each irradiation: 5.2 cm by 5.4 cm for exp_10 through exp_12, "
+            "and 7.0 cm by 7.4 cm for exp_13."
+        ),
+        "experiments": {
+            group_id: dict(CRDS_TARGETS[group_id]) for group_id in crds_group_ids
+        },
+    }
     for group_id in radex_group_ids:
         product = experiment_products[group_id]
         c = product["calibration"]
@@ -1338,6 +1422,21 @@ def reduce_results(args: argparse.Namespace) -> None:
         "radex_instrument_area_cm2": RADEX_INSTRUMENT_AREA_CM2,
         "radex_mean_fluence_raw_protons_cm2": c["delivered_protons_raw"]/RADEX_INSTRUMENT_AREA_CM2,
         "radex_mean_fluence_positive_protons_cm2": c["delivered_protons_positive"]/RADEX_INSTRUMENT_AREA_CM2})
+    for group_id in crds_group_ids:
+        product = experiment_products[group_id]
+        c = product["calibration"]
+        target = CRDS_TARGETS[group_id]
+        c.update({
+            "crds_target_width_x_cm": target["width_x_cm"],
+            "crds_target_width_y_cm": target["width_y_cm"],
+            "crds_target_area_cm2": target["area_cm2"],
+            "crds_mean_fluence_raw_protons_cm2": (
+                c["delivered_protons_raw"] / target["area_cm2"]
+            ),
+            "crds_mean_fluence_positive_protons_cm2": (
+                c["delivered_protons_positive"] / target["area_cm2"]
+            ),
+        })
 
     np.savez_compressed(
         output_dir / "campaign_heatmaps.npz",
@@ -1395,6 +1494,13 @@ def reduce_results(args: argparse.Namespace) -> None:
     named_aggregates["RadEx_Total"] = (
         named_aggregates["RadEx_64MeV"] + named_aggregates["Radex_85MeV"]
     )
+    named_aggregates.update(
+        {
+            "CRDS_5.2x5.4cm": ["exp_10", "exp_11", "exp_12"],
+            "CRDS_7.0x7.4cm": ["exp_13"],
+            "CRDS_Total": crds_group_ids,
+        }
+    )
     aggregate_root = output_dir / "aggregates"
     aggregate_root.mkdir(parents=True, exist_ok=True)
     aggregate_summaries: list[dict[str, Any]] = []
@@ -1425,7 +1531,12 @@ def reduce_results(args: argparse.Namespace) -> None:
                 target = aggregate_time[second]
                 for field, value in values.items():
                     target[field] += value
-        aggregate_time_radex = build_radex_time_rows(experiment_products, group_ids)
+        surface_name = "CRDS" if name.startswith("CRDS") else "RadEx"
+        aggregate_time_surface = (
+            build_crds_time_rows(experiment_products, group_ids)
+            if surface_name == "CRDS"
+            else build_radex_time_rows(experiment_products, group_ids)
+        )
         summaries = [
             experiment_products[group_id]["calibration"] for group_id in group_ids
         ]
@@ -1452,10 +1563,29 @@ def reduce_results(args: argparse.Namespace) -> None:
             "spatialized_protons": sum(
                 float(item["spatialized_protons"]) for item in summaries
             ),
-            "radex_instrument_width_x_mm": RADEX_INSTRUMENT_WIDTH_X_MM,
-            "radex_instrument_width_y_mm": RADEX_INSTRUMENT_WIDTH_Y_MM,
-            "radex_instrument_area_cm2": RADEX_INSTRUMENT_AREA_CM2,
         }
+        if surface_name == "RadEx":
+            summary.update({
+                "radex_instrument_width_x_mm": RADEX_INSTRUMENT_WIDTH_X_MM,
+                "radex_instrument_width_y_mm": RADEX_INSTRUMENT_WIDTH_Y_MM,
+                "radex_instrument_area_cm2": RADEX_INSTRUMENT_AREA_CM2,
+            })
+        else:
+            dimensions = sorted(
+                {
+                    (
+                        CRDS_TARGETS[group_id]["width_x_cm"],
+                        CRDS_TARGETS[group_id]["width_y_cm"],
+                    )
+                    for group_id in group_ids
+                }
+            )
+            summary.update({
+                "crds_target_dimensions_cm": [list(item) for item in dimensions],
+                "crds_target_areas_cm2": sorted(
+                    {CRDS_TARGETS[group_id]["area_cm2"] for group_id in group_ids}
+                ),
+            })
         summary["nominal_comparison_valid"] = "exp_09" not in group_ids
         summary["nominal_comparison_note"] = (
             "Includes early-canceled exp_09; its 10,000 MU summary value was an "
@@ -1471,8 +1601,22 @@ def reduce_results(args: argparse.Namespace) -> None:
         summary["spatialized_to_delivered_protons_ratio"] = (
             summary["spatialized_protons"] / summary["delivered_protons_raw"]
         )
-        summary["radex_mean_fluence_raw_protons_cm2"] = summary["delivered_protons_raw"] / RADEX_INSTRUMENT_AREA_CM2
-        summary["radex_mean_fluence_positive_protons_cm2"] = summary["delivered_protons_positive"] / RADEX_INSTRUMENT_AREA_CM2
+        if surface_name == "RadEx":
+            summary["radex_mean_fluence_raw_protons_cm2"] = (
+                summary["delivered_protons_raw"] / RADEX_INSTRUMENT_AREA_CM2
+            )
+            summary["radex_mean_fluence_positive_protons_cm2"] = (
+                summary["delivered_protons_positive"] / RADEX_INSTRUMENT_AREA_CM2
+            )
+        else:
+            summary["crds_mean_fluence_raw_protons_cm2"] = sum(
+                float(item["crds_mean_fluence_raw_protons_cm2"])
+                for item in summaries
+            )
+            summary["crds_mean_fluence_positive_protons_cm2"] = sum(
+                float(item["crds_mean_fluence_positive_protons_cm2"])
+                for item in summaries
+            )
         aggregate_summaries.append(summary)
         json_dump(aggregate_dir / "summary.json", summary)
         np.savez_compressed(
@@ -1536,16 +1680,16 @@ def reduce_results(args: argparse.Namespace) -> None:
         summary.update(monitor_summary)
         json_dump(aggregate_dir / "summary.json", summary)
         write_time_series_csv(
-            aggregate_dir / "fluence_vs_time_1s_RadEx_area.csv",
-            aggregate_time_radex,
+            aggregate_dir / f"fluence_vs_time_1s_{surface_name}_area.csv",
+            aggregate_time_surface,
             bms_timezone,
         )
         save_time_series_png(
-            aggregate_dir / "fluence_vs_time_RadEx_area.png",
-            aggregate_time_radex,
+            aggregate_dir / f"fluence_vs_time_{surface_name}_area.png",
+            aggregate_time_surface,
             bms_timezone,
-            f"{name} — mean RadEx-surface fluence versus time",
-            radex_fluence=True,
+            f"{name} — mean {surface_name}-surface fluence versus time",
+            surface_name=surface_name,
         )
     aggregate_fields = sorted({key for row in aggregate_summaries for key in row})
     with (aggregate_root / "aggregate_summary.csv").open(
@@ -1585,7 +1729,19 @@ def reduce_results(args: argparse.Namespace) -> None:
         radex_campaign_time_rows,
         bms_timezone,
         "Campaign — mean RadEx-surface fluence versus time",
-        radex_fluence=True,
+        surface_name="RadEx",
+    )
+    write_time_series_csv(
+        output_dir / "fluence_vs_time_1s_CRDS_area.csv",
+        crds_campaign_time_rows,
+        bms_timezone,
+    )
+    save_time_series_png(
+        output_dir / "fluence_vs_time_CRDS_area.png",
+        crds_campaign_time_rows,
+        bms_timezone,
+        "Campaign — mean CRDS-target fluence versus time",
+        surface_name="CRDS",
     )
 
     report = {
@@ -1599,7 +1755,7 @@ def reduce_results(args: argparse.Namespace) -> None:
         "grid": grid,
         "pixel_area_cm2": pixel_area_cm2,
         "spatial_heatmap_note": ("Recorder-plane diagnostic heatmaps retain the configured spot-width model, "
-        "but spot widths are not used for the RadEx mean-fluence estimate."),
+        "but spot widths are not used for the RadEx or CRDS mean-fluence estimates."),
         "calibration_method": (
             "Each DOSE_PRIM(C) sample is summed as incremental primary-monitor charge. "
             "For every part record, MU = charge / (3.0e-9 C/MU * K_FACTOR), and the "
@@ -1612,6 +1768,12 @@ def reduce_results(args: argparse.Namespace) -> None:
         "radex_surface_fluence": radex_area_report,
         "radex_time_series_interpretation": ("RadEx-area time-series fluence is delivered protons "
         "per second divided by the fixed 102.872 cm2 surface."),
+        "crds_surface_fluence": crds_area_report,
+        "crds_time_series_interpretation": (
+            "CRDS-area time-series fluence is delivered protons per second divided "
+            "by 28.08 cm2 for exp_10 through exp_12 and 51.8 cm2 for exp_13. "
+            "Cumulative CRDS fluence is the sum of the per-irradiation fluences."
+        ),
     }
     json_dump(output_dir / "reduction_report.json", report)
     print(

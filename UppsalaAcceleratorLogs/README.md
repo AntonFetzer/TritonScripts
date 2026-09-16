@@ -61,12 +61,16 @@ map-record. This removes the former artificial factor-of-two rate at the end of
 - fluence_vs_time_1s.csv: one-second charge and delivered-particle series.
 - fluence_vs_time_1s_RadEx_area.csv and fluence_vs_time_RadEx_area.png:
   mean incident fluence across the specified RadEx surface.
+- fluence_vs_time_1s_CRDS_area.csv and fluence_vs_time_CRDS_area.png:
+  mean incident fluence across the requested CRDS target area, selected per irradiation.
 - calibration_qc.csv: per-irradiation calibration and consistency metrics.
 - reduction_report.json: assumptions, completeness, and warnings.
 - dose_prim_vs_sec.png and dose_prim_vs_sec_1s.csv: independent primary and
   secondary dose-monitor comparison.
 - aggregates/RadEx_64MeV, aggregates/Radex_85MeV, and aggregates/RadEx_Total:
   summaries and time series for the RadEx irradiations.
+- aggregates/CRDS_5.2x5.4cm, aggregates/CRDS_7.0x7.4cm, and aggregates/CRDS_Total:
+  summaries and time series for the CRDS irradiations, separated by target size and combined.
 
 Recorder-plane heatmaps are retained as diagnostics. They are not DUT-plane
 fluence maps and are not used for the RadEx surface-fluence estimate.
@@ -90,6 +94,18 @@ separately by the Geant4 model.
 
 The diagnostic spatial heatmaps retain a configurable Gaussian spot-width
 interpretation, but they do not establish DUT-plane coordinates or fluence.
+
+## CRDS target-fluence estimate
+
+Experiments exp_10 through exp_13 are the CRDS irradiations, all at the nominal
+64 MeV setting. The requested target area was 5.2 cm by 5.4 cm (28.08 cm2) for
+exp_10 through exp_12 and 7.0 cm by 7.4 cm (51.8 cm2) for exp_13.
+
+For every irradiation and one-second time bin, mean incident CRDS target fluence
+is the monitor-derived delivered proton count divided by that irradiation's
+requested target area. The cumulative CRDS series sums these per-irradiation
+fluences; its denominator therefore changes at exp_13. Recorder-plane profile
+fits are not used as area estimates.
 
 ## Calibration assumptions and QC
 
