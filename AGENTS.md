@@ -31,6 +31,13 @@ python3 GenerateInterfaceIndex.py --write
 - `Dependencies.AggregateRun` -- Pool one GRAS result directory and validate it before a driver reports it.
   - `aggregateRun(...)` -- Pool one GRAS result directory, validating completeness and sanity.
   - `tileRecords(...)` -- Flatten aggregateRun output into one plain dict per tally.
+- `Dependencies.HistogramPlots` -- Draw the repository's standard histogram dictionaries.
+  - `checkHistogram(...)` -- Validate a histogram dictionary before drawing it.
+  - `colour(...)` -- Colour for series ``index``, cycling when there are more series than colours.
+  - `stepHistogram(...)` -- Draw a histogram as a filled bar with a step outline.
+  - `errorbarHistogram(...)` -- Draw a histogram as a translucent bar with error bars at the bin means.
+  - `logLogGrid(...)` -- Apply the shared axis styling used by every histogram figure here.
+  - `savePdf(...)` -- Save a figure as PDF with the tight bounding box used throughout.
 - `Dependencies.MergeHistograms`
   - `mergeHistograms(...)` -- Merges a list of GRAS histograms of identical runs using proper error
 - `Dependencies.MergeTotalDose`
@@ -97,25 +104,25 @@ python3 GenerateInterfaceIndex.py --write
 - `Plotting.CRDSHUSFieldSize` -- Field-size series for CRDS at HUS: 20 x 20, 100 x 100 and 200 x 200 mm.
   - `ratioWithError(...)` -- Ratio of two independent measurements and its absolute error.
   - `main(...)`
-- `Plotting.CRDSHUSProduction` -- Aggregate the CRDS HUS PDD electron production run.
+- `Plotting.CRDSHUSTID` -- Aggregate the CRDS HUS PDD electron production run.
   - `main(...)`
-- `Plotting.CRDSUppsalaProduction` -- Aggregate the CRDS Uppsala 64 MeV proton production run.
+- `Plotting.CRDSUppsalaTID` -- Aggregate the CRDS Uppsala 64 MeV proton production run.
   - `main(...)`
 - `Plotting.ComapreShieldingCurves`
   - script, no public functions and no module docstring
-- `Plotting.CompareDoseHistograms`
-  - script, no public functions and no module docstring
-- `Plotting.CompareFluenceHistograms`
-  - script, no public functions and no module docstring
 - `Plotting.CompareGRASShielddoseCarrington`
   - script, no public functions and no module docstring
-- `Plotting.CompareLETHistograms`
-  - script, no public functions and no module docstring
-- `Plotting.CompareSourceHistograms`
-  - script, no public functions and no module docstring
+- `Plotting.CompareHistograms` -- Overlay GRAS histograms from several runs, for any histogram kind.
+  - `doseComponents(...)` -- Dose histograms: by deposited dose, and by primary kinetic energy.
+  - `letComponents(...)` -- LET histograms: the LET spectrum and the effective-LET spectrum.
+  - `fluenceComponents(...)` -- Fluence histograms, one per species.
+  - `sourceComponents(...)` -- Source histograms; the reader already returns a dict keyed by quantity.
+  - `collectRuns(...)` -- Build the ordered list of (resultPath, label) pairs to overlay.
+  - `naturalKey(...)` -- Sort key that orders '8MeV' before '16MeV' rather than after it.
+  - `main(...)`
 - `Plotting.CompareSpenvis_tri_sef_gcf`
   - script, no public functions and no module docstring
-- `Plotting.RadExHUSDingRogersProduction` -- Aggregate and compare the RadEx-HUS Ding-Rogers production TID result.
+- `Plotting.RadExHUSDingRogers` -- Aggregate and compare the RadEx-HUS Ding-Rogers production TID result.
   - `main(...)`
 - `Plotting.RadExHUSPDDProduction` -- Validate and inspect the HUS production water response matrix and exploratory fits.
   - `main(...)`
@@ -128,12 +135,8 @@ python3 GenerateInterfaceIndex.py --write
   - `main(...)`
 - `Plotting.RadExTID`
   - script, no public functions and no module docstring
-- `Plotting.RadExUppsalaProduction` -- Aggregate production TID results for the RadEx Uppsala simulations.
+- `Plotting.RadExUppsala` -- Aggregate production TID results for the RadEx Uppsala simulations.
   - `main(...)`
-- `Plotting.StackedDoseHistograms`
-  - script, no public functions and no module docstring
-- `Plotting.StackedLETHistograms`
-  - script, no public functions and no module docstring
 
 <!-- END INTERFACE INDEX -->
 

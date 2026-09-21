@@ -6,10 +6,10 @@ import sys
 
 import numpy as np
 
-PYTHON_ROOT = Path("/home/fetzera1/Desktop/fetzera1/Python")
-sys.path.insert(0, str(PYTHON_ROOT))
+REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT))
 
-from Dependencies.TotalDose import totalDose
+from Dependencies.AggregateRun import aggregateRun  # noqa: E402
 
 
 BASE_PATH = Path("/scratch/work/fetzera1/GRAS/RadEx/RadEx-Uppsala")
@@ -51,22 +51,16 @@ def main() -> None:
 
     rows = []
     for run in RUNS:
-        result_path = BASE_PATH / run["folder"] / "Res"
-        result_files = list(result_path.glob("*.csv"))
-        if len(result_files) != run["expected_files"]:
-            raise RuntimeError(
-                f"{run['folder']} has {len(result_files)} CSV files; "
-                f"expected {run['expected_files']}. Production is incomplete."
-            )
-
-        results = totalDose(str(result_path))
-        simulated_primaries = int(results["entries"][0])
-        relative_error_percent = np.divide(
-            100.0 * results["error"],
-            results["dose"],
-            out=np.zeros_like(results["error"], dtype=float),
-            where=results["dose"] != 0,
+        # aggregateRun carries the file-count, tally-count and finiteness
+        # guards that used to be written out here, and returns the per-tile
+        # relative error alongside the pooled arrays.
+        results = aggregateRun(
+            BASE_PATH / run["folder"] / "Res",
+            expectedFiles=run["expected_files"],
+            tileCount=len(VOLUME_NAMES),
         )
+        simulated_primaries = int(results["entries"][0])
+        relative_error_percent = results["relative_error_percent"]
 
         for tile, volume_name in enumerate(VOLUME_NAMES):
             rows.append(

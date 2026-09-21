@@ -5,9 +5,9 @@ carrier PCB, on 20 mm standoffs above the plastic patient table, in the
 20 x 20 mm PDD field. Two tallies, the 400 nm gate oxide and the silicon die
 behind it, in the order ``CRDS/CRDS1RadFETDetector.mac`` fixes.
 
-Sibling of CRDSUppsalaProduction.py and of RadExHUSPDDProduction.py.
+Sibling of CRDSUppsalaTID.py and of RadExHUSPDDProduction.py.
 
-    python3 Plotting/CRDSHUSProduction.py --expected-files 100 --job-id 20332204
+    python3 Plotting/CRDSHUSTID.py --expected-files 100 --job-id 20332204
 
 The dose is quoted at 2e12 electrons/cm2, the assumed reference fluence the
 RadEx-HUS results use. That is an assumed normalisation, not an MU calibration

@@ -5,10 +5,10 @@ shielding PCBs, standing on the beam-facing side of a third. Two tallies, the
 400 nm gate oxide and the silicon die behind it, in the order
 ``CRDS/CRDS1RadFETDetector.mac`` fixes.
 
-Sibling of RadExUppsalaProduction.py, which does the same job for the twelve
+Sibling of RadExUppsala.py, which does the same job for the twelve
 RadEx channels in the same beam.
 
-    python3 Plotting/CRDSUppsalaProduction.py --expected-files 799 --job-id 20330228
+    python3 Plotting/CRDSUppsalaTID.py --expected-files 799 --job-id 20330228
 
 ``--expected-files`` guards against aggregating a partial run; pass the number
 of files actually produced. See Dependencies.AggregateRun for why that is not

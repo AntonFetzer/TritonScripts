@@ -5,7 +5,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
-from Dependencies.TotalDose import totalDose
+from Dependencies.AggregateRun import aggregateRun
 import matplotlib.pyplot as plt
 from uncertainties import ufloat, ufloat_fromstr
 
@@ -29,7 +29,7 @@ for root, dirs, files in os.walk(Path):
         print("Folder name:", folder_name)
         
         # Calculate the total dose for the given path
-        Results = totalDose(Path)
+        Results = aggregateRun(Path)
 
         NumTiles = len(Results['dose'])
 
@@ -82,7 +82,7 @@ for root, dirs, files in os.walk(Path):
         
         # Plot the relative error
         plt.figure(1)
-        plt.plot(100 * Results['error'] / Results['dose'], '.', label='Relative Error')
+        plt.plot(Results['relative_error_percent'], '.', label='Relative Error')
         # Add horizontal line at 1%
         plt.axhline(y=1, color='r', linestyle='--', label='1% error')
         plt.title('Relative Error in %')
