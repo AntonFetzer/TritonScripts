@@ -28,12 +28,22 @@ python3 GenerateInterfaceIndex.py --write
 
 ### Dependencies
 
+- `Dependencies.AggregateRun` -- Pool one GRAS result directory and validate it before a driver reports it.
+  - `aggregateRun(...)` -- Pool one GRAS result directory, validating completeness and sanity.
+  - `tileRecords(...)` -- Flatten aggregateRun output into one plain dict per tally.
 - `Dependencies.MergeHistograms`
   - `mergeHistograms(...)` -- Merges a list of GRAS histograms of identical runs using proper error
 - `Dependencies.MergeTotalDose`
   - `mergeTotalDose(...)` -- Merges the dose dicts in List_of_Dose_Dicts into one dose dict
 - `Dependencies.PoolDoseModules` -- Pool repeated GRAS single-volume dose modules without changing their units.
   - `poolDoseModules(...)` -- Entry-weight module doses; return pooled values and replica Birge diagnostics.
+- `Dependencies.ScanMetrics` -- Derive depth-dose and lateral-profile metrics from measured or simulated scans.
+  - `cellBounds(...)` -- Build scoring-cell boundaries for a depth grid whose first cell starts at the surface.
+  - `levelCrossing(...)` -- Interpolate where a normalised lateral profile crosses ``level`` on one side of the axis.
+  - `fallingCrossing(...)` -- Interpolate where a depth-dose curve first falls through ``level`` beyond its peak.
+  - `profileMetrics(...)` -- Derive field width, flatness and symmetry metrics from one lateral profile scan.
+  - `depthDoseMetrics(...)` -- Derive electron depth-dose metrics from one depth-dose scan.
+  - `scanMetrics(...)` -- Derive the metrics appropriate to a scan's curve type.
 - `Dependencies.TotalDose`
   - `totalDose(...)` -- Reads the TID values of all sensitive volumes of all GRAS CSV output files in a folder and calculates the total dose for each of the tiles.
 - `Dependencies.TotalDoseHistograms`
@@ -59,6 +69,9 @@ python3 GenerateInterfaceIndex.py --write
   - `readGPSMacro(...)`
 - `Read.ReadLETHistos`
   - `readLETHistos(...)`
+- `Read.ReadMCC` -- Read PTW MEPHYSTO CC-Export measurement files (.mcc).
+  - `readMCC(...)` -- Read every scan block of a PTW MEPHYSTO CC-Export (.mcc) measurement file.
+  - `readScan(...)` -- Read exactly one scan from a .mcc file.
 - `Read.ReadSD2Q`
   - `readSDQ2(...)` -- Read the TID vs shielding thickness curves from SHIELDOSE-2Q and store them in a dictionary of numpy arrays
 - `Read.ReadSolarFluxes`
@@ -81,6 +94,13 @@ python3 GenerateInterfaceIndex.py --write
 
 ### Plotting
 
+- `Plotting.CRDSHUSFieldSize` -- Field-size series for CRDS at HUS: 20 x 20, 100 x 100 and 200 x 200 mm.
+  - `ratioWithError(...)` -- Ratio of two independent measurements and its absolute error.
+  - `main(...)`
+- `Plotting.CRDSHUSProduction` -- Aggregate the CRDS HUS PDD electron production run.
+  - `main(...)`
+- `Plotting.CRDSUppsalaProduction` -- Aggregate the CRDS Uppsala 64 MeV proton production run.
+  - `main(...)`
 - `Plotting.ComapreShieldingCurves`
   - script, no public functions and no module docstring
 - `Plotting.CompareDoseHistograms`
@@ -97,13 +117,14 @@ python3 GenerateInterfaceIndex.py --write
   - script, no public functions and no module docstring
 - `Plotting.RadExHUSDingRogersProduction` -- Aggregate and compare the RadEx-HUS Ding-Rogers production TID result.
   - `main(...)`
-- `Plotting.RadExHUSPDDPilot` -- Inspect the RadEx-HUS monoenergetic PDD pilot at the measured depths.
-  - `cell_bounds(...)`
-  - `read_mcc(...)`
-  - `energy_from_name(...)`
-  - `falling_crossing(...)`
-  - `main(...)`
 - `Plotting.RadExHUSPDDProduction` -- Validate and inspect the HUS production water response matrix and exploratory fits.
+  - `main(...)`
+- `Plotting.RadExHUSScans` -- Inspect measured RadEx-HUS beam scans exported from PTW MEPHYSTO (.mcc).
+  - `outputStem(...)` -- Build a filesystem-safe output stem from a measurement file name.
+  - `metricsRow(...)` -- Flatten one scan's metrics into a single CSV row, keyed by metric name.
+  - `curveLabel(...)` -- Render a SCAN_CURVETYPE for display, keeping acronyms such as PDD uppercase.
+  - `plotScans(...)` -- Draw one panel per scan, annotated with the metrics of its curve type.
+  - `analyseScanFile(...)` -- Analyse every scan in one .mcc file and write its points, metrics and plot.
   - `main(...)`
 - `Plotting.RadExTID`
   - script, no public functions and no module docstring
@@ -149,6 +170,13 @@ electron_histogram, proton_histogram = totalFluenceHistos(path)
 ```
 
 Always unpack these tuples explicitly. LET readers already return the repository's documented converted units; do not apply a second density conversion in callers.
+
+## Submission and code placement
+
+Never submit Slurm jobs without an explicit user instruction, including simulation, analysis and dependent jobs. Implement/prepare/fix/review requests permit editing, static checks and single-threaded smoke runs lasting only a few seconds on the login node. Clean up smoke inputs, outputs and logs immediately afterward; leave the setup for inspection before Slurm submission.
+Keep all Python code, including study-specific analysis drivers, in this Python repository, never under GRAS. Generated results and plots belong alongside the simulation data.
+Use GRAS autoSeed and shared replica macros unless the user explicitly requests another seed policy. Do not add hashes or hash-gated analysis unless explicitly requested or maintaining an existing requirement.
+Run lightweight single-threaded analysis taking under 120 seconds on the login node. Do not submit a seconds-long analysis or pad it with sleep. Slurm is for longer, parallel or memory-intensive work.
 
 ## Implementation conventions
 

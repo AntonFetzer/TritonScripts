@@ -1,6 +1,6 @@
 """Validate and inspect the HUS production water response matrix and exploratory fits."""
 from pathlib import Path
-import csv, json, re, sys
+import csv, json, re, sys, hashlib
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
@@ -8,7 +8,9 @@ import matplotlib.pyplot as plt
 from scipy.optimize import nnls
 from Dependencies.PoolDoseModules import poolDoseModules
 from Read.ReadDose import readDoseModules
-from Plotting.RadExHUSPDDPilot import DEPTHS_MM, cell_bounds, read_mcc, falling_crossing
+from Dependencies.ScanMetrics import cellBounds, fallingCrossing
+from Read.ReadMCC import readScan
+from Plotting.RadExHUSScans import DEPTHS_MM
 
 BASE=Path("/scratch/work/fetzera1/GRAS/RadEx/RadEx-HUS")
 RUN=BASE/"PDD-Spectrum-Production"
@@ -19,6 +21,22 @@ def _csv(path, rows):
 
 def main():
     out=RUN/"Analysis"; out.mkdir(exist_ok=True)
+    # Historical raw outputs remain unchanged. Hashes prevent applying this
+    # correction to replacement CURRENT-normalized results or mixed datasets.
+    normalization=json.loads((RUN/"normalization.json").read_text())
+    factor=float(normalization["raw_to_current_factor"])
+    if normalization["output_convention"] != "CURRENT" or factor not in (1.0,4.0):
+        raise ValueError("Unsupported normalization provenance")
+    raw_files={str(p.relative_to(RUN)):p for p in (RUN/"Res").rglob("*.csv")}
+    if set(raw_files) != set(normalization["raw_sha256"]):
+        raise ValueError("Raw dataset differs from normalization provenance")
+    for name,p in raw_files.items():
+        if hashlib.sha256(p.read_bytes()).hexdigest() != normalization["raw_sha256"][name]:
+            raise ValueError(f"Raw normalization hash mismatch: {p}")
+    pilot_path=out/"pilot_reference.csv"
+    if hashlib.sha256(pilot_path.read_bytes()).hexdigest() != normalization["pilot_reference_sha256"]:
+        raise ValueError("Pilot normalization hash mismatch")
+    pilot_factor=float(normalization["pilot_to_current_factor"])
     manifest=list(csv.DictReader((RUN/"manifest.csv").open()))
     energies=sorted({float(r["energy_MeV"]) for r in manifest})
     K=[]; S=[]; NZ=[]; B=[]; rows=[]; seeds=set(); expected=set()
@@ -39,6 +57,9 @@ def main():
         if len(files)!=5: raise ValueError("Replica count")
         pooled=poolDoseModules(files)
         vals=[pooled[f"doseLayer-{i}"] for i in range(1,35)]
+        for value in vals:
+            value["dose"] *= factor
+            value["error"] *= factor
         K.append([v["dose"] for v in vals]); S.append([v["error"] for v in vals])
         NZ.append([v["non-zeros"] for v in vals]); B.append([v["birge_ratio"] for v in vals])
         for z,v in zip(DEPTHS_MM,vals):
@@ -51,14 +72,15 @@ def main():
     _csv(out/"pooled_kernels.csv",rows)
     np.savez(out/"response_matrix.npz",energy_MeV=energies,depth_mm=DEPTHS_MM,
              dose=K,error=S,entries_per_energy=np.full(len(energies),5000000),
-             nonzero=NZ,birge=B,unit="MeV/g at incident fluence 1 cm^-2")
+             nonzero=NZ,birge=B,unit="MeV/g at incident CURRENT fluence 1 cm^-2",
+             raw_to_current_factor=factor)
     for name,a in (("response_matrix.csv",K),("response_matrix_error.csv",S)):
         _csv(out/name,[dict(depth_mm=z,**{f"E{e:.2f}_MeV":a[i,j] for j,e in enumerate(energies)}) for i,z in enumerate(DEPTHS_MM)])
     metrics=[]
     for j,e in enumerate(energies):
         active=pdd[:,j]>=1
         metrics.append(dict(energy_MeV=e,dmax_mm=DEPTHS_MM[np.argmax(K[:,j])],
-            R50_mm=falling_crossing(DEPTHS_MM,pdd[:,j],50),
+            R50_mm=fallingCrossing(DEPTHS_MM,pdd[:,j],50),
             surface_percent=pdd[0,j],max_relative_error_percent=float(np.nanmax(rel[:,j])),
             max_error_above_1percent_peak=float(np.nanmax(rel[active,j])),
             error_60mm_percent=rel[-1,j],max_birge=B[:,j].max()))
@@ -69,11 +91,12 @@ def main():
     for r in reference:
         e=float(r["energy_MeV"]); z=float(r["depth_mm"])
         j=np.where(energies==e)[0][0]; i=np.where(DEPTHS_MM==z)[0][0]
-        sigma=np.hypot(S[i,j],float(r["error_MeV_per_g_per_cm2"]))
+        sigma=np.hypot(S[i,j],pilot_factor*float(r["error_MeV_per_g_per_cm2"]))
         pilot.append(dict(energy_MeV=e,depth_mm=z,
-            z_score=(K[i,j]-float(r["dose_MeV_per_g_per_cm2"]))/sigma))
+            z_score=(K[i,j]-pilot_factor*float(r["dose_MeV_per_g_per_cm2"]))/sigma))
     _csv(out/"pilot_comparison.csv",pilot)
-    depths,measurement=read_mcc(next(BASE.glob("*eHDTSE_PDD.mcc")))
+    scan=readScan(next(BASE.glob("*eHDTSE_PDD.mcc")),"PDD")
+    depths,measurement=scan["position"],scan["value"]
     if not np.array_equal(depths,DEPTHS_MM): raise ValueError("Depth mismatch")
     measured=measurement/measurement.max()
     # Equal absolute PDD weights: no measurement error model is supplied.
@@ -103,7 +126,8 @@ def main():
         predicted_percent=100*p[i],measured_percent=100*measured[i],residual_pp=100*(p[i]-measured[i]))
         for l,a,w,p,x in solutions for i,z in enumerate(depths)])
     flags=[r for r in rows if r["inconsistent"]]
-    summary=dict(files=len(expected),energies=len(energies),histories=160000000,
+    summary=dict(normalization=normalization["output_convention"],
+        raw_to_current_factor=factor, pilot_to_current_factor=pilot_factor, files=len(expected),energies=len(energies),histories=160000000,
         unique_seed_pairs=len(seeds),max_birge=float(B.max()),birge_flags=flags,
         max_pilot_abs_z=max(abs(r["z_score"]) for r in pilot),
         max_relative_error_percent=float(np.nanmax(rel)),
@@ -126,7 +150,7 @@ def main():
         axs[1].set(xlabel="Depth [mm] (irregular samples shown in index order)",ylabel="Energy [MeV]",title="Relative statistical error [%], linear scale")
         # pcolormesh respects the irregular measured-depth cells.
         axs[1].clear()
-        im=axs[1].pcolormesh(cell_bounds(depths),np.arange(.125,8.126,.25),rel.T,vmin=0,shading="flat")
+        im=axs[1].pcolormesh(cellBounds(depths),np.arange(.125,8.126,.25),rel.T,vmin=0,shading="flat")
         axs[1].set(xlabel="Depth [mm]",ylabel="Energy [MeV]",title="Relative statistical error [%], linear scale")
         fig.colorbar(im,ax=axs[1],label="Relative error [%]")
         fig.tight_layout();pdf.savefig(fig);plt.close(fig)

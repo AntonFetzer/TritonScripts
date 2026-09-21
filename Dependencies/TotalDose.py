@@ -3,7 +3,7 @@ import numpy as np
 from Read.ReadDose import readDose
 import matplotlib.pyplot as plt
 import sys
-from uncertainties import ufloat
+from uncertainties import ufloat, ufloat_fromstr
 
 
 def totalDose(path, filename_contains=None):
@@ -178,11 +178,17 @@ if __name__ == "__main__":
                 for i in range(NumTiles):
                     DoseWithError = ufloat(Results['dose'][i], Results['error'][i])
                     # Force uncertainties-style rounding (2 sig digits in uncertainty)
-                    DoseWithErrorString = f"{DoseWithError:.2u}"            # "value+/-error" (rounded)
-                    RoundedDose, RoundedError = DoseWithErrorString.split('+/-')
+                    DoseWithErrorString = f"{DoseWithError:.2u}"            # rounded
 
-                    RoundedDose = float(RoundedDose.strip())
-                    RoundedError = float(RoundedError.strip())
+                    # Read the rounded value back instead of splitting the string
+                    # on '+/-'. At dose magnitudes like 1.4e-10 kRad the package
+                    # emits a factored form, "(1.3975+/-0.0026)e-10", and a plain
+                    # split yields "(1.3975", which float() rejects. Plotting/
+                    # RadExTID.py already does this round trip; this keeps the two
+                    # writers of TotalDose_<folder>.csv in agreement.
+                    DoseRounded = ufloat_fromstr(DoseWithErrorString)
+                    RoundedDose = DoseRounded.n
+                    RoundedError = DoseRounded.s
 
                     print(f"{i}, {RoundedDose}, {RoundedError}, {Results['non-zeros'][i]}")
                     f.write(f"{i},{RoundedDose},{RoundedError},{Results['non-zeros'][i]}\n")
