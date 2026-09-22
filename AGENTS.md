@@ -108,11 +108,13 @@ python3 GenerateInterfaceIndex.py --write
 
 - `Plotting.CRDSHUSDDD` -- Aggregate the displacement-damage tallies of a CRDS HUS production run.
   - `main(...)`
-- `Plotting.CRDSHUSFieldSize` -- Field-size series for CRDS at HUS: 20 x 20, 100 x 100 and 200 x 200 mm.
+- `Plotting.CRDSHUSFieldSize` -- Field-size and table series for CRDS at HUS, both instruments.
   - `ratioWithError(...)` -- Ratio of two independent measurements and its absolute error.
   - `main(...)`
 - `Plotting.CRDSHUSTID` -- Aggregate the CRDS HUS PDD electron production run.
   - `main(...)`
+- `Plotting.CRDSNIELBugAnalysis` -- Validate installed GaAs NIEL lookups without changing the GRAS installation.
+  - `validate(...)`
 - `Plotting.CRDSUppsalaTID` -- Aggregate the CRDS Uppsala 64 MeV proton production run.
   - `main(...)`
 - `Plotting.CompareGRASShielddoseCarrington`

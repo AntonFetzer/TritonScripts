@@ -41,7 +41,6 @@ TILES = [
 # Campaign reference normalisation, the same assumed fluence the RadEx-HUS
 # results are quoted at. This is an assumed fluence, not an MU calibration.
 REFERENCE_FLUENCE = 2e12
-SOURCE_AREA_CM2 = 2.0 * 2.0
 
 # RadEx-HUS Ch9, the exposed 0 mm channel, is the nearest thing to a bare
 # device in the same field with the same detector model: job 20315277 gave
@@ -68,7 +67,6 @@ def main() -> None:
     )
 
     print(f"\nResult files     : {results['files']}")
-    print(f"Source area      : {SOURCE_AREA_CM2:.2f} cm2")
     print(f"Reference fluence: {REFERENCE_FLUENCE:.3e} electrons/cm2 "
           "(assumed)\n")
 
@@ -96,7 +94,6 @@ def main() -> None:
             "slurm_job_id": arguments.job_id,
             "simulated_primaries": int(record["entries"]),
             "field_size_mm": "20 x 20",
-            "source_area_cm2": f"{SOURCE_AREA_CM2:.6f}",
             "dose_coefficient_kRad_cm2_per_electron": f"{dose:.12e}",
             "statistical_error_kRad_cm2_per_electron": f"{error:.12e}",
             "relative_error_percent": f"{record['relativePercent']:.8f}",
