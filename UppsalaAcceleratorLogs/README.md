@@ -125,3 +125,33 @@ fits are not used as area estimates.
 - All 367 discovered `map_record` files were parsed (29,241,769 retained acquisition
   rows, zero numerical parse errors). The single orphan specification is an
   undocumented tuning file from 27 June and has no associated record.
+
+## Estimated CRDS isocentre maps
+
+The three CRDS directories under results/final/aggregates now contain
+fluence_isocentre.png, heatmap_isocentre.npz (fluence_protons_cm2 and coordinate
+edges in mm), and isocentre_summary.json. Reproduce from the Python repository:
+
+    python3 -m UppsalaAcceleratorLogs.crds_isocentre_outputs --aggregates "/scratch/work/fetzera1/Radiation Testing/2025-06 Proton/Uppsala Accelerator Logs/results/final/aggregates"
+
+This uses the existing load_heatmap and registered_full_grid functions, with
+the RadEx PLD-derived scales 1.4806483611 in X and 1.3288011066 in Y and inverse
+area Jacobian 0.5082625238. Transfer of this 85 MeV calibration to the nominal
+64 MeV CRDS fields is an assumption, not an independently validated CRDS fit.
+The documented scale method sensitivities are approximately +/-0.02 in X and
++/-0.03 in Y; these are not confidence intervals.
+
+Each target-size aggregate is independently centred using its fluence-weighted
+chamber centroid. CRDS_Total sums those transformed maps on a common grid.
+This assumes the two fields share a centred isocentre; actual DUT alignment
+and rotation are unknown. The rectangles show requested target areas, not
+measured instrument outlines. No channel fluences are inferred. Existing
+chamber spot-width modelling is retained.
+
+Integrated mapped protons are conserved to within 0.0013% in this run:
+5.70403273e12 for CRDS_5.2x5.4cm, 2.85278463e12 for CRDS_7.0x7.4cm,
+and 8.55681736e12 for CRDS_Total. This checks conservation of the input spatial
+maps, not recovery of monitor charge that was absent from those maps; the
+original spatialized-to-delivered ratios are retained in the summaries.
+The total input map also passes a component-sum check. Raw measurements,
+original heatmaps, and canonical area-normalized time series are unchanged.

@@ -31,6 +31,24 @@ python3 GenerateInterfaceIndex.py --write
 - `Dependencies.AggregateRun` -- Pool one GRAS result directory and validate it before a driver reports it.
   - `aggregateRun(...)` -- Pool one GRAS result directory, validating completeness and sanity.
   - `tileRecords(...)` -- Flatten aggregateRun output into one plain dict per tally.
+- `Dependencies.CRDSCampaigns` -- Campaign definitions shared by the CRDS TID, DDD and series drivers.
+  - `campaign(...)` -- Look up a campaign by name, naming the valid ones if it is unknown.
+  - `runForFolder(...)` -- Return (label, run) for a run folder, or (None, None) if it is unlisted.
+- `Dependencies.CRDSDDDReport` -- CRDS DDD aggregation and reporting for one GRAS run.
+  - `reportDDD(...)` -- Aggregate one run and write its established CSV report.
+- `Dependencies.CRDSDelivery` -- Delivered TID and DDD from per-fluence coefficients and local fluence maps.
+  - `exposureFluences(...)` -- Local and field-average fluence per exposure and part.
+  - `combine(...)` -- Delivered value and statistical error for one tally.
+  - `deliveredRecords(...)` -- Delivered TID and DDD per tally, with the comparisons that qualify it.
+- `Dependencies.CRDSSeriesAnalysis` -- CRDS series aggregation, uncertainty calculations and CSV reporting.
+  - `ratioWithError(...)` -- Ratio of two independent measurements and its absolute error.
+  - `weightedMean(...)` -- Inverse-variance mean, its error, and chi2 per degree of freedom about it.
+  - `reportDelivery(...)` -- Print and write the delivered value of every tally; return the CSV path.
+  - `collectSeries(...)` -- Pool campaign runs and return keyed tallies plus established CSV rows.
+  - `printSeries(...)` -- Print the campaign comparisons without changing coefficient units.
+  - `writeSeries(...)` -- Write the established campaign coefficient CSV.
+- `Dependencies.CRDSTIDReport` -- CRDS TID aggregation and reporting for one GRAS run.
+  - `reportTID(...)` -- Aggregate one run and write its established CSV report.
 - `Dependencies.HistogramPlots` -- Draw the repository's standard histogram dictionaries.
   - `checkHistogram(...)` -- Validate a histogram dictionary before drawing it.
   - `colour(...)` -- Colour for series ``index``, cycling when there are more series than colours.
@@ -67,6 +85,11 @@ python3 GenerateInterfaceIndex.py --write
 
 ### Read
 
+- `Read.ReadCRDSFluence` -- Read CRDS accelerator-log fluence maps and summary values.
+  - `sampleFluence(...)` -- Fluence in particles/cm2 at (x, y) mm on one isocentre heatmap.
+  - `fieldAverageFluence(...)` -- Delivered protons over the requested target area, from summary.json.
+- `Read.ReadCRDSMacro` -- Read the source-spectrum alias from a CRDS GRAS macro.
+  - `spectrumName(...)` -- Name of the source spectrum a run used, from its A.mac Spectrum alias.
 - `Read.ReadDose`
   - `readDose(...)` -- Reads TID values from a GRAS CSV output file, supporting both single and multiple volume formats.
   - `readDoseModules(...)` -- Read every GRAS single-volume ``TOTAL DOSE`` module in a CSV file.
@@ -106,22 +129,16 @@ python3 GenerateInterfaceIndex.py --write
 
 ### Plotting
 
-- `Plotting.CRDSCampaigns` -- Campaign definitions shared by the CRDS TID, DDD and series drivers.
-  - `campaign(...)` -- Look up a campaign by name, naming the valid ones if it is unknown.
-  - `runForFolder(...)` -- Return (label, run) for a run folder, or (None, None) if it is unlisted.
-  - `spectrumName(...)` -- Name of the source spectrum a run used, from its A.mac ``Spectrum`` alias.
+- `Plotting.CRDSCampaigns` -- Compatibility imports for CRDS campaign definitions in Dependencies.
 - `Plotting.CRDSDDD` -- Aggregate the LED displacement-damage tallies of one CRDS run, any campaign.
   - `main(...)`
-- `Plotting.CRDSNIELBugAnalysis` -- Validate installed GaAs NIEL lookups without changing the GRAS installation.
-  - `validate(...)`
+- `Plotting.CRDSDelivery` -- Compatibility imports for CRDS delivery calculations in Dependencies.
+- `Plotting.CRDSNIELBugAnalysis` -- Compatibility entry point for the CRDS NIEL transport diagnostic.
 - `Plotting.CRDSSeries` -- Compare every run of one CRDS campaign, both instruments side by side.
-  - `ratioWithError(...)` -- Ratio of two independent measurements and its absolute error.
-  - `weightedMean(...)` -- Inverse-variance mean, its error, and chi2 per degree of freedom about it.
+  - `dddPanel(...)` -- Draw the LED DDD coefficients of a sweep on one axis.
   - `plotSweep(...)` -- Plot every tally of a one-parameter campaign against that parameter.
   - `main(...)`
 - `Plotting.CRDSTID` -- Aggregate the RadFET TID tallies of one CRDS production run, any campaign.
-  - `main(...)`
-- `Plotting.CRDSUppsalaTID` -- Aggregate the CRDS Uppsala 64 MeV proton production run.
   - `main(...)`
 - `Plotting.CompareGRASShielddoseCarrington`
   - script, no public functions and no module docstring
