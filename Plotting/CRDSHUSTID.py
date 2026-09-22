@@ -30,7 +30,7 @@ sys.path.insert(0, str(REPO_ROOT))
 from Dependencies.AggregateRun import aggregateRun, tileRecords  # noqa: E402
 
 BASE_PATH = Path("/scratch/work/fetzera1/GRAS/CRDS/CRDS-HUS")
-FOLDER = "PDD-Electron-CRDS-20mmField"
+DEFAULT_FOLDER = "PDD-Electron-CRDS-20mmField"
 
 # Tally order is fixed by CRDS/CRDS1RadFETDetector.mac. Change both together.
 TILES = [
@@ -55,10 +55,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--expected-files", type=int, required=True)
     parser.add_argument("--job-id", type=int, required=True)
+    # Added so the same driver can report a pilot or a field-size control,
+    # matching Plotting/CRDSHUSDDD.py which reads the same result files.
+    parser.add_argument("--folder", default=DEFAULT_FOLDER)
     arguments = parser.parse_args()
+    folder = arguments.folder
 
     results = aggregateRun(
-        BASE_PATH / FOLDER / "Res",
+        BASE_PATH / folder / "Res",
         expectedFiles=arguments.expected_files,
         tileCount=len(TILES),
     )
@@ -110,7 +114,7 @@ def main() -> None:
           f"{100.0 * (oxideAtReference / RADEX_HUS_CH9_OXIDE_KRAD - 1.0):+.2f} % "
           "(different shielding and field size, context only)")
 
-    output_path = BASE_PATH / FOLDER / f"TotalDose_{FOLDER}.csv"
+    output_path = BASE_PATH / folder / f"TotalDose_{folder}.csv"
     with output_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()

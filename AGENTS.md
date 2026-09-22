@@ -59,6 +59,9 @@ python3 GenerateInterfaceIndex.py --write
   - `totalFluenceHistos(...)` -- Accumulates and processes GRAS Fluence Histograms from multiple paralel GRAS Result files.
 - `Dependencies.TotalLETHistos`
   - `totalLETHistos(...)` -- Merges GRAS LET histograms from the csv files of identical runs.
+- `Dependencies.TotalNID` -- Pool GRAS non-ionising dose across a result directory.
+  - `totalNID(...)` -- Pool every NID module in a GRAS result directory.
+  - `moduleRecords(...)` -- Flatten totalNID output into one plain dict per tally, in a fixed order.
 - `Dependencies.TotalSourceHistograms`
   - `totalSourceHistos(...)` -- Accumulates and processes GRAS Source Histograms from multiple paralel GRAS Result files.
 
@@ -79,6 +82,8 @@ python3 GenerateInterfaceIndex.py --write
 - `Read.ReadMCC` -- Read PTW MEPHYSTO CC-Export measurement files (.mcc).
   - `readMCC(...)` -- Read every scan block of a PTW MEPHYSTO CC-Export (.mcc) measurement file.
   - `readScan(...)` -- Read exactly one scan from a .mcc file.
+- `Read.ReadNID` -- Read GRAS non-ionising dose (NID) modules from one result file.
+  - `readNID(...)` -- Read every non-ionising dose module in a GRAS CSV output file.
 - `Read.ReadSD2Q`
   - `readSDQ2(...)` -- Read the TID vs shielding thickness curves from SHIELDOSE-2Q and store them in a dictionary of numpy arrays
 - `Read.ReadSolarFluxes`
@@ -101,6 +106,8 @@ python3 GenerateInterfaceIndex.py --write
 
 ### Plotting
 
+- `Plotting.CRDSHUSDDD` -- Aggregate the displacement-damage tallies of a CRDS HUS production run.
+  - `main(...)`
 - `Plotting.CRDSHUSFieldSize` -- Field-size series for CRDS at HUS: 20 x 20, 100 x 100 and 200 x 200 mm.
   - `ratioWithError(...)` -- Ratio of two independent measurements and its absolute error.
   - `main(...)`
@@ -108,8 +115,6 @@ python3 GenerateInterfaceIndex.py --write
   - `main(...)`
 - `Plotting.CRDSUppsalaTID` -- Aggregate the CRDS Uppsala 64 MeV proton production run.
   - `main(...)`
-- `Plotting.ComapreShieldingCurves`
-  - script, no public functions and no module docstring
 - `Plotting.CompareGRASShielddoseCarrington`
   - script, no public functions and no module docstring
 - `Plotting.CompareHistograms` -- Overlay GRAS histograms from several runs, for any histogram kind.
@@ -120,6 +125,8 @@ python3 GenerateInterfaceIndex.py --write
   - `collectRuns(...)` -- Build the ordered list of (resultPath, label) pairs to overlay.
   - `naturalKey(...)` -- Sort key that orders '8MeV' before '16MeV' rather than after it.
   - `main(...)`
+- `Plotting.CompareShieldingCurves`
+  - script, no public functions and no module docstring
 - `Plotting.CompareSpenvis_tri_sef_gcf`
   - script, no public functions and no module docstring
 - `Plotting.RadExHUSDingRogers` -- Aggregate and compare the RadEx-HUS Ding-Rogers production TID result.
