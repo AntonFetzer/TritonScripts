@@ -31,11 +31,11 @@ from Dependencies.AggregateRun import aggregateRun  # noqa: E402
 
 BASE = Path("/scratch/work/fetzera1/GRAS/CRDS/CRDS-HUS")
 RUNS = {
-    "20 x 20 mm": {"folder": "PDD-Electron-CRDS-NewRadFET-Cuts",
+    "20 x 20 mm": {"folder": "PDD-Electron-CRDS-20mmField",
                    "job": 20332204, "area_cm2": 4.0, "files": 100},
-    "100 x 100 mm": {"folder": "PDD-Electron-CRDS-NewRadFET-Cuts-100mmField",
+    "100 x 100 mm": {"folder": "PDD-Electron-CRDS-100mmField",
                      "job": 20335084, "area_cm2": 100.0, "files": 100},
-    "200 x 200 mm": {"folder": "PDD-Electron-CRDS-NewRadFET-Cuts-200mmField",
+    "200 x 200 mm": {"folder": "PDD-Electron-CRDS-200mmField",
                      "job": 20335552, "area_cm2": 400.0, "files": 100},
 }
 # Successive widenings, each compared against the field one step narrower.

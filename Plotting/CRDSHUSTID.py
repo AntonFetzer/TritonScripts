@@ -30,7 +30,7 @@ sys.path.insert(0, str(REPO_ROOT))
 from Dependencies.AggregateRun import aggregateRun, tileRecords  # noqa: E402
 
 BASE_PATH = Path("/scratch/work/fetzera1/GRAS/CRDS/CRDS-HUS")
-FOLDER = "PDD-Electron-CRDS-NewRadFET-Cuts"
+FOLDER = "PDD-Electron-CRDS-20mmField"
 
 # Tally order is fixed by CRDS/CRDS1RadFETDetector.mac. Change both together.
 TILES = [
