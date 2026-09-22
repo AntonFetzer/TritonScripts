@@ -1,22 +1,24 @@
-"""Aggregate the CRDS HUS PDD electron production run.
+"""Aggregate the RadFET TID tallies of one CRDS production run, any campaign.
 
-CRDS in the HUS TrueBeam electron field: one VT01 RadFET package on a 1.6 mm
-carrier PCB, on 20 mm standoffs above the plastic patient table, in the
-20 x 20 mm PDD field. Two tallies, the 400 nm gate oxide and the silicon die
-behind it, in the order ``CRDS/CRDS1RadFETDetector.mac`` fixes.
+One VT01 RadFET package on the 1.6 mm carrier PCB. Two tallies, the 400 nm
+gate oxide and the silicon die behind it, in the order
+``CRDS/CRDSRadFETLEDDetector.mac`` fixes. The campaign, its runs and its
+reference fluence are defined in Plotting/CRDSCampaigns.py.
 
-Sibling of CRDSUppsalaTID.py and of RadExHUSPDDProduction.py.
+    python3 Plotting/CRDSTID.py --campaign HUS --expected-files 100
+    python3 Plotting/CRDSTID.py --campaign Kumpula --expected-files 100 \
+        --folder 10MeVProton-CRDS-100umEpoxy
 
-    python3 Plotting/CRDSHUSTID.py --expected-files 100 --job-id 20332204
+``--job-id`` defaults to the job recorded for a listed run and is required for
+an unlisted folder such as a pilot.
 
-The dose is quoted at 2e12 electrons/cm2, the assumed reference fluence the
-RadEx-HUS results use. That is an assumed normalisation, not an MU calibration
-and not a measured delivered dose.
+HUS doses are quoted at 2e12 electrons/cm2, the assumed reference fluence the
+RadEx-HUS results use; that is not an MU calibration and not a measured
+delivered dose. The 20 x 20 mm HUS field is below lateral scatter equilibrium,
+so see Plotting/CRDSSeries.py before quoting it for a broad-field exposure.
 
-The 20 x 20 mm field is below lateral scatter equilibrium and understates a
-broad-field exposure by about 16% on the die. If the real exposure used the
-clinical applicator, the wider runs are the ones to quote; see
-Plotting/CRDSHUSFieldSize.py.
+Kumpula has no delivered fluence in the model yet, so its results stay per
+proton/cm2 unless ``--reference-fluence`` supplies one.
 """
 
 import argparse
@@ -28,47 +30,48 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from Dependencies.AggregateRun import aggregateRun, tileRecords  # noqa: E402
-
-BASE_PATH = Path("/scratch/work/fetzera1/GRAS/CRDS/CRDS-HUS")
-DEFAULT_FOLDER = "PDD-Electron-CRDS-20mmField"
-
-# Tally order is fixed by CRDS/CRDS1RadFETDetector.mac. Change both together.
-TILES = [
-    (0, "VT01_gox_0_PV", "gate oxide"),
-    (1, "VT01_die_0_PV", "silicon die"),
-]
-
-# Campaign reference normalisation, the same assumed fluence the RadEx-HUS
-# results are quoted at. This is an assumed fluence, not an MU calibration.
-REFERENCE_FLUENCE = 2e12
-
-# RadEx-HUS Ch9, the exposed 0 mm channel, is the nearest thing to a bare
-# device in the same field with the same detector model: job 20315277 gave
-# 61.435 kRad on its gate oxide at the same reference fluence. CRDS sits at the
-# same 200 mm air distance but has no aluminium top plate, no spacer and a
-# 1.6 mm board instead of 6.08 mm, so this is context, not a prediction.
-RADEX_HUS_CH9_OXIDE_KRAD = 61.435
+from Plotting.CRDSCampaigns import (CAMPAIGNS, TILES, campaign,  # noqa: E402
+                                    runForFolder, spectrumName)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--campaign", required=True, choices=list(CAMPAIGNS))
     parser.add_argument("--expected-files", type=int, required=True)
-    parser.add_argument("--job-id", type=int, required=True)
-    # Added so the same driver can report a pilot or a field-size control,
-    # matching Plotting/CRDSHUSDDD.py which reads the same result files.
-    parser.add_argument("--folder", default=DEFAULT_FOLDER)
+    parser.add_argument("--folder",
+                        help="run directory; defaults to the campaign's "
+                             "production run")
+    parser.add_argument("--job-id", type=int)
+    parser.add_argument("--reference-fluence", type=float,
+                        help="particles/cm2; defaults to the campaign's")
     arguments = parser.parse_args()
-    folder = arguments.folder
+
+    spec = campaign(arguments.campaign)
+    folder = arguments.folder or spec["defaultFolder"]
+    _, run = runForFolder(spec, folder)
+    jobId = arguments.job_id or (run and run["job"])
+    if jobId is None:
+        parser.error(f"{folder} is not a listed {arguments.campaign} run; "
+                     "pass --job-id")
+    particle = spec["particle"]
+    reference = arguments.reference_fluence or spec["referenceFluence"]
+    runPath = spec["path"] / folder
 
     results = aggregateRun(
-        BASE_PATH / folder / "Res",
+        runPath / "Res",
         expectedFiles=arguments.expected_files,
         tileCount=len(TILES),
     )
 
-    print(f"\nResult files     : {results['files']}")
-    print(f"Reference fluence: {REFERENCE_FLUENCE:.3e} electrons/cm2 "
-          "(assumed)\n")
+    print(f"\nCampaign         : {arguments.campaign}, {spec['description']}")
+    print(f"Folder           : {folder}")
+    print(f"Result files     : {results['files']}")
+    if reference:
+        note = ("supplied on the command line" if arguments.reference_fluence
+                else spec["referenceNote"])
+        print(f"Reference fluence: {reference:.3e} {particle}s/cm2 ({note})\n")
+    else:
+        print(f"Reference fluence: none, coefficients per {particle}/cm2 only\n")
 
     rows = []
     records = tileRecords(results, TILES)
@@ -78,40 +81,45 @@ def main() -> None:
         print(f"  pooled primaries    : {record['entries']:.0f}")
         print(f"  non-zero entries    : {record['nonZeros']:.0f}")
         print(f"  hit fraction        : {record['hitFraction']:.6e}")
-        print(f"  dose coefficient    : {dose:.6e} kRad cm2/electron")
-        print(f"  statistical error   : {error:.6e} kRad cm2/electron")
+        print(f"  dose coefficient    : {dose:.6e} kRad cm2/{particle}")
+        print(f"  statistical error   : {error:.6e} kRad cm2/{particle}")
         print(f"  relative error      : {record['relativePercent']:.4f}%")
-        print(f"  dose at reference   : {dose * REFERENCE_FLUENCE:.4f} "
-              f"+- {error * REFERENCE_FLUENCE:.4f} kRad")
+        if reference:
+            print(f"  dose at reference   : {dose * reference:.4f} "
+                  f"+- {error * reference:.4f} kRad")
         print()
 
         rows.append({
-            "particle": "electron",
-            "source": "HUS-PDD-SSD100",
+            "particle": particle,
+            "source": spectrumName(runPath),
             "tile_index": record["index"],
             "volume_name": record["volume"],
             "layer": record["label"],
-            "slurm_job_id": arguments.job_id,
+            "slurm_job_id": jobId,
             "simulated_primaries": int(record["entries"]),
-            "field_size_mm": "20 x 20",
-            "dose_coefficient_kRad_cm2_per_electron": f"{dose:.12e}",
-            "statistical_error_kRad_cm2_per_electron": f"{error:.12e}",
+            "field_size_mm": run["field"] if run else "",
+            f"dose_coefficient_kRad_cm2_per_{particle}": f"{dose:.12e}",
+            f"statistical_error_kRad_cm2_per_{particle}": f"{error:.12e}",
             "relative_error_percent": f"{record['relativePercent']:.8f}",
             "nonzero_entries": int(record["nonZeros"]),
             "hit_fraction": f"{record['hitFraction']:.9e}",
-            "reference_fluence_electrons_per_cm2": f"{REFERENCE_FLUENCE:.12e}",
-            "dose_at_reference_kRad": f"{dose * REFERENCE_FLUENCE:.12e}",
-            "dose_error_at_reference_kRad": f"{error * REFERENCE_FLUENCE:.12e}",
+            f"reference_fluence_{particle}s_per_cm2":
+                f"{reference:.12e}" if reference else "",
+            "dose_at_reference_kRad":
+                f"{dose * reference:.12e}" if reference else "",
+            "dose_error_at_reference_kRad":
+                f"{error * reference:.12e}" if reference else "",
         })
 
     oxideDose, dieDose = records[0]["dose"], records[1]["dose"]
-    oxideAtReference = oxideDose * REFERENCE_FLUENCE
     print(f"oxide / die                  : {oxideDose / dieDose:.4f}")
-    print(f"oxide vs RadEx-HUS Ch9 oxide : "
-          f"{100.0 * (oxideAtReference / RADEX_HUS_CH9_OXIDE_KRAD - 1.0):+.2f} % "
-          "(different shielding and field size, context only)")
+    comparison = spec["oxideComparison"]
+    if comparison and reference:
+        print(f"oxide vs {comparison['label']} : "
+              f"{100.0 * (oxideDose * reference / comparison['kRad'] - 1.0):+.2f} % "
+              f"({comparison['note']})")
 
-    output_path = BASE_PATH / folder / f"TotalDose_{folder}.csv"
+    output_path = runPath / f"TotalDose_{folder}.csv"
     with output_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()

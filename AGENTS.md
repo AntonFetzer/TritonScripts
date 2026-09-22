@@ -106,15 +106,21 @@ python3 GenerateInterfaceIndex.py --write
 
 ### Plotting
 
-- `Plotting.CRDSHUSDDD` -- Aggregate the displacement-damage tallies of a CRDS HUS production run.
-  - `main(...)`
-- `Plotting.CRDSHUSFieldSize` -- Field-size and table series for CRDS at HUS, both instruments.
-  - `ratioWithError(...)` -- Ratio of two independent measurements and its absolute error.
-  - `main(...)`
-- `Plotting.CRDSHUSTID` -- Aggregate the CRDS HUS PDD electron production run.
+- `Plotting.CRDSCampaigns` -- Campaign definitions shared by the CRDS TID, DDD and series drivers.
+  - `campaign(...)` -- Look up a campaign by name, naming the valid ones if it is unknown.
+  - `runForFolder(...)` -- Return (label, run) for a run folder, or (None, None) if it is unlisted.
+  - `spectrumName(...)` -- Name of the source spectrum a run used, from its A.mac ``Spectrum`` alias.
+- `Plotting.CRDSDDD` -- Aggregate the LED displacement-damage tallies of one CRDS run, any campaign.
   - `main(...)`
 - `Plotting.CRDSNIELBugAnalysis` -- Validate installed GaAs NIEL lookups without changing the GRAS installation.
   - `validate(...)`
+- `Plotting.CRDSSeries` -- Compare every run of one CRDS campaign, both instruments side by side.
+  - `ratioWithError(...)` -- Ratio of two independent measurements and its absolute error.
+  - `weightedMean(...)` -- Inverse-variance mean, its error, and chi2 per degree of freedom about it.
+  - `plotSweep(...)` -- Plot every tally of a one-parameter campaign against that parameter.
+  - `main(...)`
+- `Plotting.CRDSTID` -- Aggregate the RadFET TID tallies of one CRDS production run, any campaign.
+  - `main(...)`
 - `Plotting.CRDSUppsalaTID` -- Aggregate the CRDS Uppsala 64 MeV proton production run.
   - `main(...)`
 - `Plotting.CompareGRASShielddoseCarrington`
