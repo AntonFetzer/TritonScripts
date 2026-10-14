@@ -32,7 +32,8 @@ MU_COLUMNS=("normalization_status","dose_material_model","source_SSD_cm","device
             "dose_first_irradiation_combined_stat_error_kRad")
 
 def main():
-    calibration=json.loads((BASE/"MU-Fluence-Calibration/Completed-20370158/Calibration_baseline.json").read_text())
+    # 50 x 50 mm scorers, jobs 20964818-20964820; the three thicknesses agree.
+    calibration=json.loads((BASE/"MU-Fluence-Calibration/Calibration_baseline.json").read_text())
     result=calibration["result"]
     if result["source_SSD_cm"]!=CALIBRATION_SSD_CM:
         raise ValueError(f"Expected an SSD{CALIBRATION_SSD_CM} calibration, got SSD{result['source_SSD_cm']}")
@@ -46,7 +47,9 @@ def main():
                   delivered_fluence_SSD120_electrons_cm2=phi,
                   delivered_fluence_SSD120_stat_error_electrons_cm2=sigma)
     calibration["exposure_scope"]="first irradiation only; later MU inferred separately from timing"
-    calibration["status"]="provisional: scorer-thickness discrepancy unresolved"
+    calibration["status"]=("provisional: 0.25/0.5/1.0 mm scorers consistent (chi2 3.9 for 2 dof); "
+                           "SSD100 calibration geometry, Plastic Water equivalence and the "
+                           "100 cm virtual source distance assumed")
     calibration["device_normalization"]=("Use the SSD120 fluences: inverse-square factor applied once here; "
                                          "the parallel instrument beam already includes the 20 cm air transport")
     calibration["relative_normalization_stat_error"]=sigma/phi
