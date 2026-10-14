@@ -46,6 +46,8 @@ MATERIALS = {
     "VT01_die_0_PV": "Si",
     "LED_active_0_PV": "GaAs",
     "LED_die_0_PV": "GaAs",
+    "LED_active_1_PV": "GaAs",
+    "LED_die_1_PV": "GaAs",
 }
 
 # Each run: folder, Slurm job and the number of result files it produced. The
@@ -196,6 +198,54 @@ CAMPAIGNS = {
             "output": "DeliveredDose_CRDS-Uppsala.csv",
         },
     },
+}
+
+# The two extra LEDs on the FIRST Uppsala board, one lying on its back and one
+# standing upright on its leads, in CRDS-UppsalaPCB1.gdml. Not a campaign in
+# CAMPAIGNS: its tally list is CRDS/CRDSLEDPairDetector.mac, not the shared
+# RadFET+LED one, and its comparison is between two parts in ONE run rather than
+# between runs. Plotting/CRDSLEDPair.py reports it.
+UPPSALA_LED_PAIR = {
+    "path": CRDS_PATH / "CRDS-Uppsala",
+    "description": "Uppsala first board, lying and upright LED, 5.2 x 5.4 cm field",
+    "particle": "proton",
+    "folder": "64MeVProton-PCB1LEDs-52x54mmField",
+    "job": 20408887,
+    "files": 100,
+    "field": "52 x 54",
+    "runLabel": "52 x 54 mm",
+    # Order fixed by CRDS/CRDSLEDPairDetector.mac. Change both together.
+    # Instance 0 lies on its back, instance 1 stands upright.
+    "tiles": [(0, "LED_die_0_PV", "lying substrate"),
+              (1, "LED_die_1_PV", "upright substrate")],
+    "modules": [("nidActive0", "LED_active_0_PV", "lying active layer"),
+                ("nidSubstrate0", "LED_die_0_PV", "lying substrate"),
+                ("nidActive1", "LED_active_1_PV", "upright active layer"),
+                ("nidSubstrate1", "LED_die_1_PV", "upright substrate")],
+    "partOfVolume": {"LED_active_0_PV": "lying", "LED_die_0_PV": "lying",
+                     "LED_active_1_PV": "upright", "LED_die_1_PV": "upright"},
+    # The upright active layer stands edge-on to the beam and collects only
+    # tens of hits; it is reported as a check, and the substrates carry the
+    # comparison.
+    "edgeOn": {"LED_active_1_PV"},
+    "delivery": {
+        "maps": UPPSALA_LOGS,
+        # LEDFlat_pos_* and LEDUpright_pos_* in CRDS-UppsalaPCB1-define.xml,
+        # the die centres. CHANGE THEM TOGETHER.
+        "parts": {"lying": (-5.0, 0.0), "upright": (5.0, 0.0)},
+        "alignmentShift_mm": 1.0,
+        # Both LEDs are deep inside both fields, so the one narrow-field run is
+        # the coefficient for both exposures.
+        "exposures": [
+            {"label": "exp_10-12, 5.2 x 5.4 cm", "map": "CRDS_5.2x5.4cm"},
+            {"label": "exp_13, 7.0 x 7.4 cm", "map": "CRDS_7.0x7.4cm"},
+        ],
+    },
+    # The comparison with units, and the delivered values in the same format
+    # as DeliveredDose_CRDS-Uppsala.csv. The run folder also gets the usual
+    # TotalDose_<folder>.csv and TotalNID_<folder>.csv.
+    "output": "LEDOrientation_CRDS-Uppsala.csv",
+    "deliveredOutput": "DeliveredDose_CRDS-UppsalaPCB1LEDs.csv",
 }
 
 
