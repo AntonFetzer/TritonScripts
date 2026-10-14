@@ -40,6 +40,14 @@ python3 GenerateInterfaceIndex.py --write
   - `exposureFluences(...)` -- Local and field-average fluence per exposure and part.
   - `combine(...)` -- Delivered value and statistical error for one tally.
   - `deliveredRecords(...)` -- Delivered TID and DDD per tally, with the comparisons that qualify it.
+- `Dependencies.CRDSLEDPairReport` -- CRDS lying-versus-upright LED comparison on the first Uppsala board.
+  - `pairTallies(...)` -- Pool the run and return one record per tally, TID then DDD.
+  - `orientationRatios(...)` -- Upright over lying for every tally that exists on both parts.
+  - `deliver(...)` -- Add delivered values from the local fluence at each part, in place.
+  - `writeTotalDose(...)` -- Write TotalDose_<folder>.csv in the columns of Dependencies.CRDSTIDReport.
+  - `writeTotalNID(...)` -- Write TotalNID_<folder>.csv in the columns of Dependencies.CRDSDDDReport.
+  - `writeDelivered(...)` -- Write the delivered values in the format of DeliveredDose_CRDS-Uppsala.csv.
+  - `reportLEDPair(...)` -- Pool, compare, deliver, print and write every CSV; return their paths.
 - `Dependencies.CRDSSeriesAnalysis` -- CRDS series aggregation, uncertainty calculations and CSV reporting.
   - `ratioWithError(...)` -- Ratio of two independent measurements and its absolute error.
   - `weightedMean(...)` -- Inverse-variance mean, its error, and chi2 per degree of freedom about it.
@@ -133,6 +141,8 @@ python3 GenerateInterfaceIndex.py --write
 - `Plotting.CRDSDDD` -- Aggregate the LED displacement-damage tallies of one CRDS run, any campaign.
   - `main(...)`
 - `Plotting.CRDSDelivery` -- Compatibility imports for CRDS delivery calculations in Dependencies.
+- `Plotting.CRDSLEDPair` -- Compare the lying and the upright LED on the first Uppsala board.
+  - `main(...)`
 - `Plotting.CRDSNIELBugAnalysis` -- Compatibility entry point for the CRDS NIEL transport diagnostic.
 - `Plotting.CRDSSeries` -- Compare every run of one CRDS campaign, both instruments side by side.
   - `dddPanel(...)` -- Draw the LED DDD coefficients of a sweep on one axis.
@@ -154,7 +164,11 @@ python3 GenerateInterfaceIndex.py --write
   - script, no public functions and no module docstring
 - `Plotting.CompareSpenvis_tri_sef_gcf`
   - script, no public functions and no module docstring
-- `Plotting.RadExHUSDingRogers` -- Aggregate and compare the RadEx-HUS Ding-Rogers production TID result.
+- `Plotting.RadExHUSModuleVsLegacy` -- Compare the VT01 package module against the legacy bulk-silicon RadFET
+  - `collect(...)`
+  - `order(...)`
+  - `main(...)`
+- `Plotting.RadExHUSModuleVsLegacyPlot` -- Figure for the HUS PDD detector-model comparison.
   - `main(...)`
 - `Plotting.RadExHUSPDDProduction` -- Validate and inspect the HUS production water response matrix and exploratory fits.
   - `main(...)`

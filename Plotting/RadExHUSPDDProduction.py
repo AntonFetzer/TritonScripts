@@ -33,10 +33,6 @@ def main():
     for name,p in raw_files.items():
         if hashlib.sha256(p.read_bytes()).hexdigest() != normalization["raw_sha256"][name]:
             raise ValueError(f"Raw normalization hash mismatch: {p}")
-    pilot_path=out/"pilot_reference.csv"
-    if hashlib.sha256(pilot_path.read_bytes()).hexdigest() != normalization["pilot_reference_sha256"]:
-        raise ValueError("Pilot normalization hash mismatch")
-    pilot_factor=float(normalization["pilot_to_current_factor"])
     manifest=list(csv.DictReader((RUN/"manifest.csv").open()))
     energies=sorted({float(r["energy_MeV"]) for r in manifest})
     K=[]; S=[]; NZ=[]; B=[]; rows=[]; seeds=set(); expected=set()
@@ -85,16 +81,6 @@ def main():
             max_error_above_1percent_peak=float(np.nanmax(rel[active,j])),
             error_60mm_percent=rel[-1,j],max_birge=B[:,j].max()))
     _csv(out/"kernel_metrics.csv",metrics)
-    # Retain only the derived reference table after removal of the pilot runs.
-    reference=list(csv.DictReader((out/"pilot_reference.csv").open()))
-    pilot=[]
-    for r in reference:
-        e=float(r["energy_MeV"]); z=float(r["depth_mm"])
-        j=np.where(energies==e)[0][0]; i=np.where(DEPTHS_MM==z)[0][0]
-        sigma=np.hypot(S[i,j],pilot_factor*float(r["error_MeV_per_g_per_cm2"]))
-        pilot.append(dict(energy_MeV=e,depth_mm=z,
-            z_score=(K[i,j]-pilot_factor*float(r["dose_MeV_per_g_per_cm2"]))/sigma))
-    _csv(out/"pilot_comparison.csv",pilot)
     scan=readScan(next(BASE.glob("*eHDTSE_PDD.mcc")),"PDD")
     depths,measurement=scan["position"],scan["value"]
     if not np.array_equal(depths,DEPTHS_MM): raise ValueError("Depth mismatch")
@@ -127,9 +113,8 @@ def main():
         for l,a,w,p,x in solutions for i,z in enumerate(depths)])
     flags=[r for r in rows if r["inconsistent"]]
     summary=dict(normalization=normalization["output_convention"],
-        raw_to_current_factor=factor, pilot_to_current_factor=pilot_factor, files=len(expected),energies=len(energies),histories=160000000,
+        raw_to_current_factor=factor, files=len(expected),energies=len(energies),histories=160000000,
         unique_seed_pairs=len(seeds),max_birge=float(B.max()),birge_flags=flags,
-        max_pilot_abs_z=max(abs(r["z_score"]) for r in pilot),
         max_relative_error_percent=float(np.nanmax(rel)),
         max_error_above_1percent_peak=max(r["max_error_above_1percent_peak"] for r in metrics),
         measured_surface_percent=100*measured[0],measured_60mm_percent=100*measured[-1])
@@ -179,16 +164,12 @@ def main():
         for ax in axs: ax.grid(alpha=.3);ax.legend(fontsize=8)
         fig.text(.5,.01,"Equal absolute PDD weights; measurement uncertainties unavailable.\nSpectral variation across regularization is sensitivity, not a confidence interval.",ha="center",fontsize=8)
         fig.tight_layout(rect=(0,.045,1,1));pdf.savefig(fig);plt.close(fig)
-        fig,axs=plt.subplots(2,1,figsize=(8,8))
-        for e in (5.,5.5,6.):
-            pp=[r for r in pilot if r["energy_MeV"]==e]
-            axs[0].plot(depths,[r["z_score"] for r in pp],"o-",ms=3,label=f"{e:g} MeV")
-        axs[0].axhline(0,color="k",lw=.7);axs[0].set(xlabel="Depth [mm]",ylabel="Production - pilot [combined sigma]",title="Independent pilot comparison")
+        fig,ax=plt.subplots(figsize=(8,4.5))
         for limit,lam,w,p,x in solutions:
             if lam==.01:
-                axs[1].plot(energies,100*w,"o-",label=f"Fit through {limit:g} mm")
-        axs[1].set(xlabel="Electron energy [MeV]",ylabel="Fluence fraction [%]",title="Fit-window sensitivity at lambda=0.01")
-        for ax in axs:ax.grid(alpha=.3);ax.legend()
+                ax.plot(energies,100*w,"o-",label=f"Fit through {limit:g} mm")
+        ax.set(xlabel="Electron energy [MeV]",ylabel="Fluence fraction [%]",title="Fit-window sensitivity at lambda=0.01")
+        ax.grid(alpha=.3);ax.legend()
         fig.tight_layout();pdf.savefig(fig);plt.close(fig)
 if __name__=="__main__":
     main()
