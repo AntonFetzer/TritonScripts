@@ -1,14 +1,36 @@
 #!/usr/bin/env python3
-"""Aggregate and plot the RadEx Uppsala mono-energy response kernel."""
+"""Aggregate and plot the RadEx Uppsala mono-energy response kernel.
+
+Each energy's runs are pooled with Dependencies.TotalDose.totalDose, which
+entry-weights the doses, pools the statistical errors and runs the Birge
+consistency check. The empirical run-to-run standard error needs the per-run
+doses, which totalDose does not return, so each run is also read with the shared
+Read.ReadDose.readDose. Nothing here parses a GRAS file directly. Both return
+kRad; the summary keeps its established rad columns.
+
+Run from the Python repository root with the system python3 (totalDose needs
+the uncertainties package, which scicomp-python-env lacks):
+
+    python3 -m RadExUppsala.PlotEnergyKernel
+"""
 
 from __future__ import annotations
 
 import csv
 import math
 from pathlib import Path
+import sys
 
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+
+PYTHON_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PYTHON_ROOT))
+
+from Dependencies.TotalDose import totalDose  # noqa: E402
+from Read.ReadDose import readDose  # noqa: E402
 
 
 # The legacy-detector kernel sweep this script aggregates (it used to live there).
@@ -17,29 +39,10 @@ ENERGY_MANIFEST = ROOT / "energies.csv"
 CHANNELS = range(12)
 RUNS_PER_ENERGY = 10
 PRIMARIES_PER_RUN = 4_000_000
+KRAD_TO_RAD = 1000.0
 SUMMARY_PATH = ROOT / "energy-kernel-dose-summary.csv"
 PLOT_DIR = ROOT / "Plots"
 PLOT_STEM = PLOT_DIR / "dose-vs-energy-all-channels"
-
-
-def read_channel_block(path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Return dose, error, and entry arrays from the individual-volume block."""
-    with path.open(newline="", encoding="utf-8") as handle:
-        rows = list(csv.reader(handle))
-
-    block_index = next(
-        index
-        for index, row in enumerate(rows)
-        if row and row[0].strip().strip("'") == "VOLUME NAMES"
-    )
-    block = rows[block_index + 5 : block_index + 17]
-    if len(block) != 12:
-        raise ValueError(f"{path}: expected 12 channel rows, found {len(block)}")
-
-    dose = np.asarray([float(row[0]) for row in block], dtype=float)
-    error = np.asarray([float(row[1]) for row in block], dtype=float)
-    entries = np.asarray([int(float(row[2])) for row in block], dtype=int)
-    return dose, error, entries
 
 
 def load_energy_grid() -> list[tuple[float, str]]:
@@ -56,36 +59,34 @@ def load_energy_grid() -> list[tuple[float, str]]:
 
 
 def aggregate() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """Aggregate ten independent runs at every energy."""
+    """Pool the independent runs at every energy; doses and errors in rad."""
     energy_grid = load_energy_grid()
     means = []
     propagated_errors = []
     empirical_sems = []
 
     for energy, directory in energy_grid:
-        paths = sorted((ROOT / directory / "Res").glob("TID_*.csv"))
+        result_dir = ROOT / directory / "Res"
+        paths = sorted(result_dir.glob("TID_*.csv"))
         if len(paths) != RUNS_PER_ENERGY:
             raise RuntimeError(
                 f"{energy} MeV: expected {RUNS_PER_ENERGY} results, found {len(paths)}"
             )
 
-        doses = []
-        errors = []
-        for path in paths:
-            dose, error, entries = read_channel_block(path)
-            if not np.all(entries == PRIMARIES_PER_RUN):
-                raise RuntimeError(f"{path}: unexpected channel entry count")
-            doses.append(dose)
-            errors.append(error)
+        runs = [readDose(str(path)) for path in paths]
+        for path, run in zip(paths, runs):
+            if len(run["dose"]) != len(CHANNELS) or not np.all(run["entries"] == PRIMARIES_PER_RUN):
+                raise RuntimeError(f"{path}: unexpected channel count or entry count")
 
-        dose_array = np.stack(doses)
-        error_array = np.stack(errors)
-        means.append(np.mean(dose_array, axis=0))
-        propagated_errors.append(
-            np.sqrt(np.sum(np.square(error_array), axis=0)) / RUNS_PER_ENERGY
-        )
+        pooled = totalDose(str(result_dir), filename_contains="TID_")
+        if not np.all(pooled["entries"] == RUNS_PER_ENERGY * PRIMARIES_PER_RUN):
+            raise RuntimeError(f"{energy} MeV: pooled entry count does not match the runs")
+
+        per_run_rad = np.stack([run["dose"] for run in runs]) * KRAD_TO_RAD
+        means.append(np.asarray(pooled["dose"], dtype=float) * KRAD_TO_RAD)
+        propagated_errors.append(np.asarray(pooled["error"], dtype=float) * KRAD_TO_RAD)
         empirical_sems.append(
-            np.std(dose_array, axis=0, ddof=1) / math.sqrt(RUNS_PER_ENERGY)
+            np.std(per_run_rad, axis=0, ddof=1) / math.sqrt(RUNS_PER_ENERGY)
         )
 
     return (
