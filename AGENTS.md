@@ -224,8 +224,8 @@ Always unpack these tuples explicitly. LET readers already return the repository
 
 Never submit Slurm jobs without an explicit user instruction, including simulation, analysis and dependent jobs. Implement/prepare/fix/review requests permit editing, static checks and single-threaded smoke runs lasting only a few seconds on the login node. Clean up smoke inputs, outputs and logs immediately afterward; leave the setup for inspection before Slurm submission.
 Keep all Python code, including study-specific analysis drivers, in this Python repository, never under GRAS. Generated results and plots belong alongside the simulation data.
-Use GRAS autoSeed and shared replica macros unless the user explicitly requests another seed policy. Do not add hashes or hash-gated analysis unless explicitly requested or maintaining an existing requirement.
-Run lightweight single-threaded analysis taking under 120 seconds on the login node. Do not submit a seconds-long analysis or pad it with sleep. Slurm is for longer, parallel or memory-intensive work.
+Use GRAS autoSeed, with the `/dev/urandom` pre-seed described in `/scratch/work/fetzera1/AGENTS.md`, and shared replica macros unless the user explicitly requests another seed policy. Do not add hashes or hash-gated analysis unless explicitly requested or maintaining an existing requirement.
+Run single-threaded analysis expected to finish within 10 minutes on the login node. Do not submit a seconds-long analysis or pad it with sleep. Slurm is for longer, parallel or memory-intensive work.
 
 ## Implementation conventions
 
@@ -264,8 +264,11 @@ Extend it when you add a reader or change how results are combined.
 
 Also run the narrowest relevant analysis or test when its required input data is available. Report when end-to-end validation cannot be performed because external GRAS or measurement data is unavailable.
 
-On Aalto Triton, keep login-node tasks below 120 CPU seconds and strictly single-threaded.
-Use Slurm for longer or parallel computations.
-Minimum job duration is 120s.
-Maximum number of CPUs to be used concurrently 100.
-Check how many CPUs are already in use before starting new jobs.
+On Aalto Triton the login node allows no multithreading: one thread per user at a time, for at most 10 minutes.
+Submit anything expected to run longer than 10 minutes on one thread, or in parallel, as a Slurm job.
+Every Slurm job and array task must run longer than 120 s so that it does not overload the Slurm controller.
+Split work with more than 10 concurrent threads so that each thread runs at least 15 minutes.
+Keep the account's total number of Slurm jobs, counting every array task, queued or running, below 1000, and use up
+to that many to keep each job's wall time between 15 and 60 minutes. If a job would still need more than 60 minutes
+with 1000 jobs, raise it with the user. Check `squeue -u fetzera1` before submitting. Do not throttle arrays with
+`%N`; size the array instead. This supersedes the earlier limit of 100 concurrent CPUs.
