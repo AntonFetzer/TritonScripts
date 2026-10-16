@@ -46,7 +46,7 @@ from RadExUppsala import AnalyseNewRadFET as anr  # noqa: E402
 BASE_PATH = anr.BASE_PATH
 
 N_CHANNELS = anr.N_CHANNELS
-INPUTS = BASE_PATH / "EnergyKernel-FinalGeometry" / "SpectrumInference" / "Inputs"
+INPUTS = BASE_PATH / "MeasuredDoses"
 LOGS = Path("/scratch/work/fetzera1/Radiation Testing/2025-06 Proton/"
             "Uppsala Accelerator Logs/results/final/aggregates")
 

@@ -1,13 +1,47 @@
-"""Infer effective Uppsala proton energies from RadFET phase-end doses.
+"""Infer effective Uppsala proton energies from all twelve RadFET phase-end doses.
 
-The absolute fluence is a nuisance parameter. Fits therefore use the pattern of
-log dose across trusted VT01 channels. Two models are compared:
+This module also holds the dose model that FitAllChannels and
+AluminiumRowEnergyScan share, so that every fit uses the same constants,
+uncertainties and kernel folding.
+
+Every channel enters the fit in linear dose space, weighted by
+
+    sigma^2 = (SYSTEMATIC * D)^2 + sigma_noise^2 + (scale * sigma_K)^2
+
+where SYSTEMATIC is the ~10 % device-to-device scatter of the VT01 channels,
+sigma_noise is the endpoint-fit RMS voltage `fit_rms_mv` turned into dose with
+the local slope of the datasheet calibration, D_tot / (b * V_tot) at the phase
+end (for the 85 MeV increment the noise of both endpoints adds in quadrature),
+and sigma_K is the kernel's Monte Carlo error. One calibration scale, shared by
+all twelve channels, is solved by iteratively reweighted least squares; both
+device types are converted to dose with their datasheet calibrations, so a
+single constant relates measured and simulated dose. As a diagnostic the same
+fits are repeated with one scale per device type (VT01: Co-60, rad(Si); VT05:
+X-ray, rad(air)), which absorbs any VT05/VT01 calibration mismatch. Each phase's
+own per-channel delivered fluence (accelerator-log radfet_location_fluence.csv)
+multiplies the kernel.
+
+Two beam models are compared:
 
 1. a monoenergetic beam;
-2. a Gaussian energy distribution, truncated to the simulated kernel range.
+2. a Gaussian energy distribution over (mu, sigma), truncated to the kernel range.
 
-This is deliberately a low-dimensional, auditable inverse model. A free spectrum
-over the 60 simulated energies is not identifiable from seven or eight channels.
+The summary reports the shared-scale fits and, under "per_type_diagnostic", the
+per-type ones; the figure shows the shared fits and marks the per-type Gaussian.
+
+Intervals come from delta-chi2 <= 1, profiled over the other parameter. The
+searched centre energies default to PHASES' mu_range and can be narrowed with
+--mu-range-64 and --mu-range-85.
+
+Run from the repository root:
+
+    python3 -m RadExUppsala.InferSpectrum --kernel <energy-kernel-dose-summary-oxide.csv> \\
+        --dose-64 <phase-end-dose-64mev.csv> --dose-85 <phase-end-dose-85mev.csv> \\
+        --fluence-64 <RadEx_64MeV/radfet_location_fluence.csv> \\
+        --fluence-85 <Radex_85MeV/radfet_location_fluence.csv> --output-dir <dir>
+
+writes spectrum-fit-summary.json, spectrum-fit-channel-residuals.csv and
+spectrum-fit-diagnostics.png into <dir>.
 """
 
 from __future__ import annotations
@@ -26,19 +60,42 @@ import pandas as pd
 PHASES = {
     "64mev": {
         "dose_column": "dose_krad",
-        "channels": [0, 1, 2, 3, 4, 5, 6],
-        "mu_range": (58.0, 70.0),
+        "mu_range": (60.0, 65.0),
         "nominal_energy": 64.0,
         "log_fluence": 6.942e10,
     },
     "85mev": {
         "dose_column": "dose_krad_85mev_increment",
-        "channels": [0, 1, 2, 3, 4, 5, 6, 10],
-        "mu_range": (68.0, 92.0),
+        "mu_range": (80.0, 90.0),
         "nominal_energy": 85.0,
         "log_fluence": 9.152e10,
     },
 }
+CHANNELS = list(range(12))
+DEVICE = {c: "VT01" for c in (0, 1, 2, 3, 4, 5, 6, 10)}
+DEVICE.update({c: "VT05" for c in (7, 8, 9, 11)})
+MARKER = {"VT01": "o", "VT05": "s"}
+SYSTEMATIC = 0.10
+#: Exponents B of the Varadis datasheet fits dV = A * dose_rad**B (QF 16 test
+#: records, 13/05/2025, as in fs2_radex ProtonAnalysis.DATASHEET_FITS), by the
+#: upper end in krad of the dose range each fit covers.
+VT01_EXPONENT_BY_RANGE = ((1.0, 0.91193), (5.0, 0.70621), (10.0, 0.61638),
+                          (50.0, 0.47515), (100.0, 0.45509))
+VT05_EXPONENT = 0.64146
+#: Step of the fine energy grid for interpolation, folding and the mu search [MeV].
+FINE_STEP = 0.025
+SIGMAS = np.arange(0.05, 4.0001, 0.05)
+
+
+def published_sigma(energy_mev: float) -> float:
+    """Skandion energy spread [MeV] at a centre energy [MeV].
+
+    Ardenfors et al., J. Phys.: Conf. Ser. 860 (2017) 012025, as interpolated by
+    the production spectrum macros: sigma_E/E falls linearly from 0.8 % at 60 MeV
+    to 0.3 % at 226 MeV, which reproduces the 0.50429 and 0.61600 MeV in the
+    64 and 85 MeV macros.
+    """
+    return energy_mev * (0.8 - 0.5 * (energy_mev - 60.0) / 166.0) / 100.0
 
 
 def load_kernel(path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -64,160 +121,227 @@ def interpolate_kernel(
     )
 
 
-def fit_scale_log(measured_rad: np.ndarray, response: np.ndarray) -> tuple[float, np.ndarray, float]:
-    if np.any(measured_rad <= 0) or np.any(response <= 0):
-        raise ValueError("Log-pattern fit requires strictly positive doses")
-    log_scale = float(np.mean(np.log(measured_rad) - np.log(response)))
-    scale = float(np.exp(log_scale))
-    predicted = scale * response
-    residual = np.log(predicted / measured_rad)
-    return scale, predicted, float(np.sum(residual**2))
+def channel_weights(fluence_path: Path, phase: str, channels: list[int]) -> np.ndarray:
+    """Delivered fluence per channel relative to the phase's log fluence."""
+    frame = pd.read_csv(fluence_path).set_index("channel")
+    fluence = frame.loc[channels, "delivered_fluence_protons_cm2"].to_numpy(float)
+    if np.any(fluence <= 0):
+        raise ValueError(f"{fluence_path}: non-positive delivered fluence")
+    return fluence / PHASES[phase]["log_fluence"]
 
 
-def gaussian_model_grid(
-    energies: np.ndarray,
-    kernel: np.ndarray,
-    channels: list[int],
-    mu_range: tuple[float, float],
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    fine_energy = np.arange(float(energies.min()), float(energies.max()) + 0.0125, 0.025)
-    fine_kernel = interpolate_kernel(energies, kernel[:, channels], fine_energy)
-    mus = np.arange(mu_range[0], mu_range[1] + 0.0125, 0.025)
-    sigmas = np.arange(0.05, 4.0001, 0.05)
-    models = np.empty((len(mus), len(sigmas), len(channels)), dtype=float)
+def local_exponent(device: str, dose_krad: float) -> float:
+    if device == "VT05":
+        return VT05_EXPONENT
+    for top, exponent in VT01_EXPONENT_BY_RANGE:
+        if dose_krad <= top:
+            return exponent
+    return VT01_EXPONENT_BY_RANGE[-1][1]
+
+
+def measurements(dose_64: Path, dose_85: Path, phase: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Measured dose [rad], its 1-sigma uncertainty [rad] and the noise part, per channel."""
+    t64 = pd.read_csv(dose_64).set_index("channel").loc[CHANNELS]
+    t85 = pd.read_csv(dose_85).set_index("channel").loc[CHANNELS]
+    if phase == "64mev":
+        dose = t64["dose_krad"].to_numpy(float) * 1000.0
+        total = dose
+        v_total = t64["shift_end_v"].to_numpy(float)
+        noise_v = t64["fit_rms_mv"].to_numpy(float) / 1000.0
+    else:
+        dose = t85["dose_krad_85mev_increment"].to_numpy(float) * 1000.0
+        total = t85["dose_krad"].to_numpy(float) * 1000.0
+        v_total = t85["shift_end_v"].to_numpy(float)
+        noise_v = np.hypot(t85["fit_rms_mv"].to_numpy(float), t64["fit_rms_mv"].to_numpy(float)) / 1000.0
+    if np.any(v_total <= 0) or np.any(total <= 0):
+        raise RuntimeError(f"{phase}: non-positive endpoint shift or dose; the noise model needs both positive")
+    exponent = np.array([local_exponent(DEVICE[c], total[i] / 1000.0) for i, c in enumerate(CHANNELS)])
+    noise = total / (exponent * v_total) * noise_v
+    sigma = np.hypot(SYSTEMATIC * dose, noise)
+    return dose, sigma, noise
+
+
+#: Calibration-scale models: the shared scale is the default, per-type a diagnostic.
+SCALE_MODELS = ("shared", "per-type")
+
+
+def scale_groups(channels: list[int], model: str = "shared") -> dict[str, np.ndarray]:
+    """Indices into `channels` that share one calibration scale, by model."""
+    if model == "shared":
+        return {"all": np.arange(len(channels))}
+    if model != "per-type":
+        raise ValueError(f"unknown scale model {model!r}; use one of {SCALE_MODELS}")
+    groups = {dev: np.array([i for i, c in enumerate(channels) if DEVICE[c] == dev])
+              for dev in ("VT01", "VT05")}
+    return {k: v for k, v in groups.items() if len(v)}
+
+
+def solve_scales(dose, sigma, model, model_err, groups):
+    """Iteratively reweighted least squares for one scale per group.
+
+    Returns (scales by group, chi2, pulls, per-channel scale).
+    """
+    scale = np.ones(len(dose))
+    chi2 = 0.0
+    pulls = np.zeros(len(dose))
+    scales = {}
+    for name, idx in groups.items():
+        k, kerr, d, sd = model[idx], model_err[idx], dose[idx], sigma[idx]
+        s = float(np.sum(d) / np.sum(k)) if np.sum(k) > 0 else 0.0
+        for _ in range(30):
+            w = 1.0 / (sd**2 + (s * kerr) ** 2)
+            new = float(np.sum(w * d * k) / np.sum(w * k * k))
+            if abs(new - s) <= 1e-12 * max(abs(s), 1e-300):
+                s = new
+                break
+            s = new
+        w = 1.0 / (sd**2 + (s * kerr) ** 2)
+        resid = s * k - d
+        chi2 += float(np.sum(w * resid**2))
+        pulls[idx] = resid * np.sqrt(w)
+        scale[idx] = s
+        scales[name] = s
+    return scales, chi2, pulls, scale
+
+
+def _fine_grid(energies, kernel, error):
+    fine = np.arange(float(energies.min()), float(energies.max()) + FINE_STEP / 2, FINE_STEP)
+    k = interpolate_kernel(energies, kernel, fine)
+    e = interpolate_kernel(energies, error, fine)
+    # Interpolated errors are correlated over each kernel interval; scale the
+    # quadrature sum by the number of fine points per kernel interval so that
+    # folding does not shrink a single kernel point's error.
+    points_per_interval = np.interp(fine, energies[1:], np.diff(energies)) / FINE_STEP
+    return fine, k, e, points_per_interval
+
+
+def fold(energies, kernel, error, mus):
+    """Fold weighted kernel columns with the published width at each centre energy."""
+    fine, k, e, ppi = _fine_grid(energies, kernel, error)
+    means = np.empty((len(mus), kernel.shape[1]))
+    errs = np.empty_like(means)
     for i, mu in enumerate(mus):
-        z = (fine_energy[None, :] - mu) / sigmas[:, None]
-        weight = np.exp(-0.5 * z**2)
-        weight /= weight.sum(axis=1, keepdims=True)
-        models[i] = weight @ fine_kernel
-    return mus, sigmas, models
+        w = np.exp(-0.5 * ((fine - mu) / published_sigma(mu)) ** 2)
+        w /= w.sum()
+        means[i] = w @ k
+        errs[i] = np.sqrt((w**2 * ppi) @ e**2)
+    return means, errs
 
 
-def centered_log_objective(measured_rad: np.ndarray, models: np.ndarray) -> np.ndarray:
-    observed = np.log(measured_rad)
-    observed -= observed.mean()
-    model_log = np.log(models)
-    model_log -= model_log.mean(axis=-1, keepdims=True)
-    return np.sum((model_log - observed) ** 2, axis=-1)
+def gaussian_grid(energies, kernel, error, mus, sigmas):
+    """Fold weighted kernel columns with Gaussians on a (mu, sigma) grid."""
+    fine, k, e, ppi = _fine_grid(energies, kernel, error)
+    means = np.empty((len(mus), len(sigmas), kernel.shape[1]))
+    errs = np.empty_like(means)
+    for i, mu in enumerate(mus):
+        w = np.exp(-0.5 * ((fine[None, :] - mu) / sigmas[:, None]) ** 2)
+        w /= w.sum(axis=1, keepdims=True)
+        means[i] = w @ k
+        errs[i] = np.sqrt((w**2 * ppi) @ e**2)
+    return means, errs
+
+
+def weighted_kernel(kernel_path: Path, fluence_path: Path, phase: str, channels: list[int]):
+    """Kernel energies, doses and errors for `channels`, times each channel's fluence weight."""
+    energies, kernel, error = load_kernel(kernel_path)
+    w = channel_weights(fluence_path, phase, channels)
+    return energies, kernel[:, channels] * w, error[:, channels] * w
+
+
+def fit_model(dose, sigma, energies, k, e, mus, mu_range, groups, log_fluence):
+    """Mono and Gaussian fits for one calibration-scale model; returns (summary, arrays)."""
+    lo, hi = mu_range
+    inside = (energies >= lo) & (energies <= hi)
+    if not inside.any():
+        raise ValueError(f"no kernel energy inside {lo}-{hi} MeV")
+    mono_chi2 = np.array([solve_scales(dose, sigma, k[i], e[i], groups)[1] if inside[i] else np.inf
+                          for i in range(len(energies))])
+    m = int(np.argmin(mono_chi2))
+    mono_scales, _, mono_pulls, mono_scale = solve_scales(dose, sigma, k[m], e[m], groups)
+
+    means, errs = gaussian_grid(energies, k, e, mus, SIGMAS)
+    chi2 = np.empty((len(mus), len(SIGMAS)))
+    for i in range(len(mus)):
+        for j in range(len(SIGMAS)):
+            chi2[i, j] = solve_scales(dose, sigma, means[i, j], errs[i, j], groups)[1]
+    i, j = np.unravel_index(int(np.argmin(chi2)), chi2.shape)
+    scales, best_chi2, pulls, scale = solve_scales(dose, sigma, means[i, j], errs[i, j], groups)
+    mu_ok = mus[chi2.min(axis=1) <= best_chi2 + 1.0]
+    sigma_ok = SIGMAS[chi2.min(axis=0) <= best_chi2 + 1.0]
+
+    n = len(dose)
+    summary = {
+        "mono": {
+            "energy_MeV": float(energies[m]), "chi2": float(mono_chi2[m]), "dof": n - 1 - len(groups),
+            "calibration_ratio": {g: s / log_fluence for g, s in mono_scales.items()},
+        },
+        "gaussian": {
+            "mean_energy_MeV": float(mus[i]), "sigma_energy_MeV": float(SIGMAS[j]),
+            "chi2": float(best_chi2), "dof": n - 2 - len(groups),
+            "delta_chi2_vs_mono": float(best_chi2 - mono_chi2[m]),
+            "mean_energy_interval_MeV": [float(mu_ok.min()), float(mu_ok.max())],
+            "sigma_energy_interval_MeV": [float(sigma_ok.min()), float(sigma_ok.max())],
+            "calibration_ratio": {g: s / log_fluence for g, s in scales.items()},
+        },
+    }
+    arrays = {
+        "objective": chi2,
+        "mono_predicted_rad": mono_scale * k[m], "mono_pull": mono_pulls,
+        "gaussian_predicted_rad": scale * means[i, j], "gaussian_pull": pulls,
+    }
+    return summary, arrays
 
 
 def fit_phase(
     label: str,
-    dose_path: Path,
-    energies: np.ndarray,
-    kernel: np.ndarray,
-    bootstrap_draws: int,
-) -> tuple[dict, pd.DataFrame, dict[str, np.ndarray]]:
+    dose_64: Path,
+    dose_85: Path,
+    fluence_path: Path,
+    kernel_path: Path,
+    mu_range: tuple[float, float],
+) -> tuple[dict, pd.DataFrame, dict]:
+    """Shared-scale fits of one phase to all twelve channels, plus the per-type diagnostic."""
     cfg = PHASES[label]
-    table = pd.read_csv(dose_path).set_index("channel")
-    channels = cfg["channels"]
-    measured_krad = table.loc[channels, cfg["dose_column"]].to_numpy(float)
-    measured_rad = measured_krad * 1000.0
+    channels = CHANNELS
+    dose, sigma, _noise = measurements(dose_64, dose_85, label)
+    energies, k, e = weighted_kernel(kernel_path, fluence_path, label, channels)
+    weights = channel_weights(fluence_path, label, channels)
+    lo, hi = mu_range
+    mus = np.arange(lo, hi + FINE_STEP / 2, FINE_STEP)
+    fits = {model: fit_model(dose, sigma, energies, k, e, mus, mu_range,
+                             scale_groups(channels, model), cfg["log_fluence"])
+            for model in SCALE_MODELS}
+    shared, shared_arrays = fits["shared"]
+    per_type, per_type_arrays = fits["per-type"]
 
-    mono_response = kernel[:, channels]
-    mono_obj = centered_log_objective(measured_rad, mono_response)
-    mono_index = int(np.argmin(mono_obj))
-    mono_energy = float(energies[mono_index])
-    mono_scale, mono_predicted, mono_rss = fit_scale_log(measured_rad, mono_response[mono_index])
-
-    mus, sigmas, gaussian_models = gaussian_model_grid(
-        energies, kernel, channels, cfg["mu_range"]
-    )
-    gaussian_obj = centered_log_objective(measured_rad, gaussian_models)
-    best_index = np.unravel_index(int(np.argmin(gaussian_obj)), gaussian_obj.shape)
-    best_mu = float(mus[best_index[0]])
-    best_sigma = float(sigmas[best_index[1]])
-    best_response = gaussian_models[best_index]
-    gaussian_scale, gaussian_predicted, gaussian_rss = fit_scale_log(measured_rad, best_response)
-
-    n = len(channels)
-    mono_bic = n * np.log(max(mono_rss, 1e-15) / n) + 2 * np.log(n)
-    gaussian_bic = n * np.log(max(gaussian_rss, 1e-15) / n) + 3 * np.log(n)
-
-    loo = []
-    for omitted in range(n):
-        keep = np.arange(n) != omitted
-        obj = centered_log_objective(measured_rad[keep], gaussian_models[..., keep])
-        idx = np.unravel_index(int(np.argmin(obj)), obj.shape)
-        loo.append((float(mus[idx[0]]), float(sigmas[idx[1]]), channels[omitted]))
-
-    rng = np.random.default_rng(20260818 + int(label[:2]))
-    boot_mu = np.empty(bootstrap_draws)
-    boot_sigma = np.empty(bootstrap_draws)
-    # The README reports about 11% channel-to-channel scatter for the trusted
-    # VT01 shielding comparison. Treat it as independent log-scale uncertainty
-    # for a sensitivity interval; it is not a formal calibration uncertainty.
-    for draw in range(bootstrap_draws):
-        perturbed = measured_rad * np.exp(rng.normal(0.0, 0.11, size=n))
-        obj = centered_log_objective(perturbed, gaussian_models)
-        idx = np.unravel_index(int(np.argmin(obj)), obj.shape)
-        boot_mu[draw] = mus[idx[0]]
-        boot_sigma[draw] = sigmas[idx[1]]
-
-    rows = []
-    for i, channel in enumerate(channels):
-        rows.append(
-            {
-                "phase": label,
-                "channel": channel,
-                "group": table.loc[channel, "group"],
-                "sample": table.loc[channel, "sample"],
-                "measured_dose_krad": measured_krad[i],
-                "mono_predicted_krad": mono_predicted[i] / 1000.0,
-                "mono_residual_percent": 100.0 * (mono_predicted[i] / measured_rad[i] - 1.0),
-                "gaussian_predicted_krad": gaussian_predicted[i] / 1000.0,
-                "gaussian_residual_percent": 100.0
-                * (gaussian_predicted[i] / measured_rad[i] - 1.0),
-            }
-        )
-
+    table = pd.read_csv(dose_64 if label == "64mev" else dose_85).set_index("channel")
+    rows = [{
+        "phase": label, "channel": c, "group": table.loc[c, "group"], "sample": table.loc[c, "sample"],
+        "delivered_fluence_protons_cm2": weights[c] * cfg["log_fluence"],
+        "measured_dose_krad": dose[c] / 1000.0, "sigma_krad": sigma[c] / 1000.0,
+        "mono_predicted_krad": shared_arrays["mono_predicted_rad"][c] / 1000.0,
+        "mono_pull": shared_arrays["mono_pull"][c],
+        "gaussian_predicted_krad": shared_arrays["gaussian_predicted_rad"][c] / 1000.0,
+        "gaussian_pull": shared_arrays["gaussian_pull"][c],
+        "per_type_gaussian_predicted_krad": per_type_arrays["gaussian_predicted_rad"][c] / 1000.0,
+        "per_type_gaussian_pull": per_type_arrays["gaussian_pull"][c],
+    } for c in channels]
     summary = {
         "phase": label,
-        "trusted_channels": channels,
+        "channels": channels,
         "nominal_energy_MeV": cfg["nominal_energy"],
-        "log_file_fluence_protons_cm2": cfg["log_fluence"],
-        "mono": {
-            "energy_MeV": mono_energy,
-            "fluence_protons_cm2": mono_scale,
-            "fluence_ratio_to_log": mono_scale / cfg["log_fluence"],
-            "geometric_rms_fractional_residual": float(
-                np.sqrt(np.mean(np.log(mono_predicted / measured_rad) ** 2))
-            ),
-            "rss_log": mono_rss,
-            "bic": float(mono_bic),
-        },
-        "gaussian": {
-            "mean_energy_MeV": best_mu,
-            "sigma_energy_MeV": best_sigma,
-            "fwhm_energy_MeV": 2.354820045 * best_sigma,
-            "fluence_protons_cm2": gaussian_scale,
-            "fluence_ratio_to_log": gaussian_scale / cfg["log_fluence"],
-            "geometric_rms_fractional_residual": float(
-                np.sqrt(np.mean(np.log(gaussian_predicted / measured_rad) ** 2))
-            ),
-            "rss_log": gaussian_rss,
-            "bic": float(gaussian_bic),
-            "delta_bic_vs_mono": float(gaussian_bic - mono_bic),
-            "sensitivity_interval_11pct_scatter": {
-                "mean_energy_MeV_16_50_84": np.quantile(boot_mu, [0.16, 0.5, 0.84]).tolist(),
-                "sigma_energy_MeV_16_50_84": np.quantile(boot_sigma, [0.16, 0.5, 0.84]).tolist(),
-            },
-            "leave_one_channel_out": [
-                {"omitted_channel": ch, "mean_energy_MeV": mu, "sigma_energy_MeV": sigma}
-                for mu, sigma, ch in loo
-            ],
-        },
+        "mu_range_MeV": [lo, hi],
+        "scale_model": "shared",
+        **shared,
+        "per_type_diagnostic": per_type,
     }
     arrays = {
-        "mus": mus,
-        "sigmas": sigmas,
-        "objective": gaussian_obj,
-        "boot_mu": boot_mu,
-        "boot_sigma": boot_sigma,
-        "channels": np.asarray(channels),
-        "measured_krad": measured_krad,
-        "mono_predicted_krad": mono_predicted / 1000.0,
-        "gaussian_predicted_krad": gaussian_predicted / 1000.0,
+        "mus": mus, "objective": shared_arrays["objective"],
+        "channels": np.asarray(channels), "device": [DEVICE[c] for c in channels],
+        "measured_krad": dose / 1000.0, "sigma_krad": sigma / 1000.0,
+        "mono_predicted_krad": shared_arrays["mono_predicted_rad"] / 1000.0,
+        "gaussian_predicted_krad": shared_arrays["gaussian_predicted_rad"] / 1000.0,
+        "per_type_gaussian_predicted_krad": per_type_arrays["gaussian_predicted_rad"] / 1000.0,
     }
     return summary, pd.DataFrame(rows), arrays
 
@@ -226,56 +350,78 @@ def plot_results(results: dict[str, tuple[dict, pd.DataFrame, dict]], output: Pa
     fig, axes = plt.subplots(2, 2, figsize=(12.0, 8.2), constrained_layout=True)
     for column, (label, (summary, rows, arrays)) in enumerate(results.items()):
         ax = axes[0, column]
-        x = np.arange(len(rows))
-        ax.plot(x, arrays["measured_krad"], "o", label="RadFET inferred")
-        ax.plot(x, arrays["mono_predicted_krad"], "s--", label="best monoenergy")
-        ax.plot(x, arrays["gaussian_predicted_krad"], "^--", label="best Gaussian")
-        ax.set_xticks(x, [str(v) for v in arrays["channels"]])
+        x = arrays["channels"]
+        device = np.asarray(arrays["device"])
+        for dev in ("VT01", "VT05"):
+            sel = device == dev
+            y, s = arrays["measured_krad"][sel], arrays["sigma_krad"][sel]
+            ax.errorbar(x[sel], y, yerr=[np.minimum(s, 0.95 * y), s], fmt=MARKER[dev], color="C0",
+                        capsize=3, label=f"RadFET inferred, {dev}")
+        mono, gauss = summary["mono"], summary["gaussian"]
+        diag = summary["per_type_diagnostic"]["gaussian"]
+        for key, marker, colour, style, name in (
+                ("mono_predicted_krad", "s", "C1", "--",
+                 f"best monoenergy {mono['energy_MeV']:.2f} MeV, chi2 {mono['chi2']:.1f}/{mono['dof']}"),
+                ("gaussian_predicted_krad", "^", "C2", "--",
+                 f"best Gaussian {gauss['mean_energy_MeV']:.2f} MeV, sigma {gauss['sigma_energy_MeV']:.2f}, "
+                 f"chi2 {gauss['chi2']:.1f}/{gauss['dof']}"),
+                ("per_type_gaussian_predicted_krad", "x", "grey", ":",
+                 f"diagnostic, per-type scales: {diag['mean_energy_MeV']:.2f} MeV, "
+                 f"chi2 {diag['chi2']:.1f}/{diag['dof']}")):
+            y = arrays[key]
+            ax.plot(x, np.where(y > 0, y, np.nan), marker + style, color=colour, mfc="none", label=name)
+        ax.set_yscale("log")
+        ax.set_xticks(x, [str(v) for v in x])
         ax.set_xlabel("RadFET channel")
         ax.set_ylabel("Phase dose (krad)")
-        ax.set_title(f"{label.replace('mev', ' MeV phase')}: trusted VT01 channels")
-        ax.grid(alpha=0.25)
-        ax.legend()
+        ax.set_title(f"{label.replace('mev', ' MeV phase')}: all 12 channels, shared scale")
+        ax.grid(alpha=0.25, which="both")
+        ax.legend(fontsize=8)
 
         ax = axes[1, column]
-        objective = arrays["objective"]
-        delta = objective - objective.min()
-        image = ax.pcolormesh(
-            arrays["mus"], arrays["sigmas"], delta.T, shading="auto", cmap="viridis_r"
-        )
-        best = summary["gaussian"]
-        ax.plot(best["mean_energy_MeV"], best["sigma_energy_MeV"], "r*", markersize=12)
+        delta = arrays["objective"] - arrays["objective"].min()
+        image = ax.pcolormesh(arrays["mus"], SIGMAS, delta.T, shading="auto",
+                              cmap="viridis_r", vmin=0, vmax=25)
+        ax.plot(arrays["mus"], [published_sigma(mu) for mu in arrays["mus"]], "w--", lw=1,
+                label="published width")
+        ax.plot(gauss["mean_energy_MeV"], gauss["sigma_energy_MeV"], "r*", markersize=12,
+                label="best Gaussian")
+        ax.plot(diag["mean_energy_MeV"], diag["sigma_energy_MeV"], "wx", markersize=9, mew=2,
+                label="per-type diagnostic")
         ax.set_xlabel("Gaussian mean energy (MeV)")
         ax.set_ylabel("Gaussian sigma (MeV)")
-        ax.set_title("Relative-dose pattern misfit")
-        fig.colorbar(image, ax=ax, label="Delta log-RSS")
+        ax.set_title("Weighted 12-channel misfit, shared scale")
+        ax.legend(fontsize=8, loc="upper right")
+        fig.colorbar(image, ax=ax, label="Delta chi2 (clipped at 25)")
     fig.savefig(output, dpi=220)
     plt.close(fig)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--kernel", type=Path, required=True)
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--kernel", type=Path, required=True,
+                        help="unweighted kernel summary from BuildKernelSummary")
     parser.add_argument("--dose-64", type=Path, required=True)
     parser.add_argument("--dose-85", type=Path, required=True)
+    parser.add_argument("--fluence-64", type=Path, required=True)
+    parser.add_argument("--fluence-85", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
-    parser.add_argument("--bootstrap", type=int, default=500)
+    parser.add_argument("--mu-range-64", type=float, nargs=2, default=PHASES["64mev"]["mu_range"])
+    parser.add_argument("--mu-range-85", type=float, nargs=2, default=PHASES["85mev"]["mu_range"])
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    energies, kernel, _kernel_error = load_kernel(args.kernel)
     results = {}
-    all_rows = []
-    for label, dose_path in (("64mev", args.dose_64), ("85mev", args.dose_85)):
-        result = fit_phase(label, dose_path, energies, kernel, args.bootstrap)
-        results[label] = result
-        all_rows.append(result[1])
+    for label, fluence, mu_range in (("64mev", args.fluence_64, args.mu_range_64),
+                                     ("85mev", args.fluence_85, args.mu_range_85)):
+        results[label] = fit_phase(label, args.dose_64, args.dose_85, fluence, args.kernel,
+                                   tuple(mu_range))
 
     summary = {label: result[0] for label, result in results.items()}
     (args.output_dir / "spectrum-fit-summary.json").write_text(
         json.dumps(summary, indent=2), encoding="utf-8"
     )
-    pd.concat(all_rows, ignore_index=True).to_csv(
+    pd.concat([result[1] for result in results.values()], ignore_index=True).to_csv(
         args.output_dir / "spectrum-fit-channel-residuals.csv", index=False
     )
     plot_results(results, args.output_dir / "spectrum-fit-diagnostics.png")
@@ -284,5 +430,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
