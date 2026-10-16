@@ -81,7 +81,7 @@ def main():
             max_error_above_1percent_peak=float(np.nanmax(rel[active,j])),
             error_60mm_percent=rel[-1,j],max_birge=B[:,j].max()))
     _csv(out/"kernel_metrics.csv",metrics)
-    scan=readScan(next(BASE.glob("*eHDTSE_PDD.mcc")),"PDD")
+    scan=readScan(next((BASE/"Input Data Provided by HUS").glob("*eHDTSE_PDD.mcc")),"PDD")
     depths,measurement=scan["position"],scan["value"]
     if not np.array_equal(depths,DEPTHS_MM): raise ValueError("Depth mismatch")
     measured=measurement/measurement.max()

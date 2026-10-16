@@ -19,7 +19,7 @@ from Dependencies.ScanMetrics import scanMetrics
 from Read.ReadMCC import readMCC
 
 
-DEFAULT_BASE = Path("/scratch/work/fetzera1/GRAS/RadEx/RadEx-HUS")
+DEFAULT_BASE = Path("/scratch/work/fetzera1/GRAS/RadEx/RadEx-HUS") / "Input Data Provided by HUS"
 
 # Depth grid of the measured HUS water PDD, reused as the simulated layer geometry.
 DEPTHS_MM = np.array([
