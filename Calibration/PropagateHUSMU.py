@@ -55,7 +55,7 @@ def main():
     calibration["relative_normalization_stat_error"]=sigma/phi
     (BASE/"Results"/"HUS-MU-calibration.json").write_text(json.dumps(calibration,indent=2)+"\n")
     # The milled-absorber module run is the current prediction and feeds the shared table.
-    for folder,model in [("PDD-Electron-MeasuredGeometry-NewRadFET-Cuts-MilledAl","gate_oxide_module")]:
+    for folder,model in [("PDD-Electron","gate_oxide_module")]:
         path=BASE/folder/"dose_results_full_precision.csv"
         rows=[{k:v for k,v in r.items() if k not in MU_COLUMNS} for r in csv.DictReader(path.open())]
         for r in rows:
