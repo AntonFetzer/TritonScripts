@@ -114,6 +114,8 @@ python3 GenerateInterfaceIndex.py --write
   - `readFluenceHistos(...)` -- Read fluence histograms from a .csv file and return two histogram dicts
 - `Read.ReadGPSMacro`
   - `readGPSMacro(...)`
+- `Read.ReadGPSSources` -- Read the mono-energetic components of a multi-source GPS macro.
+  - `readGPSSources(...)` -- Energies and relative intensities of the sources in a GPS macro.
 - `Read.ReadLETHistos`
   - `readLETHistos(...)`
 - `Read.ReadMCC` -- Read PTW MEPHYSTO CC-Export measurement files (.mcc).

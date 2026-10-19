@@ -206,6 +206,12 @@ def totalDose(path, filename_contains=None, replica_error=False, min_replicas=5)
 
 if __name__ == "__main__":
     Path = "/l/triton_work/2MatThickAl/OLD-GTO/AE9500keV"
+    # Optional: python3 -m Dependencies.TotalDose <path> [--replica-error]
+    # --replica-error takes the error from the replica scatter (biased GPS sources).
+    Args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if Args:
+        Path = Args[0]
+    ReplicaError = "--replica-error" in sys.argv[1:]
 
     # Find all subdirectories in the given path that contain a "Res" subfolder
     # and calculate the total dose for each of them
@@ -219,7 +225,11 @@ if __name__ == "__main__":
             print("Folder name:", folder_name)
             
             # Calculate the total dose for the given path
-            Results = totalDose(Path)
+            try:
+                Results = totalDose(Path, replica_error=ReplicaError)
+            except ValueError as error:
+                print("Warning !!! Skipping", folder_name + ":", error)
+                continue
 
             NumTiles = len(Results['dose'])
 
@@ -273,6 +283,7 @@ if __name__ == "__main__":
             plt.title('Relative Error in %')
             plt.xlabel('Tile number')
             plt.ylabel('Relative Error [%]')
+            plt.ylim(bottom=0)
             plt.grid(which='both')
             plt.legend()
 
