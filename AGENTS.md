@@ -9,6 +9,7 @@ This repository contains Python tools for analysing particle-radiation simulatio
 - `Dependencies/`: aggregation, processing and other math shared by analysis scripts.
 - `Read/`: parsers for GRAS and external radiation-data formats.
 - `RadEx/`: RadEx simulation scripts. `RadEx/RadExTID.py <folder>` pools every run folder below it with `totalDose` and writes `TotalDose_<run>.csv` and the `Dose_`, `Error_` and `NonZeros_<run>.pdf` plots into the run folder.
+- `CRDS/`: CRDS simulation scripts. `CRDS/CRDSDose.py <folder>` does the same and also pools the LED NID modules with `totalNID` into `TotalNID_<run>.csv`.
 - `Carrington/`: Carrington-event spectra, shielding, dose, and SEE studies.
 - `SEE/`: single-event-effect cross sections, fits, and rate calculations.
 - `Plotting/`: reusable plotting and comparison scripts.
@@ -32,32 +33,9 @@ python3 GenerateInterfaceIndex.py --write
 - `Dependencies.AggregateRun` -- Pool one GRAS result directory and validate it before a driver reports it.
   - `aggregateRun(...)` -- Pool one GRAS result directory, validating completeness and sanity.
   - `tileRecords(...)` -- Flatten aggregateRun output into one plain dict per tally.
-- `Dependencies.CRDSCampaigns` -- Campaign definitions shared by the CRDS TID, DDD and series drivers.
-  - `campaign(...)` -- Look up a campaign by name, naming the valid ones if it is unknown.
-  - `runForFolder(...)` -- Return (label, run) for a run folder, or (None, None) if it is unlisted.
-- `Dependencies.CRDSDDDReport` -- CRDS DDD aggregation and reporting for one GRAS run.
-  - `reportDDD(...)` -- Aggregate one run and write its established CSV report.
-- `Dependencies.CRDSDelivery` -- Delivered TID and DDD from per-fluence coefficients and local fluence maps.
-  - `exposureFluences(...)` -- Local and field-average fluence per exposure and part.
-  - `combine(...)` -- Delivered value and statistical error for one tally.
-  - `deliveredRecords(...)` -- Delivered TID and DDD per tally, with the comparisons that qualify it.
-- `Dependencies.CRDSLEDPairReport` -- CRDS lying-versus-upright LED comparison on the first Uppsala board.
-  - `pairTallies(...)` -- Pool the run and return one record per tally, TID then DDD.
-  - `orientationRatios(...)` -- Upright over lying for every tally that exists on both parts.
-  - `deliver(...)` -- Add delivered values from the local fluence at each part, in place.
-  - `writeTotalDose(...)` -- Write TotalDose_<folder>.csv in the columns of Dependencies.CRDSTIDReport.
-  - `writeTotalNID(...)` -- Write TotalNID_<folder>.csv in the columns of Dependencies.CRDSDDDReport.
-  - `writeDelivered(...)` -- Write the delivered values in the format of DeliveredDose_CRDS-Uppsala.csv.
-  - `reportLEDPair(...)` -- Pool, compare, deliver, print and write every CSV; return their paths.
-- `Dependencies.CRDSSeriesAnalysis` -- CRDS series aggregation, uncertainty calculations and CSV reporting.
+- `Dependencies.CombineMeasurements` -- Combine independent measurements: ratios and inverse-variance means.
   - `ratioWithError(...)` -- Ratio of two independent measurements and its absolute error.
   - `weightedMean(...)` -- Inverse-variance mean, its error, and chi2 per degree of freedom about it.
-  - `reportDelivery(...)` -- Print and write the delivered value of every tally; return the CSV path.
-  - `collectSeries(...)` -- Pool campaign runs and return keyed tallies plus established CSV rows.
-  - `printSeries(...)` -- Print the campaign comparisons without changing coefficient units.
-  - `writeSeries(...)` -- Write the established campaign coefficient CSV.
-- `Dependencies.CRDSTIDReport` -- CRDS TID aggregation and reporting for one GRAS run.
-  - `reportTID(...)` -- Aggregate one run and write its established CSV report.
 - `Dependencies.EnergyKernel` -- Fold mono-energetic response kernels with beam spectra and fit calibration scales.
   - `publishedSkandionSigma(...)` -- Skandion proton energy spread [MeV] at a centre energy [MeV].
   - `interpolateKernel(...)` -- Linearly interpolate every tally column of a kernel to new energies.
@@ -99,11 +77,6 @@ python3 GenerateInterfaceIndex.py --write
 
 ### Read
 
-- `Read.ReadCRDSFluence` -- Read CRDS accelerator-log fluence maps and summary values.
-  - `sampleFluence(...)` -- Fluence in particles/cm2 at (x, y) mm on one isocentre heatmap.
-  - `fieldAverageFluence(...)` -- Delivered protons over the requested target area, from summary.json.
-- `Read.ReadCRDSMacro` -- Read the source-spectrum alias from a CRDS GRAS macro.
-  - `spectrumName(...)` -- Name of the source spectrum a run used, from its A.mac Spectrum alias.
 - `Read.ReadDose`
   - `readDose(...)` -- Reads TID values from a GRAS CSV output file, supporting both single and multiple volume formats.
   - `readDoseModules(...)` -- Read every GRAS single-volume ``TOTAL DOSE`` module in a CSV file.
@@ -145,19 +118,6 @@ python3 GenerateInterfaceIndex.py --write
 
 ### Plotting
 
-- `Plotting.CRDSCampaigns` -- Compatibility imports for CRDS campaign definitions in Dependencies.
-- `Plotting.CRDSDDD` -- Aggregate the LED displacement-damage tallies of one CRDS run, any campaign.
-  - `main(...)`
-- `Plotting.CRDSDelivery` -- Compatibility imports for CRDS delivery calculations in Dependencies.
-- `Plotting.CRDSLEDPair` -- Compare the lying and the upright LED on the first Uppsala board.
-  - `main(...)`
-- `Plotting.CRDSNIELBugAnalysis` -- Compatibility entry point for the CRDS NIEL transport diagnostic.
-- `Plotting.CRDSSeries` -- Compare every run of one CRDS campaign, both instruments side by side.
-  - `dddPanel(...)` -- Draw the LED DDD coefficients of a sweep on one axis.
-  - `plotSweep(...)` -- Plot every tally of a one-parameter campaign against that parameter.
-  - `main(...)`
-- `Plotting.CRDSTID` -- Aggregate the RadFET TID tallies of one CRDS production run, any campaign.
-  - `main(...)`
 - `Plotting.CompareGRASShielddoseCarrington`
   - script, no public functions and no module docstring
 - `Plotting.CompareHistograms` -- Overlay GRAS histograms from several runs, for any histogram kind.
@@ -224,7 +184,7 @@ Always unpack these tuples explicitly. LET readers already return the repository
 
 Never submit Slurm jobs without an explicit user instruction, including simulation, analysis and dependent jobs. Implement/prepare/fix/review requests permit editing, static checks and single-threaded smoke runs lasting only a few seconds on the login node. Clean up smoke inputs, outputs and logs immediately afterward; leave the setup for inspection before Slurm submission.
 Keep all Python code in this Python repository, never under GRAS. Generated results and plots belong alongside the simulation data.
-Shared code in this repository is simple, robust and run-agnostic; it never holds run-specific scripts. A script takes the run folder (or `Res` folder) as its argument and does not need to know the run's energy, source area, Slurm job IDs, primary count or normalisation. For RadEx, all the shared script does is pool each run with `Dependencies.TotalDose.totalDose` and write the aggregated doses into a CSV in the run folder; every RadEx run has the same twelve RadFETs. Run-specific post-processing (scaling to a delivered fluence, comparing runs or measurements, kernel and spectrum fits, campaign tables) is done in a scratch folder outside this repository, and its results are kept next to the simulation data. Put reusable plotting in `Plotting/` and reusable math in `Dependencies/`. Follow the early scripts in this repository's history for the style: short, direct, and built on `totalDose`.
+Shared code in this repository is simple, robust and run-agnostic; it never holds run-specific scripts. A script takes the run folder (or `Res` folder) as its argument and does not need to know the run's energy, source area, Slurm job IDs, primary count or normalisation. For RadEx, all the shared script does is pool each run with `Dependencies.TotalDose.totalDose` and write the aggregated doses into a CSV in the run folder; every RadEx run has the same twelve RadFETs. For CRDS it does the same and also pools the NID with `Dependencies.TotalNID.totalNID`. Run-specific post-processing (scaling to a delivered fluence, comparing runs or measurements, kernel and spectrum fits, campaign tables) is done in a scratch folder outside this repository, and its results are kept next to the simulation data. Put reusable plotting in `Plotting/` and reusable math in `Dependencies/`. Follow the early scripts in this repository's history for the style: short, direct, and built on `totalDose`.
 Use GRAS autoSeed, with the `/dev/urandom` pre-seed described in `/scratch/work/fetzera1/AGENTS.md`, and shared replica macros unless the user explicitly requests another seed policy. Do not add hashes or hash-gated analysis unless explicitly requested or maintaining an existing requirement.
 Run single-threaded analysis expected to finish within 10 minutes on the login node. Do not submit a seconds-long analysis or pad it with sleep. Slurm is for longer, parallel or memory-intensive work.
 
