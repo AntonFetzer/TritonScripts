@@ -6,11 +6,12 @@ This repository contains Python tools for analysing particle-radiation simulatio
 
 ## Project layout
 
-- `Dependencies/`: aggregation and processing utilities shared by analysis scripts.
+- `Dependencies/`: aggregation, processing and other math shared by analysis scripts.
 - `Read/`: parsers for GRAS and external radiation-data formats.
+- `RadEx/`: RadEx simulation scripts. `RadEx/RadExTID.py <folder>` pools every run folder below it with `totalDose` and writes `TotalDose_<run>.csv` and the `Dose_`, `Error_` and `NonZeros_<run>.pdf` plots into the run folder.
 - `Carrington/`: Carrington-event spectra, shielding, dose, and SEE studies.
 - `SEE/`: single-event-effect cross sections, fits, and rate calculations.
-- `Plotting/`: plotting and comparison scripts.
+- `Plotting/`: reusable plotting and comparison scripts.
 - `Calibration/`, `SolarCells/`, and other study folders: domain-specific analyses.
 - `Obsolete/`: retired implementations kept only for historical reference. Do not import from this directory in active code.
 
@@ -57,6 +58,11 @@ python3 GenerateInterfaceIndex.py --write
   - `writeSeries(...)` -- Write the established campaign coefficient CSV.
 - `Dependencies.CRDSTIDReport` -- CRDS TID aggregation and reporting for one GRAS run.
   - `reportTID(...)` -- Aggregate one run and write its established CSV report.
+- `Dependencies.EnergyKernel` -- Fold mono-energetic response kernels with beam spectra and fit calibration scales.
+  - `publishedSkandionSigma(...)` -- Skandion proton energy spread [MeV] at a centre energy [MeV].
+  - `interpolateKernel(...)` -- Linearly interpolate every tally column of a kernel to new energies.
+  - `foldKernel(...)` -- Fold a kernel with Gaussian spectra, truncated to the kernel's energy range.
+  - `fitScales(...)` -- Least-squares calibration scale per group of tallies: measured ~ scale * model.
 - `Dependencies.HistogramPlots` -- Draw the repository's standard histogram dictionaries.
   - `checkHistogram(...)` -- Validate a histogram dictionary before drawing it.
   - `colour(...)` -- Colour for series ``index``, cycling when there are more series than colours.
@@ -164,25 +170,17 @@ python3 GenerateInterfaceIndex.py --write
   - script, no public functions and no module docstring
 - `Plotting.CompareSpenvis_tri_sef_gcf`
   - script, no public functions and no module docstring
-- `Plotting.RadExHUSModuleVsLegacy` -- Compare the VT01 package module against the legacy bulk-silicon RadFET
-  - `collect(...)`
-  - `order(...)`
-  - `main(...)`
-- `Plotting.RadExHUSModuleVsLegacyPlot` -- Figure for the HUS PDD detector-model comparison.
-  - `main(...)`
-- `Plotting.RadExHUSPDDProduction` -- Validate and inspect the HUS production water response matrix and exploratory fits.
-  - `main(...)`
-- `Plotting.RadExHUSScans` -- Inspect measured RadEx-HUS beam scans exported from PTW MEPHYSTO (.mcc).
+- `Plotting.MCCScans` -- Plot measured beam scans exported from PTW MEPHYSTO (.mcc) and tabulate their metrics.
   - `outputStem(...)` -- Build a filesystem-safe output stem from a measurement file name.
   - `metricsRow(...)` -- Flatten one scan's metrics into a single CSV row, keyed by metric name.
   - `curveLabel(...)` -- Render a SCAN_CURVETYPE for display, keeping acronyms such as PDD uppercase.
   - `plotScans(...)` -- Draw one panel per scan, annotated with the metrics of its curve type.
   - `analyseScanFile(...)` -- Analyse every scan in one .mcc file and write its points, metrics and plot.
   - `main(...)`
-- `Plotting.RadExTID`
-  - script, no public functions and no module docstring
-- `Plotting.RadExUppsala` -- Aggregate production TID results for the RadEx Uppsala simulations.
-  - `main(...)`
+- `Plotting.TilePlots` -- Per-tally diagnostic plots of a pooled GRAS dose result.
+  - `plotDose(...)` -- Dose per tally with error bars, logarithmic axis, line at 1 kRad.
+  - `plotRelativeError(...)` -- Relative error per tally in percent, on a linear axis starting at zero.
+  - `plotNonZeros(...)` -- Number of non-zero entries per tally, logarithmic axis.
 
 <!-- END INTERFACE INDEX -->
 
@@ -223,7 +221,8 @@ Always unpack these tuples explicitly. LET readers already return the repository
 ## Submission and code placement
 
 Never submit Slurm jobs without an explicit user instruction, including simulation, analysis and dependent jobs. Implement/prepare/fix/review requests permit editing, static checks and single-threaded smoke runs lasting only a few seconds on the login node. Clean up smoke inputs, outputs and logs immediately afterward; leave the setup for inspection before Slurm submission.
-Keep all Python code, including study-specific analysis drivers, in this Python repository, never under GRAS. Generated results and plots belong alongside the simulation data.
+Keep all Python code in this Python repository, never under GRAS. Generated results and plots belong alongside the simulation data.
+Shared code in this repository is simple, robust and run-agnostic; it never holds run-specific scripts. A script takes the run folder (or `Res` folder) as its argument and does not need to know the run's energy, source area, Slurm job IDs, primary count or normalisation. For RadEx, all the shared script does is pool each run with `Dependencies.TotalDose.totalDose` and write the aggregated doses into a CSV in the run folder; every RadEx run has the same twelve RadFETs. Run-specific post-processing (scaling to a delivered fluence, comparing runs or measurements, kernel and spectrum fits, campaign tables) is done in a scratch folder outside this repository, and its results are kept next to the simulation data. Put reusable plotting in `Plotting/` and reusable math in `Dependencies/`. Follow the early scripts in this repository's history for the style: short, direct, and built on `totalDose`.
 Use GRAS autoSeed, with the `/dev/urandom` pre-seed described in `/scratch/work/fetzera1/AGENTS.md`, and shared replica macros unless the user explicitly requests another seed policy. Do not add hashes or hash-gated analysis unless explicitly requested or maintaining an existing requirement.
 Run single-threaded analysis expected to finish within 10 minutes on the login node. Do not submit a seconds-long analysis or pad it with sleep. Slurm is for longer, parallel or memory-intensive work.
 

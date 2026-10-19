@@ -1,4 +1,11 @@
-"""Inspect measured RadEx-HUS beam scans exported from PTW MEPHYSTO (.mcc)."""
+"""Plot measured beam scans exported from PTW MEPHYSTO (.mcc) and tabulate their metrics.
+
+For each .mcc file given, writes Scans_<stem>.csv (the points),
+ScanMetrics_<stem>.csv (Dependencies.ScanMetrics) and Scans_<stem>.pdf next to
+the file:
+
+    python3 -m Plotting.MCCScans <file.mcc> [<file.mcc> ...]
+"""
 
 from __future__ import annotations
 
@@ -18,19 +25,6 @@ sys.path.insert(0, str(PYTHON_ROOT))
 from Dependencies.ScanMetrics import scanMetrics
 from Read.ReadMCC import readMCC
 
-
-DEFAULT_BASE = Path("/scratch/work/fetzera1/GRAS/RadEx/RadEx-HUS") / "Input Data Provided by HUS"
-
-# Depth grid of the measured HUS water PDD, reused as the simulated layer geometry.
-DEPTHS_MM = np.array([
-    0.0, 1.5, 3.0, 4.5, 6.0, 7.5, 9.0, 10.5, 12.0, 13.5, 15.0,
-    16.5, 18.0, 19.5, 21.0, 22.5, 24.0, 25.5, 27.0, 28.5, 30.0,
-    31.5, 33.0, 34.5, 36.0, 37.5, 39.0, 40.0, 42.5, 45.0, 47.5,
-    50.0, 55.0, 60.0,
-])
-
-# Half-width of the uniform source rectangle used by the HUS simulations.
-MODELLED_SOURCE_HALFWIDTH_MM = 180.0
 
 AXIS_LABELS = {
     "profile": ("Off-axis position [mm]", "Dose relative to central axis [%]"),
@@ -98,10 +92,6 @@ def plotScans(all_metrics, scans, title, path):
             annotations = [(level, f"{int(level)}%: {metrics['widths'][level]:.1f} mm")
                            for level in metrics["levels"]
                            if not np.isnan(metrics["widths"][level])]
-            for sign in (-1, 1):
-                axis.axvline(sign * MODELLED_SOURCE_HALFWIDTH_MM, color="tab:red",
-                             linestyle="--", linewidth=1,
-                             label="Modelled source edge" if sign < 0 else None)
             summary = (f"flatness ±{metrics['flatness_percent']:.2f}%, "
                        f"asymmetry {metrics['asymmetry_percentage_points']:.2f} pp")
         else:
@@ -139,7 +129,7 @@ def analyseScanFile(source, base=None):
     Analyse every scan in one .mcc file and write its points, metrics and plot.
 
     Depth-dose and lateral-profile scans are dispatched by SCAN_CURVETYPE, so the
-    same entry point serves the HUS water PDD and the inplane/crossplane exports.
+    same entry point serves water PDDs and inplane/crossplane exports.
     Derived results are written beside the measurement; the .mcc is not modified.
 
     Args:
@@ -181,7 +171,7 @@ def analyseScanFile(source, base=None):
         writer.writeheader()
         writer.writerows(rows)
 
-    plotScans(all_metrics, scans, f"HUS 6 eHDTSE measured scans, {source.name}", figure_path)
+    plotScans(all_metrics, scans, f"Measured scans, {source.name}", figure_path)
     print(f"{source.name}: {len(all_metrics)} scan(s)")
     for metrics in all_metrics:
         if metrics["kind"] == "profile":
@@ -203,9 +193,7 @@ def analyseScanFile(source, base=None):
 def main():
     targets = [Path(argument) for argument in sys.argv[1:]]
     if not targets:
-        targets = sorted(DEFAULT_BASE.glob("*.mcc"))
-    if not targets:
-        raise RuntimeError(f"No .mcc files found in {DEFAULT_BASE}")
+        raise SystemExit("usage: python3 -m Plotting.MCCScans <file.mcc> [<file.mcc> ...]")
     for source in targets:
         analyseScanFile(source)
 
