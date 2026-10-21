@@ -214,3 +214,94 @@ def chi2Interval(grid, chi2, level=1.0):
     inside = np.flatnonzero(chi2 <= chi2[best] + level)
     low, high = int(inside.min()), int(inside.max())
     return float(grid[best]), float(grid[low]), float(grid[high]), bool(low == 0 or high == len(grid) - 1)
+
+
+
+def scaleSpectrum(componentEnergies, scale=1.0, width=1.0, about=None):
+    """Scale a discrete spectrum's energies and stretch them about a reference.
+
+    E' = scale * (about + width * (E - about)); `about` defaults to the plain
+    mean of the component energies. Energies that would fall below zero are
+    clipped to zero.
+    """
+    energies = np.asarray(componentEnergies, dtype=float)
+    about = float(np.mean(energies)) if about is None else float(about)
+    return np.maximum(scale * (about + width * (energies - about)), 0.0)
+
+
+def nnls(A, b, iterations=None, tolerance=1e-12):
+    """Non-negative least squares, min ||A x - b|| with x >= 0 (Lawson-Hanson).
+
+    Args:
+        A (2D array): (observations, unknowns).
+        b (array): observations.
+        iterations (int): cap on the active-set loop; default 3 x unknowns.
+
+    Returns:
+        array: x >= 0.
+    """
+    A = np.asarray(A, dtype=float)
+    b = np.asarray(b, dtype=float)
+    n = A.shape[1]
+    iterations = 3 * n if iterations is None else iterations
+    x = np.zeros(n)
+    passive = np.zeros(n, dtype=bool)
+    w = A.T @ (b - A @ x)
+    for _ in range(iterations):
+        if passive.all() or np.max(w[~passive]) <= tolerance:
+            break
+        j = int(np.argmax(np.where(passive, -np.inf, w)))
+        passive[j] = True
+        while True:
+            z = np.zeros(n)
+            z[passive] = np.linalg.lstsq(A[:, passive], b, rcond=None)[0]
+            if np.all(z[passive] > 0):
+                x = z
+                break
+            negative = passive & (z <= 0)
+            alpha = np.min(x[negative] / (x[negative] - z[negative]))
+            x = x + alpha * (z - x)
+            passive &= x > tolerance
+            x[~passive] = 0.0
+        w = A.T @ (b - A @ x)
+    return x
+
+
+def fitSpectrumWeights(measured, sigma, kernel, kernelError, smoothing=0.0, iterations=20):
+    """Free non-negative spectrum on the kernel energies: measured ~ kernel^T w.
+
+    Minimises sum ((K^T w - measured) / sigmaTotal)^2 + smoothing * sum (second
+    differences of w)^2 with w >= 0, where sigmaTotal^2 = sigma^2 + (w-weighted
+    kernel error)^2 is iterated with the solution. Returns the weights (the
+    fluence in each kernel energy, in the measurement's units over the kernel's),
+    the prediction, the pulls and the chi2 without the penalty.
+    """
+    kernel = np.asarray(kernel, dtype=float)
+    kernelError = np.asarray(kernelError, dtype=float)
+    measured = np.asarray(measured, dtype=float)
+    nEnergies = kernel.shape[0]
+    # Solve for dimensionless weights of order one, so the smoothing penalty is
+    # comparable to the chi2 terms whatever the units of kernel and measurement.
+    reference = float(np.sum(measured) / np.sum(kernel)) * nEnergies
+    K = kernel * reference
+    total = np.asarray(sigma, dtype=float).copy()
+    w = np.zeros(nEnergies)
+    for _ in range(iterations):
+        A = K.T / total[:, None]
+        b = measured / total
+        if smoothing > 0:
+            D = np.zeros((nEnergies - 2, nEnergies))
+            for i in range(nEnergies - 2):
+                D[i, i:i + 3] = (1.0, -2.0, 1.0)
+            A = np.vstack([A, np.sqrt(smoothing) * D])
+            b = np.concatenate([b, np.zeros(nEnergies - 2)])
+        new = nnls(A, b)
+        total = np.sqrt(np.asarray(sigma, dtype=float) ** 2 + ((new * reference) ** 2) @ kernelError ** 2)
+        if np.allclose(new, w, rtol=1e-6, atol=1e-12):
+            w = new
+            break
+        w = new
+    w = w * reference
+    predicted = kernel.T @ w
+    pulls = (predicted - measured) / total
+    return w, predicted, pulls, float(np.sum(pulls ** 2))

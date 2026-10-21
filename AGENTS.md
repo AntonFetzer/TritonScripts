@@ -45,6 +45,9 @@ python3 GenerateInterfaceIndex.py --write
   - `foldComponents(...)` -- Fold a kernel with a discrete spectrum whose component energies are scaled.
   - `scanScales(...)` -- fitScales at every row of a model grid.
   - `chi2Interval(...)` -- Best grid value and the interval where chi2 stays within `level` of its minimum.
+  - `scaleSpectrum(...)` -- Scale a discrete spectrum's energies and stretch them about a reference.
+  - `nnls(...)` -- Non-negative least squares, min ||A x - b|| with x >= 0 (Lawson-Hanson).
+  - `fitSpectrumWeights(...)` -- Free non-negative spectrum on the kernel energies: measured ~ kernel^T w.
 - `Dependencies.HistogramPlots` -- Draw the repository's standard histogram dictionaries.
   - `checkHistogram(...)` -- Validate a histogram dictionary before drawing it.
   - `colour(...)` -- Colour for series ``index``, cycling when there are more series than colours.
