@@ -41,6 +41,10 @@ python3 GenerateInterfaceIndex.py --write
   - `interpolateKernel(...)` -- Linearly interpolate every tally column of a kernel to new energies.
   - `foldKernel(...)` -- Fold a kernel with Gaussian spectra, truncated to the kernel's energy range.
   - `fitScales(...)` -- Least-squares calibration scale per group of tallies: measured ~ scale * model.
+  - `readKernelRuns(...)` -- Read a mono-energetic kernel from the TotalDose tables of a sweep folder.
+  - `foldComponents(...)` -- Fold a kernel with a discrete spectrum whose component energies are scaled.
+  - `scanScales(...)` -- fitScales at every row of a model grid.
+  - `chi2Interval(...)` -- Best grid value and the interval where chi2 stays within `level` of its minimum.
 - `Dependencies.HistogramPlots` -- Draw the repository's standard histogram dictionaries.
   - `checkHistogram(...)` -- Validate a histogram dictionary before drawing it.
   - `colour(...)` -- Colour for series ``index``, cycling when there are more series than colours.
@@ -132,6 +136,9 @@ python3 GenerateInterfaceIndex.py --write
   - script, no public functions and no module docstring
 - `Plotting.CompareSpenvis_tri_sef_gcf`
   - script, no public functions and no module docstring
+- `Plotting.KernelFitPlots` -- Figures for kernel fits of measured per-channel doses: doses with model predictions, pulls, chi2 scans.
+  - `plotChannelFit(...)` -- Measured doses with error bars and every model's prediction, plus the best model's pulls.
+  - `plotChi2Scans(...)` -- Delta-chi2 curves, one panel per scan.
 - `Plotting.MCCScans` -- Plot measured beam scans exported from PTW MEPHYSTO (.mcc) and tabulate their metrics.
   - `outputStem(...)` -- Build a filesystem-safe output stem from a measurement file name.
   - `metricsRow(...)` -- Flatten one scan's metrics into a single CSV row, keyed by metric name.
