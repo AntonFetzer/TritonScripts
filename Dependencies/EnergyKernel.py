@@ -188,8 +188,9 @@ def scanScales(measured, sigma, models, modelErrors, groups):
     Returns:
         dict: 'chi2' (grid,), 'best' (index of the minimum), and for the best
             row 'scales' (by group), 'pulls', 'predicted' (scale * model) and
-            'dof' (tallies minus groups). A row with a non-positive model sum
-            in some group gets chi2 infinity.
+            'dof' (tallies in the groups minus groups; tallies outside every
+            group are left out of the fit, with pull 0 and scale 1). A row with
+            a non-positive model sum in some group gets chi2 infinity.
     """
     chi2 = np.full(len(models), np.inf)
     for i in range(len(models)):
@@ -198,7 +199,8 @@ def scanScales(measured, sigma, models, modelErrors, groups):
     best = int(np.argmin(chi2))
     scales, _, pulls, scale = fitScales(measured, sigma, models[best], modelErrors[best], groups)
     return {"chi2": chi2, "best": best, "scales": scales, "pulls": pulls,
-            "predicted": scale * models[best], "dof": len(measured) - len(groups)}
+            "predicted": scale * models[best],
+            "dof": sum(len(idx) for idx in groups.values()) - len(groups)}
 
 
 def chi2Interval(grid, chi2, level=1.0):
