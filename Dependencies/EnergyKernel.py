@@ -1,4 +1,4 @@
-"""Fold mono-energetic response kernels with beam spectra and fit calibration scales.
+"""Fold mono-energetic response kernels with beam spectra and fit calibration scales or shift amplitudes.
 
 A response kernel is the dose of each tally, simulated at a grid of
 mono-energetic beam energies: arrays (energy) and (energy, tally) for the dose
@@ -100,6 +100,77 @@ def fitScales(measured, sigma, model, modelError, groups, iterations=30):
         scales[name] = s
     return scales, chi2, pulls, scale
 
+
+
+def shiftResponse(dose, exponent, offset=0.0):
+    """Threshold-shift response shape of a RadFET at a dose: (D + D0)^n - D0^n.
+
+    Linear below the knee dose D0 and a power law with exponent n above it;
+    D0 = 0 is the pure power law. Doses at or below zero give zero.
+    """
+    dose = np.maximum(np.asarray(dose, dtype=float), 0.0)
+    return np.power(dose + offset, exponent) - np.power(offset, exponent)
+
+
+def fitShiftAmplitudes(shift, noise, exponent, offset, systematic, model, modelError, groups,
+                       previous=None, iterations=30):
+    """Least-squares amplitude per group of tallies: shift ~ A * shiftResponse(previous + model).
+
+    The measured quantity is each tally's threshold shift [V]; the model is the
+    dose a kernel predicts for it [rad], on top of `previous`, the dose the same
+    device already carried [rad]. For fixed exponent and knee dose the model is
+    linear in A, so each group is a weighted projection, iterated because the
+    weight carries the model's own error: with the local slope
+    g = d(shiftResponse)/dD * D,
+
+        sigma^2 = noise^2 + (A g)^2 (systematic^2 + (modelError / D)^2).
+
+    Args:
+        shift, noise (arrays): measured shift and its noise, per tally [V].
+        exponent, offset (arrays): response exponent n and knee dose D0 [rad] per tally.
+        systematic (float): device-to-device spread as a fraction of the dose.
+        model, modelError (arrays): model dose and its uncertainty per tally [rad].
+        groups (dict): group name -> indices of the tallies sharing one amplitude.
+        previous (array): dose already carried per tally [rad]; zeros by default.
+
+    Returns:
+        tuple: (amplitude by group [V / rad^n], chi2, pull per tally, predicted
+            shift per tally); the pull is (predicted - measured) / sigma_total.
+    """
+    shift = np.asarray(shift, dtype=float)
+    noise = np.asarray(noise, dtype=float)
+    exponent = np.asarray(exponent, dtype=float)
+    offset = np.asarray(offset, dtype=float)
+    model = np.asarray(model, dtype=float)
+    modelError = np.asarray(modelError, dtype=float)
+    previous = np.zeros(len(shift)) if previous is None else np.asarray(previous, dtype=float)
+    total = np.maximum(previous + model, 0.0)
+    base = shiftResponse(total, exponent, offset)
+    positive = total > 0
+    safe = np.where(positive, total, 1.0)
+    slope = np.where(positive, exponent * np.power(safe + offset, exponent - 1.0) * total, 0.0)
+    relativeError = np.where(positive, modelError / safe, 0.0)
+    predicted = np.zeros(len(shift))
+    pulls = np.zeros(len(shift))
+    amplitudes = {}
+    chi2 = 0.0
+    for name, idx in groups.items():
+        b, v, nz, g, rel = base[idx], shift[idx], noise[idx], slope[idx], relativeError[idx]
+        a = float(np.sum(v * b) / np.sum(b * b)) if np.sum(b * b) > 0 else 0.0
+        for _ in range(iterations):
+            w = 1.0 / (nz ** 2 + (a * g) ** 2 * (systematic ** 2 + rel ** 2))
+            new = float(np.sum(w * v * b) / np.sum(w * b * b)) if np.sum(w * b * b) > 0 else 0.0
+            converged = abs(new - a) <= 1e-12 * max(abs(a), 1e-300)
+            a = new
+            if converged:
+                break
+        w = 1.0 / (nz ** 2 + (a * g) ** 2 * (systematic ** 2 + rel ** 2))
+        residual = a * b - v
+        chi2 += float(np.sum(w * residual ** 2))
+        pulls[idx] = residual * np.sqrt(w)
+        predicted[idx] = a * b
+        amplitudes[name] = a
+    return amplitudes, chi2, pulls, predicted
 
 
 def readKernelRuns(folder, pattern=r"^(\d+)p(\d+)MeV"):

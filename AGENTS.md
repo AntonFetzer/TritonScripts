@@ -9,6 +9,7 @@ This repository contains Python tools for analysing particle-radiation simulatio
 - `Dependencies/`: aggregation, processing and other math shared by analysis scripts.
 - `Read/`: parsers for GRAS and external radiation-data formats.
 - `RadEx/`: RadEx simulation scripts. `RadEx/RadExTID.py <folder>` pools every run folder below it with `totalDose` and writes `TotalDose_<run>.csv` and the `Dose_`, `Error_` and `NonZeros_<run>.pdf` plots into the run folder.
+  The energy-kernel fit of a RadFET campaign is `RadEx/BuildKernelSummary.py` (pools a mono-energy sweep into a kernel CSV), `RadEx/InferSpectrum.py` and `RadEx/FitAllChannels.py` (fit the centre energy to a campaign file's measured phase-end shifts, in shift or dose space; `python3 -m RadEx.FitAllChannels --kernel <csv> --campaign <json> --output <json>`), `RadEx/AluminiumRowEnergyScan.py`, `RadEx/ExportCampaignDoseTable.py` (the `CampaignDose_<run>.csv` tables from run folders, via `RadEx/RunSettings.py`) and `RadEx/CompareRuns.py`. The campaign file lives next to the measured tables (for Uppsala, `GRAS/RadEx/RadEx-Uppsala/MeasuredDoses/campaign.json`).
 - `CRDS/`: CRDS simulation scripts. `CRDS/CRDSDose.py <folder>` does the same and also pools the LED NID modules with `totalNID` into `TotalNID_<run>.csv`.
 - `Carrington/`: Carrington-event spectra, shielding, dose, and SEE studies.
 - `SEE/`: single-event-effect cross sections, fits, and rate calculations.
@@ -36,11 +37,13 @@ python3 GenerateInterfaceIndex.py --write
 - `Dependencies.CombineMeasurements` -- Combine independent measurements: ratios and inverse-variance means.
   - `ratioWithError(...)` -- Ratio of two independent measurements and its absolute error.
   - `weightedMean(...)` -- Inverse-variance mean, its error, and chi2 per degree of freedom about it.
-- `Dependencies.EnergyKernel` -- Fold mono-energetic response kernels with beam spectra and fit calibration scales.
+- `Dependencies.EnergyKernel` -- Fold mono-energetic response kernels with beam spectra and fit calibration scales or shift amplitudes.
   - `publishedSkandionSigma(...)` -- Skandion proton energy spread [MeV] at a centre energy [MeV].
   - `interpolateKernel(...)` -- Linearly interpolate every tally column of a kernel to new energies.
   - `foldKernel(...)` -- Fold a kernel with Gaussian spectra, truncated to the kernel's energy range.
   - `fitScales(...)` -- Least-squares calibration scale per group of tallies: measured ~ scale * model.
+  - `shiftResponse(...)` -- Threshold-shift response shape of a RadFET at a dose: (D + D0)^n - D0^n.
+  - `fitShiftAmplitudes(...)` -- Least-squares amplitude per group of tallies: shift ~ A * shiftResponse(previous + model).
   - `readKernelRuns(...)` -- Read a mono-energetic kernel from the TotalDose tables of a sweep folder.
   - `foldComponents(...)` -- Fold a kernel with a discrete spectrum whose component energies are scaled.
   - `scanScales(...)` -- fitScales at every row of a model grid.
