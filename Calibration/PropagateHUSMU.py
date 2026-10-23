@@ -54,8 +54,12 @@ def main():
                                          "the parallel instrument beam already includes the 20 cm air transport")
     calibration["relative_normalization_stat_error"]=sigma/phi
     (BASE/"Results"/"HUS-MU-calibration.json").write_text(json.dumps(calibration,indent=2)+"\n")
-    # The milled-absorber module run is the current prediction and feeds the shared table.
-    for folder,model in [("PDD-Electron","gate_oxide_module")]:
+    # The PDD module run is the current prediction and feeds the shared table; the
+    # mono-energetic companion gets its own table, suffixed with the run name.
+    for folder,model,table in [("PDD-Electron","gate_oxide_module","RadEx-HUS-MU-normalized-dose-results.csv"),
+                               ("Mono6MeV-Electron","gate_oxide_module","RadEx-HUS-MU-normalized-dose-results-Mono6MeV.csv")]:
+        if not (BASE/folder/"dose_results_full_precision.csv").exists():
+            continue
         path=BASE/folder/"dose_results_full_precision.csv"
         rows=[{k:v for k,v in r.items() if k not in MU_COLUMNS} for r in csv.DictReader(path.open())]
         for r in rows:
@@ -76,9 +80,9 @@ def main():
         with path.open("w",newline="") as f:
             w=csv.DictWriter(f,fieldnames=rows[0].keys());w.writeheader();w.writerows(rows)
         if model=="gate_oxide_module":
-            with (BASE/"Results"/"RadEx-HUS-MU-normalized-dose-results.csv").open("w",newline="") as f:
+            with (BASE/"Results"/table).open("w",newline="") as f:
                 w=csv.DictWriter(f,fieldnames=rows[0].keys());w.writeheader();w.writerows(rows)
-        print(model,[(r["channel"],round(r["dose_first_irradiation_kRad"],3)) for r in rows])
+        print(folder,model,[(r["channel"],round(r["dose_first_irradiation_kRad"],3)) for r in rows])
     print(f"Device fluence {phi:.6e} electrons/cm2 = SSD100 {phi100:.6e} x inverse-square {INVERSE_SQUARE:.6f}.")
     print("Reference coefficients and 2e12 columns preserved. Common normalization errors are correlated across channels.")
 
