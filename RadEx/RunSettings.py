@@ -91,12 +91,14 @@ def spectrum(runPath, settings=None):
     commands = (settings or runSettings(runPath))["commands"]
     if "/gps/source/add" in commands:
         raise ValueError(f"{runPath}: multi-source GPS; read it with Read.ReadGPSSources")
-    if "/gps/ene/mono" not in commands:
-        raise ValueError(f"{runPath}: no /gps/ene/mono in its macros")
+    # /gps/energy is the GPS shorthand for /gps/ene/mono (the mono kernel macros use it).
+    centre = commands.get("/gps/ene/mono", commands.get("/gps/energy"))
+    if centre is None:
+        raise ValueError(f"{runPath}: no /gps/ene/mono or /gps/energy in its macros")
     sigma = commands.get("/gps/ene/sigma")
     return {
         "type": commands.get("/gps/ene/type", "Mono"),
-        "centre_MeV": _quantity(commands["/gps/ene/mono"], ENERGY_UNITS, "energy"),
+        "centre_MeV": _quantity(centre, ENERGY_UNITS, "energy"),
         "sigma_MeV": _quantity(sigma, ENERGY_UNITS, "energy") if sigma else 0.0,
     }
 
