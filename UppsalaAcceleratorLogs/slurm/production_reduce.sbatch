@@ -1,6 +1,5 @@
 #!/bin/bash
 #SBATCH --job-name=uppsala-reduce
-#SBATCH --partition=batch-bdw
 #SBATCH --time=01:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=16G

@@ -1,6 +1,5 @@
 #!/bin/bash
 #SBATCH --job-name=uppsala-parse
-#SBATCH --partition=batch-bdw
 #SBATCH --time=02:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=8G
@@ -21,4 +20,10 @@ python3 -m UppsalaAcceleratorLogs.uppsala_analysis parse \
   --manifest metadata/manifest.json \
   --output-dir cache/parsed \
   --task-id "$SLURM_ARRAY_TASK_ID" \
-  --resume
+  --resume \
+  "$@"
+# Extra arguments restrict or override the selection, e.g. re-parse the RadEx
+# part records in place (adds heatmap_positions_c to their cache):
+#   sbatch production_array.sbatch \
+#     --experiments exp_01,exp_02,exp_03,exp_04,exp_05,exp_06,exp_07,exp_08,exp_09 \
+#     --kind part --no-resume

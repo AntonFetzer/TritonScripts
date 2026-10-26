@@ -448,6 +448,11 @@ def parse_record(entry: dict[str, Any], grid: dict[str, Any]) -> tuple[dict[str,
 
     second_values: dict[int, np.ndarray] = defaultdict(lambda: np.zeros(8, dtype=np.float64))
     width_histograms: dict[tuple[float, float], np.ndarray] = {}
+    # Unblurred charge-weighted spot-position histogram on the same chamber grid.
+    # The isocentre products apply the facility spot sigma after the
+    # chamber-to-isocentre transform, so they need the positions without the
+    # recorder X_WIDTH/Y_WIDTH blur that the diagnostic heatmap carries.
+    position_histogram = np.zeros((n_pixels, n_pixels), dtype=np.float64)
     totals = np.zeros(6, dtype=np.float64)
     rows = 0
     parse_errors = 0
@@ -484,6 +489,9 @@ def parse_record(entry: dict[str, Any], grid: dict[str, Any]) -> tuple[dict[str,
                         lambda: np.zeros(8, dtype=np.float64)
                     )
                     width_histograms = {}
+                    position_histogram = np.zeros(
+                        (n_pixels, n_pixels), dtype=np.float64
+                    )
                     totals = np.zeros(6, dtype=np.float64)
                     rows = 0
                     parse_errors = 0
@@ -566,6 +574,7 @@ def parse_record(entry: dict[str, Any], grid: dict[str, Any]) -> tuple[dict[str,
                     histogram = np.zeros((n_pixels, n_pixels), dtype=np.float64)
                     width_histograms[key] = histogram
                 histogram[y_idx, x_idx] += primary_positive
+                position_histogram[y_idx, x_idx] += primary_positive
                 bucket[5] += primary_positive
                 totals[5] += primary_positive
             elif primary_positive > 0:
@@ -585,6 +594,10 @@ def parse_record(entry: dict[str, Any], grid: dict[str, Any]) -> tuple[dict[str,
     mapped_sum = float(totals[5])
     conservation_error = (
         (heatmap_sum - mapped_sum) / mapped_sum if mapped_sum > 0 else 0.0
+    )
+    positions_sum = float(position_histogram.sum())
+    positions_conservation_error = (
+        (positions_sum - mapped_sum) / mapped_sum if mapped_sum > 0 else 0.0
     )
     summary = {
         **entry,
@@ -607,12 +620,19 @@ def parse_record(entry: dict[str, Any], grid: dict[str, Any]) -> tuple[dict[str,
         "charge_spatialized_positive_c": mapped_sum,
         "charge_heatmap_c": heatmap_sum,
         "heatmap_conservation_relative_error": conservation_error,
+        "charge_positions_c": positions_sum,
+        "positions_conservation_relative_error": positions_conservation_error,
         "width_bins": len(width_histograms),
     }
     arrays = {
         "seconds": seconds,
         "series": series,
+        # Recorder-plane diagnostic: every sample blurred with its own logged
+        # X_WIDTH/Y_WIDTH (interpreted per the manifest).
         "heatmap_charge_c": heatmap.astype(np.float32),
+        # Same grid and charge weighting, no width blur: input of the
+        # facility-sigma isocentre products (radex_isocentre_outputs.py).
+        "heatmap_positions_c": position_histogram.astype(np.float32),
     }
     return summary, arrays
 
@@ -623,6 +643,13 @@ def selected_entries(manifest: dict[str, Any], args: argparse.Namespace) -> list
         entries = [item for item in entries if args.session_filter in item["session"]]
     if args.record_filter:
         entries = [item for item in entries if args.record_filter in item["id"]]
+    experiments = getattr(args, "experiments", None)
+    if experiments:
+        wanted = {name.strip() for name in experiments.split(",") if name.strip()}
+        entries = [item for item in entries if item.get("experiment_id") in wanted]
+    kind = getattr(args, "kind", None)
+    if kind:
+        entries = [item for item in entries if item["kind"] == kind]
     if args.task_id is not None:
         entries = [item for item in entries if item["task"] == args.task_id]
     if args.limit is not None:
@@ -661,7 +688,8 @@ def parse_files(args: argparse.Namespace) -> None:
                 f"  rows={summary['acquisition_rows']} "
                 f"Qprim={summary['charge_primary_raw_c']:.8g} C "
                 f"mapped={summary['charge_spatialized_positive_c']:.8g} C "
-                f"conservation={summary['heatmap_conservation_relative_error']:.3g}",
+                f"conservation={summary['heatmap_conservation_relative_error']:.3g} "
+                f"positions={summary['positions_conservation_relative_error']:.3g}",
                 flush=True,
             )
         except Exception as exc:  # continue array work but preserve a machine-readable failure
@@ -1292,6 +1320,15 @@ def reduce_results(args: argparse.Namespace) -> None:
         delivered_protons_positive = 0.0
         spatialized_protons = 0.0
         group_fluence = np.zeros(shape, dtype=np.float64)
+        # Unblurred position maps exist only for records parsed after the
+        # 2026-10-23 change; a group gets them only if every part record has one.
+        has_positions = all("heatmap_positions_c" in item[2] for item in part_items)
+        group_positions_charge = (
+            np.zeros(shape, dtype=np.float64) if has_positions else None
+        )
+        group_positions_fluence = (
+            np.zeros(shape, dtype=np.float64) if has_positions else None
+        )
         k_factors: list[float] = []
         for entry, summary, arrays in part_items:
             k_factor = float(entry["k_factor"])
@@ -1310,6 +1347,12 @@ def reduce_results(args: argparse.Namespace) -> None:
             entry_spatialized_protons = float(entry_heatmap.sum()) * protons_per_c
             spatialized_protons += entry_spatialized_protons
             group_fluence += entry_heatmap * protons_per_c / pixel_area_cm2
+            if has_positions:
+                entry_positions = arrays["heatmap_positions_c"].astype(np.float64)
+                group_positions_charge += entry_positions
+                group_positions_fluence += (
+                    entry_positions * protons_per_c / pixel_area_cm2
+                )
         delivered_fraction = delivered_mu_raw / prescribed_mu
         spatialized_charge = float(part_charge_map.sum())
         calibration_summary = {
@@ -1347,6 +1390,8 @@ def reduce_results(args: argparse.Namespace) -> None:
             "experiment": experiment,
             "charge_part_c": part_charge_map,
             "fluence": group_fluence,
+            "positions_charge_part_c": group_positions_charge,
+            "positions_fluence": group_positions_fluence,
             "calibration": calibration_summary,
             "time_rows": group_time_rows,
         }
@@ -1643,6 +1688,54 @@ def reduce_results(args: argparse.Namespace) -> None:
             f"{name} — aggregated delivered fluence",
             "Protons cm$^{-2}$",
         )
+        if all(
+            experiment_products[group_id]["positions_fluence"] is not None
+            for group_id in group_ids
+        ):
+            # Unblurred charge-weighted spot positions in the chamber plane,
+            # same grid and calibration as heatmap.npz.  The isocentre
+            # products blur this with the facility spot sigma after the
+            # chamber-to-isocentre transform.
+            positions_charge = sum(
+                (
+                    experiment_products[group_id]["positions_charge_part_c"]
+                    for group_id in group_ids
+                ),
+                start=np.zeros(shape, dtype=np.float64),
+            )
+            positions_fluence = sum(
+                (
+                    experiment_products[group_id]["positions_fluence"]
+                    for group_id in group_ids
+                ),
+                start=np.zeros(shape, dtype=np.float64),
+            )
+            np.savez_compressed(
+                aggregate_dir / "heatmap_positions.npz",
+                charge_part_c=positions_charge.astype(np.float32),
+                fluence_protons_cm2=positions_fluence.astype(np.float32),
+                x_edges_mm=np.linspace(
+                    grid["minimum_mm"],
+                    grid["maximum_mm"],
+                    shape[1] + 1,
+                    dtype=np.float64,
+                ),
+                y_edges_mm=np.linspace(
+                    grid["minimum_mm"],
+                    grid["maximum_mm"],
+                    shape[0] + 1,
+                    dtype=np.float64,
+                ),
+                energies_mev=np.asarray(
+                    sorted(
+                        {
+                            float(experiment_products[group_id]["experiment"]["energy_mev"])
+                            for group_id in group_ids
+                        }
+                    ),
+                    dtype=np.float64,
+                ),
+            )
         if name == "RadEx_Total":
             instrument_size_mm = (154.0, 66.8)
             instrument_label = "RadEx instrument (154 x 66.8 mm)"
@@ -1756,6 +1849,10 @@ def reduce_results(args: argparse.Namespace) -> None:
         "pixel_area_cm2": pixel_area_cm2,
         "spatial_heatmap_note": ("Recorder-plane diagnostic heatmaps retain the configured spot-width model, "
         "but spot widths are not used for the RadEx or CRDS mean-fluence estimates."),
+        "positions_heatmap_note": ("heatmap_positions.npz (aggregates whose part records were "
+        "parsed with the unblurred position histogram) holds the same charge-weighted, "
+        "calibrated map without any spot-width blur; radex_isocentre_outputs.py transforms it "
+        "to the isocentre and applies the facility spot sigma there."),
         "calibration_method": (
             "Each DOSE_PRIM(C) sample is summed as incremental primary-monitor charge. "
             "For every part record, MU = charge / (3.0e-9 C/MU * K_FACTOR), and the "
@@ -1810,8 +1907,17 @@ def make_parser() -> argparse.ArgumentParser:
     parse.add_argument("--task-id", type=int)
     parse.add_argument("--session-filter")
     parse.add_argument("--record-filter")
+    parse.add_argument(
+        "--experiments",
+        help="comma-separated experiment ids to parse (e.g. exp_01,exp_02)",
+    )
+    parse.add_argument("--kind", choices=("part", "tuning"))
     parse.add_argument("--limit", type=int)
-    parse.add_argument("--resume", action="store_true")
+    # --no-resume overrides the --resume that production_array.sbatch passes,
+    # so a selection can be re-parsed in place.
+    parse.add_argument(
+        "--resume", action=argparse.BooleanOptionalAction, default=False
+    )
     parse.set_defaults(func=parse_files)
 
     reduce = subparsers.add_parser("reduce", help="combine parsed charge products")
