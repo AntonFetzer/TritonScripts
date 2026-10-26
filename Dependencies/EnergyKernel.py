@@ -29,7 +29,7 @@ def interpolateKernel(energies, kernel, evaluationEnergies):
                             for i in range(kernel.shape[1])])
 
 
-def foldKernel(energies, kernel, error, means, sigmas, step=0.025):
+def foldKernel(energies, kernel, error, means, sigmas, step=0.025, upperCut=None):
     """Fold a kernel with Gaussian spectra, truncated to the kernel's energy range.
 
     Args:
@@ -38,6 +38,10 @@ def foldKernel(energies, kernel, error, means, sigmas, step=0.025):
         means, sigmas (arrays): centre energy and width of each spectrum [MeV];
             a scalar sigma applies to every centre energy.
         step (float): spacing of the fine grid the kernel is interpolated to [MeV].
+        upperCut (float): if given, each Gaussian is cut off above
+            mean + upperCut * sigma (a one-sided truncation, renormalised), the
+            shape a facility that targets the Bragg-peak position may deliver;
+            None (the default) keeps the full Gaussian.
 
     Returns:
         tuple: folded dose and error, each (spectrum, tally). The interpolated
@@ -57,6 +61,8 @@ def foldKernel(energies, kernel, error, means, sigmas, step=0.025):
     foldedError = np.empty_like(folded)
     for i, (mean, sigma) in enumerate(zip(means, sigmas)):
         w = np.exp(-0.5 * ((fine - mean) / sigma) ** 2)
+        if upperCut is not None:
+            w = np.where(fine <= mean + upperCut * sigma + 1e-9 * step, w, 0.0)
         w /= w.sum()
         folded[i] = w @ k
         foldedError[i] = np.sqrt((w ** 2 * pointsPerInterval) @ e ** 2)
@@ -112,16 +118,73 @@ def shiftResponse(dose, exponent, offset=0.0):
     return np.power(dose + offset, exponent) - np.power(offset, exponent)
 
 
+def tabulatedResponse(dose, table):
+    """Threshold-shift response read off a tabulated curve, log-log interpolated.
+
+    Args:
+        dose (array): dose [rad]; at or below zero gives zero.
+        table (tuple): (doses [rad], shifts [V]) of the curve, ascending in dose;
+            outside the table the end segments' log-log slopes are extended.
+
+    Returns:
+        array: shift [V] at each dose.
+    """
+    dose = np.maximum(np.asarray(dose, dtype=float), 0.0)
+    tableDose, tableShift = (np.asarray(v, dtype=float) for v in table)
+    logDose, logShift = np.log(tableDose), np.log(tableShift)
+    positive = dose > 0
+    out = np.zeros(dose.shape)
+    x = np.log(np.where(positive, dose, 1.0))
+    inside = np.interp(x, logDose, logShift)
+    lowSlope = (logShift[1] - logShift[0]) / (logDose[1] - logDose[0])
+    highSlope = (logShift[-1] - logShift[-2]) / (logDose[-1] - logDose[-2])
+    below = logShift[0] + lowSlope * (x - logDose[0])
+    above = logShift[-1] + highSlope * (x - logDose[-1])
+    y = np.where(x < logDose[0], below, np.where(x > logDose[-1], above, inside))
+    out[positive] = np.exp(y[positive])
+    return out
+
+
+def _responseAndSlope(total, exponent, offset, response):
+    """Response value and the dose-weighted local slope D * d(response)/dD per tally.
+
+    `response` is None (the power law of `exponent` and `offset` everywhere)
+    or a sequence per tally of None or a (doses, shifts) table, which replaces
+    the power law for that tally; its slope is the log-log derivative, taken
+    numerically over +-1 % in dose.
+    """
+    base = shiftResponse(total, exponent, offset)
+    positive = total > 0
+    safe = np.where(positive, total, 1.0)
+    slope = np.where(positive, exponent * np.power(safe + offset, exponent - 1.0) * total, 0.0)
+    if response is None:
+        return base, slope
+    for i, table in enumerate(response):
+        if table is None:
+            continue
+        if positive[i]:
+            d = total[i]
+            value = tabulatedResponse(d, table)
+            up, down = tabulatedResponse(d * 1.01, table), tabulatedResponse(d / 1.01, table)
+            base[i] = value
+            slope[i] = (up - down) / (2.0 * np.log(1.01))
+        else:
+            base[i], slope[i] = 0.0, 0.0
+    return base, slope
+
+
 def fitShiftAmplitudes(shift, noise, exponent, offset, systematic, model, modelError, groups,
-                       previous=None, iterations=30):
-    """Least-squares amplitude per group of tallies: shift ~ A * shiftResponse(previous + model).
+                       previous=None, iterations=30, response=None):
+    """Least-squares amplitude per group of tallies: shift ~ A * response(previous + model).
 
     The measured quantity is each tally's threshold shift [V]; the model is the
     dose a kernel predicts for it [rad], on top of `previous`, the dose the same
-    device already carried [rad]. For fixed exponent and knee dose the model is
-    linear in A, so each group is a weighted projection, iterated because the
-    weight carries the model's own error: with the local slope
-    g = d(shiftResponse)/dD * D,
+    device already carried [rad]. The response is shiftResponse (a power law
+    with a knee) or, per tally, a tabulated curve such as the vendor
+    calibration, in which case the amplitude is the ratio to that curve. For a
+    fixed response the model is linear in A, so each group is a weighted
+    projection, iterated because the weight carries the model's own error:
+    with the local slope g = d(response)/dD * D,
 
         sigma^2 = noise^2 + (A g)^2 (systematic^2 + (modelError / D)^2).
 
@@ -132,10 +195,14 @@ def fitShiftAmplitudes(shift, noise, exponent, offset, systematic, model, modelE
         model, modelError (arrays): model dose and its uncertainty per tally [rad].
         groups (dict): group name -> indices of the tallies sharing one amplitude.
         previous (array): dose already carried per tally [rad]; zeros by default.
+        response (sequence): per tally, None for the power law or a
+            (doses [rad], shifts [V]) table for tabulatedResponse; None for
+            the power law everywhere.
 
     Returns:
-        tuple: (amplitude by group [V / rad^n], chi2, pull per tally, predicted
-            shift per tally); the pull is (predicted - measured) / sigma_total.
+        tuple: (amplitude by group [V / rad^n, or the ratio to the table], chi2,
+            pull per tally, predicted shift per tally); the pull is
+            (predicted - measured) / sigma_total.
     """
     shift = np.asarray(shift, dtype=float)
     noise = np.asarray(noise, dtype=float)
@@ -145,10 +212,9 @@ def fitShiftAmplitudes(shift, noise, exponent, offset, systematic, model, modelE
     modelError = np.asarray(modelError, dtype=float)
     previous = np.zeros(len(shift)) if previous is None else np.asarray(previous, dtype=float)
     total = np.maximum(previous + model, 0.0)
-    base = shiftResponse(total, exponent, offset)
+    base, slope = _responseAndSlope(total, exponent, offset, response)
     positive = total > 0
     safe = np.where(positive, total, 1.0)
-    slope = np.where(positive, exponent * np.power(safe + offset, exponent - 1.0) * total, 0.0)
     relativeError = np.where(positive, modelError / safe, 0.0)
     predicted = np.zeros(len(shift))
     pulls = np.zeros(len(shift))

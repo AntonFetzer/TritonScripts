@@ -43,7 +43,8 @@ python3 GenerateInterfaceIndex.py --write
   - `foldKernel(...)` -- Fold a kernel with Gaussian spectra, truncated to the kernel's energy range.
   - `fitScales(...)` -- Least-squares calibration scale per group of tallies: measured ~ scale * model.
   - `shiftResponse(...)` -- Threshold-shift response shape of a RadFET at a dose: (D + D0)^n - D0^n.
-  - `fitShiftAmplitudes(...)` -- Least-squares amplitude per group of tallies: shift ~ A * shiftResponse(previous + model).
+  - `tabulatedResponse(...)` -- Threshold-shift response read off a tabulated curve, log-log interpolated.
+  - `fitShiftAmplitudes(...)` -- Least-squares amplitude per group of tallies: shift ~ A * response(previous + model).
   - `readKernelRuns(...)` -- Read a mono-energetic kernel from the TotalDose tables of a sweep folder.
   - `foldComponents(...)` -- Fold a kernel with a discrete spectrum whose component energies are scaled.
   - `scanScales(...)` -- fitScales at every row of a model grid.
