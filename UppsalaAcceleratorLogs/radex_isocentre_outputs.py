@@ -16,6 +16,16 @@ Two spot models are available:
   whole.  This magnifies the blur by 1.48 / 1.33 (effective isocentre sigma
   11.7 x 9.0 mm at 64 MeV, 11.0 x 7.6 mm at 85 MeV), which has no physical
   basis: the point-source projection governs spot positions, not spot width.
+
+Two figures that the channel-scatter audit of 2026-10-16 drew by hand are
+produced here since 2026-10-26: ``row_profiles_spot_models.png`` in every
+RadEx aggregate (the delivered field along the two RadFET rows under both
+spot models, against the shared-area fluence) and
+``spot_lattice_64_vs_85.png`` with ``spot_lattice_summary.json`` in
+``RadEx_Total`` (the delivered spot lattice of the two energies in the
+recorder frame, from the fine projections in ``heatmap_positions.npz``;
+the equality of the two lattices is what justifies reusing the 85 MeV
+registration at 64 MeV).
 """
 
 from __future__ import annotations
@@ -87,6 +97,12 @@ SPOT_SIGMA_SOURCE = (
 )
 
 GAUSSIAN_TRUNCATE = 5.0
+
+#: Isocentre y of the two RadFET rows (sensor board) and the half extent of
+#: the planned spot-centre lattice (78 x 34 spots at 2 mm pitch, PLD).
+RADFET_ROW_Y_MM = (16.7, -16.7)
+PLD_SPOT_PITCH_MM = 2.0
+PLANNED_HALF_EXTENT_MM = (77.0, 33.0)
 
 
 def facility_spot_sigma(energy_mev: float) -> tuple[float, float]:
@@ -367,6 +383,252 @@ def facility_sigma_isocentre_map(
         "y_edges": y_edges,
         "components": components,
     }
+
+
+def row_profile(
+    fluence: np.ndarray,
+    x_edges: np.ndarray,
+    y_edges: np.ndarray,
+    y_mm: float,
+    x_mm: np.ndarray,
+) -> np.ndarray:
+    """Bilinear samples of a map along one row of constant isocentre y."""
+    return np.asarray(
+        [bilinear_sample(fluence, x_edges, y_edges, float(x), y_mm) for x in x_mm],
+        dtype=float,
+    )
+
+
+def save_row_profiles(
+    path: Path,
+    name: str,
+    maps: list[tuple[str, np.ndarray, np.ndarray, np.ndarray]],
+    shared_fluence: float,
+) -> None:
+    """The delivered field along the two RadFET rows under each spot model.
+
+    One panel per RadFET row (isocentre y = +16.7 and -16.7 mm), the local
+    fluence divided by the shared-area value, the channels of that row marked,
+    the planned spot-centre extent shaded.  This is the figure that shows what
+    the spot model does at the edge channels: with the recorder-width blur the
+    field fell by 11-13 % at Ch 0, 4, 5 and 9; with the facility sigma it is
+    flat to 2-3 % over Ch 0-9.
+    """
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    x_mm = np.linspace(-100.0, 100.0, 401)
+    fig, axes = plt.subplots(
+        len(RADFET_ROW_Y_MM), 1, figsize=(9.0, 7.6), sharex=True, constrained_layout=True
+    )
+    for ax, y_mm in zip(np.atleast_1d(axes), RADFET_ROW_Y_MM):
+        for index, (label, fluence, x_edges, y_edges) in enumerate(maps):
+            ax.plot(
+                x_mm,
+                row_profile(fluence, x_edges, y_edges, y_mm, x_mm) / shared_fluence,
+                color=f"C{index}",
+                label=label,
+            )
+        ax.axvspan(
+            -PLANNED_HALF_EXTENT_MM[0], PLANNED_HALF_EXTENT_MM[0], color="0.9", zorder=0
+        )
+        for channel, _shielding, channel_x, channel_y in RADEX_RADFETS:
+            if abs(channel_y - y_mm) < 0.1:
+                ax.axvline(channel_x, color="0.6", linewidth=0.6)
+                ax.text(channel_x, 0.55, f"Ch {channel}", ha="center", fontsize=8)
+        ax.set_ylim(0.5, 1.1)
+        ax.set_ylabel("local / shared-area fluence")
+        ax.set_title(f"isocentre y = {y_mm:+.1f} mm")
+        ax.grid(alpha=0.3)
+    np.atleast_1d(axes)[0].legend(fontsize=8, loc="lower center")
+    np.atleast_1d(axes)[-1].set_xlabel("isocentre x [mm]")
+    fig.suptitle(
+        f"{name}: delivered field along the RadFET rows\n"
+        "grey band = planned spot-centre extent (PLD, 78 x 34 spots at 2 mm)"
+    )
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+
+
+def spot_lines(
+    projection: np.ndarray,
+    edges: np.ndarray,
+    min_separation_mm: float = 0.6,
+    threshold: float = 0.05,
+    smoothing_mm: float = 0.15,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Centre and charge of every spot line in a fine 1-D position projection.
+
+    The projection is smoothed with a Gaussian of ``smoothing_mm``; local maxima
+    above ``threshold`` of the global maximum and at least ``min_separation_mm``
+    apart (the higher wins) are the lines; every bin is assigned to the nearest
+    line (split at the midpoints), which gives each line's charge-weighted
+    centre and total charge.  Returns (positions, weights) in ascending position.
+    """
+    from scipy.ndimage import gaussian_filter1d
+
+    projection = np.asarray(projection, dtype=np.float64)
+    centres = (edges[:-1] + edges[1:]) / 2.0
+    pixel = float(np.diff(edges).mean())
+    smooth = gaussian_filter1d(projection, smoothing_mm / pixel, mode="constant")
+    if smooth.max() <= 0:
+        return np.empty(0), np.empty(0)
+    is_max = (
+        (smooth[1:-1] > smooth[:-2])
+        & (smooth[1:-1] >= smooth[2:])
+        & (smooth[1:-1] > threshold * smooth.max())
+    )
+    candidates = np.flatnonzero(is_max) + 1
+    kept: list[int] = []
+    for index in candidates[np.argsort(smooth[candidates])[::-1]]:
+        if all(abs(centres[index] - centres[other]) >= min_separation_mm for other in kept):
+            kept.append(int(index))
+    peaks = np.asarray(sorted(kept), dtype=int)
+    bounds = np.concatenate(
+        [[edges[0]], (centres[peaks[:-1]] + centres[peaks[1:]]) / 2.0, [edges[-1]]]
+    )
+    assignment = np.clip(np.searchsorted(bounds, centres, side="right") - 1, 0, len(peaks) - 1)
+    weights = np.bincount(assignment, weights=projection, minlength=len(peaks))
+    moments = np.bincount(assignment, weights=projection * centres, minlength=len(peaks))
+    positions = moments / np.where(weights > 0, weights, np.nan)
+    return positions, weights
+
+
+def lattice_statistics(
+    positions: np.ndarray, weights: np.ndarray, planned_pitch_mm: float
+) -> dict[str, Any]:
+    """Span, pitch and centre of the lines that carry at least 20 % of the median charge."""
+    full = weights > 0.2 * np.median(weights) if len(weights) else np.zeros(0, bool)
+    kept = positions[full]
+    pitch = np.diff(kept)
+    median_weight = float(np.median(weights[full])) if full.any() else float("nan")
+    return {
+        "lines_detected": int(len(positions)),
+        "lines_used": int(full.sum()),
+        "first_mm": float(kept[0]) if len(kept) else None,
+        "last_mm": float(kept[-1]) if len(kept) else None,
+        "span_mm": float(kept[-1] - kept[0]) if len(kept) > 1 else None,
+        "centre_mm": float((kept[0] + kept[-1]) / 2.0) if len(kept) else None,
+        "pitch_median_mm": float(np.median(pitch)) if len(pitch) else None,
+        "pitch_mean_mm": float(pitch.mean()) if len(pitch) else None,
+        "pitch_sd_mm": float(pitch.std()) if len(pitch) > 1 else None,
+        "implied_scale_chamber_to_isocentre": (
+            planned_pitch_mm / float(np.median(pitch)) if len(pitch) else None
+        ),
+        "edge_line_charge_over_median": (
+            [float(weights[full][0] / median_weight), float(weights[full][-1] / median_weight)]
+            if full.any()
+            else None
+        ),
+    }
+
+
+def write_spot_lattice_products(
+    aggregates_root: Path, output_dir: Path
+) -> dict[str, Any] | None:
+    """Delivered spot lattice of the two energies in the recorder frame.
+
+    Reads the fine projections of ``RadEx_64MeV`` and ``Radex_85MeV``
+    (``heatmap_positions.npz``, parsed since 2026-10-26), detects the spot
+    lines along x and y, and writes ``spot_lattice_64_vs_85.png`` (charge per
+    line over its median against line position) and
+    ``spot_lattice_summary.json`` (lines, span, pitch, centre, implied scale,
+    and the differences between the energies, also projected to the isocentre
+    with the registered transform).  Returns None when the projections are not
+    there yet (records parsed before 2026-10-26).
+    """
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    energies = {"RadEx_64MeV": 64.0, "Radex_85MeV": 85.0}
+    projections: dict[str, dict[str, Any]] = {}
+    for component, energy_mev in energies.items():
+        path = aggregates_root / component / "heatmap_positions.npz"
+        if not path.exists():
+            return None
+        with np.load(path) as data:
+            if "projection_x_fine_protons" not in data.files:
+                return None
+            projections[component] = {
+                "energy_mev": energy_mev,
+                "x": data["projection_x_fine_protons"].astype(np.float64),
+                "y": data["projection_y_fine_protons"].astype(np.float64),
+                "edges": data["projection_fine_edges_mm"].astype(np.float64),
+                "source": str(path.resolve()),
+            }
+    summary: dict[str, Any] = {
+        "method": (
+            "Charge-weighted spot positions of every part record, projected on the "
+            "recorder x and y axes in 0.05 mm bins (uppsala_analysis "
+            "FINE_PROJECTION_PIXEL_MM), summed per energy in protons. Spot lines: local "
+            "maxima of the 0.15 mm-smoothed projection above 5 % of its maximum and at "
+            "least 0.6 mm apart; each bin belongs to the nearest line. Span, pitch and "
+            "centre use the lines carrying at least 20 % of the median line charge."
+        ),
+        "planned_pitch_mm": PLD_SPOT_PITCH_MM,
+        "registration": RADEX_CHAMBER_TO_ISOCENTRE,
+        "energies": {},
+    }
+    fig, axes = plt.subplots(1, 2, figsize=(12.0, 4.2), constrained_layout=True)
+    for index, (component, item) in enumerate(projections.items()):
+        per_axis: dict[str, Any] = {"source": item["source"]}
+        for axis_index, axis in enumerate(("x", "y")):
+            positions, weights = spot_lines(item[axis], item["edges"])
+            statistics = lattice_statistics(positions, weights, PLD_SPOT_PITCH_MM)
+            per_axis[axis] = statistics
+            full = weights > 0.2 * np.median(weights) if len(weights) else np.zeros(0, bool)
+            axes[axis_index].plot(
+                positions[full],
+                weights[full] / np.median(weights[full]),
+                marker="o",
+                markersize=3,
+                linewidth=0.8,
+                color=f"C{index}",
+                label=(
+                    f"{item['energy_mev']:g} MeV: {statistics['lines_used']} lines, "
+                    f"span {statistics['span_mm']:.2f} mm, pitch "
+                    f"{statistics['pitch_median_mm']:.3f} mm"
+                ),
+            )
+        summary["energies"][component] = per_axis
+    for axis_index, axis in enumerate(("x", "y")):
+        axes[axis_index].set_xlabel(f"recorder (IC2/3) {axis} position [mm]")
+        axes[axis_index].set_ylabel("charge per spot line / median")
+        axes[axis_index].grid(alpha=0.3)
+        axes[axis_index].legend(fontsize=8)
+    components = list(projections)
+    differences: dict[str, Any] = {}
+    for axis, scale_key in (("x", "scale_x_chamber_to_isocentre"), ("y", "scale_y_chamber_to_isocentre")):
+        first = summary["energies"][components[0]][axis]
+        second = summary["energies"][components[1]][axis]
+        if first["span_mm"] and second["span_mm"]:
+            centre_difference = second["centre_mm"] - first["centre_mm"]
+            differences[axis] = {
+                "span_relative_difference": second["span_mm"] / first["span_mm"] - 1.0,
+                "centre_difference_chamber_mm": centre_difference,
+                "centre_difference_isocentre_mm": (
+                    centre_difference * RADEX_CHAMBER_TO_ISOCENTRE[scale_key]
+                ),
+                "implied_scales": [
+                    first["implied_scale_chamber_to_isocentre"],
+                    second["implied_scale_chamber_to_isocentre"],
+                ],
+                "registered_scale": RADEX_CHAMBER_TO_ISOCENTRE[scale_key],
+            }
+    summary["85_minus_64"] = differences
+    fig.suptitle(
+        "Delivered spot lattice in the recorder frame, all RadEx spills "
+        "(from the fine spot-position projections)"
+    )
+    output_dir.mkdir(parents=True, exist_ok=True)
+    fig.savefig(output_dir / "spot_lattice_64_vs_85.png", dpi=150)
+    plt.close(fig)
+    write_summary(output_dir / "spot_lattice_summary.json", summary)
+    return summary
 
 
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -689,6 +951,14 @@ def process_aggregate_facility(
         y_edges,
         rows,
     )
+    profile_maps = [(f"facility spot sigma ({sigma_text})", fluence, x_edges, y_edges)]
+    if recorder_comparison is not None:
+        profile_maps.append(
+            ("recorder-width blur, magnified (superseded 2026-10-23)", recorder_map, rx, ry)
+        )
+    save_row_profiles(
+        output_dir / "row_profiles_spot_models.png", name, profile_maps, shared_fluence
+    )
     summary = {
         "title": name,
         "spot_model": "facility",
@@ -732,6 +1002,7 @@ def process_aggregate_facility(
             "max_abs_relative_difference": float(np.max(np.abs(cross_local / local - 1.0))),
         },
         "recorder_blur_comparison": recorder_comparison,
+        "row_profile_figure": "row_profiles_spot_models.png",
         "radfet_coordinate_assumption": (
             "Nominal GDML coordinates centred and aligned with machine X/Y; "
             "no additional DUT pose transform"
@@ -834,6 +1105,27 @@ def main(argv: Iterable[str] | None = None) -> int:
             f"{summary['integral_ratio']:.8f}; local/shared Ch0-11 "
             + " ".join(f"{value:.4f}" for value in local)
         )
+    if args.spot_model == "facility" and "RadEx_Total" in args.names:
+        output_dir = (
+            args.output_root / "RadEx_Total" if args.output_root else args.aggregates / "RadEx_Total"
+        )
+        lattice = write_spot_lattice_products(args.aggregates, output_dir)
+        if lattice is None:
+            print(
+                "RadEx_Total: no spot-lattice products (heatmap_positions.npz has no fine "
+                "projections; re-parse the RadEx part records and reduce)"
+            )
+        else:
+            for axis in ("x", "y"):
+                item = lattice["85_minus_64"].get(axis)
+                if item:
+                    print(
+                        f"RadEx_Total: spot lattice {axis}: span differs by "
+                        f"{100 * item['span_relative_difference']:+.3f} %, centres by "
+                        f"{item['centre_difference_chamber_mm']:+.3f} mm (chamber); implied "
+                        f"scales {item['implied_scales'][0]:.4f} / {item['implied_scales'][1]:.4f} "
+                        f"against the registered {item['registered_scale']:.4f}"
+                    )
     return 0
 
 

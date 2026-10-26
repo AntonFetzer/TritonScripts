@@ -71,6 +71,13 @@ map-record. This removes the former artificial factor-of-two rate at the end of
   summaries and time series for the RadEx irradiations.
 - aggregates/CRDS_5.2x5.4cm, aggregates/CRDS_7.0x7.4cm, and aggregates/CRDS_Total:
   summaries and time series for the CRDS irradiations, separated by target size and combined.
+- The RadEx aggregates also hold `heatmap_positions.npz` (unblurred spot positions, 1 mm,
+  with 0.05 mm one-dimensional projections) and, from `radex_isocentre_outputs.py`, the
+  isocentre products: `heatmap_isocentre.npz`, `radfet_location_fluence.{csv,md}`,
+  `isocentre_summary.json`, `fluence_isocentre.png`, `row_profiles_spot_models.png` (the
+  field along the two RadFET rows, facility sigma against the superseded recorder blur) and,
+  in `RadEx_Total`, `spot_lattice_64_vs_85.png` with `spot_lattice_summary.json` (the
+  delivered spot lattice of each energy, span, pitch, centre and implied scale).
 
 Recorder-plane heatmaps are retained as diagnostics. They are not DUT-plane
 fluence maps and are not used for the RadEx surface-fluence estimate.

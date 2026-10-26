@@ -74,6 +74,15 @@ class ParserTests(unittest.TestCase):
             self.assertAlmostEqual(summary["charge_primary_positive_c"], 3e-11, places=20)
             self.assertAlmostEqual(float(arrays["heatmap_charge_c"].sum()), 3e-11, places=17)
             self.assertLess(abs(summary["heatmap_conservation_relative_error"]), 1e-12)
+            # The fine projections carry the same charge as the position map and
+            # put it in the bin of the logged position (x = 1.0, y = -2.0 mm).
+            projection_x = arrays["projection_x_fine_c"]
+            projection_y = arrays["projection_y_fine_c"]
+            self.assertEqual(len(projection_x), 800)
+            self.assertAlmostEqual(float(projection_x.sum()), summary["charge_positions_c"], places=20)
+            self.assertAlmostEqual(float(projection_y.sum()), summary["charge_positions_c"], places=20)
+            self.assertEqual(int(np.argmax(projection_x)), int((1.0 + 20.0) / 0.05))
+            self.assertEqual(int(np.argmax(projection_y)), int((-2.0 + 20.0) / 0.05))
 
     def test_repeated_stream_retains_only_last_section(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -60,6 +60,13 @@ FACILITY_CALIBRATION_ENERGY_ALIASES = {64.0: 65.0}
 # geometric magnification inferred from recorder profiles, is the denominator.
 RADEX_INSTRUMENT_WIDTH_X_MM = 154.0
 RADEX_INSTRUMENT_WIDTH_Y_MM = 66.8
+#: Bin width of the one-dimensional spot-position projections every parsed
+#: record carries beside its 1 mm maps (projection_x_fine_c, projection_y_fine_c):
+#: fine enough to resolve the 1.35 x 1.50 mm chamber-plane spot lattice, which
+#: the 1 mm maps alias.  Input of the spot-lattice products
+#: (radex_isocentre_outputs.py).
+FINE_PROJECTION_BINS_PER_MM = 20
+FINE_PROJECTION_PIXEL_MM = 1.0 / FINE_PROJECTION_BINS_PER_MM
 RADEX_INSTRUMENT_AREA_CM2 = RADEX_INSTRUMENT_WIDTH_X_MM * RADEX_INSTRUMENT_WIDTH_Y_MM / 100.0
 
 # CRDS was irradiated with two requested target fields.  The first three runs
@@ -453,6 +460,9 @@ def parse_record(entry: dict[str, Any], grid: dict[str, Any]) -> tuple[dict[str,
     # chamber-to-isocentre transform, so they need the positions without the
     # recorder X_WIDTH/Y_WIDTH blur that the diagnostic heatmap carries.
     position_histogram = np.zeros((n_pixels, n_pixels), dtype=np.float64)
+    n_fine = int(round((grid_max - grid_min) * FINE_PROJECTION_BINS_PER_MM))
+    projection_x = np.zeros(n_fine, dtype=np.float64)
+    projection_y = np.zeros(n_fine, dtype=np.float64)
     totals = np.zeros(6, dtype=np.float64)
     rows = 0
     parse_errors = 0
@@ -492,6 +502,8 @@ def parse_record(entry: dict[str, Any], grid: dict[str, Any]) -> tuple[dict[str,
                     position_histogram = np.zeros(
                         (n_pixels, n_pixels), dtype=np.float64
                     )
+                    projection_x = np.zeros(n_fine, dtype=np.float64)
+                    projection_y = np.zeros(n_fine, dtype=np.float64)
                     totals = np.zeros(6, dtype=np.float64)
                     rows = 0
                     parse_errors = 0
@@ -575,6 +587,12 @@ def parse_record(entry: dict[str, Any], grid: dict[str, Any]) -> tuple[dict[str,
                     width_histograms[key] = histogram
                 histogram[y_idx, x_idx] += primary_positive
                 position_histogram[y_idx, x_idx] += primary_positive
+                projection_x[
+                    min(int((x_pos - grid_min) * FINE_PROJECTION_BINS_PER_MM), n_fine - 1)
+                ] += primary_positive
+                projection_y[
+                    min(int((y_pos - grid_min) * FINE_PROJECTION_BINS_PER_MM), n_fine - 1)
+                ] += primary_positive
                 bucket[5] += primary_positive
                 totals[5] += primary_positive
             elif primary_positive > 0:
@@ -633,6 +651,10 @@ def parse_record(entry: dict[str, Any], grid: dict[str, Any]) -> tuple[dict[str,
         # Same grid and charge weighting, no width blur: input of the
         # facility-sigma isocentre products (radex_isocentre_outputs.py).
         "heatmap_positions_c": position_histogram.astype(np.float32),
+        # Fine one-dimensional projections of the same unblurred positions
+        # (FINE_PROJECTION_PIXEL_MM bins), which resolve the spot lattice.
+        "projection_x_fine_c": projection_x,
+        "projection_y_fine_c": projection_y,
     }
     return summary, arrays
 
@@ -1329,6 +1351,11 @@ def reduce_results(args: argparse.Namespace) -> None:
         group_positions_fluence = (
             np.zeros(shape, dtype=np.float64) if has_positions else None
         )
+        has_projections = has_positions and all(
+            "projection_x_fine_c" in item[2] for item in part_items
+        )
+        group_projection_x: np.ndarray | None = None
+        group_projection_y: np.ndarray | None = None
         k_factors: list[float] = []
         for entry, summary, arrays in part_items:
             k_factor = float(entry["k_factor"])
@@ -1352,6 +1379,15 @@ def reduce_results(args: argparse.Namespace) -> None:
                 group_positions_charge += entry_positions
                 group_positions_fluence += (
                     entry_positions * protons_per_c / pixel_area_cm2
+                )
+            if has_projections:
+                x_part = arrays["projection_x_fine_c"].astype(np.float64) * protons_per_c
+                y_part = arrays["projection_y_fine_c"].astype(np.float64) * protons_per_c
+                group_projection_x = (
+                    x_part if group_projection_x is None else group_projection_x + x_part
+                )
+                group_projection_y = (
+                    y_part if group_projection_y is None else group_projection_y + y_part
                 )
         delivered_fraction = delivered_mu_raw / prescribed_mu
         spatialized_charge = float(part_charge_map.sum())
@@ -1392,6 +1428,8 @@ def reduce_results(args: argparse.Namespace) -> None:
             "fluence": group_fluence,
             "positions_charge_part_c": group_positions_charge,
             "positions_fluence": group_positions_fluence,
+            "projection_x_fine_protons": group_projection_x,
+            "projection_y_fine_protons": group_projection_y,
             "calibration": calibration_summary,
             "time_rows": group_time_rows,
         }
@@ -1710,6 +1748,31 @@ def reduce_results(args: argparse.Namespace) -> None:
                 ),
                 start=np.zeros(shape, dtype=np.float64),
             )
+            # Fine 1-D projections of the same positions, in protons, when every
+            # component experiment carries them: input of the spot-lattice products.
+            projection_arrays: dict[str, np.ndarray] = {}
+            if all(
+                experiment_products[group_id]["projection_x_fine_protons"] is not None
+                for group_id in group_ids
+            ):
+                projection_x = sum(
+                    experiment_products[group_id]["projection_x_fine_protons"]
+                    for group_id in group_ids
+                )
+                projection_y = sum(
+                    experiment_products[group_id]["projection_y_fine_protons"]
+                    for group_id in group_ids
+                )
+                projection_arrays = {
+                    "projection_x_fine_protons": np.asarray(projection_x, dtype=np.float64),
+                    "projection_y_fine_protons": np.asarray(projection_y, dtype=np.float64),
+                    "projection_fine_edges_mm": np.linspace(
+                        grid["minimum_mm"],
+                        grid["maximum_mm"],
+                        len(projection_x) + 1,
+                        dtype=np.float64,
+                    ),
+                }
             np.savez_compressed(
                 aggregate_dir / "heatmap_positions.npz",
                 charge_part_c=positions_charge.astype(np.float32),
@@ -1735,6 +1798,7 @@ def reduce_results(args: argparse.Namespace) -> None:
                     ),
                     dtype=np.float64,
                 ),
+                **projection_arrays,
             )
         if name == "RadEx_Total":
             instrument_size_mm = (154.0, 66.8)
@@ -1852,7 +1916,9 @@ def reduce_results(args: argparse.Namespace) -> None:
         "positions_heatmap_note": ("heatmap_positions.npz (aggregates whose part records were "
         "parsed with the unblurred position histogram) holds the same charge-weighted, "
         "calibrated map without any spot-width blur; radex_isocentre_outputs.py transforms it "
-        "to the isocentre and applies the facility spot sigma there."),
+        "to the isocentre and applies the facility spot sigma there. Its "
+        "projection_{x,y}_fine_protons arrays (0.05 mm bins) resolve the delivered spot "
+        "lattice for the spot-lattice products."),
         "calibration_method": (
             "Each DOSE_PRIM(C) sample is summed as incremental primary-monitor charge. "
             "For every part record, MU = charge / (3.0e-9 C/MU * K_FACTOR), and the "

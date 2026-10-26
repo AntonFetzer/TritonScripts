@@ -67,5 +67,35 @@ class RadexIsocentreOutputTests(unittest.TestCase):
         ]
         self.assertAlmostEqual(x_mean, expected, places=9)
 
+    def test_spot_lines_recover_a_comb_lattice(self):
+        edges = np.arange(-30.0, 30.0001, 0.05)
+        centres = (edges[:-1] + edges[1:]) / 2.0
+        pitch = 1.35
+        lines = -20.25 + pitch * np.arange(31)
+        projection = np.zeros_like(centres)
+        for index, line in enumerate(lines):
+            weight = 0.5 if index in (0, 30) else 1.0
+            projection += weight * np.exp(-0.5 * ((centres - line) / 0.1) ** 2)
+        positions, weights = rio.spot_lines(projection, edges)
+        self.assertEqual(len(positions), 31)
+        self.assertTrue(np.allclose(positions, lines, atol=0.01))
+        self.assertAlmostEqual(float(weights[0] / np.median(weights)), 0.5, places=2)
+        statistics = rio.lattice_statistics(positions, weights, rio.PLD_SPOT_PITCH_MM)
+        self.assertEqual(statistics["lines_used"], 31)
+        self.assertAlmostEqual(statistics["pitch_median_mm"], pitch, places=3)
+        self.assertAlmostEqual(statistics["span_mm"], 30 * pitch, places=2)
+        self.assertAlmostEqual(
+            statistics["implied_scale_chamber_to_isocentre"], 2.0 / pitch, places=3
+        )
+
+    def test_row_profile_samples_a_linear_field(self):
+        edges = np.linspace(-10.0, 10.0, 21)
+        centres = (edges[:-1] + edges[1:]) / 2.0
+        x, y = np.meshgrid(centres, centres)
+        values = 1.0 + 0.1 * x
+        profile = rio.row_profile(values, edges, edges, 0.0, np.array([-5.0, 0.0, 5.0]))
+        self.assertTrue(np.allclose(profile, [0.5, 1.0, 1.5]))
+
+
 if __name__ == "__main__":
     unittest.main()
