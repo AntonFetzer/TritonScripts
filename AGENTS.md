@@ -196,11 +196,10 @@ Always unpack these tuples explicitly. LET readers already return the repository
 
 ## Submission and code placement
 
-Never submit Slurm jobs without an explicit user instruction, including simulation, analysis and dependent jobs. Implement/prepare/fix/review requests permit editing, static checks and single-threaded smoke runs lasting only a few seconds on the login node. Clean up smoke inputs, outputs and logs immediately afterward; leave the setup for inspection before Slurm submission.
+Slurm submission, the login-node limits and job sizing follow `/scratch/work/fetzera1/AGENTS.md`. Read it before running anything on Triton. In short, never submit Slurm jobs without an explicit user instruction, and run nothing on the login node beyond one thread for 10 minutes.
 Keep all Python code in this Python repository, never under GRAS. Generated results and plots belong alongside the simulation data.
-Shared code in this repository is simple, robust and run-agnostic; it never holds run-specific scripts. A script takes the run folder (or `Res` folder) as its argument and does not need to know the run's energy, source area, Slurm job IDs, primary count or normalisation. For RadEx, all the shared script does is pool each run with `Dependencies.TotalDose.totalDose` and write the aggregated doses into a CSV in the run folder; every RadEx run has the same twelve RadFETs. For CRDS it does the same and also pools the NID with `Dependencies.TotalNID.totalNID`. Run-specific post-processing (scaling to a delivered fluence, comparing runs or measurements, kernel and spectrum fits, campaign tables) is done in a scratch folder outside this repository, and its results are kept next to the simulation data. Put reusable plotting in `Plotting/` and reusable math in `Dependencies/`. Follow the early scripts in this repository's history for the style: short, direct, and built on `totalDose`.
+Shared code in this repository is simple, robust and run-agnostic; it never holds run-specific scripts. A script takes the run folder (or `Res` folder) as its argument and does not need to know the run's energy, source area, Slurm job IDs, primary count or normalisation. For RadEx, all the shared script does is pool each run with `Dependencies.TotalDose.totalDose` and write the aggregated doses into a CSV in the run folder; every RadEx run has the same twelve RadFETs. For CRDS it does the same and also pools the NID with `Dependencies.TotalNID.totalNID`. Run-specific post-processing (scaling to a delivered fluence, comparing runs or measurements, kernel and spectrum fits, campaign tables) is done outside this repository, and its results are kept next to the simulation data. Such scripts are temporary and are removed after use. When one contains validated math that is expected to be reused, propose adding it here. Put reusable plotting in `Plotting/` and reusable math in `Dependencies/`. Follow the early scripts in this repository's history for the style: short, direct, and built on `totalDose`.
 Use GRAS autoSeed, with the `/dev/urandom` pre-seed described in `/scratch/work/fetzera1/AGENTS.md`, and shared replica macros unless the user explicitly requests another seed policy. Do not add hashes or hash-gated analysis unless explicitly requested or maintaining an existing requirement.
-Run single-threaded analysis expected to finish within 10 minutes on the login node. Do not submit a seconds-long analysis or pad it with sleep. Slurm is for longer, parallel or memory-intensive work.
 
 ## Implementation conventions
 
@@ -238,12 +237,3 @@ committed fixtures, so it runs without GRAS output and takes under a second.
 Extend it when you add a reader or change how results are combined.
 
 Also run the narrowest relevant analysis or test when its required input data is available. Report when end-to-end validation cannot be performed because external GRAS or measurement data is unavailable.
-
-On Aalto Triton the login node allows no multithreading: one thread per user at a time, for at most 10 minutes.
-Submit anything expected to run longer than 10 minutes on one thread, or in parallel, as a Slurm job.
-Every Slurm job and array task must run longer than 120 s so that it does not overload the Slurm controller.
-Split work with more than 10 concurrent threads so that each thread runs at least 15 minutes.
-Keep the account's total number of Slurm jobs, counting every array task, queued or running, below 1000, and use up
-to that many to keep each job's wall time between 15 and 60 minutes. If a job would still need more than 60 minutes
-with 1000 jobs, raise it with the user. Check `squeue -u fetzera1` before submitting. Do not throttle arrays with
-`%N`; size the array instead. This supersedes the earlier limit of 100 concurrent CPUs.
