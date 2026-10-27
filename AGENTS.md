@@ -54,6 +54,7 @@ python3 GenerateInterfaceIndex.py --write
   - `fitSpectrumWeights(...)` -- Free non-negative spectrum on the kernel energies: measured ~ kernel^T w.
 - `Dependencies.HistogramPlots` -- Draw the repository's standard histogram dictionaries.
   - `checkHistogram(...)` -- Validate a histogram dictionary before drawing it.
+  - `nonZeroRange(...)` -- Energy range spanned by the bins with a non-zero value, over several histograms.
   - `colour(...)` -- Colour for series ``index``, cycling when there are more series than colours.
   - `stepHistogram(...)` -- Draw a histogram as a filled bar with a step outline.
   - `errorbarHistogram(...)` -- Draw a histogram as a translucent bar with error bars at the bin means.

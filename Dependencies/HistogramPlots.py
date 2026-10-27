@@ -64,6 +64,36 @@ def checkHistogram(histogram, field="value"):
     return histogram
 
 
+def nonZeroRange(histograms, field="value"):
+    """Energy range spanned by the bins with a non-zero value, over several histograms.
+
+    Matplotlib's autoscaling covers every bin, because a bin holding zero is
+    valid data, so a spectrum that fills two decades of an eight-decade
+    histogram ends up squeezed into a corner. This returns the limits that fit
+    the populated bins instead.
+
+    Args:
+        histograms (iterable of dict): readers' outputs.
+        field (str): the per-bin quantity that decides whether a bin counts,
+            usually the one being drawn.
+
+    Returns:
+        tuple(float, float) or None: the lower edge of the first and the upper
+        edge of the last bin whose ``field`` is non-zero in any histogram, or
+        None when every bin of every histogram is zero.
+    """
+    lowest, highest = np.inf, -np.inf
+    for histogram in histograms:
+        checkHistogram(histogram, field)
+        filled = np.nonzero(np.asarray(histogram[field], dtype=float))[0]
+        if filled.size:
+            lowest = min(lowest, float(np.asarray(histogram["lower"], dtype=float)[filled].min()))
+            highest = max(highest, float(np.asarray(histogram["upper"], dtype=float)[filled].max()))
+    if not np.isfinite(lowest):
+        return None
+    return lowest, highest
+
+
 def colour(index):
     """Colour for series ``index``, cycling when there are more series than colours."""
     return COLOURS[index % len(COLOURS)]

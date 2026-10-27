@@ -41,7 +41,7 @@ sys.path.insert(0, str(REPO_ROOT))
 import matplotlib.pyplot as plt  # noqa: E402
 
 from Dependencies.HistogramPlots import (  # noqa: E402
-    colour, errorbarHistogram, logLogGrid, savePdf, stepHistogram)
+    colour, errorbarHistogram, logLogGrid, nonZeroRange, savePdf, stepHistogram)
 
 # Readers are imported inside their component function, not at module level.
 # They do not all have the same third-party dependencies -- the source reader
@@ -179,6 +179,9 @@ def main() -> None:
     parser.add_argument("--ylabel")
     parser.add_argument("--xscale", default="log", choices=["log", "linear"])
     parser.add_argument("--yscale", default="log", choices=["log", "linear"])
+    parser.add_argument("--xlim-data", action="store_true",
+                        help="fit the x axis to the bins with non-zero values in any run "
+                             "(autoscaling also covers the empty bins)")
     parser.add_argument("--output", type=Path, help="write a PDF here")
     parser.add_argument("--show", action="store_true", help="open the figure")
     arguments = parser.parse_args()
@@ -195,7 +198,7 @@ def main() -> None:
     runs = collectRuns(arguments)
 
     plt.figure()
-    drawn = 0
+    drawn = []
     for index, (path, label) in enumerate(runs):
         components = kind["reader"](str(path))
         if component not in components:
@@ -209,7 +212,7 @@ def main() -> None:
             continue
         draw = stepHistogram if arguments.style == "step" else errorbarHistogram
         draw(histogram, field=arguments.field, label=label, color=colour(index))
-        drawn += 1
+        drawn.append(histogram)
 
     if not drawn:
         raise SystemExit("no histogram could be drawn from any of the given runs")
@@ -224,6 +227,12 @@ def main() -> None:
         xscale=arguments.xscale,
         yscale=arguments.yscale,
     )
+    if arguments.xlim_data:
+        limits = nonZeroRange(drawn, field=arguments.field)
+        if limits is None:
+            print("WARNING: every bin is zero; x axis left to autoscaling")
+        else:
+            plt.xlim(*limits)
 
     if arguments.output:
         print(f"Wrote {savePdf(arguments.output)}")

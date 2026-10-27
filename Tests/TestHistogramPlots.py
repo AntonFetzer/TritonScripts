@@ -24,7 +24,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from Dependencies.HistogramPlots import (
     REQUIRED_FIELDS, checkHistogram, colour, errorbarHistogram, logLogGrid,
-    savePdf, stepHistogram)
+    nonZeroRange, savePdf, stepHistogram)
 
 
 def makeHistogram(bins=4):
@@ -72,6 +72,32 @@ class TestCheckHistogram(unittest.TestCase):
         histogram["upper"] = np.array([1.0, 2.0, np.inf, 4.0])
         with self.assertRaises(ValueError):
             checkHistogram(histogram)
+
+
+class TestNonZeroRange(unittest.TestCase):
+    def test_spans_the_filled_bins_only(self):
+        """Empty bins at both ends are valid data but must not set the limits."""
+        histogram = makeHistogram(bins=6)
+        histogram["value"] = np.array([0.0, 0.0, 3.0, 0.0, 5.0, 0.0])
+        self.assertEqual(nonZeroRange([histogram]), (2.0, 5.0))
+
+    def test_union_over_histograms(self):
+        first, second = makeHistogram(bins=6), makeHistogram(bins=6)
+        first["value"] = np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0])
+        second["value"] = np.array([0.0, 0.0, 0.0, 0.0, 2.0, 0.0])
+        self.assertEqual(nonZeroRange([first, second]), (1.0, 5.0))
+
+    def test_field_selects_what_counts(self):
+        histogram = makeHistogram(bins=4)
+        histogram["value"] = np.zeros(4)
+        histogram["entries"] = np.array([0.0, 7.0, 0.0, 0.0])
+        self.assertIsNone(nonZeroRange([histogram]))
+        self.assertEqual(nonZeroRange([histogram], field="entries"), (1.0, 2.0))
+
+    def test_all_empty_returns_none(self):
+        histogram = makeHistogram()
+        histogram["value"] = np.zeros(4)
+        self.assertIsNone(nonZeroRange([histogram]))
 
 
 class TestDrawing(unittest.TestCase):
