@@ -7,7 +7,7 @@ from pathlib import Path
 from Read.ReadDose import readDoseModules
 from Dependencies.PoolDoseModules import poolDoseModules
 
-RUN = Path("/scratch/work/fetzera1/GRAS/RadEx/RadEx-HUS/MU-Fluence-Calibration")
+RUN = Path("/scratch/work/fetzera1/GRAS/3D/RadEx/RadEx-HUS/MU-Fluence-Calibration")
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)

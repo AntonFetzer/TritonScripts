@@ -2,7 +2,7 @@ import csv
 import matplotlib.pyplot as plt
 import numpy as np
 
-Directory = "/home/anton/triton_work/GRAS/LET_Histograms/Carrington/"
+Directory = "/home/anton/triton_work/GRAS/1Tile/LET_Histograms/Carrington/"
 
 CrossectionNames = ["Cypress CY62167GE30-45ZXI", "NanoXplore NG-Medium"]  # List of cross-section names to process
 

@@ -16,7 +16,7 @@ Here: CREME96 solar iron at GEO sampled directly from the spectrum vs
 sampled flat in log energy with biasing weights (FlatLog).
 '''
 
-Directory = os.path.expanduser("~/triton_work/GRAS/LET_Histograms/Carrington-CREME96-All-Species/")
+Directory = os.path.expanduser("~/triton_work/GRAS/1Tile/LET_Histograms/Carrington-CREME96-All-Species/")
 
 DirectFolder = "GEO-CREME96-Solar-Iron"
 FlatLogFolder = "GEO-CREME96-Solar-Iron-FlatLog"

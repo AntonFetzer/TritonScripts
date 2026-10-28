@@ -26,7 +26,7 @@ F(x) = A (1- exp{-[(x-x0)/W] ** s}) where
 https://creme.isde.vanderbilt.edu/CREME-MC/help/weibull
 '''
 
-Directory = "/home/anton/triton_work/GRAS/Fluence_Histograms/CarringtonShielded/"
+Directory = "/home/anton/triton_work/GRAS/1Tile/Fluence_Histograms/CarringtonShielded/"
 
 CrossectionName = "NanoXplore NG-Medium"
 #CrossectionName = "Cypress CY62167GE30-45ZXI"

@@ -28,7 +28,7 @@ F(x) = A (1- exp{-[(x-x0)/W] ** s}) where
 https://creme.isde.vanderbilt.edu/CREME-MC/help/weibull
 '''
 
-Directory = "/scratch/work/fetzera1/GRAS/LET_Histograms/Carrington/"
+Directory = "/scratch/work/fetzera1/GRAS/1Tile/LET_Histograms/Carrington/"
 
 # nanoXplore https://nanoxplore-wiki.atlassian.net/wiki/spaces/NAN/pages/46497810/NG-MEDIUM+Radiative+Test#Weibull-fitting
 CROSS_SECTIONS = (

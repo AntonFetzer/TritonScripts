@@ -5,7 +5,7 @@ AluminiumRowEnergyScan share, so that every fit uses the same constants,
 uncertainties and kernel folding.
 
 The campaign is described by a JSON file kept next to the measured doses (for
-Uppsala, GRAS/RadEx/RadEx-Uppsala/MeasuredDoses/campaign.json), so the same
+Uppsala, GRAS/3D/RadEx/RadEx-Uppsala/MeasuredDoses/campaign.json), so the same
 code fits any campaign of these devices. Per phase it names the measured
 phase-end table, the dose column, the phase it increments on (if any), the
 accelerator-log per-channel fluence, the log fluence, the nominal energy, the

@@ -12,7 +12,7 @@ import json
 import math
 from pathlib import Path
 
-BASE=Path("/scratch/work/fetzera1/GRAS/RadEx/RadEx-HUS")
+BASE=Path("/scratch/work/fetzera1/GRAS/3D/RadEx/RadEx-HUS")
 CALIBRATION_SSD_CM=100
 DEVICE_SSD_CM=120
 INVERSE_SQUARE=(CALIBRATION_SSD_CM/DEVICE_SSD_CM)**2
