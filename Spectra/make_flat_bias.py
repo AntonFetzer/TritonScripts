@@ -29,7 +29,10 @@ How GPS energy biasing works (Geant4 ``G4SPSEneDistribution`` /
     weighted result is unbiased regardless of the bias.
 
 To flatten the sampling we place the bias points at ``u_k = CDF(E_k)`` for ``E_k``
-spaced uniformly across the spectrum, with **constant y**: every u-bin then gets
+spaced uniformly across the spectrum, with **constant y** (zero for the first point,
+which only marks the lower edge; a non-zero first y makes GPS send that share of the
+samples to u = 0 with the weight of bin 1, so the total comes out too high by the
+natural probability of bin 1): every u-bin then gets
 equal sampling probability (one energy bin each -> a flat number of primaries),
 while the weight ``w_k`` proportional to ``(u_k - u_{k-1})`` = the true probability
 of that bin reconstructs the spectrum. Because ``sum(biased_prob * weight) =
@@ -42,6 +45,15 @@ rising as E on a log one). Only the spacing changes; the weights and normalisati
 are identical. For a steep spectrum log is almost always the right choice -- linear
 spacing wastes most bins on the negligible high-energy tail and starves the
 dominant low-energy bulk.
+
+GPS uses the biased ``u`` only to choose the arb bin; inside the bin it draws the
+energy with a fresh unbiased random number (``GenArbPointEnergies``). The bias can
+therefore flatten the sampling only down to the resolution of the arb table. A table
+with few points (for example a two-point power law) needs to be rewritten with
+points at the bias energies first.
+
+The u values are written with 17 significant digits, because for steep spectra the
+tail bins differ from 1 by less than 1e-14.
 
 Standalone: depends only on the Python standard library.
 
@@ -183,7 +195,11 @@ def write_biased_macro(src: Path, out: Path, nbins: int, space: str = "log") -> 
         f"# uniform {space}-energy sampling; weights reconstruct the unbiased result",
         "# (mean weight 1 -> same NORM_FACTOR). Original source kept verbatim above.",
         "/gps/hist/type biase",
-        *[f"/gps/hist/point {u:.14f}  1.0" for u in us],
+        # The first point is the lower edge of the first bin and must carry zero weight:
+        # GPS maps random numbers below its cumulative value to u = 0 with the weight of
+        # bin 1, which adds bin 1's natural probability to the total.
+        f"/gps/hist/point {us[0]:.17g}  0.0",
+        *[f"/gps/hist/point {u:.17g}  1.0" for u in us[1:]],
     ]
     # Insert after the (last) /gps/hist/inter line; fall back to after the last arb
     # /gps/hist/point if a macro has no interpolation line.
