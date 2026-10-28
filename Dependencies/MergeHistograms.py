@@ -120,9 +120,11 @@ def mergeHistograms(list_of_histograms):
                 print(f"  bin {b} [{TotalHistogram['lower'][b]:.4g}, {TotalHistogram['upper'][b]:.4g}]:"
                       f" Birge ratio {Birge[b]:.2f} with {TotalHistogram['entries'][b]} entries")
             print("  The jobs differ by more than their random seed, or a csv file is corrupt.")
-            try:
+            # Prompt only on a terminal: an open pipe without input (ssh, a pipeline)
+            # never delivers EOF and would block input() indefinitely.
+            if sys.stdin.isatty():
                 input("  Press Enter to continue with the merge anyway...")
-            except EOFError:
+            else:
                 print("  (non-interactive run, continuing)")
 
     # Total number of primary events, where the inputs provide it

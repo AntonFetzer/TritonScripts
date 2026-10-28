@@ -25,8 +25,10 @@ def totalFluenceHistos(path):
     
     if not Files:
         print("ERROR !!! No files found")
-        # Wait for user input before exiting
-        input("Press Enter to continue")
+        # Wait for user input before returning, but only on a terminal: an open pipe
+        # without input (ssh, a pipeline) never delivers EOF and would block input().
+        if sys.stdin.isatty():
+            input("Press Enter to continue")
         return None
     
     NumFiles = len(Files)

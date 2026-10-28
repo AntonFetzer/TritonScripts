@@ -106,9 +106,11 @@ def totalDose(path, filename_contains=None, replica_error=False, min_replicas=5)
         if MaxBirge > 2:
             print("ERROR !!! Inconsistent files: the between-file scatter exceeds the quoted statistical errors")
             print("  The files differ by more than their random seed, or a csv file is corrupt.")
-            try:
+            # Prompt only on a terminal: an open pipe without input (ssh, a pipeline)
+            # never delivers EOF and would block input() indefinitely.
+            if sys.stdin.isatty():
                 input("  Press Enter to continue anyway...")
-            except EOFError:
+            else:
                 print("  (non-interactive run, continuing)")
 
     # Error of the entry-weighted mean from the replica scatter. File i is the
