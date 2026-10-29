@@ -30,6 +30,7 @@ YLim = None  # (min, max) in krad, e.g. --ylim=1e-2,1e3
 Output = None  # PDF name in <path>, e.g. --output=ShieldingCurves_Physics.pdf; default depends on the plot
 FigSize = None  # (width, height) in inches, e.g. --figsize=4,6
 Names = None  # Legend names, one per label, separated by ';', e.g. --names="EM3;EM4"; default: the labels
+LegendLoc = "best"  # Matplotlib legend location, e.g. --legend-loc="upper right"
 ErrorbarStyles = {
     'default': {'capsize': 5, 'linestyle': ''},
     'compact': {'capsize': 1.5, 'elinewidth': 1.5, 'capthick': 2, 'linestyle': ''},  # --errorbar-style=compact
@@ -38,6 +39,7 @@ ErrorbarStyle = ErrorbarStyles['default']
 
 # Optional: python3 -m Plotting.CompareShieldingCurves <path> <label> ... [--replica-error] [--min-replicas=N]
 #   [--ylabel=TEXT] [--title=TEXT] [--output=NAME.pdf] [--figsize=W,H] [--names="A;B"] [--errorbar-style=compact]
+#   [--legend-loc="upper right"]
 #   [--xlim=MIN,MAX --ylim=MIN,MAX] [--shieldose=spenvis_sqo.txt --shieldose-name=TEXT --months=N]
 Args = [a for a in sys.argv[1:] if not a.startswith("--")]
 if Args:
@@ -65,6 +67,8 @@ for a in sys.argv[1:]:
         Output = a.split("=", 1)[1]
     elif a.startswith("--figsize="):
         FigSize = tuple(float(v) for v in a.split("=", 1)[1].split(","))
+    elif a.startswith("--legend-loc="):
+        LegendLoc = a.split("=", 1)[1]
     elif a.startswith("--names="):
         Names = a.split("=", 1)[1].split(";")
     elif a.startswith("--errorbar-style="):
@@ -107,7 +111,7 @@ if ShieldoseFile is None:
     plt.title(Title or "Ionising Dose behind shielding of varying thickness")
     plt.xlabel("Aluminium Thickness [mm]")
     plt.ylabel(YLabel)
-    plt.legend()
+    plt.legend(loc=LegendLoc)
     if XLim:
         plt.xlim(XLim)
     if YLim:
