@@ -28,10 +28,17 @@ ShieldoseName = "SHIELDOSE-2Q"  # Legend name, e.g. --shieldose-name="SHIELDOSE-
 XLim = None  # (min, max) in mm, e.g. --xlim=0,6
 YLim = None  # (min, max) in krad, e.g. --ylim=1e-2,1e3
 Output = None  # PDF name in <path>, e.g. --output=ShieldingCurves_Physics.pdf; default depends on the plot
+FigSize = None  # (width, height) in inches, e.g. --figsize=4,6
+Names = None  # Legend names, one per label, separated by ';', e.g. --names="EM3;EM4"; default: the labels
+ErrorbarStyles = {
+    'default': {'capsize': 5, 'linestyle': ''},
+    'compact': {'capsize': 1.5, 'elinewidth': 1.5, 'capthick': 2, 'linestyle': ''},  # --errorbar-style=compact
+}
+ErrorbarStyle = ErrorbarStyles['default']
 
 # Optional: python3 -m Plotting.CompareShieldingCurves <path> <label> ... [--replica-error] [--min-replicas=N]
-#   [--ylabel=TEXT] [--output=NAME.pdf] [--shieldose=spenvis_sqo.txt --shieldose-name=TEXT --months=N --title=TEXT
-#    --xlim=MIN,MAX --ylim=MIN,MAX]
+#   [--ylabel=TEXT] [--output=NAME.pdf] [--figsize=W,H] [--names="A;B"] [--errorbar-style=compact]
+#   [--shieldose=spenvis_sqo.txt --shieldose-name=TEXT --months=N --title=TEXT --xlim=MIN,MAX --ylim=MIN,MAX]
 Args = [a for a in sys.argv[1:] if not a.startswith("--")]
 if Args:
     Path = Args[0]
@@ -56,6 +63,15 @@ for a in sys.argv[1:]:
         YLim = tuple(float(v) for v in a.split("=", 1)[1].split(","))
     elif a.startswith("--output="):
         Output = a.split("=", 1)[1]
+    elif a.startswith("--figsize="):
+        FigSize = tuple(float(v) for v in a.split("=", 1)[1].split(","))
+    elif a.startswith("--names="):
+        Names = a.split("=", 1)[1].split(";")
+    elif a.startswith("--errorbar-style="):
+        ErrorbarStyle = ErrorbarStyles[a.split("=", 1)[1]]
+
+if Names is not None and len(Names) != len(Labels):
+    sys.exit("ERROR !!! --names needs one name per label")
 
 Colours = ['C0', 'C1', 'C2', 'C8', 'C3', 'C9', 'C7', 'k', 'C4', 'C5', 'C6']
 
@@ -71,12 +87,13 @@ x = np.linspace(0, 10, num=NumTiles, endpoint=True)
 
 if ShieldoseFile is None:
     ## Plot shielding curves with error bars
-    plt.figure(1)
+    plt.figure(1, FigSize)
 
     # print("Shielding curves: ", SC)
 
     for i, label in enumerate(Labels):
-       plt.errorbar(x, SC[label]['dose'], SC[label]['error'], fmt='', capsize=5, label=label, color=Colours[i], linestyle='')
+       plt.errorbar(x, SC[label]['dose'], SC[label]['error'], fmt='', label=Names[i] if Names else label,
+                    color=Colours[i], **ErrorbarStyle)
 
     ####### Plot 10kRad line #########
     CriticalDose = [1 for i in x]
