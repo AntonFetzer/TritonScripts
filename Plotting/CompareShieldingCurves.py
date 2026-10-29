@@ -23,7 +23,7 @@ ReplicaError = False  # True for biased GPS sources: error from the replica scat
 MinReplicas = 5
 ShieldoseFile = None  # SHIELDOSE-2Q spenvis_sqo.txt: compare <electron label> <proton label> with it
 Months = None  # Divide all doses by this number of months, e.g. 132 for an 11-year fluence
-Title = "Ionising dose from trapped particles (AE9/AP9) on GTO"
+Title = None  # Plot title, e.g. --title=TEXT; the default depends on the plot
 ShieldoseName = "SHIELDOSE-2Q"  # Legend name, e.g. --shieldose-name="SHIELDOSE-2Q AE9/AP9" when the models differ
 XLim = None  # (min, max) in mm, e.g. --xlim=0,6
 YLim = None  # (min, max) in krad, e.g. --ylim=1e-2,1e3
@@ -37,8 +37,8 @@ ErrorbarStyles = {
 ErrorbarStyle = ErrorbarStyles['default']
 
 # Optional: python3 -m Plotting.CompareShieldingCurves <path> <label> ... [--replica-error] [--min-replicas=N]
-#   [--ylabel=TEXT] [--output=NAME.pdf] [--figsize=W,H] [--names="A;B"] [--errorbar-style=compact]
-#   [--shieldose=spenvis_sqo.txt --shieldose-name=TEXT --months=N --title=TEXT --xlim=MIN,MAX --ylim=MIN,MAX]
+#   [--ylabel=TEXT] [--title=TEXT] [--output=NAME.pdf] [--figsize=W,H] [--names="A;B"] [--errorbar-style=compact]
+#   [--xlim=MIN,MAX --ylim=MIN,MAX] [--shieldose=spenvis_sqo.txt --shieldose-name=TEXT --months=N]
 Args = [a for a in sys.argv[1:] if not a.startswith("--")]
 if Args:
     Path = Args[0]
@@ -104,7 +104,7 @@ if ShieldoseFile is None:
     plt.grid()
     plt.yscale("log")
     # plt.xscale("log")
-    plt.title("Ionising Dose behind shielding of varying thickness")
+    plt.title(Title or "Ionising Dose behind shielding of varying thickness")
     plt.xlabel("Aluminium Thickness [mm]")
     plt.ylabel(YLabel)
     plt.legend()
@@ -156,7 +156,7 @@ else:
     ax.yaxis.set_minor_locator(LogLocator(subs='all', numticks=10))
 
     plt.grid(which='both', linestyle='-', linewidth=0.5)
-    plt.title(Title, fontsize=14)
+    plt.title(Title or "Ionising dose from trapped particles (AE9/AP9) on GTO", fontsize=14)
     plt.xlabel("Aluminium Thickness [mm]", fontsize=12)
     plt.ylabel("Ionizing dose in silicon [krad" + PerUnit + "]", fontsize=12)
     plt.legend(fontsize=12)
