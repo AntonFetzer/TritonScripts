@@ -31,6 +31,7 @@ Output = None  # PDF name in <path>, e.g. --output=ShieldingCurves_Physics.pdf; 
 FigSize = None  # (width, height) in inches, e.g. --figsize=4,6
 Names = None  # Legend names, one per label, separated by ';', e.g. --names="EM3;EM4"; default: the labels
 LegendLoc = "best"  # Matplotlib legend location, e.g. --legend-loc="upper right"
+Days = None  # Multiply dose rates per second by this many days of exposure, e.g. --days=1.23 for an event dose
 ErrorbarStyles = {
     'default': {'capsize': 5, 'linestyle': ''},
     'compact': {'capsize': 1.5, 'elinewidth': 1.5, 'capthick': 2, 'linestyle': ''},  # --errorbar-style=compact
@@ -39,7 +40,7 @@ ErrorbarStyle = ErrorbarStyles['default']
 
 # Optional: python3 -m Plotting.CompareShieldingCurves <path> <label> ... [--replica-error] [--min-replicas=N]
 #   [--ylabel=TEXT] [--title=TEXT] [--output=NAME.pdf] [--figsize=W,H] [--names="A;B"] [--errorbar-style=compact]
-#   [--legend-loc="upper right"]
+#   [--legend-loc="upper right"] [--days=N]
 #   [--xlim=MIN,MAX --ylim=MIN,MAX] [--shieldose=spenvis_sqo.txt --shieldose-name=TEXT --months=N]
 Args = [a for a in sys.argv[1:] if not a.startswith("--")]
 if Args:
@@ -69,6 +70,8 @@ for a in sys.argv[1:]:
         FigSize = tuple(float(v) for v in a.split("=", 1)[1].split(","))
     elif a.startswith("--legend-loc="):
         LegendLoc = a.split("=", 1)[1]
+    elif a.startswith("--days="):
+        Days = float(a.split("=", 1)[1])
     elif a.startswith("--names="):
         Names = a.split("=", 1)[1].split(";")
     elif a.startswith("--errorbar-style="):
@@ -91,12 +94,13 @@ x = np.linspace(0, 10, num=NumTiles, endpoint=True)
 
 if ShieldoseFile is None:
     ## Plot shielding curves with error bars
+    DoseScale = Days * 24 * 60 * 60 if Days else 1  # dose rate per second to dose over Days
     plt.figure(1, FigSize)
 
     # print("Shielding curves: ", SC)
 
     for i, label in enumerate(Labels):
-       plt.errorbar(x, SC[label]['dose'], SC[label]['error'], fmt='', label=Names[i] if Names else label,
+       plt.errorbar(x, SC[label]['dose'] * DoseScale, SC[label]['error'] * DoseScale, fmt='', label=Names[i] if Names else label,
                     color=Colours[i], **ErrorbarStyle)
 
     ####### Plot 10kRad line #########
