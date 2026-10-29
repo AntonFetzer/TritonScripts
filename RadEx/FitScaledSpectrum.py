@@ -3,7 +3,8 @@
     python3 -m RadEx.FitScaledSpectrum --kernel-dir <sweep> --campaign <json> --output-dir <dir>
         [--layer oxide|die] [--exclude 9,10] [--systematic 0.10] [--tag name]
 
-Measured doses and errors come from the campaign file (RadEx.DoseCampaign); every
+Measured doses and errors, the device types and the calibration-scale groups come from
+the campaign file through RadEx.KernelFit, the core shared with the proton fits; every
 phase in it is fitted. The kernel is read from the sweep's TotalDose tables with
 Dependencies.EnergyKernel.readKernelRuns, in dose per unit of the runs' normalisation
 fluence; --layer picks its tally block from the campaign. Beam models: mono-energetic,
@@ -24,7 +25,7 @@ import numpy as np
 from Dependencies.EnergyKernel import (chi2Interval, foldComponents, foldKernel, interpolateKernel,
                                        readKernelRuns, scanScales)
 from Plotting.KernelFitPlots import plotChannelFit, plotChi2Scans
-from RadEx.DoseCampaign import layerSlice, loadCampaign, phaseDoses, scaleGroups
+from RadEx import KernelFit as kf
 from Read.ReadGPSSources import readGPSSources
 
 STEP, ALPHA_STEP = 0.025, 0.0025
@@ -41,29 +42,29 @@ parser.add_argument("--tag", default="", help="suffix for the output names")
 parser.add_argument("--mu-min", type=float, default=3.0, help="lowest mono and Gaussian centre [MeV]")
 parser.add_argument("--alpha-min", type=float, default=0.80, help="lowest spectrum scale")
 args = parser.parse_args()
-campaign = loadCampaign(args.campaign)
+default = kf.load_campaign(args.campaign)["systematic"]
+campaign = kf.load_campaign(args.campaign, systematic=args.systematic)
 layer = args.layer or campaign["default_layer"]
-systematic = campaign["systematic_fraction"] if args.systematic is None else args.systematic
+systematic = campaign["systematic"]
 channels = campaign["channels"]
-TYPE = campaign["devices"]
+TYPE = campaign["device"]
 EXCLUDED = sorted(int(c) for c in args.exclude.split(",") if c.strip())
-CHANNELS = np.array([c for c in channels if c not in EXCLUDED])
 TAG = ("-" + args.tag) if args.tag else ""
-if (EXCLUDED or systematic != campaign["systematic_fraction"]) and not TAG:
+if (EXCLUDED or systematic != default) and not TAG:
     parser.error("--exclude or a non-default --systematic needs --tag")
 out = args.output_dir
 out.mkdir(parents=True, exist_ok=True)
 
 energies, dose, error, _ = readKernelRuns(args.kernel_dir)
-kernel, kerr = dose[:, layerSlice(campaign, layer)], error[:, layerSlice(campaign, layer)]
-gps = readGPSSources(campaign["spectrum"])
+kernel, kerr = dose[:, kf.layer_slice(campaign, layer)], error[:, kf.layer_slice(campaign, layer)]
+gps = readGPSSources(str(campaign["spectrum"]))
 meanEnergy = float(gps["fraction"] @ gps["energy"])
 mus = np.arange(args.mu_min, energies.max() + STEP / 2, STEP)
 alphas = np.arange(args.alpha_min, energies.max() / gps["energy"].max() + 1e-9, ALPHA_STEP)
 models = {"mono": (interpolateKernel(energies, kernel, mus), interpolateKernel(energies, kerr, mus)),
           "scaled": foldComponents(energies, kernel, kerr, gps["energy"], gps["fraction"], alphas)}
 gaussian = [foldKernel(energies, kernel, kerr, mus, s, STEP) for s in SIGMAS]
-groupsOf = scaleGroups(campaign, CHANNELS)
+groupsOf = {model: kf.scale_groups(campaign, channels, model, EXCLUDED) for model in ("shared", "per-type")}
 
 
 def complete(fit, groups):
@@ -88,16 +89,17 @@ def scan(measured, sigma, models, errors, groups):
 
 
 summary = {"layer": layer, "systematic": systematic, "excluded_channels": EXCLUDED,
-           "kernel_energies_MeV": energies.tolist(), "campaign": campaign["path"]}
+           "kernel_energies_MeV": energies.tolist(), "campaign": str(campaign["path"])}
 residuals = []
 measurement = campaign["measurement_phase"]
-for phase, note in sorted(campaign["phases"].items(), key=lambda p: p[0] != measurement):
-    doses = phaseDoses(campaign, phase, systematic)
-    measured, sigma, fluence, table = doses["measured"], doses["sigma"], doses["fluence"], doses["rows"]
-    summary[phase] = {campaign["fluence_column"].removeprefix("phase_"): fluence,
-                      "note": table[0].get("start_time", "") + " to " + table[0].get("end_time", "")}
+for phase, cfg in sorted(campaign["phases"].items(), key=lambda p: p[0] != measurement):
+    meas = kf.measurement(campaign, phase)
+    measured, sigma, fluence, table = meas["value"], meas["sigma"], cfg["log_fluence"], cfg["table"]
+    summary[phase] = {(cfg["log_fluence_column"] or "log_fluence").removeprefix("phase_"): fluence,
+                      "note": str(table.loc[channels[0]].get("start_time", "")) + " to "
+                      + str(table.loc[channels[0]].get("end_time", ""))}
     if phase != measurement:
-        summary[phase]["note"] += "; " + note
+        summary[phase]["note"] += "; " + cfg["note"]
     scans, predictions = [], []
     for model, groups in groupsOf.items():
         result = {}

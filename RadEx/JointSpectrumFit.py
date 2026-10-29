@@ -29,7 +29,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 from Dependencies.EnergyKernel import interpolateKernel, readKernelRuns  # noqa: E402
-from RadEx.DoseCampaign import deviceTypes, layerSlice, loadCampaign, phaseDoses  # noqa: E402
+from RadEx import KernelFit as kf  # noqa: E402
 
 try:
     from scipy.optimize import nnls as _nnls
@@ -51,15 +51,17 @@ parser.add_argument("--model", type=float, help="model fraction in the RadFET si
 parser.add_argument("--per-type", action="store_true", help="one calibration scale per RadFET type")
 parser.add_argument("--low-mev", type=float, default=3.0, help="edge of the profiled low-energy fraction [MeV]")
 args = parser.parse_args()
-campaign = loadCampaign(args.campaign)
+campaign = kf.load_campaign(args.campaign)
 joint_cfg = campaign["joint_fit"]
 layer = args.layer or campaign["default_layer"]
-model = campaign["systematic_fraction"] if args.model is None else args.model
+default = campaign["systematic"]
+campaign = kf.load_campaign(args.campaign, systematic=args.model)
+model = campaign["systematic"]
 SIGMA_PDD, DEPTH_MAX, LAMBDA = joint_cfg["sigma_pdd_pp"], joint_cfg["depth_max_mm"], joint_cfg["smoothing"]
 excluded = [] if args.include_excluded else list(joint_cfg.get("excluded_channels", []))
 low = f"{args.low_mev:g}MeV"
 tag = (layer + ("-with-" + "-".join(map(str, joint_cfg.get("excluded_channels", []))) if args.include_excluded else "")
-       + (f"-model{model:.2f}" if model != campaign["systematic_fraction"] else "") + ("-per-type" if args.per_type else ""))
+       + (f"-model{model:.2f}" if model != default else "") + ("-per-type" if args.per_type else ""))
 out = args.output_dir
 out.mkdir(parents=True, exist_ok=True)
 
@@ -81,13 +83,13 @@ below3 = grid < args.low_mev
 
 # ---- RadFET block -----------------------------------------------------------------------
 energies, dose, error, _ = readKernelRuns(args.kernel_dir)
-K = interpolateKernel(energies, dose[:, layerSlice(campaign, layer)], grid)   # (grid, channel), dose per e/cm2
-doses = phaseDoses(campaign, campaign["measurement_phase"], model)
-d, sig, F = doses["measured"], doses["sigma"], doses["fluence"]
+K = interpolateKernel(energies, dose[:, kf.layer_slice(campaign, layer)], grid)   # (grid, channel), dose per e/cm2
+meas = kf.measurement(campaign, campaign["measurement_phase"])
+d, sig, F = meas["value"], meas["sigma"], campaign["phases"][campaign["measurement_phase"]]["log_fluence"]
 nChannels = len(campaign["channels"])
 channels = [c for c in campaign["channels"] if c not in excluded]
-TYPE = campaign["devices"]
-groups = {t: [c for c in channels if TYPE[c] == t] for t in deviceTypes(campaign)} if args.per_type else {"all": channels}
+TYPE = campaign["device"]
+groups = {t: [c for c in channels if TYPE[c] == t] for t in kf.device_types(campaign)} if args.per_type else {"all": channels}
 
 
 def solve(r, lam=LAMBDA, fraction=None, pdd_weight=1.0, radfet_weight=1.0):

@@ -46,6 +46,7 @@ PYTHON_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PYTHON_ROOT))
 
 from RadEx import InferSpectrum as inf  # noqa: E402
+from RadEx import KernelFit as kf  # noqa: E402
 
 #: Spacing of the printed ratio table [MeV].
 PRINT_STEP = 0.5
@@ -101,7 +102,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True, help="output stem")
     args = parser.parse_args()
 
-    campaign = inf.load_campaign(args.campaign)
+    campaign = kf.load_campaign(args.campaign)
     phase = args.phase
     if phase not in campaign["phases"]:
         parser.error(f"unknown phase {phase!r}; the campaign has {list(campaign['phases'])}")
@@ -122,7 +123,7 @@ def main() -> None:
         measured = float(d[num] / d[den])
         name = f"R{num}{den}"
         if device[num] == "VT05":
-            linear = measured ** inf.VT05_EXPONENT
+            linear = measured ** kf.VT05_EXPONENT
             band = tuple(sorted((measured, linear)))
             print(f"Measured {phase} phase: {name} = D{num}/D{den} = {measured:.2f} with the VT05 "
                   f"datasheet exponent, {linear:.2f} if linear in dose")
@@ -135,7 +136,7 @@ def main() -> None:
     print("                       " + ", ".join(f"D{c} = {d[c]:.4g} kRad" for c in reversed(channels)) + "\n")
 
     lo, hi = campaign["phases"][phase]["mu_range"]
-    mus = np.arange(lo, hi + inf.FINE_STEP / 2, inf.FINE_STEP)
+    mus = np.arange(lo, hi + kf.FINE_STEP / 2, kf.FINE_STEP)
     energies, kernel, error = inf.weighted_kernel(args.kernel, campaign, phase, channels)
     means, sigmas = inf.fold(energies, kernel, error, mus)
     every = np.ones(len(mus), dtype=bool)

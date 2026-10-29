@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 from Dependencies.EnergyKernel import (chi2Interval, fitSpectrumWeights, foldComponents, foldKernel,  # noqa: E402
                                        readKernelRuns, scaleSpectrum, scanScales)
-from RadEx.DoseCampaign import layerSlice, loadCampaign, phaseDoses, scaleGroups  # noqa: E402
+from RadEx import KernelFit as kf  # noqa: E402
 from Read.ReadGPSSources import readGPSSources  # noqa: E402
 
 STEP = 0.025
@@ -40,23 +40,23 @@ parser.add_argument("--low-mev", type=float, default=3.0, help="edge of the free
 parser.add_argument("--mu-min", type=float, default=3.0, help="lowest Gaussian centre [MeV]")
 parser.add_argument("--alpha-min", type=float, default=0.80, help="lowest spectrum scale")
 args = parser.parse_args()
-campaign = loadCampaign(args.campaign)
+campaign = kf.load_campaign(args.campaign)
 layer = args.layer or campaign["default_layer"]
 phase = args.phase or campaign["measurement_phase"]
-LOW_MEV, SYSTEMATIC = args.low_mev, campaign["systematic_fraction"]
+LOW_MEV, SYSTEMATIC = args.low_mev, campaign["systematic"]
 outDir = args.output_dir
 outDir.mkdir(parents=True, exist_ok=True)
 energies, dose, error, _ = readKernelRuns(args.kernel_dir)
-kernel, kerr = dose[:, layerSlice(campaign, layer)], error[:, layerSlice(campaign, layer)]
-gps = readGPSSources(campaign["spectrum"])
+kernel, kerr = dose[:, kf.layer_slice(campaign, layer)], error[:, kf.layer_slice(campaign, layer)]
+gps = readGPSSources(str(campaign["spectrum"]))
 E, F = gps["energy"], gps["fraction"]
 meanEnergy = float(F @ E)
 ALPHAS = np.arange(args.alpha_min, energies.max() / E.max() + 1e-9, 0.005)
 MUS = np.arange(args.mu_min, energies.max() + STEP / 2, STEP)
-doses = phaseDoses(campaign, phase)
-measured, sigma, fluence = doses["measured"], doses["sigma"], doses["fluence"]
+meas = kf.measurement(campaign, phase)
+measured, sigma, fluence = meas["value"], meas["sigma"], campaign["phases"][phase]["log_fluence"]
 nChannels = len(campaign["channels"])
-groupsOf = scaleGroups(campaign)
+groupsOf = {model: kf.scale_groups(campaign, campaign["channels"], model) for model in ("shared", "per-type")}
 spacing = float(np.median(np.diff(energies)))
 
 def density(componentEnergies, fractions, edges):

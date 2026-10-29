@@ -5,7 +5,7 @@
 The run scores the campaign's layers (for the VT01 package module, gate oxides in
 tiles 0-11 and silicon dies in 12-23); the table holds the first layer's coefficients
 and the second layer's beside them. The channel labels, device types, particle,
-energy label and reference fluence come from the campaign file (RadEx.DoseCampaign).
+energy label and reference fluence come from the campaign file (RadEx.KernelFit).
 The format is the one ElectronOrdering.py and Calibration.PropagateHUSMU consume; it
 is written without the first-irradiation MU columns, which Calibration.PropagateHUSMU
 adds afterwards.
@@ -18,7 +18,7 @@ import csv
 from pathlib import Path
 
 from Dependencies.TotalDose import totalDose
-from RadEx.DoseCampaign import layerSlice, loadCampaign
+from RadEx import KernelFit as kf
 
 
 def main():
@@ -26,7 +26,7 @@ def main():
     parser.add_argument("run", type=Path)
     parser.add_argument("--campaign", type=Path, required=True)
     args = parser.parse_args()
-    campaign = loadCampaign(args.campaign)
+    campaign = kf.load_campaign(args.campaign)
     run = args.run.resolve()
     res = run / "Res" if (run / "Res").is_dir() else run
     r = totalDose(str(res))
@@ -36,7 +36,7 @@ def main():
     expected = len(layers) * len(campaign["channels"])
     if len(dose) != expected:
         raise RuntimeError(f"{res}: expected {expected} tiles, got {len(dose)}")
-    first, second = layerSlice(campaign, layers[0]), layerSlice(campaign, layers[1])
+    first, second = kf.layer_slice(campaign, layers[0]), kf.layer_slice(campaign, layers[1])
     oxide, oxide_err, die = dose[first], err[first], dose[second]
     fluence = campaign["reference_fluence"]
     tag = f"{fluence:.0e}".replace("+", "")
@@ -53,7 +53,7 @@ def main():
             f"die_dose_coefficient_kRad_cm2_per_{campaign['particle']}"])
         for c in campaign["channels"]:
             writer.writerow([
-                campaign["coefficient_table_energy_MeV"], campaign["particle"], c, c, campaign["devices"][c],
+                campaign["coefficient_table_energy_MeV"], campaign["particle"], c, c, campaign["device"][c],
                 campaign["labels"][c], repr(oxide[c]), repr(oxide_err[c]), repr(100.0 * oxide_err[c] / oxide[c]),
                 repr(oxide[c] * fluence), repr(oxide_err[c] * fluence), repr(die[c])])
     print(f"Wrote {out}")

@@ -3,7 +3,7 @@
     python3 -m RadEx.CompareVariant <variant run folder> --campaign <json> [--reference <run folder>]
 
 Reads TotalDose_<run>.csv of both runs (RadEx/RadExTID.py output) and the campaign's
-measured doses of its measurement phase (RadEx.DoseCampaign; sigma^2 = noise^2 +
+measured doses of its measurement phase (RadEx.KernelFit; sigma^2 = noise^2 +
 conversion^2 + (systematic x dose)^2). The reference defaults to the campaign's
 reference_run. Writes Comparison_<run>.csv and Comparison_<run>.pdf into the variant
 folder: the per-channel variant/reference ratios of every layer, and for each run the
@@ -20,7 +20,7 @@ import numpy as np
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
-from RadEx.DoseCampaign import deviceTypes, layerSlice, loadCampaign, phaseDoses  # noqa: E402
+from RadEx import KernelFit as kf  # noqa: E402
 
 
 def total_dose(folder):
@@ -41,18 +41,19 @@ parser.add_argument("variant", type=Path)
 parser.add_argument("--campaign", type=Path, required=True)
 parser.add_argument("--reference", type=Path, help="reference run folder (default: the campaign's reference_run)")
 args = parser.parse_args()
-campaign = loadCampaign(args.campaign)
+campaign = kf.load_campaign(args.campaign)
 variant = args.variant.resolve()
 reference = (args.reference or Path(campaign["reference_run"])).resolve()
 channels = campaign["channels"]
 phase = campaign["measurement_phase"]
-doses = phaseDoses(campaign, phase)
-measured, sigma, fluence, rows = doses["measured"], doses["sigma"], doses["fluence"], doses["rows"]
-sample = {c: rows[c].get("sample", "") for c in channels}
-TYPE = campaign["devices"]
-types = {t: [c for c in channels if TYPE[c] == t] for t in deviceTypes(campaign)}
+meas = kf.measurement(campaign, phase)
+cfg = campaign["phases"][phase]
+measured, sigma, fluence = meas["value"], meas["sigma"], cfg["log_fluence"]
+sample = {c: str(cfg["table"].loc[c].get("sample", "")) for c in channels}
+TYPE = campaign["device"]
+types = {t: [c for c in channels if TYPE[c] == t] for t in kf.device_types(campaign)}
 layers = sorted(campaign["layers"], key=campaign["layers"].get)
-fitLayer = layerSlice(campaign, campaign["default_layer"])
+fitLayer = kf.layer_slice(campaign, campaign["default_layer"])
 
 dv, ev = total_dose(variant)
 dr, er = total_dose(reference)
@@ -60,7 +61,7 @@ vname, rname = variant.name, reference.name
 ratio = dv / dr
 ratio_err = ratio * np.sqrt((ev / dv) ** 2 + (er / dr) ** 2)
 
-lines = [f"# {vname} against {rname}; measured {phase} doses from {Path(campaign['doses']).parent.name}/{Path(campaign['doses']).name}"]
+lines = [f"# {vname} against {rname}; measured {phase} doses from {cfg['dose'].parent.name}/{cfg['dose'].name}"]
 fits = {}
 for run, coef in ((rname, dr[fitLayer]), (vname, dv[fitLayer])):
     fits[run] = {}
@@ -101,7 +102,7 @@ for c in channels:
 fig, (a, b) = plt.subplots(2, 1, figsize=(8, 7), sharex=True)
 x = np.arange(len(channels))
 for k, (layer, marker) in enumerate(zip(layers, "osd^")):
-    part = layerSlice(campaign, layer)
+    part = kf.layer_slice(campaign, layer)
     a.errorbar(x + 0.2 * (k - 0.5 * (len(layers) - 1)), ratio[part], ratio_err[part], fmt=marker, label=layer)
 a.axhline(1, color="k", lw=0.8)
 a.set_ylabel(f"{vname} / {rname}")

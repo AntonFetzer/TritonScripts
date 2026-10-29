@@ -49,6 +49,7 @@ PYTHON_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PYTHON_ROOT))
 
 from RadEx import InferSpectrum as inf  # noqa: E402
+from RadEx import KernelFit as kf  # noqa: E402
 
 #: Colours by role: the phase's default model, then its diagnostics in order.
 ROLE_COLOURS = ("C0", "grey", "magenta", "green")
@@ -66,10 +67,10 @@ def folded(kernel_path, campaign, phase, mus, sigma=None, cut=None):
 def fit(meas, means, errs, mus, campaign, phase, model, spec=None):
     """Centre-energy scan of one scale model; `spec` is a fixed-width model (published width if None)."""
     channels = campaign["channels"]
-    groups = inf.scale_groups(campaign, channels, model)
-    chi2 = np.array([inf.solve(meas, means[i], errs[i], groups)[1] for i in range(len(mus))])
+    groups = kf.scale_groups(campaign, channels, model)
+    chi2 = np.array([kf.solve(meas, means[i], errs[i], groups)[1] for i in range(len(mus))])
     best = int(np.argmin(chi2))
-    scales, chi2_min, pulls, predicted = inf.solve(meas, means[best], errs[best], groups)
+    scales, chi2_min, pulls, predicted = kf.solve(meas, means[best], errs[best], groups)
     dof = len(channels) - 1 - len(groups)
     per_dof = chi2_min / dof if dof > 0 else float("nan")
     inside = mus[chi2 <= chi2_min + 1.0]
@@ -90,7 +91,7 @@ def fit(meas, means, errs, mus, campaign, phase, model, spec=None):
         "mu_lo_scaled": float(inside_scaled.min()), "mu_hi_scaled": float(inside_scaled.max()),
         "at_edge": bool(best in (0, len(mus) - 1)),
         "chi2": chi2_min, "dof": dof, "chi2_per_dof": per_dof,
-        **inf.scale_report(meas, scales, log_fluence),
+        **kf.scale_report(meas, scales, log_fluence),
         "pull": dict(zip(map(int, channels), map(float, pulls))),
         "residual_percent": dict(zip(map(int, channels), map(float, residual))),
         "measured": dict(zip(map(int, channels), map(float, value))),
@@ -116,9 +117,9 @@ def probe(meas, kernel_path, campaign, phase, energy):
     channels = campaign["channels"]
     means, errs = folded(kernel_path, campaign, phase, np.array([energy]))
     out = {}
-    for model in inf.phase_models(campaign, phase):
-        _, chi2, pulls, predicted = inf.solve(meas, means[0], errs[0],
-                                              inf.scale_groups(campaign, channels, model))
+    for model in kf.phase_models(campaign, phase):
+        _, chi2, pulls, predicted = kf.solve(meas, means[0], errs[0],
+                                              kf.scale_groups(campaign, channels, model))
         out[model] = (chi2, pulls, predicted)
     scale = 1000.0 if meas["unit"] == "rad" else 1.0
     unit = "krad" if meas["unit"] == "rad" else "V"
@@ -130,13 +131,13 @@ def probe(meas, kernel_path, campaign, phase, energy):
 
 def scan_exponent(kernel_path, campaign, phase, device, previous_model, means, errs, mus):
     """chi2 of the phase's default model against the exponent of one device type."""
-    model = inf.phase_models(campaign, phase)[0]
+    model = kf.phase_models(campaign, phase)[0]
     saved = campaign["exponent"][device]
     chi2 = np.empty(len(EXPONENTS))
     energy = np.empty(len(EXPONENTS))
     for i, n in enumerate(EXPONENTS):
         campaign["exponent"][device] = float(n)
-        meas = inf.measurement(campaign, phase, previous_model)
+        meas = kf.measurement(campaign, phase, previous_model)
         r = fit(meas, means, errs, mus, campaign, phase, model)
         chi2[i], energy[i] = r["chi2"], r["mu_MeV"]
     campaign["exponent"][device] = saved
@@ -158,7 +159,7 @@ def plot(results, campaign, output):
     for column, phase in enumerate(phases):
         rows = {r["model"]: r for r in results if r["phase"] == phase and r["width"] == "published"}
         fixed = [r for r in results if r["phase"] == phase and r["width"] != "published"]
-        models = inf.phase_models(campaign, phase)
+        models = kf.phase_models(campaign, phase)
         colour = dict(zip(models, ROLE_COLOURS))
         fixed_colour = dict(zip((r["width"] for r in fixed), inf.FIXED_WIDTH_COLOURS))
         full = rows[models[0]]
@@ -172,7 +173,7 @@ def plot(results, campaign, output):
         for device in sorted(set(campaign["device"].values())):
             sel = np.array([campaign["device"][c] == device for c in channels])
             lower = np.minimum(sigma[sel], 0.95 * np.abs(measured[sel]))
-            ax.errorbar(x[sel], measured[sel], yerr=[lower, sigma[sel]], fmt=inf.MARKER[device],
+            ax.errorbar(x[sel], measured[sel], yerr=[lower, sigma[sel]], fmt=kf.MARKER[device],
                         color="black", capsize=3, label=f"measured {device}")
         for model in models:
             r = rows[model]
@@ -240,8 +241,8 @@ def main() -> None:
     parser.add_argument("--campaign", type=Path, required=True,
                         help="campaign JSON next to the measured doses")
     parser.add_argument("--output", type=Path, required=True)
-    inf.add_mu_range_argument(parser)
-    inf.add_space_argument(parser)
+    kf.add_mu_range_argument(parser)
+    kf.add_space_argument(parser)
     inf.add_width_argument(parser)
     parser.add_argument("--probe", action="append", default=[],
                         help="PHASE:MeV, e.g. 85mev:84.0; repeatable")
@@ -249,8 +250,8 @@ def main() -> None:
                         help="profile chi2 over the shift-space exponent of a device type; repeatable")
     args = parser.parse_args()
     specs = inf.fixed_width_specs(args.fixed_width_mev, args.fixed_width_cut_sigma)
-    campaign = inf.load_campaign(args.campaign, args.space, args.systematic, args.noise_floor_mv)
-    mu_ranges = inf.mu_range_overrides(campaign, args.mu_range)
+    campaign = kf.load_campaign(args.campaign, args.space, args.systematic, args.noise_floor_mv)
+    mu_ranges = kf.mu_range_overrides(campaign, args.mu_range)
     probes = [(s.split(":")[0], float(s.split(":")[1])) for s in args.probe]
     unknown = sorted({p for p, _ in probes} - set(campaign["phases"]))
     if unknown:
@@ -278,9 +279,9 @@ def main() -> None:
     for phase, cfg in campaign["phases"].items():
         previous = model_by_phase.get(cfg["previous_phase"]) if cfg["previous_phase"] else None
         previous_fixed = fixed_by_phase.get(cfg["previous_phase"], {}) if cfg["previous_phase"] else {}
-        meas = inf.measurement(campaign, phase, previous)
+        meas = kf.measurement(campaign, phase, previous)
         mu_range = mu_ranges[phase]
-        mus = np.arange(mu_range[0], mu_range[1] + inf.FINE_STEP / 2, inf.FINE_STEP)
+        mus = np.arange(mu_range[0], mu_range[1] + kf.FINE_STEP / 2, kf.FINE_STEP)
         means, errs = folded(args.kernel, campaign, phase, mus)
         scale = 1000.0 if meas["unit"] == "rad" else 1.0
         unit = "krad" if meas["unit"] == "rad" else "V"
@@ -296,7 +297,7 @@ def main() -> None:
             print("   starts from the previous phase's model dose [krad]: " +
                   "  ".join(f"ch{c}:{meas['previous'][i] / 1000:.3g}"
                             for i, c in enumerate(campaign["channels"])))
-        for model in inf.phase_models(campaign, phase):
+        for model in kf.phase_models(campaign, phase):
             r = fit(meas, means, errs, mus, campaign, phase, model)
             results.append(r)
             edge = "  AT GRID EDGE" if r["at_edge"] else ""
@@ -309,7 +310,7 @@ def main() -> None:
         fixed_by_phase[phase] = {}
         for spec in specs:
             start = previous_fixed.get(spec["key"], previous)
-            fixed_meas = inf.measurement(campaign, phase, start)
+            fixed_meas = kf.measurement(campaign, phase, start)
             fixed_means, fixed_errs = folded(args.kernel, campaign, phase, mus, spec["sigma"], spec["cut"])
             r = fit(fixed_meas, fixed_means, fixed_errs, mus, campaign, phase, default["model"], spec)
             results.append(r)
