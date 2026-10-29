@@ -90,12 +90,15 @@ TYPE = campaign["devices"]
 groups = {t: [c for c in channels if TYPE[c] == t] for t in deviceTypes(campaign)} if args.per_type else {"all": channels}
 
 
-def solve(r, lam=LAMBDA, fraction=None, pdd_weight=1.0):
-    """NNLS on the stacked blocks; r: amplitude per group (dict). Returns x and the chi2 parts."""
+def solve(r, lam=LAMBDA, fraction=None, pdd_weight=1.0, radfet_weight=1.0):
+    """NNLS on the stacked blocks; r: amplitude per group (dict). Returns x and the chi2 parts.
+
+    radfet_weight 0 leaves the RadFET block out of the fit (the PDD-only spectrum);
+    its chi2 and pulls are still reported at the amplitudes r."""
     blocks_A, blocks_b = [A_pdd * pdd_weight / SIGMA_PDD], [y_pdd * pdd_weight / SIGMA_PDD]
     for g, idx in groups.items():
-        blocks_A.append((r[g] * F * K[:, idx]).T / sig[idx][:, None])
-        blocks_b.append(d[idx] / sig[idx])
+        blocks_A.append(radfet_weight * (r[g] * F * K[:, idx]).T / sig[idx][:, None])
+        blocks_b.append(radfet_weight * d[idx] / sig[idx])
     blocks_A.append(np.sqrt(lam) * D2 * np.sqrt(len(y_pdd)) / SIGMA_PDD)   # same relative strength as the PDD-only fit
     blocks_b.append(np.zeros(n - 2))
     if fraction is not None:
@@ -112,7 +115,7 @@ def solve(r, lam=LAMBDA, fraction=None, pdd_weight=1.0):
     return x, chi_pdd, chi_rf, pulls
 
 
-def profile(fraction=None, lam=LAMBDA, pdd_weight=1.0, iterations=12):
+def profile(fraction=None, lam=LAMBDA, pdd_weight=1.0, radfet_weight=1.0, iterations=12):
     """Minimise the total chi2: NNLS for x at fixed amplitudes, then the weighted
     least-squares amplitude of each group at fixed x, alternated to convergence."""
     r = {g: 1.0 for g in groups}
@@ -121,7 +124,7 @@ def profile(fraction=None, lam=LAMBDA, pdd_weight=1.0, iterations=12):
         for g, idx in groups.items():
             k = F * (K[:, idx].T @ x)
             r[g] = float(np.sum(d[idx] * k / sig[idx] ** 2) / np.sum(k * k / sig[idx] ** 2))
-        x_new, cp, cr, pulls = solve(r, lam, fraction, pdd_weight)
+        x_new, cp, cr, pulls = solve(r, lam, fraction, pdd_weight, radfet_weight)
         done = np.allclose(x_new, x, rtol=1e-6, atol=1e-12)
         x = x_new
         if done:
@@ -134,9 +137,13 @@ def profile(fraction=None, lam=LAMBDA, pdd_weight=1.0, iterations=12):
 
 
 results = {"tag": tag, "layer": layer, "channels": channels, "model_fraction": model, "sigma_pdd_pp": SIGMA_PDD, "lambda": LAMBDA, "depth_max_mm": DEPTH_MAX}
-# PDD only (RadFET block weight zero) and the joint fits
-pdd_only = profile(pdd_weight=1.0)
+# PDD only (RadFET block left out of the fit) and the joint fits
+pdd_only = profile(radfet_weight=0.0)
 results["pdd_only_reference"] = joint_cfg.get("pdd_only_reference")
+results["pdd_only"] = {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in pdd_only.items()}
+print(f"PDD only: mean {pdd_only['mean_energy_MeV']:.3f} MeV, <{low} {pdd_only['below_' + low]:.3f}, <2 MeV {pdd_only['below_2MeV']:.3f}, "
+      f"chi2 PDD {pdd_only['chi2_pdd']:.1f}/{use.sum()} (rmse {pdd_only['rmse_pdd_pp']:.3f} pp), RadFET {pdd_only['chi2_radfet']:.1f}/{len(channels)} "
+      "at its best amplitudes")
 joint = profile()
 results["joint"] = {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in joint.items()}
 print(f"joint {tag}: mean {joint['mean_energy_MeV']:.3f} MeV, <{low} {joint['below_' + low]:.3f}, <2 MeV {joint['below_2MeV']:.3f}, "
@@ -171,9 +178,7 @@ for phi in (0.20, 0.40):
 ax[0, 0].set_xlabel("energy (MeV)"); ax[0, 0].set_ylabel(f"fluence fraction per {np.median(np.diff(grid)):g} MeV"); ax[0, 0].legend(fontsize=7); ax[0, 0].grid(alpha=0.3)
 ax[0, 1].plot([p["fraction_below_" + low] for p in prof], [p["chi2_pdd"] for p in prof], "o-", label=f"PDD ({use.sum()} depths, sigma {SIGMA_PDD} pp)")
 ax[0, 1].plot([p["fraction_below_" + low] for p in prof], [p["chi2_radfet"] for p in prof], "s-", label=f"RadFET ({len(channels)} channels)")
-reference = (joint_cfg.get("pdd_only_reference") or {}).get("below_" + low)
-if reference is not None:
-    ax[0, 1].axvline(reference, color="k", lw=0.8, ls=":", label=f"PDD-only spectrum ({reference:.1%})")
+ax[0, 1].axvline(pdd_only["below_" + low], color="k", lw=0.8, ls=":", label=f"PDD-only spectrum ({pdd_only['below_' + low]:.1%})")
 ax[0, 1].set_xlabel(f"fluence fraction below {args.low_mev:g} MeV (forced)"); ax[0, 1].set_ylabel("chi2"); ax[0, 1].set_yscale("log"); ax[0, 1].legend(fontsize=7); ax[0, 1].grid(alpha=0.3)
 x = joint["x"]
 ax[1, 0].plot(depth, y, "k.", label="measured PDD")
