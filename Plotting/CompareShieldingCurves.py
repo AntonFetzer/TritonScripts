@@ -27,9 +27,10 @@ Title = "Ionising dose from trapped particles (AE9/AP9) on GTO"
 ShieldoseName = "SHIELDOSE-2Q"  # Legend name, e.g. --shieldose-name="SHIELDOSE-2Q AE9/AP9" when the models differ
 XLim = None  # (min, max) in mm, e.g. --xlim=0,6
 YLim = None  # (min, max) in krad, e.g. --ylim=1e-2,1e3
+Output = None  # PDF name in <path>, e.g. --output=ShieldingCurves_Physics.pdf; default depends on the plot
 
 # Optional: python3 -m Plotting.CompareShieldingCurves <path> <label> ... [--replica-error] [--min-replicas=N]
-#   [--ylabel=TEXT] [--shieldose=spenvis_sqo.txt --shieldose-name=TEXT --months=N --title=TEXT
+#   [--ylabel=TEXT] [--output=NAME.pdf] [--shieldose=spenvis_sqo.txt --shieldose-name=TEXT --months=N --title=TEXT
 #    --xlim=MIN,MAX --ylim=MIN,MAX]
 Args = [a for a in sys.argv[1:] if not a.startswith("--")]
 if Args:
@@ -53,6 +54,8 @@ for a in sys.argv[1:]:
         XLim = tuple(float(v) for v in a.split("=", 1)[1].split(","))
     elif a.startswith("--ylim="):
         YLim = tuple(float(v) for v in a.split("=", 1)[1].split(","))
+    elif a.startswith("--output="):
+        Output = a.split("=", 1)[1]
 
 Colours = ['C0', 'C1', 'C2', 'C8', 'C3', 'C9', 'C7', 'k', 'C4', 'C5', 'C6']
 
@@ -88,10 +91,12 @@ if ShieldoseFile is None:
     plt.xlabel("Aluminium Thickness [mm]")
     plt.ylabel(YLabel)
     plt.legend()
-    # plt.ylim(0.1, 100)
-    # plt.xlim(0, 2.5)
+    if XLim:
+        plt.xlim(XLim)
+    if YLim:
+        plt.ylim(YLim)
 
-    plt.savefig(path.join(Path, "ShieldingCurves.pdf"), format='pdf', bbox_inches="tight")
+    plt.savefig(path.join(Path, Output or "ShieldingCurves.pdf"), format='pdf', bbox_inches="tight")
 
 else:
     ## Compare GRAS electron, proton and total dose with SHIELDOSE-2Q
@@ -139,5 +144,5 @@ else:
     plt.ylabel("Ionizing dose in silicon [krad" + PerUnit + "]", fontsize=12)
     plt.legend(fontsize=12)
 
-    plt.savefig(path.join(Path, "ShieldoseComparison_" + Labels[0] + "-" + Labels[1] + ".pdf"),
+    plt.savefig(path.join(Path, Output or "ShieldoseComparison_" + Labels[0] + "-" + Labels[1] + ".pdf"),
                 format='pdf', bbox_inches="tight")
