@@ -39,9 +39,9 @@ SAP_PeakColor = 'C9' # Turquoise
 # They agree, therefore do not need to be plotted again
 
 ## Read in GPS Macro
-ExpectedInt = "/l/triton_work/Spectra/Carrington/SEP-Final/Carrington-SEP-Expected-Int.mac"
-Minus2SigmaInt = "/l/triton_work/Spectra/Carrington/SEP-Final/Carrington-SEP-Minus2Sigma-Int.mac"
-Plus2SigmaInt = "/l/triton_work/Spectra/Carrington/SEP-Final/Carrington-SEP-Plus2Sigma-Int.mac"
+ExpectedInt = "/l/triton_work/Spectra/Carrington/SEP-EVT-2025/Carrington-SEP-Expected-Int.mac"
+Minus2SigmaInt = "/l/triton_work/Spectra/Carrington/SEP-EVT-2025/Carrington-SEP-Minus2Sigma-Int.mac"
+Plus2SigmaInt = "/l/triton_work/Spectra/Carrington/SEP-EVT-2025/Carrington-SEP-Plus2Sigma-Int.mac"
 
 ExpectedInt = readGPSMacro(ExpectedInt)
 Minus2SigmaInt = readGPSMacro(Minus2SigmaInt)
@@ -193,5 +193,5 @@ order = [0, 9, 1, 5, 6, 7, 4, 8, 2, 3]  # Adjust this list to reorder as needed
 plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='lower right')
 
 
-plt.savefig("/l/triton_work/Spectra/Carrington/SEP-Final/ProtonSpectra.pdf", format='pdf', bbox_inches="tight")
+plt.savefig("/l/triton_work/Spectra/Carrington/SEP-EVT-2025/ProtonSpectra.pdf", format='pdf', bbox_inches="tight")
 # plt.show()
