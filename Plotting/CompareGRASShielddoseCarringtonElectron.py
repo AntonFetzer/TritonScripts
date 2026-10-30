@@ -1,8 +1,17 @@
+import sys
+from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
+
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT))
+
 from Read.ReadSD2Q import readSDQ2
 from Dependencies.TotalDose import totalDose
 from Dependencies.MergeTotalDose import mergeTotalDose
+
+
 
 # Define default errorbar style
 default_errorbar_style = {
@@ -36,22 +45,22 @@ plt.plot(x, CriticalDose, '--', color='k', linewidth=2, label='10 krad')
 
 ##################################### Carrington Spectra ########################################
 
-Path = "/l/triton_work/Shielding_Curves/Carrington/"
+Path = "/scratch/work/fetzera1/GRAS/2D/Shielding_Curves/Carrington/"
 # The carrington fluxes are per second, but we are interested in the event fluence which corresponds to 1.23 d
 PerStoEvent = 1.23 * 24 * 60 * 60
 
 #### Carrington SEP fluxes ######
-Ex = totalDose(Path + "Carrington-SEP-Expected-Int/Res")
-Minus = totalDose(Path + "Carrington-SEP-Minus2Sigma-Int/Res")
-Plus = totalDose(Path + "Carrington-SEP-Plus2Sigma-Int/Res")
+# Ex = totalDose(Path + "Carrington-SEP-Expected-Int/Res")
+# Minus = totalDose(Path + "Carrington-SEP-Minus2Sigma-Int/Res")
+# Plus = totalDose(Path + "Carrington-SEP-Plus2Sigma-Int/Res")
 
 # Plot Carrington SEP fluxes
-plt.errorbar(x, Ex['dose'] * PerStoEvent, Ex['error'] * PerStoEvent, fmt='', label='EVT SEP event dose', 
-             color=Expected, **default_errorbar_style)
-plt.fill_between(x, Plus['dose'] * PerStoEvent, Ex['dose'] * PerStoEvent, color=PlusColor, alpha=0.5, 
-                 label='EVT SEP + 2\u03C3')
-plt.fill_between(x, Ex['dose'] * PerStoEvent, Minus['dose'] * PerStoEvent, color=MinusColor, alpha=0.5, 
-                 label='EVT SEP − 2\u03C3')
+# plt.errorbar(x, Ex['dose'] * PerStoEvent, Ex['error'] * PerStoEvent, fmt='', label='EVT SEP event dose', 
+#              color=Expected, **default_errorbar_style)
+# plt.fill_between(x, Plus['dose'] * PerStoEvent, Ex['dose'] * PerStoEvent, color=PlusColor, alpha=0.5, 
+#                  label='EVT SEP + 2\u03C3')
+# plt.fill_between(x, Ex['dose'] * PerStoEvent, Minus['dose'] * PerStoEvent, color=MinusColor, alpha=0.5, 
+#                  label='EVT SEP − 2\u03C3')
 
 # Alternative SEP spectra
 # Carrington_SEP_Expected_Diff = totalDose(Path + "Carrington-SEP-Expected-Diff/Res")
@@ -74,15 +83,40 @@ plt.fill_between(x, Ex['dose'] * PerStoEvent, Minus['dose'] * PerStoEvent, color
 
 
 #### Carrington Electron fluxes ######
+# EVT_Electron_NoExt = totalDose(Path + "Carrington-Electron-Expected-EVT2026-Arb/Res")
+# EVT_Electron_Ext = totalDose(Path + "Carrington-Electron-Expected-EVT2026-Arb-130keVto1000MeV/Res")
+EVT_Electron_ExtDense = totalDose(Path + "Carrington-Electron-Expected-EVT2026-ArbDense-130keVto1000MeV/Res")
+
 # CarringtonElectronINTEGRALPowTabelated = totalDose(Path + "CarringtonElectronINTEGRALPowTabelated/Res")
 # Alternative Electron spectra
 # CarringtonElectronDiffPowTabelated = totalDose(Path + "CarringtonElectronDiffPowTabelated/Res")
 # CarringtonElectronDiffPow = totalDose(Path + "CarringtonElectronDiffPow/Res")
 
 # Plot Carrington Electron fluxes
+
+# plt.errorbar(x, EVT_Electron_NoExt['dose'] * PerStoEvent, 
+#              yerr=EVT_Electron_NoExt['error'] * PerStoEvent, label='EVT electron\nevent dose', 
+#              color=Expected, **default_errorbar_style)
+
+# plt.errorbar(x, EVT_Electron_Ext['dose'] * PerStoEvent, 
+#              yerr=EVT_Electron_Ext['error'] * PerStoEvent, label='Ext', 
+#              color=Expected, **default_errorbar_style)
+
+plt.errorbar(x, EVT_Electron_ExtDense['dose'] * PerStoEvent, 
+             yerr=EVT_Electron_ExtDense['error'] * PerStoEvent, label='EVT electron\nevent dose',
+             color=Expected, **default_errorbar_style)
+
 # plt.errorbar(x, CarringtonElectronINTEGRALPowTabelated['dose'] * PerStoEvent, 
 #              yerr=CarringtonElectronINTEGRALPowTabelated['error'] * PerStoEvent, label='EVT electron\nevent dose', 
 #              color=Expected, **default_errorbar_style)
+
+# plt.errorbar(x, CarringtonElectronDiffPowTabelated['dose'] * PerStoEvent,
+#              yerr=CarringtonElectronDiffPowTabelated['error'] * PerStoEvent, label='Carrington electron Diff Pow Tabelated',
+#              color=PlusColor, **default_errorbar_style)
+
+# plt.errorbar(x, CarringtonElectronDiffPow['dose'] * PerStoEvent,
+#              yerr=CarringtonElectronDiffPow['error'] * PerStoEvent, label='Carrington electron Diff Pow',
+#              color=MinusColor, **default_errorbar_style)    
 
 
 
@@ -111,8 +145,8 @@ LEO_solar_proton = totalDose(Path + "LEO-solar-proton/Res") # Insigngificant on 
 LEO_cosmic_proton = totalDose(Path + "LEO-cosmic-proton/Res") # Negiligible
 LEO_cosmic_iron = totalDose(Path + "LEO-cosmic-iron/Res") # Negiligible
 
-# plt.errorbar(x, LEO_electron['dose'], yerr=LEO_electron['error'], label="LEO Electrons", 
-#              linestyle='', capsize=1, color='C0')
+# plt.errorbar(x, LEO_electron['dose']*100/11, yerr=LEO_electron['error']*100/11, label="LEO Electrons 100 year dose", 
+            #  color=LEOColor, **default_errorbar_style)
 # plt.errorbar(x, LEO_trapped_proton['dose'], yerr=LEO_trapped_proton['error'], label="LEO Trapped Protons", 
 #              linestyle='', capsize=1, color='C1')
 # plt.errorbar(x, LEO_solar_proton['dose'], yerr=LEO_solar_proton['error'], label="LEO Solar Protons", 
@@ -123,8 +157,8 @@ LEO_cosmic_iron = totalDose(Path + "LEO-cosmic-iron/Res") # Negiligible
 #              linestyle='', capsize=1, color='C4')
 
 LEO_Total = mergeTotalDose([LEO_electron, LEO_trapped_proton, LEO_solar_proton, LEO_cosmic_proton, LEO_cosmic_iron])
-plt.errorbar(x, LEO_Total['dose'] * 100/11, yerr=LEO_Total['error'] * 100/11, color=LEOColor, 
-             label="LEO 100 year dose", **default_errorbar_style)
+plt.errorbar(x, LEO_Total['dose'] * 50/11, yerr=LEO_Total['error'] * 50/11, color=LEOColor, 
+             label="LEO 50 year dose", **default_errorbar_style)
 
 # LEO_SD = readSDQ2("/l/triton_work/Spectra/Carrington/LEO/spenvis_sqo.txt")
 # plt.plot(LEO_SD['Thickness'], ( LEO_SD['Electrons'] + LEO_SD['Bremsstrahlung'] ), 
@@ -165,13 +199,13 @@ plt.errorbar(x, LEO_Total['dose'] * 100/11, yerr=LEO_Total['error'] * 100/11, co
 #### VAP ######
 VAP_electron = totalDose(Path + "VAP-electron/Res")
 VAP_trapped_proton = totalDose(Path + "VAP-trapped-proton/Res")
-VAP_trapped_proton_integral = totalDose(Path + "VAP-trapped-proton-integral/Res")
+# VAP_trapped_proton_integral = totalDose(Path + "VAP-trapped-proton-integral/Res")
 VAP_solar_proton = totalDose(Path + "VAP-solar-proton/Res")
 VAP_cosmic_proton = totalDose(Path + "VAP-cosmic-proton/Res")
 VAP_cosmic_rron = totalDose(Path + "VAP-cosmic-iron/Res")
 
-# plt.errorbar(x, VAP_electron['dose'], yerr=VAP_electron['error'], label="VAP Electrons", 
-#              linestyle='', capsize=1, color='C0')
+# plt.errorbar(x, VAP_electron['dose']/(11*12), yerr=VAP_electron['error']/(11*12), label="VAP Electrons 1 month dose", 
+            #  color=VAPColor, **default_errorbar_style)
 # plt.errorbar(x, VAP_trapped_proton['dose'], yerr=VAP_trapped_proton['error'], label="VAP Trapped Protons", 
             #  linestyle='', capsize=1, color='C1')
 # plt.errorbar(x, VAP_trapped_proton_integral['dose'], yerr=VAP_trapped_proton_integral['error'], label="VAP Trapped Protons Integral", 
@@ -183,14 +217,14 @@ VAP_cosmic_rron = totalDose(Path + "VAP-cosmic-iron/Res")
 # plt.errorbar(x, VAP_cosmic_rron['dose'], yerr=VAP_cosmic_rron['error'], label="VAP Cosmic Iron", 
 #              linestyle='', capsize=1, color='C4')
 
-# VAP_Total = mergeTotalDose([VAP_electron, VAP_trapped_proton, VAP_solar_proton, VAP_cosmic_proton, VAP_cosmic_rron])
-# plt.errorbar(x, VAP_Total['dose'] /11, yerr=VAP_Total['error'] /11, 
-#              label="VAP 1 year dose\n(GRAS)", color=VAPColor, **default_errorbar_style)
+VAP_Total = mergeTotalDose([VAP_electron, VAP_trapped_proton, VAP_solar_proton, VAP_cosmic_proton, VAP_cosmic_rron])
+plt.errorbar(x, VAP_Total['dose']/(11*12), yerr=VAP_Total['error']/(11*12), 
+             label="VAP 1 month dose\n(GRAS)", color=VAPColor, **default_errorbar_style)
 
-# VAP_SD = readSDQ2("/l/triton_work/Spectra/Carrington/VAP/spenvis_sqo.txt")
+VAP_SD = readSDQ2("/scratch/work/fetzera1/Spectra/Carrington/VAP/spenvis_sqo.txt")
 # plt.plot(VAP_SD['Thickness'], ( VAP_SD['Electrons'] + VAP_SD['Bremsstrahlung'] ), label="SHIELDOSE-2Q VAP Electrons + Bremsstrahlung", color='C0')
 # plt.plot(VAP_SD['Thickness'], VAP_SD['Trapped Protons'], label="SHIELDOSE-2Q VAP Trapped Protons", color='C1')
-# plt.plot(VAP_SD['Thickness'], VAP_SD['Total'] /11, '.', label="VAP 1 year dose\n(SHIELDOSE-2Q)", color=VAPColor)
+plt.plot(VAP_SD['Thickness'], VAP_SD['Total'] /(11*12), '.', label="VAP 1 month dose\n(SHIELDOSE-2Q)", color=VAPColor)
 
 
 # #### GEO ######
@@ -200,14 +234,15 @@ GEO_solar_proton = totalDose(Path + "GEO-solar-proton/Res")
 GEO_cosmic_proton = totalDose(Path + "GEO-cosmic-proton/Res") # Cosmics have super low fluxes --> negligible TID
 GEO_cosmic_iron = totalDose(Path + "GEO-cosmic-iron/Res")     # Cosmics have super low fluxes --> negligible TID
 
-# plt.errorbar(x, GEO_electron['dose'], yerr=GEO_electron['error'], label="GEO Electrons", linestyle='', capsize=1, color='C0')
+# plt.errorbar(x, GEO_electron['dose']/11, yerr=GEO_electron['error']/11, label="GEO Electrons 1 year dose",
+            #   color=GEOColor, **default_errorbar_style)
 # # plt.errorbar(x, GEO_trapped_proton['dose'], yerr=GEO_trapped_proton['error'], label="GEO Trapped Protons", linestyle='', capsize=1, color='C1')
 # plt.errorbar(x, GEO_solar_proton['dose'], yerr=GEO_solar_proton['error'], label="GEO Solar Protons", linestyle='', capsize=1, color='C2')
 # plt.errorbar(x, GEO_cosmic_proton['dose'], yerr=GEO_cosmic_proton['error'], label="GEO Cosmic Protons", linestyle='', capsize=1, color='C3')
 # plt.errorbar(x, GEO_cosmic_iron['dose'], yerr=GEO_cosmic_iron['error'], label="GEO Cosmic Iron", linestyle='', capsize=1, color='C4')
 
 GEO_Total = mergeTotalDose([GEO_electron, GEO_trapped_proton, GEO_solar_proton, GEO_cosmic_proton, GEO_cosmic_iron])
-plt.errorbar(x, GEO_Total['dose'] * 10/11, yerr=GEO_Total['error'] * 10/11, color=GEOColor, label="GEO 10 year dose"
+plt.errorbar(x, GEO_Total['dose']/11, yerr=GEO_Total['error']/11, color=GEOColor, label="GEO 1 year dose"
              , **default_errorbar_style)
 
 # GEO_SD = readSDQ2("/l/triton_work/Spectra/Carrington/GEO/spenvis_sqo.txt")
@@ -227,29 +262,29 @@ plt.yscale("log")
 # plt.yticks(np.logspace(-4, 4, num=9))
 
 plt.xlim(0.5, 10)
-plt.ylim(2e-1, 1e+3)
+plt.ylim(1e-1, 1e+2)
 plt.grid(which='both')
 
 
 ################### Re-ordering the legend labels ############################
 # Store the handles and labels when plotting
-handles, labels = plt.gca().get_legend_handles_labels()
+#handles, labels = plt.gca().get_legend_handles_labels()
 
 # Reorder the handles and labels to your desired order
 # Example: Suppose you want to reorder them based on some criteria or the original plotting order
-order = [0, 1, 6, 5, 2, 4, 3]  # PROTON Plot specify the desired order of indices 
+#order = [0, 1, 6, 5, 2, 4, 3]  # PROTON Plot specify the desired order of indices 
 # order = [0, 1, 3, 4, 6, 5, 2]  # ELECTRON specify the desired order of indices
 
 # Apply the reordering
-handles = [handles[i] for i in order]
-labels = [labels[i] for i in order]
+#handles = [handles[i] for i in order]
+#labels = [labels[i] for i in order]
 
 # Then pass them to plt.legend()
-plt.legend(handles, labels)
+#plt.legend(handles, labels)
 
 # External legend
-# plt.legend()
+plt.legend()
 
 
-plt.savefig(Path + "CompareGRASShieldose.pdf", format='pdf', bbox_inches="tight")
+plt.savefig(Path + "CompareCarringtonElectron.pdf", format='pdf', bbox_inches="tight")
 # plt.show()
