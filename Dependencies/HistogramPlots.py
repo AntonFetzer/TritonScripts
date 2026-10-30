@@ -100,7 +100,7 @@ def colour(index):
 
 
 def stepHistogram(histogram, field="value", label=None, color=None, alpha=0.5,
-                  axes=None):
+                  axes=None, fill=True):
     """Draw a histogram as a filled bar with a step outline.
 
     This is the comparison idiom: several runs overlaid, each a translucent
@@ -114,6 +114,8 @@ def stepHistogram(histogram, field="value", label=None, color=None, alpha=0.5,
         color (str or None): matplotlib colour; None lets matplotlib choose.
         alpha (float): opacity of the fill. The outline is always opaque.
         axes (matplotlib.axes.Axes or None): target axes; None uses the current axes.
+        fill (bool): draw the translucent bar under the outline; False draws
+            the outline alone, which keeps many overlaid runs readable.
 
     Returns:
         matplotlib.axes.Axes: the axes drawn on.
@@ -124,8 +126,9 @@ def stepHistogram(histogram, field="value", label=None, color=None, alpha=0.5,
     upper = np.asarray(histogram["upper"], dtype=float)
     values = np.asarray(histogram[field], dtype=float)
 
-    axes.bar(lower, values, width=upper - lower, align="edge", alpha=alpha,
-             color=color)
+    if fill:
+        axes.bar(lower, values, width=upper - lower, align="edge", alpha=alpha,
+                 color=color)
     axes.step(lower, values, where="post", label=label, color=color)
     return axes
 

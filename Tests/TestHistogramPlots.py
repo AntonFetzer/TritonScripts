@@ -113,6 +113,11 @@ class TestDrawing(unittest.TestCase):
         self.assertEqual(len(axes.containers[0]), 4)
         self.assertEqual(axes.get_legend_handles_labels()[1], ["run A"])
 
+    def test_step_can_omit_the_fill(self):
+        axes = stepHistogram(makeHistogram(), label="run A", fill=False)
+        self.assertEqual(len(axes.containers), 0)
+        self.assertEqual(len(axes.get_lines()), 1)
+
     def test_errorbar_can_omit_the_fill(self):
         axes = errorbarHistogram(makeHistogram(), label="run B", fill=False)
         self.assertTrue(any(isinstance(container, matplotlib.container.ErrorbarContainer)

@@ -173,7 +173,9 @@ def main() -> None:
     parser.add_argument("--reverse", action="store_true",
                         help="with --scan, order subfolders descending")
     parser.add_argument("--labels", nargs="+", help="legend entries, one per run")
-    parser.add_argument("--style", default="step", choices=["step", "errorbar"])
+    parser.add_argument("--style", default="step", choices=["step", "line", "errorbar"],
+                        help="step: filled bars with an outline; line: the outline alone; "
+                             "errorbar: bars with error bars at the bin means")
     parser.add_argument("--title")
     parser.add_argument("--xlabel")
     parser.add_argument("--ylabel")
@@ -210,8 +212,11 @@ def main() -> None:
             # The readers return None for a directory they could not use.
             print(f"WARNING: {path} returned no {component!r} histogram; skipped")
             continue
-        draw = stepHistogram if arguments.style == "step" else errorbarHistogram
-        draw(histogram, field=arguments.field, label=label, color=colour(index))
+        if arguments.style == "errorbar":
+            errorbarHistogram(histogram, field=arguments.field, label=label, color=colour(index))
+        else:
+            stepHistogram(histogram, field=arguments.field, label=label, color=colour(index),
+                          fill=arguments.style == "step")
         drawn.append(histogram)
 
     if not drawn:
