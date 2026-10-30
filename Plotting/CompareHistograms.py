@@ -184,6 +184,8 @@ def main() -> None:
     parser.add_argument("--xlim-data", action="store_true",
                         help="fit the x axis to the bins with non-zero values in any run "
                              "(autoscaling also covers the empty bins)")
+    parser.add_argument("--xlim", nargs=2, type=float, metavar=("MIN", "MAX"),
+                        help="x axis range, e.g. --xlim 5 300")
     parser.add_argument("--output", type=Path, help="write a PDF here")
     parser.add_argument("--show", action="store_true", help="open the figure")
     arguments = parser.parse_args()
@@ -194,6 +196,8 @@ def main() -> None:
         parser.error("--reverse only applies with --scan")
     if not arguments.output and not arguments.show:
         parser.error("nothing to do: pass --output, --show, or both")
+    if arguments.xlim and arguments.xlim_data:
+        parser.error("pass --xlim or --xlim-data, not both")
 
     kind = KINDS[arguments.kind]
     component = arguments.component or kind["default"]
@@ -238,6 +242,8 @@ def main() -> None:
             print("WARNING: every bin is zero; x axis left to autoscaling")
         else:
             plt.xlim(*limits)
+    if arguments.xlim:
+        plt.xlim(*arguments.xlim)
 
     if arguments.output:
         print(f"Wrote {savePdf(arguments.output)}")
