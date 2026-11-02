@@ -75,14 +75,18 @@ def f(LET, parameters):
 # Generate list of all folder names in the directory
 FolderList = [f_ for f_ in os.listdir(Directory) if os.path.isdir(os.path.join(Directory, f_))]
 
+# Alternatively process only the run folders given as command line arguments (all in one directory)
+if len(sys.argv) > 1:
+    Paths = [os.path.abspath(p) for p in sys.argv[1:]]
+    Directory = os.path.dirname(Paths[0]) + "/"
+    FolderList = [os.path.basename(p) for p in Paths]
+    if any(os.path.dirname(p) + "/" != Directory for p in Paths):
+        sys.exit("The run folders must all be in one directory")
+
 for parameters in CROSS_SECTIONS:
     CrossectionName = parameters["name"]
 
-    # Open the CSV file to write the results to
-    CSVFile = open(Directory + "/SEERates_" + CrossectionName + ".csv", 'w')
-    # Write the header to the file
     header = "Data,Shielding,Crossection,SEE_Rate,SEE_Error,Relative_SEE_Error,Entries_Contributing_To_SEE"
-    CSVFile.write(header + "\n")
 
     for F, Folder in enumerate(FolderList):
 
@@ -182,12 +186,15 @@ for parameters in CROSS_SECTIONS:
             print("The total SEE rate is:", SEERateU, " s-1 bit-1 with ", int(EntriesContributingToSEE), " entries contributing to the SEE rate.")
             #print("or:", SEERateU * 8e+9, " s-1 Gbyte-1 ")
 
-            # Write the results to the CSV file
+            # Write the results to a CSV file next to the plots
             List = (Folder, SubFolder, CrossectionName, SEERate, SEERateError, RelativeError, EntriesContributingToSEE)
 
             String = ','.join(map(str, List))
             #print(String)
+            CSVFile = open(path + "../" + Folder + " " + CrossectionName + " " + SubFolder + " SEE-Rate.csv", 'w')
+            CSVFile.write(header + "\n")
             CSVFile.writelines(String + "\n")
+            CSVFile.close()
 
             if SEERate == 0:
                 print("No SEEs in", path)
@@ -218,5 +225,3 @@ for parameters in CROSS_SECTIONS:
             plt.savefig(path + "../" + Folder + " " + CrossectionName + " " + SubFolder + " SEE-Hist.pdf", format='pdf', bbox_inches="tight")
             plt.close('all')
             #plt.show()
-
-    CSVFile.close()
