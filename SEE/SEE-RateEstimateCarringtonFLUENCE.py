@@ -1,6 +1,8 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from Dependencies.TotalFluenceHistograms import totalFluenceHistos
 from uncertainties import ufloat
 import os
@@ -26,10 +28,10 @@ F(x) = A (1- exp{-[(x-x0)/W] ** s}) where
 https://creme.isde.vanderbilt.edu/CREME-MC/help/weibull
 '''
 
-Directory = "/home/anton/triton_work/GRAS/1Tile/Fluence_Histograms/CarringtonShielded/"
+Directory = "/scratch/work/fetzera1/GRAS/1Tile/Fluence_Histograms/CarringtonShielded/"
 
 CrossectionName = "NanoXplore NG-Medium"
-#CrossectionName = "Cypress CY62167GE30-45ZXI"
+# CrossectionName = "Cypress CY62167GE30-45ZXI"
 
 # nanoXplore https://nanoxplore-wiki.atlassian.net/wiki/spaces/NAN/pages/46497810/NG-MEDIUM+Radiative+Test#Weibull-fitting
 if CrossectionName == "NanoXplore NG-Medium":
@@ -178,30 +180,30 @@ for F, Folder in enumerate(FolderList):
         BinWidths = ProtonHist['upper'] - ProtonHist['lower']
 
         # ### Fluence Histogram ###############
-        # fig, ax1 = plt.subplots(1)
-        # plt.bar(ProtonHist['lower'], ProtonHist['value'], width=BinWidths, align='edge', alpha=0.3) # pyright: ignore[reportCallIssue, reportArgumentType]
-        # plt.errorbar(ProtonHist['mean'], ProtonHist['value'], ProtonHist['error'], fmt=' ', capsize=2, elinewidth=1, # pyright: ignore[reportArgumentType] # pyright: ignore[reportCallIssue] # pyright: ignore[reportCallIssue] # type: ignore
-        #              capthick=1, label="Fluence Histogram")
-        # plt.plot([], [], label="SEU Cross Section", color='C1')
-        # plt.yscale("log")
-        # plt.xscale("log")
-        # plt.xlim(5e-1, 1.5e2)
-        # plt.grid(which='major')
-        # plt.title(Folder + " " + CrossectionName + " " + SubFolder + " Al\nTotal Fluence = " + str(TotalFluenceU) + " cm-2 s-1")
-        # plt.xlabel("Energy [MeV]")
-        # ax1.legend(loc='upper left')
-        # ax1.set_ylabel("Fluence per Energy bin [cm-2 s-1]", color='C0')
-        # ax1.tick_params(axis='y', colors='C0')
+        fig, ax1 = plt.subplots(1)
+        plt.bar(ProtonHist['lower'], ProtonHist['value'], width=BinWidths, align='edge', alpha=0.3) # pyright: ignore[reportCallIssue, reportArgumentType]
+        plt.errorbar(ProtonHist['mean'], ProtonHist['value'], ProtonHist['error'], fmt=' ', capsize=2, elinewidth=1, # pyright: ignore[reportArgumentType] # pyright: ignore[reportCallIssue] # pyright: ignore[reportCallIssue] # type: ignore
+                     capthick=1, label="Fluence Histogram")
+        plt.plot([], [], label="SEU Cross Section", color='C1')
+        plt.yscale("log")
+        plt.xscale("log")
+        #plt.xlim(5e-1, 1.5e2)
+        plt.grid(which='major')
+        plt.title(Folder + " " + CrossectionName + " " + SubFolder + " Al\nTotal Fluence = " + str(TotalFluenceU) + " cm-2 s-1")
+        plt.xlabel("Energy [MeV]")
+        ax1.legend(loc='upper left')
+        ax1.set_ylabel("Fluence per Energy bin [cm-2 s-1]", color='C0')
+        ax1.tick_params(axis='y', colors='C0')
 
-        # ax2 = ax1.twinx()
-        # # plt.plot(E_pts, S_pts, '.-', color='C1')
-        # plt.plot(ProtonHist['lower'], f(ProtonHist['lower']), color='C1')
-        # ax2.set_ylabel(CrossectionName + " Cross Section [cm2 bit-1]", color='C1')
-        # plt.yscale("log")
-        # ax2.tick_params(axis='y', colors='C1')
+        ax2 = ax1.twinx()
+        # plt.plot(E_pts, S_pts, '.-', color='C1')
+        plt.plot(ProtonHist['lower'], f(ProtonHist['lower']), color='C1')
+        ax2.set_ylabel(CrossectionName + " Cross Section [cm2 bit-1]", color='C1')
+        plt.yscale("log")
+        ax2.tick_params(axis='y', colors='C1')
 
-        # plt.savefig(path + "../" + Folder + " " + CrossectionName + " " + SubFolder + " Fluence-Hist.pdf", format='pdf', bbox_inches="tight")
-        # plt.close('all')
+        plt.savefig(path + "../" + Folder + " " + CrossectionName + " " + SubFolder + " Fluence-Hist.pdf", format='pdf', bbox_inches="tight")
+        plt.close('all')
         # #plt.show()
 
 
@@ -251,30 +253,30 @@ for F, Folder in enumerate(FolderList):
             print("No SEEs in", path)
             continue
 
-        # fig, ax1 = plt.subplots(1)
-        # plt.bar(SEEHist['lower'], SEEHist['value'], width=BinWidths, align='edge', alpha=0.3)
-        # plt.errorbar(SEEHist['mean'], SEEHist['value'], SEEHist['error'], fmt=' ', capsize=2, elinewidth=1,
-        #              capthick=1, label="SEU Rate Histogram")
-        # plt.plot([], [], label="SEU Cross Section", color='C1')
-        # plt.yscale("log")
-        # plt.xscale("log")
-        # plt.grid(which='major')
-        # plt.title(Folder + " " + CrossectionName + " " + SubFolder + " Al\nTotal SEU Rate = " + str(SEERateU) + " s-1 bit-1")
-        # plt.xlabel("Energy [MeV]")
-        # ax1.legend()
-        # ax1.set_ylabel("SEU Rate per Energy bin [s-1 bit-1]", color='C0')
-        # ax1.tick_params(axis='y', colors='C0')
+        fig, ax1 = plt.subplots(1)
+        plt.bar(SEEHist['lower'], SEEHist['value'], width=BinWidths, align='edge', alpha=0.3)
+        plt.errorbar(SEEHist['mean'], SEEHist['value'], SEEHist['error'], fmt=' ', capsize=2, elinewidth=1,
+                     capthick=1, label="SEU Rate Histogram")
+        plt.plot([], [], label="SEU Cross Section", color='C1')
+        plt.yscale("log")
+        plt.xscale("log")
+        plt.grid(which='major')
+        plt.title(Folder + " " + CrossectionName + " " + SubFolder + " Al\nTotal SEU Rate = " + str(SEERateU) + " s-1 bit-1")
+        plt.xlabel("Energy [MeV]")
+        ax1.legend()
+        ax1.set_ylabel("SEU Rate per Energy bin [s-1 bit-1]", color='C0')
+        ax1.tick_params(axis='y', colors='C0')
 
-        # ax2 = ax1.twinx()
-        # # plt.plot(E_pts, S_pts, '.-', color='C1')
-        # plt.plot(SEEHist['lower'], f(SEEHist['lower']), color='C1')
-        # ax2.set_ylabel(CrossectionName + " Cross Section [cm2 bit-1]", color='C1')
-        # plt.yscale("log")
+        ax2 = ax1.twinx()
+        # plt.plot(E_pts, S_pts, '.-', color='C1')
+        plt.plot(SEEHist['lower'], f(SEEHist['lower']), color='C1')
+        ax2.set_ylabel(CrossectionName + " Cross Section [cm2 bit-1]", color='C1')
+        plt.yscale("log")
         # plt.xlim(5e-1, 1.5e2)
-        # ax2.tick_params(axis='y', colors='C1')
+        ax2.tick_params(axis='y', colors='C1')
 
-        # plt.savefig(path + "../" + Folder + " " + CrossectionName + " " + SubFolder + " SEE-Hist.pdf", format='pdf', bbox_inches="tight")
-        # plt.close('all')
+        plt.savefig(path + "../" + Folder + " " + CrossectionName + " " + SubFolder + " SEE-Hist.pdf", format='pdf', bbox_inches="tight")
+        plt.close('all')
         # #plt.show()
         
 CSVFile.close()

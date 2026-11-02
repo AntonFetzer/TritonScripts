@@ -157,8 +157,8 @@ LEO_cosmic_iron = totalDose(Path + "LEO-cosmic-iron/Res") # Negiligible
 #              linestyle='', capsize=1, color='C4')
 
 LEO_Total = mergeTotalDose([LEO_electron, LEO_trapped_proton, LEO_solar_proton, LEO_cosmic_proton, LEO_cosmic_iron])
-plt.errorbar(x, LEO_Total['dose'] * 50/11, yerr=LEO_Total['error'] * 50/11, color=LEOColor, 
-             label="LEO 50 year dose", **default_errorbar_style)
+plt.errorbar(x, LEO_Total['dose'] * 100/11, yerr=LEO_Total['error'] * 100/11, color=LEOColor, 
+             label="LEO 100 year dose", **default_errorbar_style)
 
 # LEO_SD = readSDQ2("/l/triton_work/Spectra/Carrington/LEO/spenvis_sqo.txt")
 # plt.plot(LEO_SD['Thickness'], ( LEO_SD['Electrons'] + LEO_SD['Bremsstrahlung'] ), 
@@ -218,13 +218,13 @@ VAP_cosmic_rron = totalDose(Path + "VAP-cosmic-iron/Res")
 #              linestyle='', capsize=1, color='C4')
 
 VAP_Total = mergeTotalDose([VAP_electron, VAP_trapped_proton, VAP_solar_proton, VAP_cosmic_proton, VAP_cosmic_rron])
-plt.errorbar(x, VAP_Total['dose']/(11*12), yerr=VAP_Total['error']/(11*12), 
-             label="VAP 1 month dose\n(GRAS)", color=VAPColor, **default_errorbar_style)
+plt.errorbar(x, VAP_Total['dose']/(11), yerr=VAP_Total['error']/(11), 
+             label="VAP 1 year dose\n(GRAS)", color=VAPColor, **default_errorbar_style)
 
 VAP_SD = readSDQ2("/scratch/work/fetzera1/Spectra/Carrington/VAP/spenvis_sqo.txt")
 # plt.plot(VAP_SD['Thickness'], ( VAP_SD['Electrons'] + VAP_SD['Bremsstrahlung'] ), label="SHIELDOSE-2Q VAP Electrons + Bremsstrahlung", color='C0')
 # plt.plot(VAP_SD['Thickness'], VAP_SD['Trapped Protons'], label="SHIELDOSE-2Q VAP Trapped Protons", color='C1')
-plt.plot(VAP_SD['Thickness'], VAP_SD['Total'] /(11*12), '.', label="VAP 1 month dose\n(SHIELDOSE-2Q)", color=VAPColor)
+plt.plot(VAP_SD['Thickness'], VAP_SD['Total'] /(11), '.', label="VAP 1 year dose\n(SHIELDOSE-2Q)", color=VAPColor)
 
 
 # #### GEO ######
@@ -242,7 +242,7 @@ GEO_cosmic_iron = totalDose(Path + "GEO-cosmic-iron/Res")     # Cosmics have sup
 # plt.errorbar(x, GEO_cosmic_iron['dose'], yerr=GEO_cosmic_iron['error'], label="GEO Cosmic Iron", linestyle='', capsize=1, color='C4')
 
 GEO_Total = mergeTotalDose([GEO_electron, GEO_trapped_proton, GEO_solar_proton, GEO_cosmic_proton, GEO_cosmic_iron])
-plt.errorbar(x, GEO_Total['dose']/11, yerr=GEO_Total['error']/11, color=GEOColor, label="GEO 1 year dose"
+plt.errorbar(x, GEO_Total['dose']*10/11, yerr=GEO_Total['error']*10/11, color=GEOColor, label="GEO 10 year dose"
              , **default_errorbar_style)
 
 # GEO_SD = readSDQ2("/l/triton_work/Spectra/Carrington/GEO/spenvis_sqo.txt")
@@ -262,28 +262,28 @@ plt.yscale("log")
 # plt.yticks(np.logspace(-4, 4, num=9))
 
 plt.xlim(0.5, 10)
-plt.ylim(1e-1, 1e+2)
+plt.ylim(2e-1, 1e+3)
 plt.grid(which='both')
 
 
 ################### Re-ordering the legend labels ############################
 # Store the handles and labels when plotting
-#handles, labels = plt.gca().get_legend_handles_labels()
+handles, labels = plt.gca().get_legend_handles_labels()
 
 # Reorder the handles and labels to your desired order
 # Example: Suppose you want to reorder them based on some criteria or the original plotting order
 #order = [0, 1, 6, 5, 2, 4, 3]  # PROTON Plot specify the desired order of indices 
-# order = [0, 1, 3, 4, 6, 5, 2]  # ELECTRON specify the desired order of indices
+order = [0, 1, 3, 4, 6, 5, 2]  # ELECTRON specify the desired order of indices
 
 # Apply the reordering
-#handles = [handles[i] for i in order]
-#labels = [labels[i] for i in order]
+handles = [handles[i] for i in order]
+labels = [labels[i] for i in order]
 
 # Then pass them to plt.legend()
-#plt.legend(handles, labels)
+plt.legend(handles, labels)
 
 # External legend
-plt.legend()
+# plt.legend()
 
 
 plt.savefig(Path + "CompareCarringtonElectron.pdf", format='pdf', bbox_inches="tight")

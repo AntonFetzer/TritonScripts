@@ -86,7 +86,7 @@ for parameters in CROSS_SECTIONS:
 
     for F, Folder in enumerate(FolderList):
 
-        if Folder == "NoSEEs":
+        if Folder == "OldResults":
             continue
 
         # Generate list of all subfolder names in the Folder

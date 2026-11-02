@@ -106,7 +106,7 @@ def mergeHistograms(list_of_histograms):
     # Only bins with enough entries are checked; in sparser bins the ratio
     # itself is too noisy to judge (spread ~ sqrt(2/hits)).
     MinEntriesForBirgeCheck = 100
-    BirgeThreshold = 2.0
+    BirgeThreshold = 2.5
     if total_weight > 0 and len(list_of_histograms) > 1:
         ExternalErrSq = np.zeros_like(TotalHistogram['value'])
         for hist, weight in zip(list_of_histograms, weights):
