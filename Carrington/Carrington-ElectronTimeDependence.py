@@ -1,22 +1,25 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sp
-from sympy import *
-from GRAS.Read.ReadSpenvis_tri import readSpenvis_tri
+import sys, os
+# Ensure the package root (the "Python" folder) is on sys.path so "from Read.* import ..." works
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from Read.ReadSpenvis_tri import readSpenvis_tri
 
 t = sp.Symbol('t')  # time in hours
 
 T_c = 1.23 * 24  # Decay time in hours
 
-f0 = 10 ** 10   # cm-2 s-1 sr-1 
+f0 = 4.511444e10   # cm-2 s-1
 
-flux = 4 * np.pi * f0 * exp(-t / T_c)
+flux = f0 * sp.exp(-t / T_c)
 
 print(flux)
 
 T = sp.Symbol('T')  # time in hours
 
-TotalFluence = sp.integrate(flux, (t, 0, oo)) * 3600  # cm-2. The factor 3600 converts from per hour to per second
+TotalFluence = sp.integrate(flux, (t, 0, sp.oo)) * 3600  # cm-2. The factor 3600 converts from per hour to per second
 # Print total fluence rounded to 4 significant figures
 print(f"TotalFluence: {TotalFluence:.4g} cm-2")
 
@@ -26,7 +29,7 @@ print(Fluence)
 flux = sp.lambdify(t, flux, "numpy")
 Fluence = sp.lambdify(T, Fluence, "numpy")
 
-Evals = np.linspace(1, 100, num=100) # 100 hours in 1 hour steps
+Evals = np.linspace(0, 100, num=101) # 100 hours in 1 hour steps
 
 #for t in Evals:
 #    print(f"{t:.4}", f"{flux(t):.4}")
@@ -46,7 +49,7 @@ plt.grid(which='both')
 ax2 = ax1.twinx()
 plt.plot(Evals/24, Fluence(Evals), label="Electron Fluence", color="C1")
 ax2.set_ylabel("Total Electron Fluence [cm-2]", color="C1")
-ax2.legend(loc='lower center')
+plt.legend(loc='lower center')
 ax2.tick_params(axis='y', colors='C1')
 
 #plt.grid(which='both')
@@ -55,7 +58,7 @@ ax2.tick_params(axis='y', colors='C1')
 plt.title("Time dependent electron flux and event fluence")
 ax1.set_xlabel("Time [days]")
 
-plt.savefig("/l/triton_work/Spectra/Carrington/Electron/ElectronTimeDependence.pdf", format='pdf', bbox_inches="tight")
+plt.savefig("/scratch/work/fetzera1/Spectra/Carrington/Electron-EVT-2026/Electron-EVT-2026TimeDependence.pdf", format='pdf', bbox_inches="tight")
 #plt.show()
 
 

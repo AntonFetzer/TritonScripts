@@ -8,16 +8,18 @@ import sympy as sp
 from Read.ReadSpenvis_tri import readSpenvis_tri
 from Read.ReadGPSMacro import readGPSMacro
 
-Path = "/l/triton_work/"
+Path = "/scratch/work/fetzera1/"
 
 Expected = 'blue' # Blue
-PlusColor = 'C1'  # Green
-MinusColor = 'C2' # Orange
+# PlusColor = 'C1'  # Green
+# MinusColor = 'C2' # Orange
 LEOColor = 'C8'   # yellow
 GEOColor = 'C7'   # grey
 VAPColor = 'C3'   # Red
+FlumicColor = 'magenta' # Magenta
+GOESColor = 'cyan' # Cyan
 
-
+'''  Deprecated 
 ## Carrington Integral Electron Spectrum Parameters from EVT Analysis of Adnane Osmane
 f0 = 10 ** 10   # cm-2 s-1 sr-1 
 E0 = 0.13       # MeV
@@ -38,9 +40,25 @@ fdiff = sp.lambdify(Energy, fdiff, "numpy")
 
 def f(Energy):
     return 4 * np.pi * f0 * (Energy / E0) ** (-a)
+'''
 
-Energies = [0.13, 1.2]
-Diff = []
+
+
+## Carrington differential electron return levels (1-in-150 year), Mikko Borg, 28 October 2026
+E1, E2 = 0.13, 1.2           # MeV
+j1, j2 = 1.07e8, 2.11e3      # keV-1 cm-2 s-1 sr-1
+j1, j2 = j1 * 1e3, j2 * 1e3  # MeV-1 cm-2 s-1 sr-1
+Emax = 1000                  # MeV, upper end of the production macro
+g = np.log(j1 / j2) / np.log(E2 / E1)   # differential slope, 4.874551
+
+print("Differential slope g:", g)
+
+def f(Energy):
+    # omnidirectional integral flux above Energy: 4 pi * int_Energy^Emax j dE, in cm-2 s-1
+    return 4 * np.pi * j1 * E1 / (g - 1) * ((Energy / E1) ** (1 - g) - (Emax / E1) ** (1 - g))
+
+Energies = [0.13, 1.2, 100.0]  # MeV
+# Diff = []
 Int = []
 
 # print("Differential")
@@ -54,17 +72,36 @@ for E in Energies:
     Int.append(f(E))
 
 
+
+
+
 ## Plotting
 plt.figure(1, figsize=(6, 6))
 
-## Read in Carrington EVT spectrum
-EVT_file = Path + "/Spectra/Carrington/Electron/CarringtonElectronINTEGRALPowTabelated.mac"
-EVT_Data = readGPSMacro(EVT_file)
-plt.plot(EVT_Data["Energy"], EVT_Data["Flux"], '-', linewidth=2.5, color=Expected)
-
-
 # Plot the data points from the function
 plt.plot(Energies, Int, 'o-', label="GEO EVT 1-in-150 year peak 6-min", linewidth=2.5, color=Expected)
+
+
+## Read in Carrington EVT spectrum  -- NO! The new spectrum is in differential units. Cannot be plotted in the integral plot. The function above is the integral spectrum.
+# EVT_file = Path + "/Spectra/Carrington/Electron-EVT-2026/Carrington-Electron-Expected-EVT2026-Arb-130keVto1000MeV.mac"
+# EVT_Data = readGPSMacro(EVT_file)
+# plt.plot(EVT_Data["Energy"], EVT_Data["Flux"], '-', linewidth=2.5, color=Expected)
+
+# Add data point from Meredith 2015 1-in-100 year GOES-W and GOES-E electron fluxes
+# GOES-W 1-in-100 year 2 MeV electron flux: 7.68e5 cm−2 s−1 sr−1
+# GOES-E 1-in-100 year 2 MeV electron flux: 3.25e5 cm−2 s−1 sr−1
+GOES_W_100 = 7.68e5 * 4 * np.pi  # Convert from sr-1 to omnidirectional
+GOES_E_100 = 3.25e5 * 4 * np.pi  # Convert from sr-1 to omnidirectional
+# plt.plot(2, GOES_W_100, 'x', label="GEO GOES-W 1-in-100 year 1-day avg", color=GOESColor, markersize=8)
+# plt.plot(2, GOES_E_100, '+', label="GEO GOES-E 1-in-100 year 1-day avg", color=GOESColor, markersize=8)
+
+# GOES-W 1-in-150 year 2 MeV electron flux: 9.86e5 cm−2 s−1 sr−1
+# GOES-E 1-in-150 year 2 MeV electron flux: 4.35e5 cm−2 s−1 sr−1
+GOES_W_150 = 9.86e5 * 4 * np.pi  # Convert from sr-1 to omnidirectional
+GOES_E_150 = 4.35e5 * 4 * np.pi  # Convert from sr-1 to omnidirectional
+plt.plot(2, GOES_W_150, 'x', label="GEO GOES-W 1-in-150 year 1-day avg", color=GOESColor, markersize=8)
+plt.plot(2, GOES_E_150, '+', label="GEO GOES-E 1-in-150 year 1-day avg", color=GOESColor, markersize=8)
+
 
 ## FLUMIC spectrum
 # FLUMIC Energy in MeV
@@ -73,27 +110,29 @@ FLUMIC_Energy = [2.0000E-01, 5.0000E-01, 8.0000E-01, 1.1000E+00, 1.4000E+00, 1.7
 FLUMIC_Average_Flux = [1.0016E+10, 4.3943E+09, 1.9280E+09, 8.4589E+08, 3.7113E+08, 1.6283E+08, 7.1441E+07, 3.1344E+07, 1.3752E+07, 6.0337E+06, 2.6473E+06, 1.1615E+06, 5.0959E+05, 2.2358E+05, 9.8094E+04, 4.3038E+04, 1.8883E+04, 8.2847E+03, 3.6349E+03, 1.5948E+03]
 # Flumic Max Flux in Flux (m-2 s-1 sr-1)
 FLUMIC_Max_Flux = [14921000000, 6546400000, 2872200000, 1260200000, 552890000, 242580000, 106430000, 46695000, 20487000, 8988700, 3943800, 1730300, 759160, 333080, 146140, 64116, 28131, 12342, 5415.1, 2375.8]
+# Estimated FLUMIC 3 worst case at L = 6.6 (fsc 0.802, foy 0.219), from the FLUMIC 3 equations; illustration only, not a SPENVIS run
+FLUMIC_Worst_Flux = [2.8025E+10, 1.5405E+10, 8.4681E+09, 4.6548E+09, 2.5587E+09, 1.4065E+09, 7.7314E+08, 4.2499E+08, 2.3361E+08, 1.2841E+08, 7.0588E+07, 3.8801E+07, 2.1329E+07, 1.1724E+07, 6.4447E+06, 3.5426E+06, 1.9473E+06, 1.0704E+06, 5.8840E+05, 3.2344E+05]
 
 # Convert from m-2 to cm-2 and from sr-1 to omnidirectional
 FLUMIC_Average_Flux = np.array(FLUMIC_Average_Flux) * 1e-4 * 4 * np.pi
 FLUMIC_Max_Flux = np.array(FLUMIC_Max_Flux) * 1e-4 * 4 * np.pi
+FLUMIC_Worst_Flux = np.array(FLUMIC_Worst_Flux) * 1e-4 * 4 * np.pi
 
-plt.plot(FLUMIC_Energy, FLUMIC_Max_Flux, 'x-', label="GEO FLUMIC worst-case 1-day avg", color='magenta', linewidth=1)
+# plt.plot(FLUMIC_Energy, FLUMIC_Average_Flux, 'o-', label="GEO FLUMIC 1-day avg", color=FlumicColor, linewidth=1)
+plt.plot(FLUMIC_Energy, FLUMIC_Max_Flux, 'x-', label="GEO FLUMIC worst-case 1-day avg", color=FlumicColor, linewidth=1)
+# plt.plot(FLUMIC_Energy, FLUMIC_Worst_Flux, 's-', label="GEO FLUMIC worst-case 1-day avg", color=FlumicColor, linewidth=1)
 
 
-# Add data point from Meredith 2015 1-in-100 year GOES-W and GOES-E electron fluxes
-# GOES-W 1-in-100 year 2 MeV electron flux: 7.68e5 cm−2 s−1 sr−1
-# GOES-E 1-in-100 year 2 MeV electron flux: 3.25e5 cm−2 s−1 sr−1
-GOES_W_Flux = 7.68e5 * 4 * np.pi  # Convert from sr-1 to omnidirectional
-GOES_E_Flux = 3.25e5 * 4 * np.pi  # Convert from sr-1 to omnidirectional
-plt.plot(2, GOES_W_Flux, 'x', label="GEO GOES-W 1-in-100 year 1-day avg", color='cyan', markersize=8)
-plt.plot(2, GOES_E_Flux, '+', label="GEO GOES-E 1-in-100 year 1-day avg", color='cyan', markersize=8)
+
+
+
+
+
 
 ## Read in Geostationary A9 spectrum
 GEO_file = Path + "/Spectra/Carrington/GEO/spenvis_tri.txt"
 Protons, Electrons = readSpenvis_tri(GEO_file)
 plt.plot(Electrons['Energy'], Electrons['Integral'], '1-.', label="GEO AE9 11-year mean", color=GEOColor)
-
 
 ## Read in LEO A9 spectrum
 LEO_file = Path + "/Spectra/Carrington/LEO/spenvis_tri.txt"
@@ -162,5 +201,5 @@ plt.yticks(y_ticks)
 x_ticks = [0.1, 0.2, 0.5, 1, 2, 5, 10]
 plt.xticks(x_ticks, labels=[str(tick) for tick in x_ticks])
 
-plt.savefig(Path + "/Spectra/Carrington/Electron/ElectronSpectra.pdf", format='pdf', bbox_inches="tight")
+plt.savefig(Path + "/Spectra/Carrington/Electron-EVT-2026/Electron-EVT-2026.pdf", format='pdf', bbox_inches="tight")
 #plt.show()
