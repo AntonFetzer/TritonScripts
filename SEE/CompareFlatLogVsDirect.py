@@ -7,7 +7,7 @@ from Dependencies.TotalLETHistos import totalLETHistos
 
 '''
 Compares two GRAS LET histogram simulation results with each other using the
-same algorithm as SEE-RateEstimateCarringtonFinal.py:
+same algorithm as SEE-RateEstimateCarringtonLET.py:
 merge the per-job csv histograms, normalise the 11 year fluence to flux,
 compute the total LET rate and fold the spectrum with a Weibull SEU cross
 section to get the total SEE rate.
@@ -53,7 +53,7 @@ def f(LET, X):
 
 
 def readAndNormalise(Folder):
-    """Merges the csv histograms of one folder and normalises fluence to flux as in SEE-RateEstimateCarringtonFinal.py."""
+    """Merges the csv histograms of one folder and normalises fluence to flux as in SEE-RateEstimateCarringtonLET.py."""
     path = Directory + Folder + "/" + SubFolder + "/Res/"
 
     LETHist, _ = totalLETHistos(path)

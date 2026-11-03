@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Estimate SEE rates for the Carrington CREME96 and SAPPHIRE datasets.
 
-Adapted from SEE-RateEstimateCarringtonFinal.py.  By default, both all-species
+Adapted from SEE-RateEstimateCarringtonLET.py.  By default, both all-species
 folders next to this script are analysed.  Alternative dataset directories can
 be supplied as positional arguments.
 """
