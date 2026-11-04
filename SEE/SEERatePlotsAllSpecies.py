@@ -1,16 +1,20 @@
 import csv
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+import sys
 
-Directories = {
-    #"GEO-CREME96": "/home/anton/triton_work/GRAS/1Tile/LET_Histograms/Carrington-GEO-CREME96-All-Species/",
-    #"GEO-SAPPHIRE": "/home/anton/triton_work/GRAS/1Tile/LET_Histograms/Carrington-GEO-SAPPHIRE-All-Species/",
-    #"GEO-GCR": "/home/anton/triton_work/GRAS/1Tile/LET_Histograms/Carrington-GEO-GCR-All-Species/",
-    #"LEO-SAPPHIRE": "/home/anton/triton_work/GRAS/1Tile/LET_Histograms/Carrington-LEO-SAPPHIRE-All-Species/",
-    #"LEO-GCR": "/home/anton/triton_work/GRAS/1Tile/LET_Histograms/Carrington-LEO-GCR-All-Species/",
-    "VAP-GCR": "/home/anton/triton_work/GRAS/1Tile/LET_Histograms/Carrington-VAP-GCR-All-Species/",
-    "VAP-SAPPHIRE": "/home/anton/triton_work/GRAS/1Tile/LET_Histograms/Carrington-VAP-SAPPHIRE-All-Species/",
-}
+BaseDirectory = "/scratch/work/fetzera1/GRAS/1Tile/LET_Histograms/"
+
+# Generate list of all folders with All-Species in their name
+FolderList = [BaseDirectory + f_ for f_ in os.listdir(BaseDirectory) if "All-Species" in f_ and os.path.isdir(BaseDirectory + f_)]
+
+# Alternatively process only the folders given as command line arguments
+if len(sys.argv) > 1:
+    FolderList = [os.path.abspath(p) for p in sys.argv[1:]]
+
+# The model names, such as GEO-CREME96, come from the folder names
+Directories = {os.path.basename(p).replace("Carrington-", "").replace("-All-Species", ""): p + "/" for p in FolderList}
 
 CrossectionNames = ["Cypress CY62167GE30-45ZXI", "NanoXplore SEU"]
 
@@ -99,30 +103,29 @@ for ModelName, Directory in Directories.items():
     Total_Ex3['SEE_Rate'] = np.sum([Dict[name]['SEE_Rate'] for name in RestNames], axis=0)
     Total_Ex3['SEE_Error'] = np.sqrt(np.sum([np.square(Dict[name]['SEE_Error']) for name in RestNames], axis=0))
 
-    # Combine all non-proton species into a total heavy-ion rate and print it
-    # in the structure of the main SEERates CSV summary files, ready to be
-    # copied there.
+    # Combine all non-proton species into a total heavy-ion rate and write it
+    # next to the data in the structure of the SEE-Rate CSV files, where
+    # SEERatePlotsLET.py reads it.
     HeavyNames = [name for name in sorted_names if not name.endswith("Proton")]
     HeavyRate = np.sum([Dict[name]['SEE_Rate'] for name in HeavyNames], axis=0)
     HeavyError = np.sqrt(np.sum([np.square(Dict[name]['SEE_Error']) for name in HeavyNames], axis=0))
     HeavyEntries = np.sum([Dict[name]['Entries_Contributing_To_SEE'] for name in HeavyNames], axis=0)
     SummaryName = (sorted_names[0].rsplit("-", 1)[0]) + "-AllHeavyIons"
 
-    print(f"\nTotal non-proton heavy-ion rates ({ModelName}, {CrossectionName}), "
-          "copy into the main SEERates CSV:")
+    CSVFile = open(Directory + SummaryName + " " + CrossectionName + " SEE-Rate.csv", 'w')
+    CSVFile.write("Data,Shielding,Crossection,SEE_Rate,SEE_Error,Relative_SEE_Error,Entries_Contributing_To_SEE\n")
     for i, shielding in enumerate(Total['Shielding']):
         RelativeError = HeavyError[i] / HeavyRate[i] if HeavyRate[i] else float('nan')
-        print(f"{SummaryName},{shielding},{CrossectionName},"
-              f"{HeavyRate[i]},{HeavyError[i]},{RelativeError},{int(HeavyEntries[i])}")
-    print()
+        CSVFile.write(f"{SummaryName},{shielding},{CrossectionName},"
+                      f"{HeavyRate[i]},{HeavyError[i]},{RelativeError},{int(HeavyEntries[i])}\n")
+    CSVFile.close()
 
     plt.errorbar(Total['Shielding'], Total['SEE_Rate'], yerr=Total['SEE_Error'],
                  label="Total", color='black', linewidth=3, **default_errorbar_style)
 
     for i, name in enumerate(Top3Names):
-        label = name.replace("GEO-" + ModelName + "-Solar-", "")
         plt.errorbar(Dict[name]['Shielding'], Dict[name]['SEE_Rate'],
-                     yerr=Dict[name]['SEE_Error'], label=label,
+                     yerr=Dict[name]['SEE_Error'], label=name,
                      color='C' + str(i % 10), **default_errorbar_style)
 
     plt.errorbar(Total_Ex3['Shielding'], Total_Ex3['SEE_Rate'], yerr=Total_Ex3['SEE_Error'],
@@ -130,7 +133,7 @@ for ModelName, Directory in Directories.items():
 
     plt.yscale("log")
     plt.grid()
-    plt.title(CrossectionName + "\nGEO " + ModelName + " Solar Ion SEU Rate Estimates - All Species")
+    plt.title(CrossectionName + "\n" + ModelName.replace("-", " ") + " SEU Rate Estimates - All Species")
 
     plt.xlabel("Aluminium Shielding Thickness")
     plt.ylabel("Single Event Upset Rate [s-1 bit-1]")

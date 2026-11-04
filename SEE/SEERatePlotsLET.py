@@ -30,8 +30,10 @@ for CrossectionName in CrossectionNames:
     # Initialize the final data structure
     Dict = {}
 
-    # Read the CSV files next to the data, natsorted to keep the shieldings in order
-    for CSVPath in natsort.natsorted(glob.glob(Directory + "*/*/* " + CrossectionName + " * SEE-Rate.csv")):
+    # Read the CSV files next to the data, natsorted to keep the shieldings in order.
+    # The AllHeavyIons totals are written by SEERatePlotsAllSpecies.py
+    for CSVPath in natsort.natsorted(glob.glob(Directory + "*/*/* " + CrossectionName + " * SEE-Rate.csv")
+                                     + glob.glob(Directory + "../Carrington-*-All-Species/* " + CrossectionName + " SEE-Rate.csv")):
         with open(CSVPath, mode='r') as file:
             csv_reader = list(csv.DictReader(file))
         
@@ -55,17 +57,6 @@ for CrossectionName in CrossectionNames:
             Dict[dataset_name]['SEE_Rate'].append(see_rate)
             Dict[dataset_name]['SEE_Error'].append(see_error)
             Dict[dataset_name]['Entries_Contributing_To_SEE'].append(entries_contributing_to_see)
-
-    # Sum the non-proton species of the all-species set, as in SEERatePlotsAllSpecies.py
-    HeavyRate = {}
-    HeavyVariance = {}
-    with open(Directory + "../Carrington-GEO-CREME96-All-Species/SEERates_" + CrossectionName + ".csv", mode='r') as file:
-        for row in csv.DictReader(file):
-            if not row['Data'].endswith("Proton"):
-                HeavyRate[row['Shielding']] = HeavyRate.get(row['Shielding'], 0) + float(row['SEE_Rate'])
-                HeavyVariance[row['Shielding']] = HeavyVariance.get(row['Shielding'], 0) + float(row['SEE_Error'])**2
-    Dict['GEO-CREME96-Solar-AllHeavyIons'] = {'Shielding': list(HeavyRate), 'SEE_Rate': list(HeavyRate.values()),
-                                              'SEE_Error': list(np.sqrt(list(HeavyVariance.values())))}
 
     # Convert the lists to numpy arrays
     for key in Dict:
@@ -118,31 +109,31 @@ for CrossectionName in CrossectionNames:
 
 
     # # Plot the GEO Solar Proton 5min Peak flux
-    plt.errorbar(Dict['GEO-SolarProton-5minPeakFlux']['Shielding'], Dict['GEO-SolarProton-5minPeakFlux']['SEE_Rate'],
-                  yerr=Dict['GEO-SolarProton-5minPeakFlux']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min Proton"
-                  , color=CREME96Color, linestyle=':', **default_errorbar_style)
+    # plt.errorbar(Dict['GEO-SolarProton-5minPeakFlux']['Shielding'], Dict['GEO-SolarProton-5minPeakFlux']['SEE_Rate'],
+    #               yerr=Dict['GEO-SolarProton-5minPeakFlux']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min Proton"
+    #               , color=CREME96Color, linestyle=':', **default_errorbar_style)
 
-    plt.errorbar(Dict['GEO-CREME96-Solar-Iron']['Shielding'], Dict['GEO-CREME96-Solar-Iron']['SEE_Rate'],
-                  yerr=Dict['GEO-CREME96-Solar-Iron']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min SEP Iron"
-                    , color='C4', linestyle='-', **default_errorbar_style)
+    # plt.errorbar(Dict['GEO-CREME96-Solar-Iron']['Shielding'], Dict['GEO-CREME96-Solar-Iron']['SEE_Rate'],
+    #               yerr=Dict['GEO-CREME96-Solar-Iron']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min SEP Iron"
+    #                 , color='C4', linestyle='-', **default_errorbar_style)
 
-    plt.errorbar(Dict['GEO-CREME96-Solar-AllHeavyIons']['Shielding'], Dict['GEO-CREME96-Solar-AllHeavyIons']['SEE_Rate'],
-                  yerr=Dict['GEO-CREME96-Solar-AllHeavyIons']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min\nHeavy Ions GRAS LET Folding"
-                    , color=CREME96IonColor, linestyle='-.', **default_errorbar_style)
+    # plt.errorbar(Dict['GEO-CREME96-Solar-AllHeavyIons']['Shielding'], Dict['GEO-CREME96-Solar-AllHeavyIons']['SEE_Rate'],
+    #               yerr=Dict['GEO-CREME96-Solar-AllHeavyIons']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min\nHeavy Ions GRAS LET Folding"
+    #                 , color=CREME96IonColor, linestyle='-.', **default_errorbar_style)
 
 
-    Dict['GEO-CREME96-Solar-Total'] = {}
-    Dict['GEO-CREME96-Solar-Total']['Shielding'] = Dict['GEO-SolarProton-5minPeakFlux']['Shielding']
+    # Dict['GEO-CREME96-Solar-Total'] = {}
+    # Dict['GEO-CREME96-Solar-Total']['Shielding'] = Dict['GEO-SolarProton-5minPeakFlux']['Shielding']
 
-    Dict['GEO-CREME96-Solar-Total']['SEE_Rate'] = (Dict['GEO-SolarProton-5minPeakFlux']['SEE_Rate']
-                                                    + Dict['GEO-CREME96-Solar-AllHeavyIons']['SEE_Rate'])
+    # Dict['GEO-CREME96-Solar-Total']['SEE_Rate'] = (Dict['GEO-SolarProton-5minPeakFlux']['SEE_Rate']
+    #                                                 + Dict['GEO-CREME96-Solar-AllHeavyIons']['SEE_Rate'])
     
-    Dict['GEO-CREME96-Solar-Total']['SEE_Error'] = (np.sqrt(np.square(Dict['GEO-SolarProton-5minPeakFlux']['SEE_Error']) 
-                                                             + np.square(Dict['GEO-CREME96-Solar-AllHeavyIons']['SEE_Error'])))
+    # Dict['GEO-CREME96-Solar-Total']['SEE_Error'] = (np.sqrt(np.square(Dict['GEO-SolarProton-5minPeakFlux']['SEE_Error']) 
+    #                                                          + np.square(Dict['GEO-CREME96-Solar-AllHeavyIons']['SEE_Error'])))
     
-    plt.errorbar(Dict['GEO-CREME96-Solar-Total']['Shielding'], Dict['GEO-CREME96-Solar-Total']['SEE_Rate'],
-                  yerr=Dict['GEO-CREME96-Solar-Total']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min SEP Total"
-                    , color='C0', linestyle='-', **default_errorbar_style)
+    # plt.errorbar(Dict['GEO-CREME96-Solar-Total']['Shielding'], Dict['GEO-CREME96-Solar-Total']['SEE_Rate'],
+    #               yerr=Dict['GEO-CREME96-Solar-Total']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min SEP Total"
+    #                 , color='C0', linestyle='-', **default_errorbar_style)
 
 
     ########################### LEO ###################################
@@ -324,7 +315,9 @@ for CrossectionName in CrossectionNames:
     #     "1 upset per kByte per day" if CrossectionName == "Cypress CY62167GE30-45ZXI" else "1 upset per GByte per day",
     # ] if l in labels]
     # plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='lower right')
-    plt.legend(loc='lower right')
+    
+    plt.legend()
+    
     print("Saving " + Directory + CrossectionName + " Rates.pdf")
     plt.savefig(Directory + CrossectionName + " Rates.pdf", format='pdf', bbox_inches="tight")
     # plt.show()

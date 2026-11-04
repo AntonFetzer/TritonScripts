@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Estimate SEE rates for the Carrington CREME96 and SAPPHIRE datasets.
 
-Adapted from SEE-RateEstimateCarringtonLET.py.  By default, both all-species
-folders next to this script are analysed.  Alternative dataset directories can
-be supplied as positional arguments.
+Adapted from SEE-RateEstimateCarringtonLET.py.  By default, all folders with
+All-Species in their name in LET_Histograms are analysed.  Alternative dataset
+directories can be supplied as positional arguments.
 """
 
 import argparse
@@ -16,7 +16,7 @@ import numpy as np
 
 
 # totalLETHistos and its imports live in the shared Python analysis directory.
-ANALYSIS_ROOT = Path("/home/anton/triton_work/Python")
+ANALYSIS_ROOT = Path("/scratch/work/fetzera1/Python")
 sys.path.insert(0, str(ANALYSIS_ROOT))
 from Dependencies.TotalLETHistos import totalLETHistos  # noqa: E402
 
@@ -44,16 +44,8 @@ CROSS_SECTIONS = (
 # need no time normalisation.
 NORMALISATION_SECONDS = 4015 * 24 * 3600
 
-DATA_ROOT = Path("/home/anton/triton_work/GRAS/1Tile/LET_Histograms")
-DEFAULT_DIRECTORIES = (
-    #DATA_ROOT / "Carrington-GEO-CREME96-All-Species",
-    #DATA_ROOT / "Carrington-GEO-SAPPHIRE-All-Species",
-    #DATA_ROOT / "Carrington-GEO-GCR-All-Species",
-    #DATA_ROOT / "Carrington-LEO-SAPPHIRE-All-Species",
-    #DATA_ROOT / "Carrington-LEO-GCR-All-Species",
-    DATA_ROOT / "Carrington-VAP-GCR-All-Species",
-    DATA_ROOT / "Carrington-VAP-SAPPHIRE-All-Species",
-)
+DATA_ROOT = Path("/scratch/work/fetzera1/GRAS/1Tile/LET_Histograms")
+DEFAULT_DIRECTORIES = sorted(path for path in DATA_ROOT.iterdir() if path.is_dir() and "All-Species" in path.name)
 
 
 def natural_key(path):
@@ -173,7 +165,7 @@ def main():
         nargs="*",
         type=Path,
         default=DEFAULT_DIRECTORIES,
-        help="dataset directories (defaults to both Carrington all-species folders)",
+        help="dataset directories (defaults to all All-Species folders in LET_Histograms)",
     )
     args = parser.parse_args()
     success = all(
