@@ -61,12 +61,24 @@ python3 GenerateInterfaceIndex.py --write
   - `errorbarHistogram(...)` -- Draw a histogram as a translucent bar with error bars at the bin means.
   - `logLogGrid(...)` -- Apply the shared axis styling used by every histogram figure here.
   - `savePdf(...)` -- Save a figure as PDF with the tight bounding box used throughout.
+  - `histogramWithCrossSection(...)` -- Draw a histogram with an SEU cross section on a second axis and save it as PDF.
 - `Dependencies.MergeHistograms`
+  - `completeResultFiles(...)` -- Returns the complete GRAS csv files of one kind in a result folder.
   - `mergeHistograms(...)` -- Merges a list of GRAS histograms of identical runs using proper error
 - `Dependencies.MergeTotalDose`
   - `mergeTotalDose(...)` -- Merges the dose dicts in List_of_Dose_Dicts into one dose dict
 - `Dependencies.PoolDoseModules` -- Pool repeated GRAS single-volume dose modules without changing their units.
   - `poolDoseModules(...)` -- Entry-weight module doses; return pooled values and replica Birge diagnostics.
+- `Dependencies.SEERates` -- Shared steps of the SEU rate scripts in SEE/.
+  - `runFolders(...)` -- Return (Directory, FolderList): all run folders in Directory, or only the ones given as arguments.
+  - `thicknessFolders(...)` -- Return the shielding subfolders of a run in natural order (2mm before 16mm).
+  - `usableHistogram(...)` -- Return True if a reader gave a histogram with consistent arrays; otherwise say why it is skipped.
+  - `normaliseToRate(...)` -- Return a new histogram per second: runs with mission-fluence macros are divided by the mission duration.
+  - `crossSection(...)` -- Return the SEU cross section in cm2 bit-1 at X, LET in MeV cm2 mg-1 or proton energy in MeV.
+  - `foldCrossSection(...)` -- Return a new histogram of SEU rate per bin: each bin scaled by the cross section at its mean.
+  - `seeRate(...)` -- Return the total rate, its error in quadrature, the relative error and the entries in contributing bins.
+  - `writeRateCSV(...)` -- Write the rates of one run and cross section, with one line per thickness.
+  - `readRateCSVs(...)` -- Collect SEE-Rate CSVs into {dataset: {'Shielding': ..., 'SEE_Rate': ..., ...}} of numpy arrays.
 - `Dependencies.ScanMetrics` -- Derive depth-dose and lateral-profile metrics from measured or simulated scans.
   - `cellBounds(...)` -- Build scoring-cell boundaries for a depth grid whose first cell starts at the surface.
   - `levelCrossing(...)` -- Interpolate where a normalised lateral profile crosses ``level`` on one side of the axis.

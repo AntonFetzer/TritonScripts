@@ -28,8 +28,8 @@ FlatLogColor = 'C1'
 '''
 The functional form of the Weibull is:
 F(x) = A (1- exp{-[(x-x0)/W] ** s}) where
-    x = effective LET in MeV-cm2/milligram;
-    F(x) = SEU cross-section in square-microns/bit;
+    x = effective LET in MeV cm2 mg-1;
+    F(x) = SEU cross section in cm2 bit-1 (CREME-MC's own input is in square microns per bit);
     A0 = limiting or plateau cross-section;
     x0 = onset parameter, such that F(x) = 0 for x < x0;
     W = width parameter;
@@ -111,7 +111,7 @@ CSVFile.write(header + "\n")
 
 Rows = [
     ("", "Total_entries", Direct['entries'], FlatLog['entries']),
-    ("", "Total_LET_rate_MeVcm2mg-1s-1", Direct['TotalLET'], FlatLog['TotalLET']),
+    ("", "Total_LET_rate_MeVmg-1s-1", Direct['TotalLET'], FlatLog['TotalLET']),
     ("", "Total_LET_rate_error", Direct['TotalLETError'], FlatLog['TotalLETError']),
 ]
 
@@ -161,7 +161,7 @@ ax1.legend(loc='upper right')
 
 TitleLines = ["CREME96 solar iron at GEO behind " + SubFolder + " Al",
               f"Total LET rate: Direct = {Direct['TotalLET']:.3e} ± {Direct['TotalLETError']:.1e}, "
-              + f"FlatLog = {FlatLog['TotalLET']:.3e} ± {FlatLog['TotalLETError']:.1e} MeV cm2 mg-1 s-1"]
+              + f"FlatLog = {FlatLog['TotalLET']:.3e} ± {FlatLog['TotalLETError']:.1e} MeV mg-1 s-1"]
 for X in Crossections:
     DirectSEE, FlatLogSEE = SEEResults[X['Name']]
     TitleLines.append(f"SEE rate ({X['Name']}): Direct = {DirectSEE['SEERate']:.3e} ± {DirectSEE['SEERateError']:.1e}, "

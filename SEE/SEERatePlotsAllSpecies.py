@@ -1,8 +1,9 @@
-import csv
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from Dependencies.SEERates import readRateCSVs, writeRateCSV
 
 BaseDirectory = "/scratch/work/fetzera1/GRAS/1Tile/LET_Histograms/"
 
@@ -30,42 +31,8 @@ for ModelName, Directory in Directories.items():
   for CrossectionName in CrossectionNames:
     FigureNumber += 1
 
-    # Initialize the final data structure
-    Dict = {}
-
-    # Read the CSV file
-    with open(Directory + "SEERates_" + CrossectionName + ".csv", mode='r') as file:
-        csv_reader = csv.DictReader(file)
-        CrossectionName = None
-
-        for row in csv_reader:
-            # Extract relevant data
-            dataset_name = row['Data']
-            shielding = row['Shielding']
-            see_rate = float(row['SEE_Rate'])
-            see_error = float(row['SEE_Error'])
-            entries_contributing_to_see = float(row['Entries_Contributing_To_SEE'])
-
-            # Initialize the inner dictionary if it doesn't exist
-            if dataset_name not in Dict:
-                Dict[dataset_name] = {'Shielding': [], 'SEE_Rate': [], 'SEE_Error': [], 'Entries_Contributing_To_SEE': []}
-
-            if CrossectionName:
-                if CrossectionName != row['Crossection']:
-                    raise ValueError("Crossection name is not the same for all entries")
-            else:
-                CrossectionName = row['Crossection']
-
-            # Store the data dictionary
-            Dict[dataset_name]['Shielding'].append(shielding)
-            Dict[dataset_name]['SEE_Rate'].append(see_rate)
-            Dict[dataset_name]['SEE_Error'].append(see_error)
-            Dict[dataset_name]['Entries_Contributing_To_SEE'].append(entries_contributing_to_see)
-
-    # Convert the lists to numpy arrays
-    for key in Dict:
-        for inner_key in Dict[key]:
-            Dict[key][inner_key] = np.array(Dict[key][inner_key])
+    # Read the CSV file of every run in this set
+    Dict = readRateCSVs([Directory + "*/* " + CrossectionName + " SEE-Rate.csv"], CrossectionName)
 
     # Every species must have the same shielding points, otherwise the total
     # over species would silently miss contributions (e.g. runs that produced
@@ -112,13 +79,11 @@ for ModelName, Directory in Directories.items():
     HeavyEntries = np.sum([Dict[name]['Entries_Contributing_To_SEE'] for name in HeavyNames], axis=0)
     SummaryName = (sorted_names[0].rsplit("-", 1)[0]) + "-AllHeavyIons"
 
-    CSVFile = open(Directory + SummaryName + " " + CrossectionName + " SEE-Rate.csv", 'w')
-    CSVFile.write("Data,Shielding,Crossection,SEE_Rate,SEE_Error,Relative_SEE_Error,Entries_Contributing_To_SEE\n")
+    Rows = []
     for i, shielding in enumerate(Total['Shielding']):
         RelativeError = HeavyError[i] / HeavyRate[i] if HeavyRate[i] else float('nan')
-        CSVFile.write(f"{SummaryName},{shielding},{CrossectionName},"
-                      f"{HeavyRate[i]},{HeavyError[i]},{RelativeError},{int(HeavyEntries[i])}\n")
-    CSVFile.close()
+        Rows.append((shielding, HeavyRate[i], HeavyError[i], RelativeError, int(HeavyEntries[i])))
+    writeRateCSV(Directory + SummaryName + " " + CrossectionName + " SEE-Rate.csv", SummaryName, CrossectionName, Rows)
 
     plt.errorbar(Total['Shielding'], Total['SEE_Rate'], yerr=Total['SEE_Error'],
                  label="Total", color='black', linewidth=3, **default_errorbar_style)

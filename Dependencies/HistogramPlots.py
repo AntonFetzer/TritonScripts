@@ -134,7 +134,7 @@ def stepHistogram(histogram, field="value", label=None, color=None, alpha=0.5,
 
 
 def errorbarHistogram(histogram, field="value", label=None, color=None,
-                      alpha=0.3, axes=None, fill=True):
+                      alpha=0.3, axes=None, fill=True, capsize=5):
     """Draw a histogram as a translucent bar with error bars at the bin means.
 
     This is the idiom for showing a single series whose per-bin uncertainty
@@ -148,6 +148,7 @@ def errorbarHistogram(histogram, field="value", label=None, color=None,
         alpha (float): opacity of the fill.
         axes (matplotlib.axes.Axes or None): target axes.
         fill (bool): draw the underlying bar as well as the error bars.
+        capsize (float): size of the error bar caps.
 
     Returns:
         matplotlib.axes.Axes: the axes drawn on.
@@ -163,7 +164,7 @@ def errorbarHistogram(histogram, field="value", label=None, color=None,
     if fill:
         axes.bar(lower, values, width=upper - lower, align="edge", alpha=alpha,
                  color=color)
-    axes.errorbar(mean, values, errors, fmt=" ", capsize=5, elinewidth=1,
+    axes.errorbar(mean, values, errors, fmt=" ", capsize=capsize, elinewidth=1,
                   capthick=1, label=label, color=color)
     return axes
 
@@ -215,3 +216,47 @@ def savePdf(path, figure=None):
     figure = figure or plt.gcf()
     figure.savefig(str(path), format="pdf", bbox_inches="tight")
     return str(path)
+
+
+def histogramWithCrossSection(histogram, sigma, path, title, xlabel, ylabel, label,
+                              sigmaLabel, sigmaAxisLabel, legendLoc=None, capsize=5):
+    """Draw a histogram with an SEU cross section on a second axis and save it as PDF.
+
+    The figure of the SEU rate scripts in SEE/: the histogram on the left axis in
+    C0 and the cross section on the right axis in C1, both logarithmic.
+
+    Args:
+        histogram (dict): a reader's output.
+        sigma (numpy.ndarray): the cross section at the lower edges of the bins.
+        path (str or Path): destination file.
+        title, xlabel, ylabel (str): labels of the figure and of the left axis.
+        label (str): legend entry of the histogram.
+        sigmaLabel (str): legend entry of the cross section.
+        sigmaAxisLabel (str): label of the right axis.
+        legendLoc (str or None): matplotlib legend location, None for the default.
+        capsize (float): size of the error bar caps.
+
+    Returns:
+        str: the path written, as a string.
+    """
+    figure, ax1 = plt.subplots(1)
+    errorbarHistogram(histogram, label=label, axes=ax1, capsize=capsize)
+    ax1.plot([], [], label=sigmaLabel, color="C1")
+    ax1.set_yscale("log")
+    ax1.set_xscale("log")
+    ax1.grid(which="major")
+    ax1.set_title(title)
+    ax1.set_xlabel(xlabel)
+    ax1.legend(loc=legendLoc)
+    ax1.set_ylabel(ylabel, color="C0")
+    ax1.tick_params(axis="y", colors="C0")
+
+    ax2 = ax1.twinx()
+    ax2.plot(histogram["lower"], sigma, color="C1")
+    ax2.set_ylabel(sigmaAxisLabel, color="C1")
+    ax2.set_yscale("log")
+    ax2.tick_params(axis="y", colors="C1")
+
+    written = savePdf(path, figure)
+    plt.close(figure)
+    return written

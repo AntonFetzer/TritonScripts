@@ -2,11 +2,11 @@ import os
 import numpy as np
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import matplotlib.pyplot as plt
 from Dependencies.TotalLETHistos import totalLETHistos
+from Dependencies.HistogramPlots import histogramWithCrossSection
+from Dependencies.SEERates import (LET_CROSS_SECTIONS, runFolders, thicknessFolders, usableHistogram,
+                                   normaliseToRate, crossSection, foldCrossSection, seeRate, writeRateCSV)
 from uncertainties import ufloat
-import os
-import natsort
 
 Expected = 'blue' # Blue
 PlusColor = 'C1'  # Orange
@@ -16,113 +16,30 @@ MEOColor = 'C9'   # Turquoise
 VAPColor = 'C3'   # Red
 GEOColor = 'C7'   # Grey
 
-'''
-The functional form of the Weibull is:
-F(x) = A (1- exp{-[(x-x0)/W] ** s}) where
-    x = effective LET in MeV-cm2/milligram;
-    F(x) = SEU cross-section in square-microns/bit;
-    A0 = limiting or plateau cross-section;
-    x0 = onset parameter, such that F(x) = 0 for x < x0;
-    W = width parameter;
-    s = a dimensionless exponent.
-https://creme.isde.vanderbilt.edu/CREME-MC/help/weibull
-'''
-
 Directory = "/scratch/work/fetzera1/GRAS/1Tile/LET_Histograms/Carrington/"
 
-# nanoXplore https://nanoxplore-wiki.atlassian.net/wiki/spaces/NAN/pages/46497810/NG-MEDIUM+Radiative+Test#Weibull-fitting
-CROSS_SECTIONS = (
-    {
-        "name": "NanoXplore SEU",
-        "L0": 0.11,
-        "W": 36.0,
-        "S": 4.4,
-        "A0": 5.2e-9,
-    },
-    {
-        "name": "Cypress CY62167GE30-45ZXI",
-        "L0": 0.1,
-        "W": 70.0,
-        "S": 1.2,
-        "A0": 2.6e-7,
-    },
-)
+# Process all run folders in the directory, or only the ones given as command line arguments (all in one directory)
+Directory, FolderList = runFolders(Directory, sys.argv[1:])
 
-
-def f(LET, parameters):
-    """
-    Return the Weibull SEE cross section in cm2/bit for the given LET values.
-
-    Parameters:
-    LET (numpy.ndarray): Array of LET values.
-    parameters (dict): Weibull parameters with keys 'L0', 'W', 'S', 'A0'.
-
-    Returns:
-    numpy.ndarray: Array of cross sections.
-    """
-
-    result = np.zeros_like(LET)
-    # Remove all values of LET that are less than x0
-    mask = LET > parameters["L0"]
-    # A * (1 - np.exp(-((x - x0) / W) ** s))
-    result[mask] = parameters["A0"] * (
-        1 - np.exp(-((LET[mask] - parameters["L0"]) / parameters["W"]) ** parameters["S"])
-    )
-
-    return result
-
-
-# Generate list of all folder names in the directory
-FolderList = [f_ for f_ in os.listdir(Directory) if os.path.isdir(os.path.join(Directory, f_))]
-
-# Alternatively process only the run folders given as command line arguments (all in one directory)
-if len(sys.argv) > 1:
-    Paths = [os.path.abspath(p) for p in sys.argv[1:]]
-    Directory = os.path.dirname(Paths[0]) + "/"
-    FolderList = [os.path.basename(p) for p in Paths]
-    if any(os.path.dirname(p) + "/" != Directory for p in Paths):
-        sys.exit("The run folders must all be in one directory")
-
-for parameters in CROSS_SECTIONS:
+for parameters in LET_CROSS_SECTIONS:
     CrossectionName = parameters["name"]
-
-    header = "Data,Shielding,Crossection,SEE_Rate,SEE_Error,Relative_SEE_Error,Entries_Contributing_To_SEE"
 
     for F, Folder in enumerate(FolderList):
 
-        if Folder == "OldResults":
-            continue
+        # One line per thickness in the CSV of this run
+        Rows = []
 
-        # Generate list of all subfolder names in the Folder
-        SubFolderList = [f_ for f_ in os.listdir(Directory + Folder) if os.path.isdir(os.path.join(Directory + Folder, f_))]
-
-        # Sort the SubFolderList
-        SubFolderList = natsort.natsorted(SubFolderList)
-
-        for SubFolder in SubFolderList:
+        for SubFolder in thicknessFolders(Directory, Folder):
 
             path = Directory + Folder + "/" + SubFolder + "/Res/"
             ## ----------------------------------- LET Read-in -----------------------------------------------------------
             LETHist, _ = totalLETHistos(path)
 
-            # Check if the LET histogram is None (no files found)
-            if LETHist is None:
-                print("No LET histogram found in", path, "-> skipping")
-                continue
-
-            # Ensure the histogram arrays returned have consistent binning/length.
-            # The script requires 'lower','upper','mean','value','error','entries' to be the same length.
-            required_keys = ['lower', 'upper', 'mean', 'value', 'error', 'entries']
-            lengths = [len(LETHist[k]) for k in required_keys]
-            if not all(l == lengths[0] for l in lengths):
-                print("Inconsistent histogram lengths in", path, "-> skipping")
+            if not usableHistogram(LETHist, path):
                 continue
 
             # Normalise from 11 year fluence to flux
-            if "-electron" in Folder or "-solar-proton" in Folder or "-trapped-proton" in Folder or "-cosmic-proton" in Folder or "-cosmic-iron" in Folder or "-solar-helium" in Folder or "-solar-oxygen" in Folder or "-solar-iron" in Folder or "-solar-nickel" in Folder:
-                NormalisationFactor = 4015 * 24 * 3600  # seconds in 11 years
-                LETHist['value'] = LETHist['value'] / NormalisationFactor
-                LETHist['error'] = LETHist['error'] / NormalisationFactor
+            LETHist = normaliseToRate(LETHist, Folder)
 
             NumberEntriesLETHist = np.sum(LETHist['entries'])
             TotalLET = np.sum(LETHist['value'] * LETHist['mean'])
@@ -130,98 +47,37 @@ for parameters in CROSS_SECTIONS:
             TotalLETError = np.sqrt(np.sum(TotalLETError))
             TotalLETU = ufloat(TotalLET, TotalLETError)
 
+            Sigma = crossSection(LETHist['lower'], parameters)
 
             ### LET Histogram ###############
-            fig, ax1 = plt.subplots(1)
-            plt.bar(LETHist['lower'], LETHist['value'], width=LETHist['upper'] - LETHist['lower'], align='edge', alpha=0.3)
-            plt.errorbar(LETHist['mean'], LETHist['value'], LETHist['error'], fmt=' ', capsize=5, elinewidth=1,
-                         capthick=1, label="LET histogram")
-            plt.plot([], [], label="SEU cross section", color='C1')
-            plt.yscale("log")
-            plt.xscale("log")
-            plt.grid(which='major')
-            plt.title(Folder + " LET histogram behind " + SubFolder + " Al\nTotal LET rate = " + str(TotalLETU) + " MeV cm2 mg-1 s-1\nTotal entries = " + str(int(NumberEntriesLETHist)))
-            plt.xlabel("LET [MeV cm2 mg-1]")
-            ax1.legend(loc='center right')
-            ax1.set_ylabel("Rate per LET bin [cm-2 s-1]", color='C0')
-            ax1.tick_params(axis='y', colors='C0')
-
-            ax2 = ax1.twinx()
-            plt.plot(LETHist['lower'], f(LETHist['lower'], parameters), color='C1')
-            ax2.set_ylabel(CrossectionName + " cross section [cm2 bit-1]", color='C1')
-            plt.yscale("log")
-            ax2.tick_params(axis='y', colors='C1')
-
-            plt.savefig(path + "../" + Folder + " " + CrossectionName + " " + SubFolder + " LET-Hist.pdf", format='pdf', bbox_inches="tight")
-            plt.close('all')
-            #plt.show()
+            histogramWithCrossSection(
+                LETHist, Sigma, path + "../" + Folder + " " + CrossectionName + " " + SubFolder + " LET-Hist.pdf",
+                title=Folder + " LET histogram behind " + SubFolder + " Al\nTotal LET rate = " + str(TotalLETU) + " MeV mg-1 s-1\nTotal entries = " + str(int(NumberEntriesLETHist)),
+                xlabel="LET [MeV cm2 mg-1]", ylabel="Rate per LET bin [cm-2 s-1]", label="LET histogram",
+                sigmaLabel="SEU cross section", sigmaAxisLabel=CrossectionName + " cross section [cm2 bit-1]", legendLoc='center right')
 
 
             ### SEE rate ###############
 
-            SEEHist = LETHist
-            # Scale the value and error by the cross section fuction
-            SEEHist['value'] = LETHist['value'] * f(LETHist['mean'], parameters)
-            SEEHist['error'] = LETHist['error'] * f(LETHist['mean'], parameters)
+            SEEHist = foldCrossSection(LETHist, parameters)
 
-            ################## Calculating total SEE Rate #####################################
-
-            SEERate = np.sum(SEEHist['value'])
-
-            SEERateError = np.square(SEEHist['error'])
-            SEERateError = np.sqrt(np.sum(SEERateError))
-
+            SEERate, SEERateError, RelativeError, EntriesContributingToSEE = seeRate(SEEHist)
             SEERateU = ufloat(SEERate, SEERateError)
-            if SEERate != 0:
-                RelativeError = SEERateError / SEERate
-            else:
-                RelativeError = np.nan
-
-            # Calculate number of entries contributing to the total SEE rate
-            EntriesContributingToSEE = 0  # Initialize counter
-            for i in range(len(SEEHist['value'])):
-                if SEEHist['value'][i] > 0:
-                    EntriesContributingToSEE += SEEHist['entries'][i]
 
             print("The total SEE rate is:", SEERateU, " s-1 bit-1 with ", int(EntriesContributingToSEE), " entries contributing to the SEE rate.")
-            #print("or:", SEERateU * 8e+9, " s-1 Gbyte-1 ")
 
-            # Write the results to a CSV file next to the plots
-            List = (Folder, SubFolder, CrossectionName, SEERate, SEERateError, RelativeError, EntriesContributingToSEE)
-
-            String = ','.join(map(str, List))
-            #print(String)
-            CSVFile = open(path + "../" + Folder + " " + CrossectionName + " " + SubFolder + " SEE-Rate.csv", 'w')
-            CSVFile.write(header + "\n")
-            CSVFile.writelines(String + "\n")
-            CSVFile.close()
+            Rows.append((SubFolder, SEERate, SEERateError, RelativeError, EntriesContributingToSEE))
 
             if SEERate == 0:
                 print("No SEEs in", path)
                 continue
 
             ### SEE Histogram ###############
+            histogramWithCrossSection(
+                SEEHist, Sigma, path + "../" + Folder + " " + CrossectionName + " " + SubFolder + " SEE-Hist.pdf",
+                title=Folder + " SEU rate histogram behind " + SubFolder + " Al\nTotal SEU rate = " + str(SEERateU) + " s-1 bit-1\nEntries contributing to SEU = " + str(int(EntriesContributingToSEE)),
+                xlabel="LET [MeV cm2 mg-1]", ylabel="SEU rate per LET bin [s-1 bit-1]", label="SEU rate histogram",
+                sigmaLabel="SEU cross section", sigmaAxisLabel=CrossectionName + " cross section [cm2 bit-1]", legendLoc='center left')
 
-            fig, ax1 = plt.subplots(1)
-            plt.bar(SEEHist['lower'], SEEHist['value'], width=SEEHist['upper'] - SEEHist['lower'], align='edge', alpha=0.3)
-            plt.errorbar(SEEHist['mean'], SEEHist['value'], SEEHist['error'], fmt=' ', capsize=5, elinewidth=1,
-                         capthick=1, label="SEU rate histogram")
-            plt.plot([], [], label="SEU cross section", color='C1')
-            plt.yscale("log")
-            plt.xscale("log")
-            plt.grid(which='major')
-            plt.title(Folder + " SEU rate histogram behind " + SubFolder + " Al\nTotal SEU rate = " + str(SEERateU) + " s-1 bit-1\nEntries contributing to SEU = " + str(int(EntriesContributingToSEE)))
-            plt.xlabel("LET [MeV cm2 mg-1]")
-            ax1.legend(loc='center left')
-            ax1.set_ylabel("SEU rate per LET bin [s-1 bit-1]", color='C0')
-            ax1.tick_params(axis='y', colors='C0')
-
-            ax2 = ax1.twinx()
-            plt.plot(LETHist['lower'], f(LETHist['lower'], parameters), color='C1')
-            ax2.set_ylabel(CrossectionName + " cross section [cm2 bit-1]", color='C1')
-            plt.yscale("log")
-            ax2.tick_params(axis='y', colors='C1')
-
-            plt.savefig(path + "../" + Folder + " " + CrossectionName + " " + SubFolder + " SEE-Hist.pdf", format='pdf', bbox_inches="tight")
-            plt.close('all')
-            #plt.show()
+        # Write the results of all thicknesses to a CSV file in the run folder
+        writeRateCSV(Directory + Folder + "/" + Folder + " " + CrossectionName + " SEE-Rate.csv", Folder, CrossectionName, Rows)

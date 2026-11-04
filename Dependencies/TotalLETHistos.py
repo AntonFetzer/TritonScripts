@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from Read.ReadLETHistos import readLETHistos
-from Dependencies.MergeHistograms import mergeHistograms
+from Dependencies.MergeHistograms import mergeHistograms, completeResultFiles
 import sys
 import os
 
@@ -15,36 +15,17 @@ def totalLETHistos(path):
         path (str): The path to the folder containing the csv files.
 
     Returns:
-        dict: A dictionary containing the accumulated LET histograms.
+        tuple: The accumulated LET and effective LET histograms, or (None, None) if the
+            folder has no complete csv file with histogram data.
 
     Raises:
-        SystemExit: If no files are found in the specified path.
         SystemExit: If the histogram bins in a file do not match the bins in the first file.
 
     """
     print("\nReading in all csv files in folder:", path)
 
-    # Get list of all csv files in Path
-    Files = [f for f in os.listdir(path) if "LET" in f and f.endswith(".csv")]
-
-    if not Files:
-        print("ERROR !!! No files found")
-        exit()
-
-    # A job killed while writing its checkpoint leaves an empty or truncated
-    # csv. Complete GRAS csv files always end with an 'End of File' line, so
-    # anything else is corrupt and gets deleted before reading.
-    Complete = []
-    for File in Files:
-        FilePath = os.path.join(path, File)
-        with open(FilePath, 'rb') as f:
-            Tail = f.read()[-64:]
-        if b"'End of File'" in Tail:
-            Complete.append(File)
-        else:
-            print("WARNING: deleting incomplete csv", FilePath)
-            os.remove(FilePath)
-    Files = Complete
+    # Get list of all complete csv files in Path
+    Files = completeResultFiles(path, "LET")
 
     if not Files:
         print(f"ERROR !!! No complete csv files in {path}")
@@ -116,7 +97,7 @@ if __name__ == "__main__":
             plt.yscale("log")
             plt.xscale("log")
             plt.grid()
-            plt.title("LET Histogram " + f"{NumberEntriesLETHist:.2e}" + " entries\nTotal LET by Values " + f"{TotalLETbyValues:.2e}" + " [MeV cm2 mg-1]")
+            plt.title("LET Histogram " + f"{NumberEntriesLETHist:.2e}" + " entries\nTotal LET by Values " + f"{TotalLETbyValues:.2e}" + " [MeV mg-1 s-1]")
             plt.xlabel("LET [MeV cm2 mg-1]")
             plt.ylabel("Rate per LET bin [cm-2 s-1]")
 

@@ -62,7 +62,7 @@ def readLETHistos(file):
     Eff['events'] = NumOfEvt
 
     if len(LET['lower']) == 0:
-        # Corrupt csvs are deleted upstream (TotalLETHistos checks for the
+        # Corrupt csvs are skipped upstream (TotalLETHistos checks for the
         # 'End of File' terminator), so this only fires on standalone reads.
         print("WARNING: no histogram data in", file, "(empty or truncated csv)")
     elif np.sum(LET['value']) == 0:
@@ -76,7 +76,7 @@ def readLETHistos(file):
         LET[key] = LET[key] / C
         Eff[key] = Eff[key] / C
 
-    # The LET spectra are in 'counts' per MeV/cm bin ???
+    # The LET spectra are in 'counts' per bin (the 'value' column of the csv), not per MeV/cm
     # If the input spcectrum is in [cm-2 s-1] then the counts are in [s-1] per interface area between the shield and detector
     # This area is 1e6 cm2 in the 1Tile.gdml file written in December 2022
     # To get the values in [cm-2 s-1] they have to be divided by 1e6
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     plt.yscale("log")
     plt.xscale("log")
     plt.grid()
-    plt.title("LET Histogram " + f"{NumberEntriesLETHist:.2e}" + " entries\nTotal LET by Values " + f"{TotalLETbyValues:.2e}" + " [MeV cm2 mg-1]")
+    plt.title("LET Histogram " + f"{NumberEntriesLETHist:.2e}" + " entries\nTotal LET by Values " + f"{TotalLETbyValues:.2e}" + " [MeV mg-1 s-1]")
     plt.xlabel("LET [MeV cm2 mg-1]")
     plt.ylabel("Rate per LET bin [cm-2 s-1]")
 
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     plt.yscale("log")
     plt.xscale("log")
     plt.grid()
-    plt.title(f"EffLET Histogram {NumberEntriesEffHist:.2e} entries\nTotal EffLET by Values {TotalEffLETbyValues:.2e} MeV cm2 mg-1")
+    plt.title(f"EffLET Histogram {NumberEntriesEffHist:.2e} entries\nTotal EffLET by Values {TotalEffLETbyValues:.2e} MeV mg-1 s-1")
     plt.xlabel("EffLET [MeV cm2 mg-1]")
     plt.ylabel("Rate per LET bin [cm-2 s-1]")
     '''

@@ -12,13 +12,13 @@ def weibull_func(x, A, x0, W, s):
 
 # Your data points
 # x_data = np.array([30.260, 3.593, 0.965])   # LET [MeV cm2 mg-1]
-# y_data = np.array([7.505e-12, 1.138e-11, 1.418e-12])   # cross section [cm-2]
+# y_data = np.array([7.505e-12, 1.138e-11, 1.418e-12])   # cross section [cm2]
 
 # x_data = np.array([3.576, 30.243, 48.165])   # LET [MeV cm2 mg-1]
-# y_data = np.array([3.656E-07, 2.548E-07, 2.269E-07])   # cross section [cm-2]
+# y_data = np.array([3.656E-07, 2.548E-07, 2.269E-07])   # cross section [cm2]
 
 x_data = np.array([0.963, 2.246, 3.479, 6.123])   # LET [MeV cm2 mg-1]
-y_data = np.array([9.031E-08, 2.632E-07, 1.447E-06, 2.254E-06])   # cross section [cm-2]
+y_data = np.array([9.031E-08, 2.632E-07, 1.447E-06, 2.254E-06])   # cross section [cm2]
 
 # Initial guess for the parameters
 # p0 = [A, x0, W, s]
@@ -54,7 +54,7 @@ Fit_label = f'Fit: A={A:.3e}, x0={x0:.3e}, W={W:.3e}, s={s:.3f}'
 plt.plot(x_Fit, y_Fit, 'r-', label=Fit_label)
 
 plt.xlabel('LET [MeV cm2 mg-1]')
-plt.ylabel('Cross Section [cm-2] ')
+plt.ylabel('Cross Section [cm2] ')
 plt.title("SEE cross section vs LET")
 plt.xlim(min(x_data)*0.1, max(x_data)*2)
 plt.ylim(min(y_data)*0.1, max(y_data)*2)

@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 from Read.ReadFluenceHistos import readFluenceHistos
-from Dependencies.MergeHistograms import mergeHistograms
-import sys
+from Dependencies.MergeHistograms import mergeHistograms, completeResultFiles
 import os
 
 def totalFluenceHistos(path):
@@ -12,25 +11,21 @@ def totalFluenceHistos(path):
         path (str): The path to the Res folder containing the csv files.
 
     Returns:
-        dict: A dictionary containing the accumulated Fluence histos.
+        tuple: The accumulated electron and proton histograms, or (None, None) if the
+            folder has no complete csv file.
 
     Raises:
-        SystemExit: If no files are found in the specified path.
         SystemExit: If the histogram bins in a file do not match the bins in the first file.
     """
     print("\nReading in all csv files in folder:", path)
 
-    # Get list of all csv files in Path
-    Files = [f for f in os.listdir(path) if "Fluence" in f and f.endswith(".csv")]
-    
+    # Get list of all complete csv files in Path
+    Files = completeResultFiles(path, "Fluence")
+
     if not Files:
-        print("ERROR !!! No files found")
-        # Wait for user input before returning, but only on a terminal: an open pipe
-        # without input (ssh, a pipeline) never delivers EOF and would block input().
-        if sys.stdin.isatty():
-            input("Press Enter to continue")
-        return None
-    
+        print(f"ERROR !!! No complete csv files in {path}")
+        return None, None
+
     NumFiles = len(Files)
     # print("Number of Files:", NumFiles)
 

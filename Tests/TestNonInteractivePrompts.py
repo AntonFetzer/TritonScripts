@@ -1,7 +1,7 @@
 """Regression test for the "Press Enter" prompts of the shared readers.
 
-mergeHistograms, totalDose and totalFluenceHistos ask for Enter when the
-merged files are inconsistent or missing. Run over ssh or in a pipeline, stdin
+mergeHistograms and totalDose ask for Enter when the merged files are
+inconsistent or missing. Run over ssh or in a pipeline, stdin
 can be an open pipe that never delivers EOF, and input() then blocks forever
 (a fluence plot hung this way). The prompts must therefore only appear when
 stdin is a terminal.
@@ -54,13 +54,13 @@ class TestNonInteractivePrompts(unittest.TestCase):
         _, prompt = self.mergeInconsistent(isatty=True)
         prompt.assert_called_once()
 
-    def test_missing_fluence_files_do_not_prompt_without_terminal(self):
+    def test_missing_fluence_files_never_prompt(self):
         with tempfile.TemporaryDirectory() as empty, \
              mock.patch("sys.stdin") as stdin, \
              mock.patch("builtins.input") as prompt, \
              mock.patch("builtins.print"):
-            stdin.isatty.return_value = False
-            self.assertIsNone(totalFluenceHistos(empty))
+            stdin.isatty.return_value = True
+            self.assertEqual(totalFluenceHistos(empty), (None, None))
         prompt.assert_not_called()
 
 

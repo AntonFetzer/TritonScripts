@@ -1,6 +1,9 @@
-import csv
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from Dependencies.SEERates import readRateCSVs
 
 Directory = "/scratch/work/fetzera1/GRAS/1Tile/Fluence_Histograms/CarringtonShielded/"
 
@@ -24,65 +27,32 @@ SAP_PeakColor = 'C9' # Turquoise
 
 for CrossectionName in CrossectionNames:
 
-    # Initialize the final data structure
-    Dict = {}
-
-    # Read the CSV file
-    with open(Directory + "SEERates_" + CrossectionName + ".csv", mode='r') as file:
-        csv_reader = csv.DictReader(file)
-        
-        for row in csv_reader:
-            # Extract relevant data
-            dataset_name = row['Data']
-            shielding = row['Shielding']
-            see_rate = float(row['SEE_Rate'])
-            see_error = float(row['SEE_Error'])
-            entries_contributing_to_see = float(row['Entries_Contributing_To_SEE'])
-            
-            # Initialize the inner dictionary if it doesn't exist
-            if dataset_name not in Dict:
-                Dict[dataset_name] = {'Shielding': [], 'SEE_Rate': [], 'SEE_Error': [], 'Entries_Contributing_To_SEE': []}
-
-
-            if CrossectionName != row['Crossection']:
-                raise ValueError("Crossection name is not the same for all entries")
-
-            # Store the data dictionary
-            Dict[dataset_name]['Shielding'].append(shielding)
-            Dict[dataset_name]['SEE_Rate'].append(see_rate)
-            Dict[dataset_name]['SEE_Error'].append(see_error)
-            Dict[dataset_name]['Entries_Contributing_To_SEE'].append(entries_contributing_to_see)
-
-    # Convert the lists to numpy arrays
-    for key in Dict:
-        for inner_key in Dict[key]:
-            Dict[key][inner_key] = np.array(Dict[key][inner_key])
+    # Read the CSV file of every run
+    Dict = readRateCSVs([Directory + "*/* " + CrossectionName + " SEE-Rate.csv"], CrossectionName)
 
 
     plt.figure(figsize=(5, 8))
     ########################### Carrington SEP ###################################
-    Shielding = Dict['Carrington-SEP-Expected-Int']['Shielding']
-    ExpectedInt = Dict['Carrington-SEP-Expected-Int']['SEE_Rate']
-    Minus = Dict['Carrington-SEP-Minus2Sigma-Int']['SEE_Rate']
-    Plus = Dict['Carrington-SEP-Plus2Sigma-Int']['SEE_Rate']
-    Error = Dict['Carrington-SEP-Expected-Int']['SEE_Error']
+    # The EVT2026 runs replace the -Int runs, which are in the deprecated CarringtonShielded_2xTooHigh
+    Shielding = Dict['Carrington-SEP-Expected-EVT2026']['Shielding']
+    EVT2026 = Dict['Carrington-SEP-Expected-EVT2026']['SEE_Rate']
+    Minus = Dict['Carrington-SEP-Minus2Sigma-EVT2026']['SEE_Rate']
+    Plus = Dict['Carrington-SEP-Plus2Sigma-EVT2026']['SEE_Rate']
+    Error = Dict['Carrington-SEP-Expected-EVT2026']['SEE_Error']
 
-    plt.errorbar(Shielding, ExpectedInt, yerr=Error, label="GEO EVT 1-in-150 year peak SEP"
+    plt.errorbar(Shielding, EVT2026, yerr=Error, label="GEO EVT 1-in-150 year peak SEP"
                 , color=Expected, **default_errorbar_style)
 
-    plt.fill_between(Shielding, ExpectedInt, Plus, color=PlusColor, alpha=0.5, label="GEO EVT 1-in-150 year peak SEP +2\u03C3") 
-    plt.fill_between(Shielding, ExpectedInt, Minus, color=MinusColor, alpha=0.5, label="GEO EVT 1-in-150 year peak SEP -2\u03C3")
+    plt.fill_between(Shielding, EVT2026, Plus, color=PlusColor, alpha=0.5, label="GEO EVT 1-in-150 year peak SEP +2\u03C3")
+    plt.fill_between(Shielding, EVT2026, Minus, color=MinusColor, alpha=0.5, label="GEO EVT 1-in-150 year peak SEP -2\u03C3")
 
 
 
-    EVT2026 = Dict['Carrington-SEP-Expected-EVT2026']['SEE_Rate']
     EVT2026_Extr = Dict['Carrington-SEP-Expected-EVT2026-10to1000MeV']['SEE_Rate']
     EVT2026_Fit = Dict['Carrington-SEP-Expected-EVT2026-Fit']['SEE_Rate']
     EVT2026_Fit_Extr = Dict['Carrington-SEP-Expected-EVT2026-Fit-10to1000MeV']['SEE_Rate']
 
 
-    plt.errorbar(Shielding, EVT2026, label="SEP EVT2026"
-                 , color='C4', **default_errorbar_style)
     plt.errorbar(Shielding, EVT2026_Extr, label="SEP EVT2026 10-1000 MeV"
                  , color='C5', **default_errorbar_style)
     plt.errorbar(Shielding, EVT2026_Fit, label="SEP EVT2026 Fit"
@@ -99,10 +69,11 @@ for CrossectionName in CrossectionNames:
     #             yerr=Dict['Carrington-SEP-Minus2Sigma-Int']['SEE_Error'], label="Carrington SEP EVT -2\u03C3"
     #             , color=MinusColor, **default_errorbar_style)
 
-    # Plot the GEO Solar Proton 5min Peak Flux
-    plt.errorbar(Dict['GEO-SolarProton-5minPeakFlux']['Shielding'], Dict['GEO-SolarProton-5minPeakFlux']['SEE_Rate'],
-                yerr=Dict['GEO-SolarProton-5minPeakFlux']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min Proton\nGRAS Shieleded Spectrum Folding"
-                , color=CREME96Color, linestyle=':', **default_errorbar_style)
+    # Plot the GEO Solar Proton 5min Peak Flux, once its new one-sided run exists
+    if 'GEO-SolarProton-5minPeakFlux' in Dict:
+        plt.errorbar(Dict['GEO-SolarProton-5minPeakFlux']['Shielding'], Dict['GEO-SolarProton-5minPeakFlux']['SEE_Rate'],
+                    yerr=Dict['GEO-SolarProton-5minPeakFlux']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min Proton\nGRAS Shieleded Spectrum Folding"
+                    , color=CREME96Color, linestyle=':', **default_errorbar_style)
 
 
     ########################### LEO ###################################

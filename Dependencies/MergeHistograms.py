@@ -3,6 +3,36 @@ import matplotlib.pyplot as plt
 import sys
 import os
 
+def completeResultFiles(path, keyword):
+    """
+    Returns the complete GRAS csv files of one kind in a result folder.
+
+    A job killed while writing its checkpoint leaves an empty or truncated csv.
+    Complete GRAS csv files always end with an 'End of File' line, so anything
+    else is skipped with a warning. It stays on disk for inspection.
+
+    Args:
+        path (str): The path to the result folder.
+        keyword (str): Text in the names of the files, for example 'LET' or 'Fluence'.
+
+    Returns:
+        list: The names of the complete files, empty if the folder does not exist.
+    """
+    if not os.path.isdir(path):
+        return []
+
+    Complete = []
+    for File in os.listdir(path):
+        if keyword in File and File.endswith(".csv"):
+            with open(os.path.join(path, File), 'rb') as f:
+                Tail = f.read()[-64:]
+            if b"'End of File'" in Tail:
+                Complete.append(File)
+            else:
+                print("WARNING: skipping incomplete csv", os.path.join(path, File))
+    return Complete
+
+
 def mergeHistograms(list_of_histograms):
     """
     Merges a list of GRAS histograms of identical runs using proper error

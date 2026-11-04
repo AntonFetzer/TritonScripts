@@ -1,180 +1,58 @@
-#!/usr/bin/env python3
-"""Estimate SEE rates for the Carrington CREME96 and SAPPHIRE datasets.
+"""Estimate SEE rates for the Carrington all-species datasets.
 
 Adapted from SEE-RateEstimateCarringtonLET.py.  By default, all folders with
 All-Species in their name in LET_Histograms are analysed.  Alternative dataset
-directories can be supplied as positional arguments.
+directories can be supplied as command line arguments.
+
+Every species folder is a run and gets one SEE-Rate CSV per cross section.  No
+histogram plots are made: with about 2900 thicknesses they would take hours.
 """
-
-import argparse
-import csv
 import os
-import re
 import sys
-from pathlib import Path
-import numpy as np
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from Dependencies.TotalLETHistos import totalLETHistos
+from Dependencies.SEERates import (LET_CROSS_SECTIONS, runFolders, thicknessFolders, usableHistogram,
+                                   normaliseToRate, foldCrossSection, seeRate, writeRateCSV)
+from uncertainties import ufloat
 
+BaseDirectory = "/scratch/work/fetzera1/GRAS/1Tile/LET_Histograms/"
 
-# totalLETHistos and its imports live in the shared Python analysis directory.
-ANALYSIS_ROOT = Path("/scratch/work/fetzera1/Python")
-sys.path.insert(0, str(ANALYSIS_ROOT))
-from Dependencies.TotalLETHistos import totalLETHistos  # noqa: E402
+# Generate list of all folders with All-Species in their name
+SetList = [BaseDirectory + f_ for f_ in sorted(os.listdir(BaseDirectory)) if "All-Species" in f_ and os.path.isdir(BaseDirectory + f_)]
 
+# Alternatively process only the folders given as command line arguments
+if len(sys.argv) > 1:
+    SetList = [os.path.abspath(p) for p in sys.argv[1:]]
 
-CROSS_SECTIONS = (
-    {
-        "name": "NanoXplore SEU",
-        "L0": 0.11,
-        "W": 36.0,
-        "S": 4.4,
-        "A0": 5.2e-9,
-    },
-    {
-        "name": "Cypress CY62167GE30-45ZXI",
-        "L0": 0.1,
-        "W": 70.0,
-        "S": 1.2,
-        "A0": 2.6e-7,
-    },
-)
+for parameters in LET_CROSS_SECTIONS:
+    CrossectionName = parameters["name"]
 
-# The SAPPHIRE SEF spectra are normalised to a 4015-day (11-year) mission
-# fluence (cm-2), so they must be divided by the mission duration to obtain a
-# rate.  The CREME96 spectra are already normalised to flux (cm-2 s-1) and
-# need no time normalisation.
-NORMALISATION_SECONDS = 4015 * 24 * 3600
+    for SetFolder in SetList:
 
-DATA_ROOT = Path("/scratch/work/fetzera1/GRAS/1Tile/LET_Histograms")
-DEFAULT_DIRECTORIES = sorted(path for path in DATA_ROOT.iterdir() if path.is_dir() and "All-Species" in path.name)
+        Directory, FolderList = runFolders(SetFolder + "/", [])
 
+        for F, Folder in enumerate(FolderList):
 
-def natural_key(path):
-    """Sort paths naturally (for example, 2mm before 16mm)."""
-    return [int(part) if part.isdigit() else part.lower() for part in re.split(r"(\d+)", path.name)]
+            # One line per thickness in the CSV of this run
+            Rows = []
 
+            for SubFolder in thicknessFolders(Directory, Folder):
 
-def cross_section(let_values, parameters):
-    """Return the Weibull SEE cross section in cm2/bit."""
-    let_values = np.asarray(let_values, dtype=float)
-    result = np.zeros_like(let_values)
-    mask = let_values > parameters["L0"]
-    result[mask] = parameters["A0"] * (
-        1.0
-        - np.exp(
-            -(
-                (let_values[mask] - parameters["L0"]) / parameters["W"]
-            )
-            ** parameters["S"]
-        )
-    )
-    return result
+                path = Directory + Folder + "/" + SubFolder + "/Res/"
+                ## ----------------------------------- LET Read-in -----------------------------------------------------------
+                LETHist, _ = totalLETHistos(path)
 
-
-def analyse_directory(directory, parameters):
-    """Analyse every species/shielding combination in one dataset."""
-    directory = Path(directory).expanduser().resolve()
-    if not directory.is_dir():
-        print(f"Dataset directory does not exist: {directory}", file=sys.stderr)
-        return False
-
-    # The GEO SAPPHIRE campaign was simulated with the old fluence-normalised
-    # macros (cm-2 per 4015-day mission) and must be divided by the mission
-    # duration.  All macros generated since 2026-07-13 (including the LEO
-    # SAPPHIRE set) are flux-normalised (cm-2 s-1) and are already rates.
-    normalisation = NORMALISATION_SECONDS if "GEO-SAPPHIRE" in directory.name else 1.0
-
-    cross_section_name = parameters["name"]
-    output_path = directory / f"SEERates_{cross_section_name}.csv"
-    species_folders = sorted(
-        (path for path in directory.iterdir() if path.is_dir() and path.name != "NoSEEs"),
-        key=natural_key,
-    )
-
-    with output_path.open("w", newline="") as output_file:
-        writer = csv.writer(output_file)
-        writer.writerow(
-            (
-                "Data",
-                "Shielding",
-                "Crossection",
-                "SEE_Rate",
-                "SEE_Error",
-                "Relative_SEE_Error",
-                "Entries_Contributing_To_SEE",
-            )
-        )
-
-        for species_folder in species_folders:
-            shielding_folders = sorted(
-                (path for path in species_folder.iterdir() if path.is_dir()),
-                key=natural_key,
-            )
-            for shielding_folder in shielding_folders:
-                result_directory = shielding_folder / "Res"
-                let_files = list(result_directory.glob("*LET*.csv")) if result_directory.is_dir() else []
-                if not let_files:
-                    print(f"No LET histogram found in {result_directory} -> skipping")
+                if not usableHistogram(LETHist, path):
                     continue
 
-                let_hist, _ = totalLETHistos(os.fspath(result_directory))
-                if let_hist is None:
-                    print(f"Only empty csv files in {result_directory} -> skipping")
-                    continue
-                required_keys = ("lower", "upper", "mean", "value", "error", "entries")
-                lengths = [len(let_hist[key]) for key in required_keys]
-                if not lengths or any(length != lengths[0] for length in lengths):
-                    print(f"Inconsistent histogram lengths in {result_directory} -> skipping")
-                    continue
+                # Normalise from 11 year fluence to flux where needed, then scale by the cross section
+                SEEHist = foldCrossSection(normaliseToRate(LETHist, Folder), parameters)
 
-                values = np.asarray(let_hist["value"], dtype=float) / normalisation
-                errors = np.asarray(let_hist["error"], dtype=float) / normalisation
-                weibull = cross_section(let_hist["mean"], parameters)
-                see_values = values * weibull
-                see_errors = errors * weibull
+                SEERate, SEERateError, RelativeError, EntriesContributingToSEE = seeRate(SEEHist)
 
-                see_rate = float(np.sum(see_values))
-                see_rate_error = float(np.sqrt(np.sum(np.square(see_errors))))
-                relative_error = see_rate_error / see_rate if see_rate else np.nan
-                entries = float(np.sum(np.asarray(let_hist["entries"])[see_values > 0]))
+                print("The total SEE rate is:", ufloat(SEERate, SEERateError), " s-1 bit-1 with ", int(EntriesContributingToSEE), " entries contributing to the SEE rate.")
 
-                print(
-                    f"{species_folder.name}/{shielding_folder.name}: "
-                    f"{see_rate:.6e} +/- {see_rate_error:.2e} s-1 bit-1 "
-                    f"({int(entries)} contributing entries)"
-                )
-                writer.writerow(
-                    (
-                        species_folder.name,
-                        shielding_folder.name,
-                        cross_section_name,
-                        see_rate,
-                        see_rate_error,
-                        relative_error,
-                        entries,
-                    )
-                )
+                Rows.append((SubFolder, SEERate, SEERateError, RelativeError, EntriesContributingToSEE))
 
-    print(f"Wrote {output_path}")
-    return True
-
-
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "directories",
-        nargs="*",
-        type=Path,
-        default=DEFAULT_DIRECTORIES,
-        help="dataset directories (defaults to all All-Species folders in LET_Histograms)",
-    )
-    args = parser.parse_args()
-    success = all(
-        analyse_directory(directory, parameters)
-        for directory in args.directories
-        for parameters in CROSS_SECTIONS
-    )
-    return 0 if success else 1
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+            # Write the results of all thicknesses to a CSV file in the run folder
+            writeRateCSV(Directory + Folder + "/" + Folder + " " + CrossectionName + " SEE-Rate.csv", Folder, CrossectionName, Rows)
