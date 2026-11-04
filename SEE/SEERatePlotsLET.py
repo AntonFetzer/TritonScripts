@@ -34,14 +34,21 @@ for CrossectionName in CrossectionNames:
 
     plt.figure(figsize=(5, 8))
     ########################### Carrington SEP ###################################
-    Shielding = Dict['Carrington-SEP-Expected-Int']['Shielding']
+    # Shielding = Dict['Carrington-SEP-Expected-Int']['Shielding']
 
-    ExpectedInt = Dict['Carrington-SEP-Expected-Int']['SEE_Rate']
-    Error = Dict['Carrington-SEP-Expected-Int']['SEE_Error']
+    # ExpectedInt = Dict['Carrington-SEP-Expected-Int']['SEE_Rate']
+    # Error = Dict['Carrington-SEP-Expected-Int']['SEE_Error']
     
-    Minus = Dict['Carrington-SEP-Minus2Sigma-Int']['SEE_Rate']
-    Plus = Dict['Carrington-SEP-Plus2Sigma-Int']['SEE_Rate']
+    # Minus = Dict['Carrington-SEP-Minus2Sigma-Int']['SEE_Rate']
+    # Plus = Dict['Carrington-SEP-Plus2Sigma-Int']['SEE_Rate']
 
+    Shielding = Dict['Carrington-SEP-Expected-EVT2026']['Shielding']
+
+    ExpectedInt = Dict['Carrington-SEP-Expected-EVT2026']['SEE_Rate']
+    Error = Dict['Carrington-SEP-Expected-EVT2026']['SEE_Error']
+    
+    Minus = Dict['Carrington-SEP-Minus2Sigma-EVT2026']['SEE_Rate']
+    Plus = Dict['Carrington-SEP-Plus2Sigma-EVT2026']['SEE_Rate']
 
     plt.errorbar(Shielding, ExpectedInt, yerr=Error, label="GEO EVT 1-in-150 year peak SEP"
                  , color=Expected, **default_errorbar_style)
@@ -50,17 +57,20 @@ for CrossectionName in CrossectionNames:
     plt.fill_between(Shielding, ExpectedInt, Minus, color=MinusColor, alpha=0.5, label="GEO EVT 1-in-150 year peak SEP -2\u03C3")
 
 
-    EVT2026 = Dict['Carrington-SEP-Expected-EVT2026']['SEE_Rate']
-    plt.errorbar(Shielding, EVT2026, label="SEP EVT2026", color='C4', **default_errorbar_style)    
+    # EVT2026 = Dict['Carrington-SEP-Expected-EVT2026']['SEE_Rate']
+    # plt.errorbar(Shielding, EVT2026, label="SEP EVT2026", color='C4', **default_errorbar_style)    
     
-    EVT2026_Extr = Dict['Carrington-SEP-Expected-EVT2026-10to1000MeV']['SEE_Rate']
-    plt.errorbar(Shielding, EVT2026_Extr, label="SEP EVT2026 10-1000 MeV", color='C5', **default_errorbar_style)    
+    # EVT2026_Extr = Dict['Carrington-SEP-Expected-EVT2026-10to1000MeV']['SEE_Rate']
+    # plt.errorbar(Shielding, EVT2026_Extr, label="SEP EVT2026 10-1000 MeV", color='C5', **default_errorbar_style)    
     
-    EVT2026_Fit = Dict['Carrington-SEP-Expected-EVT2026-Fit']['SEE_Rate']
-    plt.errorbar(Shielding, EVT2026_Fit, label="SEP EVT2026 Fit", color='C6', **default_errorbar_style)    
+    # EVT2026_Fit = Dict['Carrington-SEP-Expected-EVT2026-Fit']['SEE_Rate']
+    # plt.errorbar(Shielding, EVT2026_Fit, label="SEP EVT2026 Fit", color='C6', **default_errorbar_style)    
     
-    EVT2026_Fit_Extr = Dict['Carrington-SEP-Expected-EVT2026-Fit-10to1000MeV']['SEE_Rate']
-    plt.errorbar(Shielding, EVT2026_Fit_Extr, label="SEP EVT2026 Fit 10-1000 MeV", color='C7', **default_errorbar_style)
+    # EVT2026_Fit_Extr = Dict['Carrington-SEP-Expected-EVT2026-Fit-10to1000MeV']['SEE_Rate']
+    # plt.errorbar(Shielding, EVT2026_Fit_Extr, label="SEP EVT2026 Fit 10-1000 MeV", color='C7', **default_errorbar_style)
+
+    # Carrington_SEP_Expected_Int = Dict['Carrington-SEP-Expected-Int']['SEE_Rate']
+    # plt.errorbar(Shielding, Carrington_SEP_Expected_Int, label="Old", color='C8', **default_errorbar_style)
 
 
     # Other EVT plots. Do not plot for now.
@@ -72,8 +82,10 @@ for CrossectionName in CrossectionNames:
     #             , color=MinusColor, **default_errorbar_style)
 
     # Carrington Electrons
-    # plt.errorbar(Dict['CarringtonElectronINTEGRALPowTabelated']['Shielding'], Dict['CarringtonElectronINTEGRALPowTabelated']['SEE_Rate'],
-    #                 yerr=Dict['CarringtonElectronINTEGRALPowTabelated']['SEE_Error'], capsize=5, elinewidth=1, capthick=2, label="Carrington Electron SEU Rate", color='C3')
+    plt.errorbar(Dict['CarringtonElectronINTEGRALPowTabelated']['Shielding'],
+                  Dict['CarringtonElectronINTEGRALPowTabelated']['SEE_Rate'],
+                    yerr=Dict['CarringtonElectronINTEGRALPowTabelated']['SEE_Error'],
+                      label="Carrington Electron SEU Rate", color='C3', **default_errorbar_style)
 
 
 
@@ -107,20 +119,20 @@ for CrossectionName in CrossectionNames:
 
     ########################### LEO ###################################
     # plt.errorbar(Dict['LEO-electron']['Shielding'], Dict['LEO-electron']['SEE_Rate'],
-    #               yerr=Dict['LEO-electron']['SEE_Error'], label="LEO Electron", capsize=5, capthick=2)
+    #               yerr=Dict['LEO-electron']['SEE_Error'], label="LEO Electron", **default_errorbar_style)
     # plt.errorbar(Dict['LEO-trapped-proton']['Shielding'], Dict['LEO-trapped-proton']['SEE_Rate'], 
-    #              yerr=Dict['LEO-trapped-proton']['SEE_Error'], label="LEO trapped proton", capsize=5, capthick=2)
+    #              yerr=Dict['LEO-trapped-proton']['SEE_Error'], label="LEO trapped proton", **default_errorbar_style)
     # plt.errorbar(Dict['LEO-solar-proton']['Shielding'], Dict['LEO-solar-proton']['SEE_Rate'], 
-    #              yerr=Dict['LEO-solar-proton']['SEE_Error'], label="LEO Solar Proton", capsize=5, capthick=2)
+    #              yerr=Dict['LEO-solar-proton']['SEE_Error'], label="LEO Solar Proton", **default_errorbar_style)
     # plt.errorbar(Dict['LEO-cosmic-proton']['Shielding'], Dict['LEO-cosmic-proton']['SEE_Rate'], 
-    #              yerr=Dict['LEO-cosmic-proton']['SEE_Error'], label="LEO Cosmic Proton", capsize=5, capthick=2)
+    #              yerr=Dict['LEO-cosmic-proton']['SEE_Error'], label="LEO Cosmic Proton", **default_errorbar_style)
     # # plt.errorbar(Dict['LEO-cosmic-iron']['Shielding'], Dict['LEO-cosmic-iron']['SEE_Rate'], 
-    # #             yerr=Dict['LEO-cosmic-iron']['SEE_Error'], label="LEO Cosmic Iron", capsize=5, capthick=2)
+    # #             yerr=Dict['LEO-cosmic-iron']['SEE_Error'], label="LEO Cosmic Iron", **default_errorbar_style)
     
     # plt.errorbar(Dict['LEO-SAPPHIRE-Solar-AllHeavyIons']['Shielding'], Dict['LEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Rate'],
-    #                 yerr=Dict['LEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Error'], label="LEO SAPPHIRE Solar Heavy Ions", color=SAP_PeakColor, capsize=5, capthick=2)
+    #                 yerr=Dict['LEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Error'], label="LEO SAPPHIRE Solar Heavy Ions", color=SAP_PeakColor, **default_errorbar_style)
     # plt.errorbar(Dict['LEO-GCR-AllHeavyIons']['Shielding'], Dict['LEO-GCR-AllHeavyIons']['SEE_Rate'],
-    #                 yerr=Dict['LEO-GCR-AllHeavyIons']['SEE_Error'], label="LEO GCR Heavy Ions", color='C4', capsize=5, capthick=2)
+    #                 yerr=Dict['LEO-GCR-AllHeavyIons']['SEE_Error'], label="LEO GCR Heavy Ions", color='C4', **default_errorbar_style)
 
     # Combine the LEO trapped proton, Solar Proton and Cosmic data
     # Dict['LEO'] = {}
@@ -145,29 +157,29 @@ for CrossectionName in CrossectionNames:
 
     ########################### GEO ###################################
     # # plt.errorbar(Dict['GEO-electron']['Shielding'], Dict['GEO-electron']['SEE_Rate'],
-    # #                 yerr=Dict['GEO-electron']['SEE_Error'], label="GEO Electron", capsize=5, capthick=2)
+    # #                 yerr=Dict['GEO-electron']['SEE_Error'], label="GEO Electron", **default_errorbar_style)
     # plt.errorbar(Dict['GEO-trapped-proton']['Shielding'], Dict['GEO-trapped-proton']['SEE_Rate'],
-    #                 yerr=Dict['GEO-trapped-proton']['SEE_Error'], label="GEO trapped proton", capsize=5, capthick=2)
+    #                 yerr=Dict['GEO-trapped-proton']['SEE_Error'], label="GEO trapped proton", **default_errorbar_style)
     # plt.errorbar(Dict['GEO-solar-proton']['Shielding'], Dict['GEO-solar-proton']['SEE_Rate'],
-    #                 yerr=Dict['GEO-solar-proton']['SEE_Error'], label="GEO Solar Proton", capsize=5, capthick=2)
+    #                 yerr=Dict['GEO-solar-proton']['SEE_Error'], label="GEO Solar Proton", **default_errorbar_style)
     # # plt.errorbar(Dict['GEO-solar-helium']['Shielding'], Dict['GEO-solar-helium']['SEE_Rate'],
-    # #                 yerr=Dict['GEO-solar-helium']['SEE_Error'], label="GEO Solar Helium", capsize=5, capthick=2)
+    # #                 yerr=Dict['GEO-solar-helium']['SEE_Error'], label="GEO Solar Helium", **default_errorbar_style)
     # # plt.errorbar(Dict['GEO-solar-oxygen']['Shielding'], Dict['GEO-solar-oxygen']['SEE_Rate'],
-    # #                 yerr=Dict['GEO-solar-oxygen']['SEE_Error'], label="GEO Solar Oxygen", capsize=5, capthick=2)
+    # #                 yerr=Dict['GEO-solar-oxygen']['SEE_Error'], label="GEO Solar Oxygen", **default_errorbar_style)
     # # plt.errorbar(Dict['GEO-solar-iron']['Shielding'], Dict['GEO-solar-iron']['SEE_Rate'],
-    # #                 yerr=Dict['GEO-solar-iron']['SEE_Error'], label="GEO Solar Iron", capsize=5, capthick=2)
+    # #                 yerr=Dict['GEO-solar-iron']['SEE_Error'], label="GEO Solar Iron", **default_errorbar_style)
     # # plt.errorbar(Dict['GEO-solar-nickel']['Shielding'], Dict['GEO-solar-nickel']['SEE_Rate'],
-    # #                 yerr=Dict['GEO-solar-nickel']['SEE_Error'], label="GEO Solar Nickel", capsize=5, capthick=2)
+    # #                 yerr=Dict['GEO-solar-nickel']['SEE_Error'], label="GEO Solar Nickel", **default_errorbar_style)
     # plt.errorbar(Dict['GEO-cosmic-proton']['Shielding'], Dict['GEO-cosmic-proton']['SEE_Rate'],
-    #                 yerr=Dict['GEO-cosmic-proton']['SEE_Error'], label="GEO Cosmic Proton", capsize=5, capthick=2)
+    #                 yerr=Dict['GEO-cosmic-proton']['SEE_Error'], label="GEO Cosmic Proton", **default_errorbar_style)
     # # plt.errorbar(Dict['GEO-cosmic-iron']['Shielding'], Dict['GEO-cosmic-iron']['SEE_Rate'],
-    # #                 yerr=Dict['GEO-cosmic-iron']['SEE_Error'], label="GEO Cosmic Iron", capsize=5, capthick=2)
+    # #                 yerr=Dict['GEO-cosmic-iron']['SEE_Error'], label="GEO Cosmic Iron", **default_errorbar_style)
 
 
     # plt.errorbar(Dict['GEO-SAPPHIRE-Solar-AllHeavyIons']['Shielding'], Dict['GEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Rate'],
-    #                 yerr=Dict['GEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Error'], label="GEO SAPPHIRE Solar Heavy Ions", color=SAP_PeakColor, capsize=5, capthick=2)
+    #                 yerr=Dict['GEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Error'], label="GEO SAPPHIRE Solar Heavy Ions", color=SAP_PeakColor, **default_errorbar_style)
     # plt.errorbar(Dict['GEO-GCR-AllHeavyIons']['Shielding'], Dict['GEO-GCR-AllHeavyIons']['SEE_Rate'],
-    #                 yerr=Dict['GEO-GCR-AllHeavyIons']['SEE_Error'], label="GEO GCR Heavy Ions", color='C4', capsize=5, capthick=2)
+    #                 yerr=Dict['GEO-GCR-AllHeavyIons']['SEE_Error'], label="GEO GCR Heavy Ions", color='C4', **default_errorbar_style)
 
 
     # # # Combine the GEO Solar Proton, Cosmic and trapped proton data
@@ -202,20 +214,20 @@ for CrossectionName in CrossectionNames:
 
     ########################### VAP ###################################
     # plt.errorbar(Dict['VAP-electron']['Shielding'], Dict['VAP-electron']['SEE_Rate'],
-    #                 yerr=Dict['VAP-electron']['SEE_Error'], label="VAP Electron", capsize=5, capthick=2)
+    #                 yerr=Dict['VAP-electron']['SEE_Error'], label="VAP Electron", **default_errorbar_style)
     # plt.errorbar(Dict['VAP-trapped-proton']['Shielding'], Dict['VAP-trapped-proton']['SEE_Rate'],
-    #                 yerr=Dict['VAP-trapped-proton']['SEE_Error'], label="VAP trapped proton", capsize=5, capthick=2)
+    #                 yerr=Dict['VAP-trapped-proton']['SEE_Error'], label="VAP trapped proton", **default_errorbar_style)
     # plt.errorbar(Dict['VAP-solar-proton']['Shielding'], Dict['VAP-solar-proton']['SEE_Rate'],
-    #                 yerr=Dict['VAP-solar-proton']['SEE_Error'], label="VAP Solar Proton", capsize=5, capthick=2)
+    #                 yerr=Dict['VAP-solar-proton']['SEE_Error'], label="VAP Solar Proton", **default_errorbar_style)
     # plt.errorbar(Dict['VAP-cosmic-proton']['Shielding'], Dict['VAP-cosmic-proton']['SEE_Rate'],
-    #                 yerr=Dict['VAP-cosmic-proton']['SEE_Error'], label="VAP Cosmic Proton", capsize=5, capthick=2)
+    #                 yerr=Dict['VAP-cosmic-proton']['SEE_Error'], label="VAP Cosmic Proton", **default_errorbar_style)
     # plt.errorbar(Dict['VAP-cosmic-iron']['Shielding'], Dict['VAP-cosmic-iron']['SEE_Rate'],
-    #                 yerr=Dict['VAP-cosmic-iron']['SEE_Error'], label="VAP Cosmic Iron", capsize=5, capthick=2)
+    #                 yerr=Dict['VAP-cosmic-iron']['SEE_Error'], label="VAP Cosmic Iron", **default_errorbar_style)
 
     # plt.errorbar(Dict['VAP-SAPPHIRE-Solar-AllHeavyIons']['Shielding'], Dict['VAP-SAPPHIRE-Solar-AllHeavyIons']['SEE_Rate'],
-    #                 yerr=Dict['VAP-SAPPHIRE-Solar-AllHeavyIons']['SEE_Error'], label="VAP SAPPHIRE Solar Heavy Ions", capsize=5, capthick=2)
+    #                 yerr=Dict['VAP-SAPPHIRE-Solar-AllHeavyIons']['SEE_Error'], label="VAP SAPPHIRE Solar Heavy Ions", **default_errorbar_style)
     # plt.errorbar(Dict['VAP-GCR-AllHeavyIons']['Shielding'], Dict['VAP-GCR-AllHeavyIons']['SEE_Rate'],
-    #                 yerr=Dict['VAP-GCR-AllHeavyIons']['SEE_Error'], label="VAP GCR Heavy Ions", capsize=5, capthick=2)
+    #                 yerr=Dict['VAP-GCR-AllHeavyIons']['SEE_Error'], label="VAP GCR Heavy Ions", **default_errorbar_style)
 
 
     # # Combine the VAP Solar Proton, Cosmic and trapped proton data
