@@ -13,7 +13,6 @@ from Dependencies.TotalDose import totalDose
 from Dependencies.MergeTotalDose import mergeTotalDose
 
 
-
 # Define default errorbar style
 default_errorbar_style = {
     'capsize': 1.5,     # Size of the error bar caps
@@ -42,7 +41,7 @@ CriticalDose10 = [10 for i in x]
 Path = "/scratch/work/fetzera1/GRAS/2D/Shielding_Curves/Carrington/"
 # The carrington fluxes are per second, but we are interested in the event fluence which corresponds to 1.23 d
 PerStoEvent = 1.23 * 24 * 60 * 60
-# The nominal runs are normalised to the 4015-day mission, but the GCR and the LEO and MEO SAPPHIRE Heavy-Ion totals are per second
+# The nominal runs are normalised to the 4015-day mission, but the GCR and the SAPPHIRE Heavy-Ion totals are per second
 PerStoMission = 4015 * 24 * 60 * 60
 
 for Species in ['Electrons', 'Protons']: 
@@ -184,7 +183,12 @@ for Species in ['Electrons', 'Protons']:
     #             color='C4', **default_errorbar_style)
 
     LEO_GCR_heavy_ions = readTotalDoseCSV(Path + "../Carrington-LEO-GCR-All-Species/TotalDose_Carrington-LEO-GCR-Heavy-Ion.csv", PerStoMission)
+    # plt.errorbar(x, LEO_GCR_heavy_ions['dose'] * 20/11, yerr=LEO_GCR_heavy_ions['error'] * 20/11, color=LEOColor, 
+    #             label="LEO 20 year dose\n(GCR Heavy Ions)", **default_errorbar_style)
+    
     LEO_SAPPHIRE_heavy_ions = readTotalDoseCSV(Path + "../Carrington-LEO-SAPPHIRE-All-Species/TotalDose_Carrington-LEO-SAPPHIRE-Heavy-Ion.csv", PerStoMission)
+    # plt.errorbar(x, LEO_SAPPHIRE_heavy_ions['dose'] * 20/11, yerr=LEO_SAPPHIRE_heavy_ions['error'] * 20/11, color=LEOColor, 
+    #             label="LEO 20 year dose\n(SAPPHIRE Heavy Ions)", **default_errorbar_style)
 
     LEO_Total = mergeTotalDose([LEO_electron, LEO_trapped_proton, LEO_solar_proton, LEO_cosmic_proton, LEO_GCR_heavy_ions, LEO_SAPPHIRE_heavy_ions])
     plt.errorbar(x, LEO_Total['dose'] * 20/11, yerr=LEO_Total['error'] * 20/11, color=LEOColor, 
@@ -219,7 +223,12 @@ for Species in ['Electrons', 'Protons']:
         #             color='C4', **default_errorbar_style)
 
         MEO_GCR_heavy_ions = readTotalDoseCSV(Path + "../Carrington-MEO-GCR-All-Species/TotalDose_Carrington-MEO-GCR-Heavy-Ion.csv", PerStoMission)
+        # plt.errorbar(x, MEO_GCR_heavy_ions['dose']/11, yerr=MEO_GCR_heavy_ions['error']/11, color=MEOColor, 
+        #             label="MEO 1 year dose\n(GCR Heavy Ions)", **default_errorbar_style)
+        
         MEO_SAPPHIRE_heavy_ions = readTotalDoseCSV(Path + "../Carrington-MEO-SAPPHIRE-All-Species/TotalDose_Carrington-MEO-SAPPHIRE-Heavy-Ion.csv", PerStoMission)
+        # plt.errorbar(x, MEO_SAPPHIRE_heavy_ions['dose']/11, yerr=MEO_SAPPHIRE_heavy_ions['error']/11, color=MEOColor, 
+        #             label="MEO 1 year dose\n(SAPPHIRE Heavy Ions)", **default_errorbar_style)
 
         MEO_Total = mergeTotalDose([MEO_electron, MEO_trapped_proton, MEO_solar_proton, MEO_cosmic_proton, MEO_GCR_heavy_ions, MEO_SAPPHIRE_heavy_ions])
         plt.errorbar(x, MEO_Total['dose']/11, yerr=MEO_Total['error']/11, color=MEOColor, 
@@ -291,7 +300,12 @@ for Species in ['Electrons', 'Protons']:
     #              color='C4', **default_errorbar_style)
 
     GEO_GCR_heavy_ions = readTotalDoseCSV(Path + "../Carrington-GEO-GCR-All-Species/TotalDose_Carrington-GEO-GCR-Heavy-Ion.csv", PerStoMission)
-    GEO_SAPPHIRE_heavy_ions = readTotalDoseCSV(Path + "../Carrington-GEO-SAPPHIRE-All-Species/TotalDose_Carrington-GEO-SAPPHIRE-Heavy-Ion.csv")  # Already a mission dose, from the earlier macros
+    # plt.errorbar(x, GEO_GCR_heavy_ions['dose']/11, yerr=GEO_GCR_heavy_ions['error']/11, color=GEOColor, 
+    #             label="GEO 1 year dose\n(GCR Heavy Ions)", **default_errorbar_style)
+    
+    GEO_SAPPHIRE_heavy_ions = readTotalDoseCSV(Path + "../Carrington-GEO-SAPPHIRE-All-Species/TotalDose_Carrington-GEO-SAPPHIRE-Heavy-Ion.csv", PerStoMission)
+    # plt.errorbar(x, GEO_SAPPHIRE_heavy_ions['dose']/11, yerr=GEO_SAPPHIRE_heavy_ions['error']/11, color=GEOColor, 
+    #             label="GEO 1 year dose\n(SAPPHIRE Heavy Ions)", **default_errorbar_style)
 
     GEO_Total = mergeTotalDose([GEO_electron, GEO_trapped_proton, GEO_solar_proton, GEO_cosmic_proton, GEO_GCR_heavy_ions, GEO_SAPPHIRE_heavy_ions])
     plt.errorbar(x, GEO_Total['dose']/11, yerr=GEO_Total['error']/11, color=GEOColor, label="GEO 1 year dose"
@@ -319,7 +333,7 @@ for Species in ['Electrons', 'Protons']:
     plt.grid(which='both')
 
     ################### Re-ordering the legend labels ############################
-    '''
+    
     # Store the handles and labels when plotting
     handles, labels = plt.gca().get_legend_handles_labels()
 
@@ -328,7 +342,7 @@ for Species in ['Electrons', 'Protons']:
     if Species == 'Electrons':
         order = [0, 1, 3, 4, 6, 5, 2]  # ELECTRON specify the desired order of indices
     if Species == 'Protons':
-        order = [0, 1, 6, 5, 2, 4, 3]  # PROTON Plot specify the desired order of indices 
+        order = [0, 1, 3, 4, 2, 6, 5]  # PROTON Plot specify the desired order of indices 
 
     # Apply the reordering
     handles = [handles[i] for i in order]
@@ -336,9 +350,9 @@ for Species in ['Electrons', 'Protons']:
 
     # Then pass them to plt.legend()
     plt.legend(handles, labels)
-    '''
+    
     # External legend
-    plt.legend()
+    # plt.legend()
 
     if Species == 'Electrons':
         plt.savefig(Path + "CompareCarringtonElectron.pdf", format='pdf', bbox_inches="tight")
