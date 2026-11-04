@@ -119,7 +119,6 @@ def render_macro(data, species_index, mass_number, source_name):
             "/gps/ang/type cos",
             "/gps/ang/mintheta    0.000E+00 deg",
             "/gps/ang/maxtheta    9.000E+01 deg",
-            "/gps/source/list ",
             "",
             "#",
             "#Normalisation",
