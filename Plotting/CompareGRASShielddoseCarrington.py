@@ -58,7 +58,7 @@ for Species in ['Electrons', 'Protons']:
         
         EVT_Electron_Ext = totalDose(Path + "Carrington-Electron-Expected-EVT2026-Arb-130keVto1000MeV-Production/Res")
         plt.errorbar(x, EVT_Electron_Ext['dose'] * PerStoEvent, 
-                    yerr=EVT_Electron_Ext['error'] * PerStoEvent, label='Ext', 
+                    yerr=EVT_Electron_Ext['error'] * PerStoEvent, label='EVT electron\nevent dose', 
                     color=Expected, **default_errorbar_style)
         
         # EVT_Electron_ExtDense = totalDose(Path + "Carrington-Electron-Expected-EVT2026-ArbDense-130keVto1000MeV/Res")
