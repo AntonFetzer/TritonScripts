@@ -15,7 +15,8 @@ Expected = 'blue' # Blue
 # MinusColor = 'C2' # Orange
 LEOColor = 'C8'   # yellow
 GEOColor = 'C7'   # grey
-VAPColor = 'C3'   # Red
+# VAPColor = 'C3'   # Red
+MEOColor = 'C3'   # Red
 FlumicColor = 'magenta' # Magenta
 GOESColor = 'cyan' # Cyan
 
@@ -127,22 +128,29 @@ plt.plot(FLUMIC_Energy, FLUMIC_Max_Flux, 'x-', label="GEO FLUMIC worst-case 1-da
 
 
 
+## Read in LEO A9 spectrum
+LEO_file = Path + "/Spectra/Carrington/LEO/spenvis_tri.txt"
+Protons, Electrons = readSpenvis_tri(LEO_file)
+plt.plot(Electrons['Energy'], Electrons['Integral'], '+--', label="LEO AE9 11-year mean", color=LEOColor)
 
+## Read in MEO A9 spectrum
+MEO_file = Path + "/Spectra/Carrington/MEO/spenvis_tri.txt"
+Protons, Electrons = readSpenvis_tri(MEO_file)
+plt.plot(Electrons['Energy'], Electrons['Integral'], '2:', label="MEO AE9 11-year mean", color=MEOColor)
+
+# ## Read in Van-Allen Belt Probes A9 spectrum
+# VAP_file = Path + "/Spectra/Carrington/VAP/spenvis_tri.txt"
+# Protons, Electrons = readSpenvis_tri(VAP_file)
+# plt.plot(Electrons['Energy'], Electrons['Integral'], '2:', label="VAP AE9 11-year mean", color=VAPColor)
 
 ## Read in Geostationary A9 spectrum
 GEO_file = Path + "/Spectra/Carrington/GEO/spenvis_tri.txt"
 Protons, Electrons = readSpenvis_tri(GEO_file)
 plt.plot(Electrons['Energy'], Electrons['Integral'], '1-.', label="GEO AE9 11-year mean", color=GEOColor)
 
-## Read in LEO A9 spectrum
-LEO_file = Path + "/Spectra/Carrington/LEO/spenvis_tri.txt"
-Protons, Electrons = readSpenvis_tri(LEO_file)
-plt.plot(Electrons['Energy'], Electrons['Integral'], '+--', label="LEO AE9 11-year mean", color=LEOColor)
 
-## Read in Van-Allen Belt Probes A9 spectrum
-VAP_file = Path + "/Spectra/Carrington/VAP/spenvis_tri.txt"
-Protons, Electrons = readSpenvis_tri(VAP_file)
-plt.plot(Electrons['Energy'], Electrons['Integral'], '2:', label="VAP AE9 11-year mean", color=VAPColor)
+
+
 
 
 
