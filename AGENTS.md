@@ -131,6 +131,8 @@ python3 GenerateInterfaceIndex.py --write
 
 ### Plotting
 
+- `Plotting.AllSpeciesShieldingCurves`
+  - script, no public functions and no module docstring
 - `Plotting.CompareGRASShielddoseCarrington`
   - script, no public functions and no module docstring
 - `Plotting.CompareHistograms` -- Overlay GRAS histograms from several runs, for any histogram kind.
