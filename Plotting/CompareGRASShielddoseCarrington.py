@@ -8,6 +8,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from Read.ReadSD2Q import readSDQ2
+from Read.ReadTotalDoseCSV import readTotalDoseCSV
 from Dependencies.TotalDose import totalDose
 from Dependencies.MergeTotalDose import mergeTotalDose
 
@@ -25,8 +26,8 @@ Expected = 'blue' # Blue
 PlusColor = 'C1'  # Orange
 MinusColor = 'C2' # Green
 LEOColor = 'C8'   # Yellow
-MEOColor = 'C9'   # Turquoise
-VAPColor = 'C3'   # Red
+MEOColor = 'C3'   # Red
+# VAPColor = 'C3'   # Red
 GEOColor = 'C7'   # Grey
 
 
@@ -41,6 +42,8 @@ CriticalDose10 = [10 for i in x]
 Path = "/scratch/work/fetzera1/GRAS/2D/Shielding_Curves/Carrington/"
 # The carrington fluxes are per second, but we are interested in the event fluence which corresponds to 1.23 d
 PerStoEvent = 1.23 * 24 * 60 * 60
+# The nominal runs are normalised to the 4015-day mission, but the GCR and the LEO and MEO SAPPHIRE Heavy-Ion totals are per second
+PerStoMission = 4015 * 24 * 60 * 60
 
 for Species in ['Electrons', 'Protons']: 
 
@@ -176,13 +179,16 @@ for Species in ['Electrons', 'Protons']:
     # plt.errorbar(x, LEO_cosmic_proton['dose'], yerr=LEO_cosmic_proton['error'], label="LEO Cosmic Protons", 
     #             color='C3', **default_errorbar_style)
 
-    LEO_cosmic_iron = totalDose(Path + "LEO-cosmic-iron/Res") # Negiligible
+    # LEO_cosmic_iron = totalDose(Path + "LEO-cosmic-iron/Res") # Negiligible
     # plt.errorbar(x, LEO_cosmic_iron['dose'], yerr=LEO_cosmic_iron['error'], label="LEO Cosmic Iron", 
     #             color='C4', **default_errorbar_style)
 
-    LEO_Total = mergeTotalDose([LEO_electron, LEO_trapped_proton, LEO_solar_proton, LEO_cosmic_proton, LEO_cosmic_iron])
-    plt.errorbar(x, LEO_Total['dose'] * 100/11, yerr=LEO_Total['error'] * 100/11, color=LEOColor, 
-                label="LEO 100 year dose", **default_errorbar_style)
+    LEO_GCR_heavy_ions = readTotalDoseCSV(Path + "../Carrington-LEO-GCR-All-Species/TotalDose_Carrington-LEO-GCR-Heavy-Ion.csv", PerStoMission)
+    LEO_SAPPHIRE_heavy_ions = readTotalDoseCSV(Path + "../Carrington-LEO-SAPPHIRE-All-Species/TotalDose_Carrington-LEO-SAPPHIRE-Heavy-Ion.csv", PerStoMission)
+
+    LEO_Total = mergeTotalDose([LEO_electron, LEO_trapped_proton, LEO_solar_proton, LEO_cosmic_proton, LEO_GCR_heavy_ions, LEO_SAPPHIRE_heavy_ions])
+    plt.errorbar(x, LEO_Total['dose'] * 20/11, yerr=LEO_Total['error'] * 20/11, color=LEOColor, 
+                label="LEO 20 year dose", **default_errorbar_style)
 
     # LEO_SD = readSDQ2("/scratch/work/fetzera1/Spectra/Carrington/LEO/spenvis_sqo.txt")
     # plt.plot(LEO_SD['Thickness'], ( LEO_SD['Electrons'] + LEO_SD['Bremsstrahlung'] ), 
@@ -190,38 +196,42 @@ for Species in ['Electrons', 'Protons']:
     # plt.plot(LEO_SD['Thickness'], LEO_SD['Trapped Protons'], label="SHIELDOSE-2Q LEO Trapped Protons", color='C1')
     # plt.plot(LEO_SD['Thickness'], LEO_SD['Total'] * 100/11, label="SHIELDOSE-2Q LEO Total Dose", color=LEOColor)
 
+    if Species == 'Electrons':
+        #### MEO ######
+        MEO_electron = totalDose(Path + "MEO-electron/Res")
+        # plt.errorbar(x, MEO_electron['dose'], yerr=MEO_electron['error'], label="MEO Electrons", 
+        #             color='C0', **default_errorbar_style)
+        
+        MEO_trapped_proton = totalDose(Path + "MEO-trapped-proton/Res")  # Effectively no trapped protons on MEO
+        # plt.errorbar(x, MEO_trapped_proton['dose'], yerr=MEO_trapped_proton['error'], label="MEO Trapped Protons", 
+        #             color='C1', **default_errorbar_style)
 
-    #### MEO ######
-    # MEO_electron = totalDose(Path + "MEO-electron/Res")
-    # plt.errorbar(x, MEO_electron['dose'], yerr=MEO_electron['error'], label="MEO Electrons", 
-    #             color='C0', **default_errorbar_style)
-    
-    # MEO_trapped_proton = totalDose(Path + "MEO-trapped-proton/Res")  # Effectively no trapped protons on MEO
-    # plt.errorbar(x, MEO_trapped_proton['dose'], yerr=MEO_trapped_proton['error'], label="MEO Trapped Protons", 
-    #             color='C1', **default_errorbar_style)
+        MEO_solar_proton = totalDose(Path + "MEO-solar-proton/Res")
+        # plt.errorbar(x, MEO_solar_proton['dose'], yerr=MEO_solar_proton['error'], label="MEO Solar Protons", 
+        #             color='C2', **default_errorbar_style)
 
-    # MEO_solar_proton = totalDose(Path + "MEO-solar-proton/Res")
-    # plt.errorbar(x, MEO_solar_proton['dose'], yerr=MEO_solar_proton['error'], label="MEO Solar Protons", 
-    #             color='C2', **default_errorbar_style)
+        MEO_cosmic_proton = totalDose(Path + "MEO-cosmic-proton/Res")
+        # plt.errorbar(x, MEO_cosmic_proton['dose'], yerr=MEO_cosmic_proton['error'], label="MEO Cosmic Protons", 
+        #             color='C3', **default_errorbar_style)
 
-    # MEO_cosmic_proton = totalDose(Path + "MEO-cosmic-proton/Res")
-    # plt.errorbar(x, MEO_cosmic_proton['dose'], yerr=MEO_cosmic_proton['error'], label="MEO Cosmic Protons", 
-    #             color='C3', **default_errorbar_style)
+        # MEO_cosmic_iron = totalDose(Path + "MEO-cosmic-iron/Res")
+        # plt.errorbar(x, MEO_cosmic_iron['dose'], yerr=MEO_cosmic_iron['error'], label="MEO Cosmic Iron", 
+        #             color='C4', **default_errorbar_style)
 
-    # MEO_cosmic_iron = totalDose(Path + "MEO-cosmic-iron/Res")
-    # plt.errorbar(x, MEO_cosmic_iron['dose'], yerr=MEO_cosmic_iron['error'], label="MEO Cosmic Iron", 
-    #             color='C4', **default_errorbar_style)
+        MEO_GCR_heavy_ions = readTotalDoseCSV(Path + "../Carrington-MEO-GCR-All-Species/TotalDose_Carrington-MEO-GCR-Heavy-Ion.csv", PerStoMission)
+        MEO_SAPPHIRE_heavy_ions = readTotalDoseCSV(Path + "../Carrington-MEO-SAPPHIRE-All-Species/TotalDose_Carrington-MEO-SAPPHIRE-Heavy-Ion.csv", PerStoMission)
 
-    # MEO_Total = mergeTotalDose([MEO_electron, MEO_trapped_proton, MEO_solar_proton, MEO_cosmic_proton, MEO_cosmic_iron])
-    # plt.errorbar(x, MEO_Total['dose'], yerr=MEO_Total['error'], color=MEOColor, 
-    #             label="MEO Total", **default_errorbar_style)
+        MEO_Total = mergeTotalDose([MEO_electron, MEO_trapped_proton, MEO_solar_proton, MEO_cosmic_proton, MEO_GCR_heavy_ions, MEO_SAPPHIRE_heavy_ions])
+        plt.errorbar(x, MEO_Total['dose']/11, yerr=MEO_Total['error']/11, color=MEOColor, 
+                    label="MEO 1 year dose", **default_errorbar_style)
 
-    # MEO_SD = readSDQ2("/scratch/work/fetzera1/Spectra/Carrington/MEO/spenvis_sqo.txt")
-    # plt.plot(MEO_SD['Thickness'], ( MEO_SD['Electrons'] + MEO_SD['Bremsstrahlung'] ), 
-    #         label="SHIELDOSE-2Q MEO Electrons + Bremsstrahlung", color='C0')
-    # plt.plot(MEO_SD['Thickness'], MEO_SD['Trapped Protons'], label="SHIELDOSE-2Q MEO Trapped Protons", color='C1')
-    # plt.plot(MEO_SD['Thickness'], MEO_SD['Total'], label="SHIELDOSE-2Q MEO Total Dose", color=MEOColor)
+        MEO_SD = readSDQ2("/scratch/work/fetzera1/Spectra/Carrington/MEO/spenvis_sqo.txt")
+        # plt.plot(MEO_SD['Thickness'], ( MEO_SD['Electrons'] + MEO_SD['Bremsstrahlung'] ), 
+        #         label="SHIELDOSE-2Q MEO Electrons + Bremsstrahlung", color='C0')
+        # plt.plot(MEO_SD['Thickness'], MEO_SD['Trapped Protons'], label="SHIELDOSE-2Q MEO Trapped Protons", color='C1')
+        plt.plot(MEO_SD['Thickness'], MEO_SD['Total']/11, '.', label="MEO 1 year dose\n(SHIELDOSE-2Q)", color=MEOColor)
 
+    '''
     if Species == 'Electrons':
         #### VAP ######
         VAP_electron = totalDose(Path + "VAP-electron/Res")
@@ -258,7 +268,7 @@ for Species in ['Electrons', 'Protons']:
             # plt.plot(VAP_SD['Thickness'], ( VAP_SD['Electrons'] + VAP_SD['Bremsstrahlung'] ), label="SHIELDOSE-2Q VAP Electrons + Bremsstrahlung", color='C0')
             # plt.plot(VAP_SD['Thickness'], VAP_SD['Trapped Protons'], label="SHIELDOSE-2Q VAP Trapped Protons", color='C1')
             plt.plot(VAP_SD['Thickness'], VAP_SD['Total'] /(11*12), '.', label="VAP 1 month dose\n(SHIELDOSE-2Q)", color=VAPColor) 
-            
+    '''       
     
     # #### GEO ######
     GEO_electron = totalDose(Path + "GEO-electron/Res") # Similar but slightly less than VAP-electron, therefore not interesting for shielding
@@ -276,11 +286,14 @@ for Species in ['Electrons', 'Protons']:
     # plt.errorbar(x, GEO_cosmic_proton['dose'], yerr=GEO_cosmic_proton['error'], label="GEO Cosmic Protons", 
     #              color='C3', **default_errorbar_style)
 
-    GEO_cosmic_iron = totalDose(Path + "GEO-cosmic-iron/Res")     # Cosmics have super low fluxes --> negligible TID
+    # GEO_cosmic_iron = totalDose(Path + "GEO-cosmic-iron/Res")     # Cosmics have super low fluxes --> negligible TID
     # plt.errorbar(x, GEO_cosmic_iron['dose'], yerr=GEO_cosmic_iron['error'], label="GEO Cosmic Iron", 
     #              color='C4', **default_errorbar_style)
 
-    GEO_Total = mergeTotalDose([GEO_electron, GEO_trapped_proton, GEO_solar_proton, GEO_cosmic_proton, GEO_cosmic_iron])
+    GEO_GCR_heavy_ions = readTotalDoseCSV(Path + "../Carrington-GEO-GCR-All-Species/TotalDose_Carrington-GEO-GCR-Heavy-Ion.csv", PerStoMission)
+    GEO_SAPPHIRE_heavy_ions = readTotalDoseCSV(Path + "../Carrington-GEO-SAPPHIRE-All-Species/TotalDose_Carrington-GEO-SAPPHIRE-Heavy-Ion.csv")  # Already a mission dose, from the earlier macros
+
+    GEO_Total = mergeTotalDose([GEO_electron, GEO_trapped_proton, GEO_solar_proton, GEO_cosmic_proton, GEO_GCR_heavy_ions, GEO_SAPPHIRE_heavy_ions])
     plt.errorbar(x, GEO_Total['dose']/11, yerr=GEO_Total['error']/11, color=GEOColor, label="GEO 1 year dose"
                 , **default_errorbar_style)
 

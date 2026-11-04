@@ -128,6 +128,8 @@ python3 GenerateInterfaceIndex.py --write
   - `readSpenvis_sefflare_Ions(...)` -- Reads the ion peak flux table from Solar Flare spenvis_sefflare.txt files.
 - `Read.ReadSpenvis_tri`
   - `readSpenvis_tri(...)`
+- `Read.ReadTotalDoseCSV` -- Read a TotalDose CSV into the dictionary format of Dependencies.TotalDose.totalDose.
+  - `readTotalDoseCSV(...)` -- Reads a TotalDose_<name>.csv file, such as the Heavy-Ion totals of Plotting/AllSpeciesShieldingCurves.py.
 
 ### Plotting
 
