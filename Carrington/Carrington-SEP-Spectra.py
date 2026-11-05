@@ -11,16 +11,7 @@ from Read.ReadGPSMacro import readGPSMacro
 from Read.ReadSpenvis_sef import readSpenvis_sef_protons
 from Read.ReadSpenvis_gcf import readSpenvis_gcf
 from Read.ReadSpenvis_sefflare import readSpenvis_sefflare
-
-Expected = 'blue' # Blue
-PlusColor = 'C1'  # Green
-MinusColor = 'C2' # Orange
-LEOColor = 'C8'   # yellow
-GEOColor = 'C7'   # grey
-VAPColor = 'C3'   # Red
-MEOColor = 'C3'   # Red
-CREME96Color = 'C6' # Pink
-SAP_PeakColor = 'C9' # Turquoise
+from Dependencies.CarringtonColors import Expected, PlusColor, MinusColor, LEOColor, GEOColor, MEOColor, CREME96Color, SAP_PeakColor
 
 Path = "/scratch/work/fetzera1/Spectra/Carrington"
 

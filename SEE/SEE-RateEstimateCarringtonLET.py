@@ -8,14 +8,6 @@ from Dependencies.SEERates import (LET_CROSS_SECTIONS, runFolders, thicknessFold
                                    normaliseToRate, crossSection, foldCrossSection, seeRate, writeRateCSV)
 from uncertainties import ufloat
 
-Expected = 'blue' # Blue
-PlusColor = 'C1'  # Orange
-MinusColor = 'C2' # Green
-LEOColor = 'C8'   # Yellow
-MEOColor = 'C9'   # Turquoise
-VAPColor = 'C3'   # Red
-GEOColor = 'C7'   # Grey
-
 Directory = "/scratch/work/fetzera1/GRAS/1Tile/LET_Histograms/Carrington/"
 
 # Process all run folders in the directory, or only the ones given as command line arguments (all in one directory)

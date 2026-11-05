@@ -4,6 +4,7 @@ import os
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from Dependencies.SEERates import readRateCSVs
+from Dependencies.CarringtonColors import Expected, PlusColor, MinusColor, LEOColor, GEOColor, MEOColor, CREME96Color, CREME96IonColor
 
 Directory = "/scratch/work/fetzera1/GRAS/1Tile/LET_Histograms/Carrington/"
 
@@ -15,15 +16,6 @@ default_errorbar_style = {
     'elinewidth': 2,     # Width of the error bar lines
     'capthick': 2,       # Thickness of the error bar caps
 }
-
-Expected = 'blue' # Blue
-PlusColor = 'C1'  # Green
-MinusColor = 'C2' # Orange
-LEOColor = 'C8'   # yellow
-GEOColor = 'C7'   # grey
-VAPColor = 'C3'   # Red
-CREME96Color = 'C6' # Pink
-CREME96IonColor = 'C9' # Turquoise
 
 for CrossectionName in CrossectionNames:
 
@@ -138,6 +130,45 @@ for CrossectionName in CrossectionNames:
 
     plt.errorbar(Dict['LEO']['Shielding'], Dict['LEO']['SEE_Rate'], yerr=Dict['LEO']['SEE_Error'],
                     label="LEO total 11-year mean", color=LEOColor, linestyle='-.', **default_errorbar_style)
+
+
+    #################################### MEO ###################################
+    # plt.errorbar(Dict['MEO-electron']['Shielding'], Dict['MEO-electron']['SEE_Rate'],
+    #                 yerr=Dict['MEO-electron']['SEE_Error'], label="MEO Electron", **default_errorbar_style)
+    plt.errorbar(Dict['MEO-trapped-proton']['Shielding'], Dict['MEO-trapped-proton']['SEE_Rate'],
+                    yerr=Dict['MEO-trapped-proton']['SEE_Error'], label="MEO trapped proton", **default_errorbar_style)
+    # plt.errorbar(Dict['MEO-solar-proton']['Shielding'], Dict['MEO-solar-proton']['SEE_Rate'],
+    #                 yerr=Dict['MEO-solar-proton']['SEE_Error'], label="MEO Solar Proton", **default_errorbar_style)
+    plt.errorbar(Dict['MEO-cosmic-proton']['Shielding'], Dict['MEO-cosmic-proton']['SEE_Rate'],
+                    yerr=Dict['MEO-cosmic-proton']['SEE_Error'], label="MEO Cosmic Proton", **default_errorbar_style)
+    plt.errorbar(Dict['MEO-cosmic-iron']['Shielding'], Dict['MEO-cosmic-iron']['SEE_Rate'],
+                    yerr=Dict['MEO-cosmic-iron']['SEE_Error'], label="MEO Cosmic Iron", **default_errorbar_style)
+
+    plt.errorbar(Dict['MEO-SAPPHIRE-Solar-AllHeavyIons']['Shielding'], Dict['MEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Rate'],
+                    yerr=Dict['MEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Error'], label="MEO SAPPHIRE Solar Heavy Ions", **default_errorbar_style)
+    plt.errorbar(Dict['MEO-GCR-AllHeavyIons']['Shielding'], Dict['MEO-GCR-AllHeavyIons']['SEE_Rate'],
+                    yerr=Dict['MEO-GCR-AllHeavyIons']['SEE_Error'], label="MEO GCR Heavy Ions", **default_errorbar_style)
+
+    # Combine the MEO trapped proton, Solar Proton and Cosmic data
+    Dict['MEO'] = {}
+    Dict['MEO']['Shielding'] = Dict['MEO-trapped-proton']['Shielding']
+
+    Dict['MEO']['SEE_Rate'] = (Dict['MEO-trapped-proton']['SEE_Rate']
+                               + Dict['MEO-solar-proton']['SEE_Rate']
+                                 + Dict['MEO-cosmic-proton']['SEE_Rate']
+                                 + Dict['MEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Rate']
+                                 + Dict['MEO-GCR-AllHeavyIons']['SEE_Rate'])
+
+    Dict['MEO']['SEE_Error'] = ( np.sqrt(np.square(Dict['MEO-trapped-proton']['SEE_Error'])
+                                         + np.square(Dict['MEO-solar-proton']['SEE_Error'])
+                                         + np.square(Dict['MEO-cosmic-proton']['SEE_Error'])
+                                         + np.square(Dict['MEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Error'])
+                                         + np.square(Dict['MEO-GCR-AllHeavyIons']['SEE_Error'])))
+
+    plt.errorbar(Dict['MEO']['Shielding'], Dict['MEO']['SEE_Rate'], yerr=Dict['MEO']['SEE_Error'],
+                    label="MEO total 11-year mean", color=MEOColor, linestyle='-.', **default_errorbar_style)
+
+
 
     ########################### GEO ###################################
     # plt.errorbar(Dict['GEO-electron']['Shielding'], Dict['GEO-electron']['SEE_Rate'],

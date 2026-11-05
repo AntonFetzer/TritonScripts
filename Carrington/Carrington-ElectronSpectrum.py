@@ -7,18 +7,9 @@ import matplotlib.pyplot as plt
 import sympy as sp
 from Read.ReadSpenvis_tri import readSpenvis_tri
 from Read.ReadGPSMacro import readGPSMacro
+from Dependencies.CarringtonColors import Expected, LEOColor, GEOColor, MEOColor, FlumicColor, GOESColor
 
 Path = "/scratch/work/fetzera1/"
-
-Expected = 'blue' # Blue
-# PlusColor = 'C1'  # Green
-# MinusColor = 'C2' # Orange
-LEOColor = 'C8'   # yellow
-GEOColor = 'C7'   # grey
-# VAPColor = 'C3'   # Red
-MEOColor = 'C3'   # Red
-FlumicColor = 'magenta' # Magenta
-GOESColor = 'cyan' # Cyan
 
 '''  Deprecated 
 ## Carrington Integral Electron Spectrum Parameters from EVT Analysis of Adnane Osmane

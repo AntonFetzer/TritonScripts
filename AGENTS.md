@@ -35,6 +35,7 @@ python3 GenerateInterfaceIndex.py --write
 - `Dependencies.AggregateRun` -- Pool one GRAS result directory and validate it before a driver reports it.
   - `aggregateRun(...)` -- Pool one GRAS result directory, validating completeness and sanity.
   - `tileRecords(...)` -- Flatten aggregateRun output into one plain dict per tally.
+- `Dependencies.CarringtonColors` -- Plot colours of the Carrington study, the one place that defines them.
 - `Dependencies.CombineMeasurements` -- Combine independent measurements: ratios and inverse-variance means.
   - `ratioWithError(...)` -- Ratio of two independent measurements and its absolute error.
   - `weightedMean(...)` -- Inverse-variance mean, its error, and chi2 per degree of freedom about it.

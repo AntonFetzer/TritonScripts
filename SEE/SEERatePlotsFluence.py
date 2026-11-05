@@ -4,6 +4,7 @@ import os
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from Dependencies.SEERates import readRateCSVs
+from Dependencies.CarringtonColors import Expected, PlusColor, MinusColor, LEOColor, GEOColor, CREME96Color, SAP_PeakColor
 
 Directory = "/scratch/work/fetzera1/GRAS/1Tile/Fluence_Histograms/CarringtonShielded/"
 
@@ -15,15 +16,6 @@ default_errorbar_style = {
     'elinewidth': 2,     # Width of the error bar lines
     'capthick': 2,       # Thickness of the error bar caps
 }
-
-Expected = 'blue' # Blue
-PlusColor = 'C1'  # Green
-MinusColor = 'C2' # Orange
-LEOColor = 'C8'   # yellow
-GEOColor = 'C7'   # grey
-VAPColor = 'C3'   # Red
-CREME96Color = 'C6' # Pink
-SAP_PeakColor = 'C9' # Turquoise
 
 for CrossectionName in CrossectionNames:
 

@@ -11,6 +11,7 @@ from Read.ReadSD2Q import readSDQ2
 from Read.ReadTotalDoseCSV import readTotalDoseCSV
 from Dependencies.TotalDose import totalDose
 from Dependencies.MergeTotalDose import mergeTotalDose
+from Dependencies.CarringtonColors import Expected, PlusColor, MinusColor, LEOColor, MEOColor, GEOColor
 
 
 # Define default errorbar style
@@ -20,14 +21,6 @@ default_errorbar_style = {
     'capthick': 2,      # Thickness of the error bar caps
     'linestyle':''      # No line connecting the points
 }
-
-Expected = 'blue' # Blue
-PlusColor = 'C1'  # Orange
-MinusColor = 'C2' # Green
-LEOColor = 'C8'   # Yellow
-MEOColor = 'C3'   # Red
-# VAPColor = 'C3'   # Red
-GEOColor = 'C7'   # Grey
 
 
 # Aluminium Shielding Thickness [mm]
