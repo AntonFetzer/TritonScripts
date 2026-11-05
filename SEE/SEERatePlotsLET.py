@@ -262,12 +262,12 @@ for CrossectionName in CrossectionNames:
     plt.axhline(1/(8e+6 * 60 * 60 * 24), linestyle='--', label="1 upset per MByte per day", color='black')
 
     if CrossectionName == "Cypress CY62167GE30-45ZXI":
-        # plt.ylim(2e-13, 3e-6)
+        plt.ylim(1e-13, 1.5e-6)
         plt.axhline(1/(8e+3 * 60 * 60 * 24), linestyle='-', label="1 upset per kByte per day", color='black')
         # No CREME96 HUP curve: no defensible single-RPP sensitive volume exists for
         # this part (Serban et al. 2024 require four nested RPPs)
     else:
-        # plt.ylim(1e-18, 3e-11)
+        plt.ylim(1e-17, 3e-11)
         plt.axhline(1/(8e+9 * 60 * 60 * 24), linestyle=':', label="1 upset per GByte per day", color='black')
 
         # CREME96 HUP (Vanderbilt web tool): GEO peak 5 min SEP heavy ions (Z = 2-92),

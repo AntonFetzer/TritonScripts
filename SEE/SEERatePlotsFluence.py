@@ -68,7 +68,7 @@ for CrossectionName in CrossectionNames:
     # Plot the GEO Solar Proton 5min Peak Flux, once its new one-sided run exists
 
     plt.errorbar(Dict['GEO-SolarProton-5minPeakFlux']['Shielding'], Dict['GEO-SolarProton-5minPeakFlux']['SEE_Rate'],
-                yerr=Dict['GEO-SolarProton-5minPeakFlux']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min Proton\nGRAS Shieleded Spectrum Folding"
+                yerr=Dict['GEO-SolarProton-5minPeakFlux']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min Proton\nGRAS Shielded Spectrum Folding"
                 , color=CREME96Color, linestyle=':', **default_errorbar_style)
 
 
@@ -93,7 +93,7 @@ for CrossectionName in CrossectionNames:
                                         + np.square(Dict['LEO-cosmic-proton']['SEE_Error']) ) )
 
     plt.errorbar(Dict['LEO']['Shielding'], Dict['LEO']['SEE_Rate'], yerr=Dict['LEO']['SEE_Error'],
-                    label="LEO total 11-year mean", color=LEOColor, linestyle='-.', **default_errorbar_style)
+                    label="LEO protons 11-year mean", color=LEOColor, linestyle='-.', **default_errorbar_style)
 
 
     ################################# MEO ###################################
@@ -117,7 +117,7 @@ for CrossectionName in CrossectionNames:
                                     + np.square(Dict['MEO-cosmic-proton']['SEE_Error']) ) )
 
     plt.errorbar(Dict['MEO']['Shielding'], Dict['MEO']['SEE_Rate'], yerr=Dict['MEO']['SEE_Error'],
-                    label="MEO total 11-year mean", color=MEOColor, linestyle='-.', **default_errorbar_style)
+                    label="MEO protons 11-year mean", color=MEOColor, linestyle='-.', **default_errorbar_style)
 
 
 
@@ -142,7 +142,7 @@ for CrossectionName in CrossectionNames:
                             + np.square(Dict['GEO-cosmic-proton']['SEE_Error']) ) )
 
     plt.errorbar(Dict['GEO']['Shielding'], Dict['GEO']['SEE_Rate'], yerr=Dict['GEO']['SEE_Error'],
-                    label="GEO total 11-year mean", color=GEOColor, **default_errorbar_style)
+                    label="GEO protons 11-year mean", color=GEOColor, **default_errorbar_style)
 
 
     ########################### VAP ###################################
@@ -171,10 +171,10 @@ for CrossectionName in CrossectionNames:
     plt.axhline(1/(8e+6 * 60 * 60 * 24), linestyle='--', label="1 upset per MByte per day", color='black')
 
     if CrossectionName == "Cypress CY62167GE30-45ZXI":
-        # plt.ylim(2e-13, 3e-6)
+        plt.ylim(1e-13, 1.5e-6)
         plt.axhline(1/(8e+3 * 60 * 60 * 24), linestyle='-', label="1 upset per kByte per day", color='black')
     else:
-        # plt.ylim(1e-18, 3e-11)
+        plt.ylim(1e-17, 3e-11)
         plt.axhline(1/(8e+9 * 60 * 60 * 24), linestyle=':', label="1 upset per GByte per day", color='black')
 
         # CREME96 PUP (Vanderbilt web tool): GEO peak 5 min SEP protons folded with the
@@ -201,11 +201,11 @@ for CrossectionName in CrossectionNames:
         "GEO EVT 1-in-150 year peak SEP +2σ",
         "GEO EVT 1-in-150 year peak SEP",
         "GEO EVT 1-in-150 year peak SEP -2σ",
-        "GEO CREME96 peak 5 min Proton\nGRAS Shieleded Spectrum Folding",
+        "GEO CREME96 peak 5 min Proton\nGRAS Shielded Spectrum Folding",
         "GEO CREME96 peak 5 min Proton\nCREME96 PUP",
-        "GEO total 11-year mean",
-        "MEO total 11-year mean",
-        "LEO total 11-year mean",
+        "LEO protons 11-year mean",        
+        "MEO protons 11-year mean",
+        "GEO protons 11-year mean",
         "1 upset per MByte per day",
         "1 upset per kByte per day" if CrossectionName == "Cypress CY62167GE30-45ZXI" else "1 upset per GByte per day",
     ] if l in labels]
