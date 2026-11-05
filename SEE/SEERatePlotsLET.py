@@ -95,6 +95,9 @@ for CrossectionName in CrossectionNames:
                     , color=CREME96IonColor, linestyle='-.', **default_errorbar_style)
 
 
+
+
+
     ########################### LEO ###################################
     # plt.errorbar(Dict['LEO-electron']['Shielding'], Dict['LEO-electron']['SEE_Rate'],
     #               yerr=Dict['LEO-electron']['SEE_Error'], label="LEO Electron", **default_errorbar_style)
@@ -132,22 +135,26 @@ for CrossectionName in CrossectionNames:
                     label="LEO total 11-year mean", color=LEOColor, linestyle='-.', **default_errorbar_style)
 
 
+
+
+
+
     #################################### MEO ###################################
     # plt.errorbar(Dict['MEO-electron']['Shielding'], Dict['MEO-electron']['SEE_Rate'],
     #                 yerr=Dict['MEO-electron']['SEE_Error'], label="MEO Electron", **default_errorbar_style)
-    plt.errorbar(Dict['MEO-trapped-proton']['Shielding'], Dict['MEO-trapped-proton']['SEE_Rate'],
-                    yerr=Dict['MEO-trapped-proton']['SEE_Error'], label="MEO trapped proton", **default_errorbar_style)
+    # plt.errorbar(Dict['MEO-trapped-proton']['Shielding'], Dict['MEO-trapped-proton']['SEE_Rate'],
+    #                 yerr=Dict['MEO-trapped-proton']['SEE_Error'], label="MEO trapped proton", **default_errorbar_style)
     # plt.errorbar(Dict['MEO-solar-proton']['Shielding'], Dict['MEO-solar-proton']['SEE_Rate'],
     #                 yerr=Dict['MEO-solar-proton']['SEE_Error'], label="MEO Solar Proton", **default_errorbar_style)
-    plt.errorbar(Dict['MEO-cosmic-proton']['Shielding'], Dict['MEO-cosmic-proton']['SEE_Rate'],
-                    yerr=Dict['MEO-cosmic-proton']['SEE_Error'], label="MEO Cosmic Proton", **default_errorbar_style)
-    plt.errorbar(Dict['MEO-cosmic-iron']['Shielding'], Dict['MEO-cosmic-iron']['SEE_Rate'],
-                    yerr=Dict['MEO-cosmic-iron']['SEE_Error'], label="MEO Cosmic Iron", **default_errorbar_style)
+    # plt.errorbar(Dict['MEO-cosmic-proton']['Shielding'], Dict['MEO-cosmic-proton']['SEE_Rate'],
+    #                 yerr=Dict['MEO-cosmic-proton']['SEE_Error'], label="MEO Cosmic Proton", **default_errorbar_style)
+    # plt.errorbar(Dict['MEO-cosmic-iron']['Shielding'], Dict['MEO-cosmic-iron']['SEE_Rate'],
+    #                 yerr=Dict['MEO-cosmic-iron']['SEE_Error'], label="MEO Cosmic Iron", **default_errorbar_style)
 
-    plt.errorbar(Dict['MEO-SAPPHIRE-Solar-AllHeavyIons']['Shielding'], Dict['MEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Rate'],
-                    yerr=Dict['MEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Error'], label="MEO SAPPHIRE Solar Heavy Ions", **default_errorbar_style)
-    plt.errorbar(Dict['MEO-GCR-AllHeavyIons']['Shielding'], Dict['MEO-GCR-AllHeavyIons']['SEE_Rate'],
-                    yerr=Dict['MEO-GCR-AllHeavyIons']['SEE_Error'], label="MEO GCR Heavy Ions", **default_errorbar_style)
+    # plt.errorbar(Dict['MEO-SAPPHIRE-Solar-AllHeavyIons']['Shielding'], Dict['MEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Rate'],
+    #                 yerr=Dict['MEO-SAPPHIRE-Solar-AllHeavyIons']['SEE_Error'], label="MEO SAPPHIRE Solar Heavy Ions", **default_errorbar_style)
+    # plt.errorbar(Dict['MEO-GCR-AllHeavyIons']['Shielding'], Dict['MEO-GCR-AllHeavyIons']['SEE_Rate'],
+    #                 yerr=Dict['MEO-GCR-AllHeavyIons']['SEE_Error'], label="MEO GCR Heavy Ions", **default_errorbar_style)
 
     # Combine the MEO trapped proton, Solar Proton and Cosmic data
     Dict['MEO'] = {}
@@ -167,6 +174,9 @@ for CrossectionName in CrossectionNames:
 
     plt.errorbar(Dict['MEO']['Shielding'], Dict['MEO']['SEE_Rate'], yerr=Dict['MEO']['SEE_Error'],
                     label="MEO total 11-year mean", color=MEOColor, linestyle='-.', **default_errorbar_style)
+
+
+
 
 
 
@@ -275,28 +285,28 @@ for CrossectionName in CrossectionNames:
     plt.ylabel("Single Event Upset Rate [s-1 bit-1]")
 
     # Manually add legend entries in the desired order
-    # handles, labels = plt.gca().get_legend_handles_labels()
+    handles, labels = plt.gca().get_legend_handles_labels()
 
     # Create a new order for the legend
     # handles, labels = plt.gca().get_legend_handles_labels()
     # Order by label: matplotlib groups handles by artist type, so plain indices
     # shift whenever a line/patch/errorbar is added or removed
-    # order = [labels.index(l) for l in [
-    #     "GEO EVT 1-in-150 year peak SEP +2σ",
-    #     "GEO EVT 1-in-150 year peak SEP",
-    #     "GEO EVT 1-in-150 year peak SEP -2σ",
-    #     "GEO CREME96 peak 5 min Proton",
-    #     "GEO CREME96 peak 5 min\nHeavy Ions GRAS LET Folding",
-    #     "GEO CREME96 peak 5 min\nHeavy Ions CREME 96 HUP IRPP",
-    #     "VAP total 11-year mean",
-    #     "GEO total 11-year mean",
-    #     "LEO total 11-year mean",
-    #     "1 upset per MByte per day",
-    #     "1 upset per kByte per day" if CrossectionName == "Cypress CY62167GE30-45ZXI" else "1 upset per GByte per day",
-    # ] if l in labels]
-    # plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='lower right')
+    order = [labels.index(l) for l in [
+        "GEO EVT 1-in-150 year peak SEP +2σ",
+        "GEO EVT 1-in-150 year peak SEP",
+        "GEO EVT 1-in-150 year peak SEP -2σ",
+        "GEO CREME96 peak 5 min Proton",
+        "GEO CREME96 peak 5 min\nHeavy Ions GRAS LET Folding",
+        "GEO CREME96 peak 5 min\nHeavy Ions CREME 96 HUP IRPP",
+        "LEO total 11-year mean",
+        "MEO total 11-year mean",
+        "GEO total 11-year mean",
+        "1 upset per MByte per day",
+        "1 upset per kByte per day" if CrossectionName == "Cypress CY62167GE30-45ZXI" else "1 upset per GByte per day",
+    ] if l in labels]
+    plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='lower right')
     
-    plt.legend()
+    # plt.legend()
     
     print("Saving " + Directory + CrossectionName + " Rates.pdf")
     plt.savefig(Directory + CrossectionName + " Rates.pdf", format='pdf', bbox_inches="tight")
