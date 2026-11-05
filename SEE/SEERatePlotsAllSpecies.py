@@ -17,7 +17,7 @@ if len(sys.argv) > 1:
 # The model names, such as GEO-CREME96, come from the folder names
 Directories = {os.path.basename(p).replace("Carrington-", "").replace("-All-Species", ""): p + "/" for p in FolderList}
 
-CrossectionNames = ["Cypress CY62167GE30-45ZXI", "NanoXplore SEU"]
+CrossectionNames = ["Cypress CY62167GE30-45ZXI", "NanoXplore NG-Medium"]
 
 # Define default errorbar style
 default_errorbar_style = {

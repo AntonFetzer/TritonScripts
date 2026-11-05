@@ -62,7 +62,7 @@ class TestCrossSection(unittest.TestCase):
     def test_device_parameters_are_in_cm2_per_bit(self):
         LET = {X["name"]: X for X in LET_CROSS_SECTIONS}
         Proton = {X["name"]: X for X in PROTON_CROSS_SECTIONS}
-        self.assertEqual(LET["NanoXplore SEU"]["A0"], 5.2e-9)
+        self.assertEqual(LET["NanoXplore NG-Medium"]["A0"], 5.2e-9)
         self.assertEqual(LET["Cypress CY62167GE30-45ZXI"]["A0"], 2.6e-7)
         self.assertEqual(Proton["NanoXplore NG-Medium"]["A0"], 4.85e-16)
         self.assertAlmostEqual(np.max(Proton["Cypress CY62167GE30-45ZXI"]["S_pts"]) / 1.2757607330635113e-9, 1.0)

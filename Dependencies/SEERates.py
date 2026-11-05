@@ -27,7 +27,7 @@ import numpy as np
 # Cypress: Garcia Alia et al. (2025), Table I
 LET_CROSS_SECTIONS = (
     {
-        "name": "NanoXplore SEU",
+        "name": "NanoXplore NG-Medium",
         "L0": 0.11,
         "W": 36.0,
         "S": 4.4,
