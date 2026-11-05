@@ -4,7 +4,7 @@ import os
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from Dependencies.SEERates import readRateCSVs
-from Dependencies.CarringtonColors import Expected, PlusColor, MinusColor, LEOColor, GEOColor, CREME96Color, SAP_PeakColor
+from Dependencies.CarringtonColors import Expected, PlusColor, MinusColor, LEOColor, MEOColor, GEOColor, CREME96Color, SAP_PeakColor
 
 Directory = "/scratch/work/fetzera1/GRAS/1Tile/Fluence_Histograms/CarringtonShielded/"
 
@@ -23,14 +23,17 @@ for CrossectionName in CrossectionNames:
     Dict = readRateCSVs([Directory + "*/* " + CrossectionName + " SEE-Rate.csv"], CrossectionName)
 
 
-    plt.figure(figsize=(5, 8))
+    plt.figure(figsize=(6, 8))
     ########################### Carrington SEP ###################################
     # The EVT2026 runs replace the -Int runs, which are in the deprecated CarringtonShielded_2xTooHigh
     Shielding = Dict['Carrington-SEP-Expected-EVT2026']['Shielding']
+
     EVT2026 = Dict['Carrington-SEP-Expected-EVT2026']['SEE_Rate']
+    Error = Dict['Carrington-SEP-Expected-EVT2026']['SEE_Error']
+
     Minus = Dict['Carrington-SEP-Minus2Sigma-EVT2026']['SEE_Rate']
     Plus = Dict['Carrington-SEP-Plus2Sigma-EVT2026']['SEE_Rate']
-    Error = Dict['Carrington-SEP-Expected-EVT2026']['SEE_Error']
+
 
     plt.errorbar(Shielding, EVT2026, yerr=Error, label="GEO EVT 1-in-150 year peak SEP"
                 , color=Expected, **default_errorbar_style)
@@ -40,17 +43,18 @@ for CrossectionName in CrossectionNames:
 
 
 
-    EVT2026_Extr = Dict['Carrington-SEP-Expected-EVT2026-10to1000MeV']['SEE_Rate']
-    EVT2026_Fit = Dict['Carrington-SEP-Expected-EVT2026-Fit']['SEE_Rate']
-    EVT2026_Fit_Extr = Dict['Carrington-SEP-Expected-EVT2026-Fit-10to1000MeV']['SEE_Rate']
+    # EVT2026_Extr = Dict['Carrington-SEP-Expected-EVT2026-10to1000MeV']['SEE_Rate']
+    # plt.errorbar(Shielding, EVT2026_Extr, label="SEP EVT2026 10-1000 MeV"
+    #              , color='C5', **default_errorbar_style)
+    
+    # EVT2026_Fit = Dict['Carrington-SEP-Expected-EVT2026-Fit']['SEE_Rate']
+    # plt.errorbar(Shielding, EVT2026_Fit, label="SEP EVT2026 Fit"
+    #              , color='C6', **default_errorbar_style)
+    
+    # EVT2026_Fit_Extr = Dict['Carrington-SEP-Expected-EVT2026-Fit-10to1000MeV']['SEE_Rate']
+    # plt.errorbar(Shielding, EVT2026_Fit_Extr, label="SEP EVT2026 Fit 10-1000 MeV"
+    #              , color='C7', **default_errorbar_style)
 
-
-    plt.errorbar(Shielding, EVT2026_Extr, label="SEP EVT2026 10-1000 MeV"
-                 , color='C5', **default_errorbar_style)
-    plt.errorbar(Shielding, EVT2026_Fit, label="SEP EVT2026 Fit"
-                 , color='C6', **default_errorbar_style)
-    plt.errorbar(Shielding, EVT2026_Fit_Extr, label="SEP EVT2026 Fit 10-1000 MeV"
-                 , color='C7', **default_errorbar_style)
 
 
     # Other EVT plots. Do not plot for now.
@@ -62,10 +66,10 @@ for CrossectionName in CrossectionNames:
     #             , color=MinusColor, **default_errorbar_style)
 
     # Plot the GEO Solar Proton 5min Peak Flux, once its new one-sided run exists
-    if 'GEO-SolarProton-5minPeakFlux' in Dict:
-        plt.errorbar(Dict['GEO-SolarProton-5minPeakFlux']['Shielding'], Dict['GEO-SolarProton-5minPeakFlux']['SEE_Rate'],
-                    yerr=Dict['GEO-SolarProton-5minPeakFlux']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min Proton\nGRAS Shieleded Spectrum Folding"
-                    , color=CREME96Color, linestyle=':', **default_errorbar_style)
+
+    plt.errorbar(Dict['GEO-SolarProton-5minPeakFlux']['Shielding'], Dict['GEO-SolarProton-5minPeakFlux']['SEE_Rate'],
+                yerr=Dict['GEO-SolarProton-5minPeakFlux']['SEE_Error'], marker='o', label="GEO CREME96 peak 5 min Proton\nGRAS Shieleded Spectrum Folding"
+                , color=CREME96Color, linestyle=':', **default_errorbar_style)
 
 
     ########################### LEO ###################################
@@ -77,38 +81,68 @@ for CrossectionName in CrossectionNames:
     #              yerr=Dict['LEO-cosmic-proton']['SEE_Error'], label="LEO Cosmic Proton", capsize=5, capthick=2)
 
     # Combine the LEO trapped proton, Solar Proton and Cosmic data
-    # Dict['LEO'] = {}
-    # Dict['LEO']['Shielding'] = Dict['LEO-solar-proton']['Shielding']
+    Dict['LEO'] = {}
+    Dict['LEO']['Shielding'] = Dict['LEO-solar-proton']['Shielding']
 
-    # Dict['LEO']['SEE_Rate'] = (  Dict['LEO-trapped-proton']['SEE_Rate'] 
-    #                         + Dict['LEO-solar-proton']['SEE_Rate'] 
-    #                         + Dict['LEO-cosmic-proton']['SEE_Rate'] )
+    Dict['LEO']['SEE_Rate'] = (  Dict['LEO-trapped-proton']['SEE_Rate'] 
+                            + Dict['LEO-solar-proton']['SEE_Rate'] 
+                            + Dict['LEO-cosmic-proton']['SEE_Rate'] )
 
-    # Dict['LEO']['SEE_Error'] = ( np.sqrt(np.square(Dict['LEO-trapped-proton']['SEE_Error'])
-    #                                     + np.square(Dict['LEO-solar-proton']['SEE_Error']) 
-    #                                     + np.square(Dict['LEO-cosmic-proton']['SEE_Error']) ) )
+    Dict['LEO']['SEE_Error'] = ( np.sqrt(np.square(Dict['LEO-trapped-proton']['SEE_Error'])
+                                        + np.square(Dict['LEO-solar-proton']['SEE_Error']) 
+                                        + np.square(Dict['LEO-cosmic-proton']['SEE_Error']) ) )
 
-    # plt.errorbar(Dict['LEO']['Shielding'], Dict['LEO']['SEE_Rate'], yerr=Dict['LEO']['SEE_Error'],
-    #                 label="LEO total 11-year mean", color=LEOColor, linestyle='-.', **default_errorbar_style)
+    plt.errorbar(Dict['LEO']['Shielding'], Dict['LEO']['SEE_Rate'], yerr=Dict['LEO']['SEE_Error'],
+                    label="LEO total 11-year mean", color=LEOColor, linestyle='-.', **default_errorbar_style)
+
+
+    ################################# MEO ###################################
+    # plt.errorbar(Dict['MEO-trapped-proton']['Shielding'], Dict['MEO-trapped-proton']['SEE_Rate'], 
+    #              yerr=Dict['MEO-trapped-proton']['SEE_Error'], label="MEO trapped proton", color=MEOColor, **default_errorbar_style)
+    # plt.errorbar(Dict['MEO-solar-proton']['Shielding'], Dict['MEO-solar-proton']['SEE_Rate'],
+    #              yerr=Dict['MEO-solar-proton']['SEE_Error'], label="MEO Solar Proton", color=MEOColor, linestyle='--', **default_errorbar_style)
+    # plt.errorbar(Dict['MEO-cosmic-proton']['Shielding'], Dict['MEO-cosmic-proton']['SEE_Rate'],
+    #              yerr=Dict['MEO-cosmic-proton']['SEE_Error'], label="MEO Cosmic Proton", color=MEOColor, linestyle=':', **default_errorbar_style)
+
+    # Combine the MEO trapped proton, Solar Proton and Cosmic data
+    Dict['MEO'] = {}
+    Dict['MEO']['Shielding'] = Dict['MEO-solar-proton']['Shielding']
+
+    Dict['MEO']['SEE_Rate'] = (  Dict['MEO-trapped-proton']['SEE_Rate']
+                            + Dict['MEO-solar-proton']['SEE_Rate']
+                            + Dict['MEO-cosmic-proton']['SEE_Rate'] )
+
+    Dict['MEO']['SEE_Error'] = ( np.sqrt(np.square(Dict['MEO-trapped-proton']['SEE_Error'])
+                                    + np.square(Dict['MEO-solar-proton']['SEE_Error'])
+                                    + np.square(Dict['MEO-cosmic-proton']['SEE_Error']) ) )
+
+    plt.errorbar(Dict['MEO']['Shielding'], Dict['MEO']['SEE_Rate'], yerr=Dict['MEO']['SEE_Error'],
+                    label="MEO total 11-year mean", color=MEOColor, linestyle='-.', **default_errorbar_style)
+
+
 
     ########################### GEO ###################################
+    # plt.errorbar(Dict['GEO-trapped-proton']['Shielding'], Dict['GEO-trapped-proton']['SEE_Rate'],
+    #                 yerr=Dict['GEO-trapped-proton']['SEE_Error'], label="GEO trapped proton", capsize=5, capthick=2)    
     # plt.errorbar(Dict['GEO-solar-proton']['Shielding'], Dict['GEO-solar-proton']['SEE_Rate'],
-                    # yerr=Dict['GEO-solar-proton']['SEE_Error'], label="GEO Solar Proton", capsize=5, capthick=2)
+    #                 yerr=Dict['GEO-solar-proton']['SEE_Error'], label="GEO Solar Proton", capsize=5, capthick=2)
     # plt.errorbar(Dict['GEO-cosmic-proton']['Shielding'], Dict['GEO-cosmic-proton']['SEE_Rate'],
     #                 yerr=Dict['GEO-cosmic-proton']['SEE_Error'], label="GEO Cosmic Proton", capsize=5, capthick=2)
 
-    # # Combine the GEO Solar Proton, Cosmic and trapped proton data
-    # Dict['GEO'] = {}
-    # Dict['GEO']['Shielding'] = Dict['GEO-solar-proton']['Shielding']
+    # Combine the GEO Solar Proton, Cosmic and trapped proton data
+    Dict['GEO'] = {}
+    Dict['GEO']['Shielding'] = Dict['GEO-solar-proton']['Shielding']
 
-    # Dict['GEO']['SEE_Rate'] = ( Dict['GEO-solar-proton']['SEE_Rate']  
-    #                         + Dict['GEO-cosmic-proton']['SEE_Rate'] )
+    Dict['GEO']['SEE_Rate'] = (Dict['GEO-trapped-proton']['SEE_Rate'] 
+                            + Dict['GEO-solar-proton']['SEE_Rate']  
+                            + Dict['GEO-cosmic-proton']['SEE_Rate'] )
 
-    # Dict['GEO']['SEE_Error'] = ( np.sqrt(np.square(Dict['GEO-solar-proton']['SEE_Error'])  
-    #                                     + np.square(Dict['GEO-cosmic-proton']['SEE_Error'])) )
+    Dict['GEO']['SEE_Error'] = (np.sqrt(np.square(Dict['GEO-trapped-proton']['SEE_Error'])
+                            + np.square(Dict['GEO-solar-proton']['SEE_Error']) 
+                            + np.square(Dict['GEO-cosmic-proton']['SEE_Error']) ) )
 
-    # plt.errorbar(Dict['GEO']['Shielding'], Dict['GEO']['SEE_Rate'], yerr=Dict['GEO']['SEE_Error'],
-    #                 label="GEO total 11-year mean", color=GEOColor, **default_errorbar_style)
+    plt.errorbar(Dict['GEO']['Shielding'], Dict['GEO']['SEE_Rate'], yerr=Dict['GEO']['SEE_Error'],
+                    label="GEO total 11-year mean", color=GEOColor, **default_errorbar_style)
 
 
     ########################### VAP ###################################
@@ -137,10 +171,10 @@ for CrossectionName in CrossectionNames:
     plt.axhline(1/(8e+6 * 60 * 60 * 24), linestyle='--', label="1 upset per MByte per day", color='black')
 
     if CrossectionName == "Cypress CY62167GE30-45ZXI":
-        plt.ylim(2e-13, 3e-6)
+        # plt.ylim(2e-13, 3e-6)
         plt.axhline(1/(8e+3 * 60 * 60 * 24), linestyle='-', label="1 upset per kByte per day", color='black')
     else:
-        plt.ylim(1e-18, 3e-11)
+        # plt.ylim(1e-18, 3e-11)
         plt.axhline(1/(8e+9 * 60 * 60 * 24), linestyle=':', label="1 upset per GByte per day", color='black')
 
         # CREME96 PUP (Vanderbilt web tool): GEO peak 5 min SEP protons folded with the
@@ -160,23 +194,24 @@ for CrossectionName in CrossectionNames:
     plt.ylabel("Single Event Upset Rate [s-1 bit-1]")
 
     # Create a new order for the legend
-    # handles, labels = plt.gca().get_legend_handles_labels()
+    handles, labels = plt.gca().get_legend_handles_labels()
     # Order by label: matplotlib groups handles by artist type, so plain indices
     # shift whenever a line/patch/errorbar is added or removed
-    # order = [labels.index(l) for l in [
-    #     "GEO EVT 1-in-150 year peak SEP +2σ",
-    #     "GEO EVT 1-in-150 year peak SEP",
-    #     "GEO EVT 1-in-150 year peak SEP -2σ",
-    #     "GEO CREME96 peak 5 min Proton\nGRAS Shieleded Spectrum Folding",
-    #     "GEO CREME96 peak 5 min Proton\nCREME96 PUP",
-    #     "VAP total 11-year mean",
-    #     "GEO total 11-year mean",
-    #     "LEO total 11-year mean",
-    #     "1 upset per MByte per day",
-    #     "1 upset per kByte per day" if CrossectionName == "Cypress CY62167GE30-45ZXI" else "1 upset per GByte per day",
-    # ] if l in labels]
-    # plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='lower right')
-    plt.legend(loc='lower right')
-
+    order = [labels.index(l) for l in [
+        "GEO EVT 1-in-150 year peak SEP +2σ",
+        "GEO EVT 1-in-150 year peak SEP",
+        "GEO EVT 1-in-150 year peak SEP -2σ",
+        "GEO CREME96 peak 5 min Proton\nGRAS Shieleded Spectrum Folding",
+        "GEO CREME96 peak 5 min Proton\nCREME96 PUP",
+        "GEO total 11-year mean",
+        "MEO total 11-year mean",
+        "LEO total 11-year mean",
+        "1 upset per MByte per day",
+        "1 upset per kByte per day" if CrossectionName == "Cypress CY62167GE30-45ZXI" else "1 upset per GByte per day",
+    ] if l in labels]
+    plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='lower right')
+    # plt.legend(loc='upper right')
+                              
+    print("Saving " + Directory + CrossectionName + " Rates.pdf")
     plt.savefig(Directory + CrossectionName + " Rates.pdf", format='pdf', bbox_inches="tight")
     # plt.show()
