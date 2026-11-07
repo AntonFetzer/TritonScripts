@@ -84,10 +84,13 @@ plt.plot(Energies, Int, 'o-', label="GEO EVT 1-in-150 year peak 6-min", linewidt
 FLUMIC_Energy = [2.0000E-01, 5.0000E-01, 8.0000E-01, 1.1000E+00, 1.4000E+00, 1.7000E+00, 2.0000E+00, 2.3000E+00, 2.6000E+00, 2.9000E+00, 3.2000E+00, 3.5000E+00, 3.8000E+00, 4.1000E+00, 4.4000E+00, 4.7000E+00, 5.0000E+00, 5.3000E+00, 5.6000E+00, 5.9000E+00]
 # Flumic Flux in Flux (m-2 s-1 sr-1)
 FLUMIC_Average_Flux = [1.0016E+10, 4.3943E+09, 1.9280E+09, 8.4589E+08, 3.7113E+08, 1.6283E+08, 7.1441E+07, 3.1344E+07, 1.3752E+07, 6.0337E+06, 2.6473E+06, 1.1615E+06, 5.0959E+05, 2.2358E+05, 9.8094E+04, 4.3038E+04, 1.8883E+04, 8.2847E+03, 3.6349E+03, 1.5948E+03]
-# Flumic Max Flux in Flux (m-2 s-1 sr-1)
+# Flumic Max Flux in Flux (m-2 s-1 sr-1), SPENVIS run of 10 September 2025: maximum along the orbit (L = 6.6)
+# at fraction of solar cycle 0.000 and fraction of year 0.001, so 7.6 times below the model peak at 2 MeV. Not plotted.
 FLUMIC_Max_Flux = [14921000000, 6546400000, 2872200000, 1260200000, 552890000, 242580000, 106430000, 46695000, 20487000, 8988700, 3943800, 1730300, 759160, 333080, 146140, 64116, 28131, 12342, 5415.1, 2375.8]
-# Estimated FLUMIC 3 worst case at L = 6.6 (fsc 0.802, foy 0.219), from the FLUMIC 3 equations; illustration only, not a SPENVIS run
-FLUMIC_Worst_Flux = [2.8025E+10, 1.5405E+10, 8.4681E+09, 4.6548E+09, 2.5587E+09, 1.4065E+09, 7.7314E+08, 4.2499E+08, 2.3361E+08, 1.2841E+08, 7.0588E+07, 3.8801E+07, 2.1329E+07, 1.1724E+07, 6.4447E+06, 3.5426E+06, 1.9473E+06, 1.0704E+06, 5.8840E+05, 3.2344E+05]
+# FLUMIC 3 worst case at L = 6.6, from Rodgers, Hunter and Wrenn (2004); not a SPENVIS run, which was offline
+FLUMIC_Peak_F2 = 8e8  # m-2 s-1 sr-1, the peak integral flux above 2 MeV that the paper states
+FLUMIC_E0 = 0.25 + 0.11 * (np.log10(FLUMIC_Peak_F2) - 7) ** 1.3  # MeV, e-folding energy
+FLUMIC_Worst_Flux = FLUMIC_Peak_F2 * np.exp((2 - np.array(FLUMIC_Energy)) / FLUMIC_E0)
 
 # Convert from m-2 to cm-2 and from sr-1 to omnidirectional
 FLUMIC_Average_Flux = np.array(FLUMIC_Average_Flux) * 1e-4 * 4 * np.pi
@@ -95,8 +98,8 @@ FLUMIC_Max_Flux = np.array(FLUMIC_Max_Flux) * 1e-4 * 4 * np.pi
 FLUMIC_Worst_Flux = np.array(FLUMIC_Worst_Flux) * 1e-4 * 4 * np.pi
 
 # plt.plot(FLUMIC_Energy, FLUMIC_Average_Flux, 'o-', label="GEO FLUMIC 1-day avg", color=FlumicColor, linewidth=1)
-plt.plot(FLUMIC_Energy, FLUMIC_Max_Flux, 'x-', label="GEO FLUMIC worst-case 1-day avg", color=FlumicColor, linewidth=1)
-# plt.plot(FLUMIC_Energy, FLUMIC_Worst_Flux, 's-', label="GEO FLUMIC worst-case 1-day avg", color=FlumicColor, linewidth=1)
+# plt.plot(FLUMIC_Energy, FLUMIC_Max_Flux, 'x-', label="GEO FLUMIC 1 January 1-day avg", color=FlumicColor, linewidth=1)
+plt.plot(FLUMIC_Energy, FLUMIC_Worst_Flux, 'x-', label="GEO FLUMIC worst-case 1-day avg", color=FlumicColor, linewidth=1)
 
 
 
