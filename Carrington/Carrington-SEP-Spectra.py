@@ -13,7 +13,7 @@ from Read.ReadSpenvis_gcf import readSpenvis_gcf
 from Read.ReadSpenvis_sefflare import readSpenvis_sefflare
 from Dependencies.CarringtonColors import Expected, PlusColor, MinusColor, LEOColor, GEOColor, MEOColor, CREME96Color, SAP_PeakColor
 
-Path = "/scratch/work/fetzera1/Spectra/Carrington"
+Path = r"\\data.triton.aalto.fi\work\fetzera1\Spectra\Carrington"
 
 ## Raw Data from Adnanes E-mail on 13/02/2023 15:53
 Energies = np.array([10, 30, 60, 100, 200])      # MeV
@@ -191,7 +191,7 @@ plt.grid(which='both')
 
 # # Adjust legend to ensure proper order
 handles, labels = plt.gca().get_legend_handles_labels()
-order = [0, 9, 1, 5, 6, 7, 4, 3, 8, 2]  # Adjust this list to reorder as needed
+order = [1, 9, 0, 5, 6, 7, 4, 8, 2, 3]  # Adjust this list to reorder as needed
 plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='lower right')
 # plt.legend()
 
