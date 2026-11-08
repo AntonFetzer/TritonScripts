@@ -336,9 +336,9 @@ for Species in ['Electrons', 'Protons']:
     ######################## Plot formatting ############################
 
     if Species == 'Electrons':
-        plt.title("Electron Dose Behind Shielding")
+        plt.title("Electron Dose")
     if Species == 'Protons':
-        plt.title("Proton and Heavy Ion Dose Behind Shielding")
+        plt.title("Proton and Heavy Ion Dose")
 
     plt.xlabel("Aluminium Shielding Thickness [mm]")
     if Species == 'Electrons':
