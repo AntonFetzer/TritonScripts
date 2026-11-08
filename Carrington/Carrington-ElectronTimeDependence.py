@@ -38,18 +38,18 @@ for T in Evals:
     print(f"{T:.4}", f"{Fluence(T):.4}")
 
 
-fig, ax1 = plt.subplots()
+fig, ax1 = plt.subplots(1, figsize=(5, 3))
 
 plt.plot(Evals/24, flux(Evals), label="Electron Flux", color="C0")
 ax1.set_ylabel("Total Electron Flux [cm-2 s-1]", color="C0")
-ax1.legend(loc='upper center')
+ax1.legend(loc='upper center', bbox_to_anchor=(0.3, 1.0))
 ax1.tick_params(axis='y', colors='C0')
 plt.grid(which='both')
 
 ax2 = ax1.twinx()
 plt.plot(Evals/24, Fluence(Evals), label="Electron Fluence", color="C1")
 ax2.set_ylabel("Total Electron Fluence [cm-2]", color="C1")
-plt.legend(loc='lower center')
+plt.legend(loc='lower center', bbox_to_anchor=(0.3, 0.0))
 ax2.tick_params(axis='y', colors='C1')
 
 #plt.grid(which='both')
@@ -58,7 +58,7 @@ ax2.tick_params(axis='y', colors='C1')
 plt.title("Time dependent electron flux and event fluence")
 ax1.set_xlabel("Time [days]")
 
-plt.savefig("/scratch/work/fetzera1/Spectra/Carrington/Electron-EVT-2026/Electron-EVT-2026TimeDependence.pdf", format='pdf', bbox_inches="tight")
+plt.savefig(r"\\data.triton.aalto.fi\work\fetzera1\Spectra\Carrington\Electron-EVT-2026\Electron-EVT-2026TimeDependence.pdf", format='pdf', bbox_inches="tight")
 #plt.show()
 
 
