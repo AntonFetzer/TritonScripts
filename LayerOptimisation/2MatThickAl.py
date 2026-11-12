@@ -1,4 +1,6 @@
-import os
+import sys, os
+# Ensure the package root (the "Python" folder) is on sys.path so "from Read.* import ..." works
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import numpy as np
 from Dependencies.TotalDose import totalDose
 from Read.ReadSD2Q import readSDQ2
@@ -9,17 +11,17 @@ from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
 from matplotlib.ticker import FuncFormatter
 
 
-Path = "/scratch/work/fetzera1/GRAS/2D/2MatThickAl/FS2-GTO-A9-11y-mean/"
+Path = "/scratch/work/fetzera1/GRAS/2D/2MatThickAl/OLD-GTO"
 
-ElectronFolder = "FS2-GTO-AE9-11y-mean"
-ProtonFolder = "FS2-GTO-AP9-11y-mean"
+ElectronFolder = "AE9500keV"
+ProtonFolder = "AP910MeV"
 SolarFolder = None  # None when the study has no solar-proton run
-TotalFolder = "FS2-GTO-A9-total-11y-mean"
+TotalFolder = "TotalDose_GTO_A9_97thpercentile"
 
 Datset = "T" #E - Electron, P - Proton, S - Solar, T - Total
 
-sd2q_file = "/scratch/work/fetzera1/Spectra/FS2/spenvis_sqo.txt"
-HeatmapTitle = "Dose relative to same mass of Al on GTO (AE9/AP9 11-year mean)"  # None: 'Dose Heatmap <folder>'
+sd2q_file = "/scratch/work/fetzera1/Spectra/OLD/GTO/Shieldose/spenvis_sqo.txt"
+HeatmapTitle = "Dose relative to same mass of Al on GTO (OLD-GTO)"
 
 print("Calculating total dose for Folder name:", Path)
     
@@ -184,15 +186,6 @@ plt.savefig(Path + "/" + folder + "/Plot/DoseShieldingCurves_" + folder + ".pdf"
 plt.close()
 
 
-# Normalize each row to its last entry (reference material Al)
-MapNormalized = np.zeros_like(Map)
-for row in range(TilesY):
-    reference_value = Map[row, -1]  # Last entry is Al reference
-    if reference_value != 0:
-        MapNormalized[row, :] = Map[row, :] / reference_value
-    else:
-        MapNormalized[row, :] = Map[row, :]
-
 # Create a custom diverging colormap: green-white-red
 # Green for values < 1 (lower than reference), red for values > 1 (higher than reference)
 colors_low = ['#228B22', '#FFFFFF']  # Green to white
@@ -205,36 +198,47 @@ cmap_high = LinearSegmentedColormap.from_list('white_red', colors_high)
 colors_combined = list(cmap_low(np.linspace(0, 1, n_bins//2))) + list(cmap_high(np.linspace(0, 1, n_bins//2)))
 cmap_diverging = LinearSegmentedColormap.from_list('green_white_red', colors_combined, N=n_bins)
 
-# Set the normalization to center at 1.0 (100% reference)
-norm = TwoSlopeNorm(vmin=np.min(MapNormalized), vcenter=1.0, vmax=np.max(MapNormalized))
+# One heat map per reference column: Al (last column), 100% PE (column 10) and 100% Pb (column 0, 0% PE)
+for RefColumn, RefName, FileSuffix in [(-1, "Al", ""), (10, "PE", "PE"), (0, "Pb", "Pb")]:
+    # Normalize each row to the reference column
+    MapNormalized = np.zeros_like(Map)
+    for row in range(TilesY):
+        reference_value = Map[row, RefColumn]
+        if reference_value != 0:
+            MapNormalized[row, :] = Map[row, :] / reference_value
+        else:
+            MapNormalized[row, :] = Map[row, :]
 
-plt.figure(figsize=(8, 6))
-im = plt.imshow(MapNormalized, cmap=cmap_diverging, aspect='auto', norm=norm)
-cbar = plt.colorbar(im, label='Dose relative to same mass of Al (%)')
-cbar.ax.yaxis.set_major_formatter(FuncFormatter(lambda x, p: f'{int(x*100)}%'))
+    # Set the normalization to center at 1.0 (100% reference)
+    norm = TwoSlopeNorm(vmin=np.min(MapNormalized), vcenter=1.0, vmax=np.max(MapNormalized))
 
-# Mark the lowest entry with an X
-min_idx = np.unravel_index(np.argmin(MapNormalized), MapNormalized.shape)
-plt.plot(min_idx[1], min_idx[0], 'x', color='black', markersize=12, markeredgewidth=2)
+    plt.figure(figsize=(8, 6))
+    im = plt.imshow(MapNormalized, cmap=cmap_diverging, aspect='auto', norm=norm)
+    cbar = plt.colorbar(im, label='Dose relative to same mass of ' + RefName + ' (%)')
+    cbar.ax.yaxis.set_major_formatter(FuncFormatter(lambda x, p: f'{int(x*100)}%'))
 
-# Label the minimum next to the X; place it on the left when the X is in the right half
-MinLabel = f"{MapNormalized[min_idx] * 100:.0f}%"
-OnRight = min_idx[1] < TilesX / 2
-plt.annotate(MinLabel, (min_idx[1], min_idx[0]), xytext=(12 if OnRight else -12, 0), textcoords='offset points',
-             ha='left' if OnRight else 'right', va='center',
-             bbox=dict(boxstyle='round', facecolor='white', edgecolor='black', alpha=0.9))
+    # Mark the lowest entry with an X
+    min_idx = np.unravel_index(np.argmin(MapNormalized), MapNormalized.shape)
+    plt.plot(min_idx[1], min_idx[0], 'x', color='black', markersize=12, markeredgewidth=2)
 
-# Set x-axis labels to show PE percentages and Al
-x_labels = [f'{i}% PE' for i in range(0, 110, 10)] + ['Al']
-plt.xticks(range(TilesX), x_labels, rotation=45, ha='right')
+    # Label the minimum next to the X; place it on the left when the X is in the right half
+    MinLabel = f"{MapNormalized[min_idx] * 100:.0f}%"
+    OnRight = min_idx[1] < TilesX / 2
+    plt.annotate(MinLabel, (min_idx[1], min_idx[0]), xytext=(12 if OnRight else -12, 0), textcoords='offset points',
+                 ha='left' if OnRight else 'right', va='center',
+                 bbox=dict(boxstyle='round', facecolor='white', edgecolor='black', alpha=0.9))
 
-# Set y-axis labels to show shielding depth in g/cm²
-y_ticks = np.linspace(0, TilesY-1, 10, dtype=int)
-y_labels = [f'{shielding_depth[i]:.2f}' for i in y_ticks]
-plt.yticks(y_ticks, y_labels)
+    # Set x-axis labels to show PE percentages and Al
+    x_labels = [f'{i}% PE' for i in range(0, 110, 10)] + ['Al']
+    plt.xticks(range(TilesX), x_labels, rotation=45, ha='right')
 
-plt.title(HeatmapTitle if HeatmapTitle else 'Dose Heatmap ' + folder)
-plt.xlabel('Shielding Material (% PE)')
-plt.ylabel('Shielding depth [g/cm²]')
-plt.savefig(Path + "/" + folder + "/Plot/DoseHeatmap_" + folder + ".pdf", format='pdf', bbox_inches="tight")
-plt.close()
+    # Set y-axis labels to show shielding depth in g/cm²
+    y_ticks = np.linspace(0, TilesY-1, 10, dtype=int)
+    y_labels = [f'{shielding_depth[i]:.2f}' for i in y_ticks]
+    plt.yticks(y_ticks, y_labels)
+
+    plt.title(HeatmapTitle.replace("same mass of Al", "same mass of " + RefName) if HeatmapTitle else 'Dose Heatmap ' + RefName + ' ' + folder)
+    plt.xlabel('Shielding Material (% PE)')
+    plt.ylabel('Shielding depth [g/cm²]')
+    plt.savefig(Path + "/" + folder + "/Plot/DoseHeatmap" + FileSuffix + "_" + folder + ".pdf", format='pdf', bbox_inches="tight")
+    plt.close()
