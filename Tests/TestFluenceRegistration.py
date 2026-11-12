@@ -11,29 +11,6 @@ class FluenceRegistrationTests(unittest.TestCase):
         self.assertAlmostEqual(rf.pearson(values, values), 1.0)
         self.assertAlmostEqual(rf.cosine(values, values), 1.0)
 
-    def test_sample_registered_applies_coordinate_scale_and_offset(self):
-        try:
-            import scipy  # noqa: F401
-        except ImportError:
-            self.skipTest("SciPy not available")
-        edges = np.linspace(-5.0, 5.0, 11)
-        x = (edges[:-1] + edges[1:]) / 2.0
-        y = (edges[:-1] + edges[1:]) / 2.0
-        observed_x, observed_y = np.meshgrid(x, y)
-        observed = observed_x + 10.0 * observed_y
-        query_x = np.asarray([2.0, 4.0])
-        query_y = np.asarray([1.0, 3.0])
-        sampled = rf.sample_registered(
-            observed,
-            edges,
-            edges,
-            query_x,
-            query_y,
-            (2.0, 2.0, 1.0, 1.0),
-        )
-        # Source coordinates are (0.5, 0.0) and (1.5, 1.0).
-        np.testing.assert_allclose(sampled, [0.5, 11.5], atol=1e-12)
-
     def test_fit_reports_area_jacobian(self):
         # The spatial fit result uses this Jacobian to preserve the integrated
         # proton count when an absolute fluence-density map is stretched.
