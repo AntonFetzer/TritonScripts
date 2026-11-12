@@ -198,12 +198,14 @@ cmap_high = LinearSegmentedColormap.from_list('white_red', colors_high)
 colors_combined = list(cmap_low(np.linspace(0, 1, n_bins//2))) + list(cmap_high(np.linspace(0, 1, n_bins//2)))
 cmap_diverging = LinearSegmentedColormap.from_list('green_white_red', colors_combined, N=n_bins)
 
-# One heat map per reference column: Al (last column), 100% PE (column 10) and 100% Pb (column 0, 0% PE)
-for RefColumn, RefName, FileSuffix in [(-1, "Al", ""), (10, "PE", "PE"), (0, "Pb", "Pb")]:
-    # Normalize each row to the reference column
+# One heat map per reference: Al (last column), 100% PE (column 10), 100% Pb (column 0, 0% PE),
+# and the lowest of these three single materials at each depth, which shows the true multilayer advantage
+for RefColumns, RefName, FileSuffix in [([-1], "Al", ""), ([10], "PE", "PE"), ([0], "Pb", "Pb"),
+                                        ([0, 10, -1], "best single material", "Best")]:
+    # Normalize each row to the reference column (the lowest one when there are several)
     MapNormalized = np.zeros_like(Map)
     for row in range(TilesY):
-        reference_value = Map[row, RefColumn]
+        reference_value = np.min(Map[row, RefColumns])
         if reference_value != 0:
             MapNormalized[row, :] = Map[row, :] / reference_value
         else:
@@ -242,3 +244,24 @@ for RefColumn, RefName, FileSuffix in [(-1, "Al", ""), (10, "PE", "PE"), (0, "Pb
     plt.ylabel('Shielding depth [g/cm²]')
     plt.savefig(Path + "/" + folder + "/Plot/DoseHeatmap" + FileSuffix + "_" + folder + ".pdf", format='pdf', bbox_inches="tight")
     plt.close()
+
+# Heat map of the absolute dose per month of every configuration, centred at 1 kRad per month
+# The OLD-GTO spectrum is per second: multiply by the seconds in 1 month
+MapMonth = Map * 30*24*3600
+# Logarithmic colour scale: colour log10 of the dose, so 1 kRad per month sits at 0
+LogMapMonth = np.log10(MapMonth)
+norm = TwoSlopeNorm(vmin=np.min(LogMapMonth), vcenter=0.0, vmax=np.max(LogMapMonth))
+plt.figure(figsize=(8, 6))
+im = plt.imshow(LogMapMonth, cmap=cmap_diverging, aspect='auto', norm=norm)
+cbar = plt.colorbar(im, label='Dose [kRad per month]')
+cbar.set_ticks(np.log10([t for t in [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]
+                         if np.min(MapMonth) <= t <= np.max(MapMonth)]))
+cbar.ax.yaxis.set_major_formatter(FuncFormatter(lambda x, p: f'{10**x:g}'))
+cbar.ax.yaxis.set_minor_locator(plt.NullLocator())
+plt.xticks(range(TilesX), x_labels, rotation=45, ha='right')
+plt.yticks(y_ticks, y_labels)
+plt.title(HeatmapTitle.replace("Dose relative to same mass of Al", "Absolute dose") if HeatmapTitle else 'Absolute Dose Heatmap ' + folder)
+plt.xlabel('Shielding Material (% PE)')
+plt.ylabel('Shielding depth [g/cm²]')
+plt.savefig(Path + "/" + folder + "/Plot/DoseHeatmapAbsolute_" + folder + ".pdf", format='pdf', bbox_inches="tight")
+plt.close()
