@@ -1,13 +1,16 @@
-import os
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
+import sys, os
+# Ensure the package root (the "Python" folder) is on sys.path so "from Read.* import ..." works
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from Dependencies.HistogramPlots import savePdf
 from Dependencies.MergeTotalDose import mergeTotalDose
 from Dependencies.TotalDose import totalDose
 from uncertainties import ufloat
 
-Path = "/scratch/work/fetzera1/GRAS/2D/2LayerOptimisation"
+
+
+Path = r"\\data.triton.aalto.fi\work\fetzera1\GRAS\2D\2LayerOptimisation"
 ShieldingDepth = "0.564"  # g/cm2
 
 MatA = "Polyethylene"
@@ -15,20 +18,24 @@ MatB = "Lead"
 A = "PE"
 B = "Pb"
 Shield = A + "-" + B
-Folder = Shield + "-0.564gcm2-FlatMissionGTO"  # Study folder; equal to Shield for the original runs
+Folder = Shield + "-0.752gcm2-OldGTO"  # Study folder; equal to Shield for the original runs
 
 # Biased GPS sources (/gps/hist/type biase): GRAS 5 overestimates the quoted
 # errors, so take the error from the replica scatter instead.
 ReplicaError = True
 Months = None  # Divide all doses by this number of months, e.g. 132 for an 11-year fluence
 
-# Optional: python3 -m LayerOptimisation.2LayerOptimisationGRAS <study folder> [--months=N]
+Circles = False  # Mark 0, 25, 50, 75 and 100 % of the A-on-B total dose with white circles
+
+# Optional: python3 -m LayerOptimisation.2LayerOptimisationGRAS <study folder> [--months=N] [--circles]
 Args = [a for a in sys.argv[1:] if not a.startswith("--")]
 if Args:
     Folder = Args[0]  # e.g. PE-Pb-0.564gcm2-FS2-A9-flatlog
 for a in sys.argv[1:]:
     if a.startswith("--months="):
         Months = float(a.split("=", 1)[1])
+    if a == "--circles":
+        Circles = True
 
 Ymax = 1  # Max kRad shown in plots so that every plot has the same scale
 
@@ -73,7 +80,7 @@ plt.grid(which='both')
 plt.legend()
 # plt.yscale("log")
 savePdf(Path + Shield + "-Gradient.pdf")
-plt.show()
+# plt.show()
 
 TotalA = mergeTotalDose([ElecA, ProtA])
 
@@ -82,6 +89,9 @@ TotalB = mergeTotalDose([ElecB, ProtB])
 plt.figure(2)
 plt.errorbar(x, TotalA["dose"], TotalA["error"], fmt=' ', capsize=2, label=MatA + " on top of " + MatB)
 plt.errorbar(x, TotalB["dose"], TotalB["error"], fmt=' ', capsize=2, label=MatB + " on top of " + MatA)
+if Circles:
+    CircleIndex = [0, 25, 50, 75, 100]
+    plt.plot(x[CircleIndex], TotalA["dose"][CircleIndex], 'o', markersize=10, markerfacecolor='white', markeredgecolor='black', zorder=3)
 
 #plt.ylim(0, Ymax)
 plt.title("Total dose deposited by trapped particles in 0.5 mm Si \n behind " + ShieldingDepth + " g/cm2 of " + MatA + "-" + MatB + " shielding")  # --------
@@ -91,7 +101,7 @@ plt.grid(which='both')
 plt.legend(loc='upper left')
 # plt.yscale("log")
 savePdf(Path + Shield + "-GradientSum.pdf")
-plt.show()
+# plt.show()
 
 
 TotalAmin = np.min(TotalA["dose"])
