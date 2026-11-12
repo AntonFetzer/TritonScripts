@@ -84,16 +84,16 @@ plt.plot(LEO_AE9_Protons['Energy'], LEO_AE9_Protons['Integral'], '.-',
          label="LEO AP9 11-year mean trapped proton", color=LEOColor)
 
 ## Read in MEO A9 spectrum
-# MEO_AE9 = Path + "/MEO/spenvis_tri.txt"
-# MEO_AE9_Protons, MEO_AE9_Electrons = readSpenvis_tri(MEO_AE9)
-# plt.plot(MEO_AE9_Protons['Energy'], MEO_AE9_Protons['Integral'], '.-', 
-#          label="MEO AP9 11-year mean", color=MEOColor)
+MEO_AE9 = Path + "/MEO/spenvis_tri.txt"
+MEO_AE9_Protons, MEO_AE9_Electrons = readSpenvis_tri(MEO_AE9)
+plt.plot(MEO_AE9_Protons['Energy'], MEO_AE9_Protons['Integral'], '.-', 
+         label="MEO AP9 11-year mean", color=MEOColor)
 
 ## Read in GEO A9 spectrum
-# GEO_AE9 = Path + "/GEO/spenvis_tri.txt"
-# GEO_AE9_Protons, GEO_AE9_Electrons = readSpenvis_tri(GEO_AE9)
-# plt.plot(GEO_AE9_Protons['Energy'], GEO_AE9_Protons['Integral'], '.-', 
-#          label="GEO AP9 11-year mean", color=GEOColor)
+GEO_AE9 = Path + "/GEO/spenvis_tri.txt"
+GEO_AE9_Protons, GEO_AE9_Electrons = readSpenvis_tri(GEO_AE9)
+plt.plot(GEO_AE9_Protons['Energy'], GEO_AE9_Protons['Integral'], '.-', 
+         label="GEO AP9 11-year mean", color=GEOColor)
 # Flux at low energy is high, but then drops to zero at 8 MeV, therefore not plotted
 
 ## Read in VAP A9 spectrum
