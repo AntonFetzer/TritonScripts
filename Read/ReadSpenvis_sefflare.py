@@ -138,7 +138,7 @@ def readSpenvis_sefflare_Ions(fileName, masses=AtomicMass):
 
 
 if __name__ == "__main__":
-    File = "/home/anton/triton_work/Spectra/Carrington/GEO-Extreme/CREME96/spenvis_sefflare.txt"
+    File = "/scratch/work/fetzera1/Spectra/Carrington/GEO-Extreme/CREME96/spenvis_sefflare.txt"
     '''
     Results = readSpenvis_sefflare(File)
 

@@ -4,7 +4,7 @@ from Dependencies.MergeTotalDose import mergeTotalDose
 from Dependencies.TotalDose import totalDose
 from matplotlib import cm
 
-Path = "/l/triton_work/2LayerOptimisation"
+Path = "/scratch/work/fetzera1/GRAS/2D/2LayerOptimisation"
 
 Folders = ["PE-Pb", "PE-W", "Ti-PE", "PE-FR4", "PE-Al", "Al-W", "FR4-Ti", "Al-FR4", "Kevlar-Al"]
 

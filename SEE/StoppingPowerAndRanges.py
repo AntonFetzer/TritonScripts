@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from Dependencies.TotalLETHistos import totalLETHistos
 
-File = '/l/triton_work/LET_Histograms/Stopping Powers and Ranges/StoppingPower-Ranges.csv'
+File = '/scratch/work/fetzera1/GRAS/1Tile/LET_Histograms/Stopping Powers and Ranges/StoppingPower-Ranges.csv'
 
 # Column names
 columns = ['Proton Energy', 'Proton LET', 'Proton Range', 'Electron Energy', 'Electron LET', 'Electron Range']
@@ -33,8 +33,8 @@ data['Proton LET'] = data['Proton LET'] / 1000
 
 
 ########## Read in GRAS data ##########
-ProtonPath = '/l/triton_work/LET_Histograms/Mono/Protons/'
-ElectronPath = '/l/triton_work/LET_Histograms/Mono/Electrons/'
+ProtonPath = '/scratch/work/fetzera1/GRAS/1Tile/LET_Histograms/Mono/Protons0mmAl-1nmSi/'
+ElectronPath = '/scratch/work/fetzera1/GRAS/1Tile/LET_Histograms/Mono/Electrons0mmAl-1nmSi/'
 
 Proton_LET = {}
 Proton_LET['Energies'] = np.zeros(11, dtype=int)
@@ -107,7 +107,7 @@ ax2.set_ylim(0, 10)
 plt.tight_layout()
 
 # Save the plot
-plt.savefig("/l/triton_work/LET_Histograms/Stopping Powers and Ranges/Stopping Power and Ranges in Silicon.pdf", format='pdf', bbox_inches="tight")
+plt.savefig("/scratch/work/fetzera1/GRAS/1Tile/LET_Histograms/Stopping Powers and Ranges/Stopping Power and Ranges in Silicon.pdf", format='pdf', bbox_inches="tight")
 # plt.show()
 
 # Print maximum LET and corresponding energy of PSTAR data

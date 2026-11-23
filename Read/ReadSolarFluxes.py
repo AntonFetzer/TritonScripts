@@ -65,6 +65,6 @@ def readSpenvis_sef(fileName):
 if __name__ == "__main__":
     ############ SAPPHIRE Spectra are in Fluence with minimum duration 6 months !!! ###############################
     ############ Check duration and normalisation of the spectrum #################################################
-    DataT = readSpenvis_sef("/l/triton_work/Spectra/SAPPHIRE-GTO/spenvis_sef.txt")
+    DataT = readSpenvis_sef("/scratch/work/fetzera1/Spectra/OLD/GTO/SAPPHIRE/spenvis_sef.txt")
 
     print(DataT)

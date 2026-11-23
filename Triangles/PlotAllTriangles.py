@@ -6,7 +6,7 @@ from matplotlib import cm
 import matplotlib as mpl
 from uncertainties import ufloat
 from csv import writer
-from GRAS.Triangles.TernaryPlot import plotTernary
+from Triangles.TernaryPlot import plotTernary
 
 Path = "/l/triton_work/3MatTriangles/DONE/"
 

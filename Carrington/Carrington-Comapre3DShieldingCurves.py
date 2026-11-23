@@ -26,7 +26,7 @@ plt.plot(x, CriticalDose, '--', color='k', linewidth=2, label='100 krad')
 
 ######################  3D data  ##################################
 
-Path = "/l/triton_work/1U/"
+Path = "/scratch/work/fetzera1/GRAS/3D/1U/"
 Folders = ['1mm', '2mm', '4mm', '8mm']
 ThickList = [1, 2, 4, 8]
 
@@ -54,6 +54,6 @@ plt.title("Carrington Total Electron Fluence\nTotal Dose deposited behind planar
 plt.xlabel("Aluminium Shielding Thickness [mm]")
 plt.ylabel("Ionising Dose [krad]")
 plt.legend()
-#plt.savefig("/l/TritonPlots/Carrington/CarringtonShieldingCurveWith3D.eps", format='eps', bbox_inches="tight")
+#plt.savefig("/scratch/work/fetzera1/GRAS/3D/1U/CarringtonShieldingCurveWith3D.eps", format='eps', bbox_inches="tight")
 
 plt.show()

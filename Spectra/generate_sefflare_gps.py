@@ -32,7 +32,7 @@ from Read.ReadSpenvis_sefflare import readSpenvis_sefflare_Ions
 
 
 DEFAULT_INPUT = Path(
-    "/home/anton/triton_work/Spectra/Carrington/GEO-Extreme/CREME96/"
+    "/scratch/work/fetzera1/Spectra/Carrington/GEO-Extreme/CREME96/"
     "spenvis_sefflare.txt"
 )
 

@@ -66,4 +66,4 @@ plt.legend()
 plt.show()
 
 # Save the plot
-#plt.savefig('/l/triton_work/LET/Foresail1-Hercules/Fig13_SEFI_CrossSection_vs_LET_WeibullFitting.png', dpi=300, bbox_inches='tight')
+#plt.savefig('/scratch/work/fetzera1/GRAS/1Tile/LET_Histograms/Foresail1-Hercules/Fig13_SEFI_CrossSection_vs_LET_WeibullFitting.png', dpi=300, bbox_inches='tight')

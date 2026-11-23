@@ -35,13 +35,13 @@ def readGPSMacro(file):
 
 if __name__ == "__main__":
     
-    NewE = readGPSMacro("/l/triton_work/Spectra/FS2/GTO-11year-AE9.mac")
-    OldE = readGPSMacro("/l/triton_work/Spectra/OLD/GTO/AE9/AE9Mission.mac")
-    AE8 = readGPSMacro("/l/triton_work/Spectra/FS2/GTO-11year-AE8.mac")
+    NewE = readGPSMacro("/scratch/work/fetzera1/Spectra/FS2/GTO-11year-AE9.mac")
+    OldE = readGPSMacro("/scratch/work/fetzera1/Spectra/OLD/GTO/AE9/AE9Mission.mac")
+    AE8 = readGPSMacro("/scratch/work/fetzera1/Spectra/FS2/GTO-11year-AE8.mac")
     
-    NewP = readGPSMacro("/l/triton_work/Spectra/FS2/GTO-11year-AP9.mac")    
-    OldP = readGPSMacro("/l/triton_work/Spectra/OLD/GTO/AP9/AP9Mission.mac")
-    AP8 = readGPSMacro("/l/triton_work/Spectra/FS2/GTO-11year-AP8.mac")
+    NewP = readGPSMacro("/scratch/work/fetzera1/Spectra/FS2/GTO-11year-AP9.mac")    
+    OldP = readGPSMacro("/scratch/work/fetzera1/Spectra/OLD/GTO/AP9/AP9Mission.mac")
+    AP8 = readGPSMacro("/scratch/work/fetzera1/Spectra/FS2/GTO-11year-AP8.mac")
 
     # plt.plot(NewE['Energy'], NewE['Flux']/(11*12), label="FS2 AE9 11 year mean per month")
     plt.plot(OldE['Energy'], OldE['Flux'], label="97 percentile AE9 per month")

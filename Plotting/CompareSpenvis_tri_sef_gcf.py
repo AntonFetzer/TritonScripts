@@ -1,13 +1,13 @@
-from GRAS.Read.ReadSpenvis_tri import readSpenvis_tri
-from GRAS.Read.ReadSpenvis_sef import readSpenvis_sef
-from GRAS.Read.ReadSpenvis_gcf import readSpenvis_gcf
-from GRAS.Read.ReadGPSMacro import readGPSMacro
+from Read.ReadSpenvis_tri import readSpenvis_tri
+from Read.ReadSpenvis_sef import readSpenvis_sef
+from Read.ReadSpenvis_gcf import readSpenvis_gcf
+from Read.ReadGPSMacro import readGPSMacro
 import numpy as np
 import matplotlib.pyplot as plt
 
-TRIProt, TRIElec = readSpenvis_tri("/l/triton_work/Spectra/A9-GTO/spenvis_tri.txt")
-SEF = readSpenvis_sef("/l/triton_work/Spectra/SAPPHIRE-GTO/spenvis_sef.txt")
-GCF = readSpenvis_gcf("/l/triton_work/Spectra/ISO-GTO/spenvis_gcf.txt")
+TRIProt, TRIElec = readSpenvis_tri("/scratch/work/fetzera1/Spectra/OLD/GTO/spenvis_tri.txt")
+SEF = readSpenvis_sef("/scratch/work/fetzera1/Spectra/OLD/GTO/SAPPHIRE/spenvis_sef.txt")
+GCF = readSpenvis_gcf("/scratch/work/fetzera1/Spectra/OLD/GTO/ISO/spenvis_gcf.txt")
 #GPS = readGPSMacro("/l/triton_work/Spectra/SuperGTO/SuperGTOElectrons.mac")
 
 Species = ['H ', 'He', 'Li', 'Be', 'B ', 'C ', 'N ', 'O ', 'F ', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P ', 'S ', 'Cl',
@@ -71,4 +71,4 @@ plt.ylabel("Differential Flux [cm-2 s-1 MeV-1]")
 plt.legend()
 #plt.show()
 
-plt.savefig("/l/TritonPlots/Paper/FluxComparison.pdf", format='pdf', bbox_inches="tight")
+plt.savefig("/scratch/work/fetzera1/FluxComparison.pdf", format='pdf', bbox_inches="tight")

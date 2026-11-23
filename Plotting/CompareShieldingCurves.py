@@ -9,7 +9,7 @@ import csv
 import sys
 
 
-Path = "/l/triton_work/Shielding_Curves/Mono/"
+Path = "/scratch/work/fetzera1/GRAS/2D/Shielding_Curves/Mono/"
 res_suffix = "/Res/"
 
 Labels = [

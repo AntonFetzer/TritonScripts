@@ -6,8 +6,8 @@ from uncertainties import ufloat, unumpy
 
 ProtElecOrTotal = "Total"  # "Protons", "Electrons", "Total
 
-Proton_Path = "/l/triton_work/2LayerOptimisation10TilesPE/Protons/"
-Electron_Path = "/l/triton_work/2LayerOptimisation10TilesPE/Electrons/"
+Proton_Path = "/scratch/work/fetzera1/GRAS/OLD/2LayerOptimisation10TilesPE/Protons/"
+Electron_Path = "/scratch/work/fetzera1/GRAS/OLD/2LayerOptimisation10TilesPE/Electrons/"
 res_suffix = "/Res/"
 
 Labels = [

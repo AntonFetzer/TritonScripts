@@ -18,7 +18,7 @@ print("Number of Names:", len(Materials))
 #for x in Densities:
 #    print(x)
 
-Path = "/l/triton_work/Permutations/3Layer/Res/"
+Path = "/scratch/work/fetzera1/GRAS/2D/Permutations/3Layer/Res/"
 file_name = Path + "../Analysis/3Layer-Raw.csv"
 
 Electrons = totalDose(Path, filename_contains="Elec")

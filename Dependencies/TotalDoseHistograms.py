@@ -72,7 +72,7 @@ def totalDoseHistograms(path, particle=""):
 
 
 if __name__ == "__main__":
-    path = "/l/triton_work/Histograms/AE9500keV/Res/"
+    path = "/scratch/work/fetzera1/GRAS/1Tile/Dose_Histograms/AE9500keV/Res/"
     DoseHist, PrimaryHist = totalDoseHistograms(path)
 
     ####    Dose hist Entries #######

@@ -6,7 +6,7 @@ from Dependencies.TotalDose import totalDose
 from matplotlib import cm
 import matplotlib as mpl
 from uncertainties import ufloat
-from GRAS.Triangles.CombinedColormaps import create_average_colormap
+from Triangles.CombinedColormaps import create_average_colormap
 import sigfig
 
 
@@ -141,7 +141,7 @@ def plotTernary(path, particle, materials, mat):
     # plt.close(Fig)
     '''
     if "Total" in particle:
-        CSVFile = open("/l/triton_work/3MatTriangles/3MatSum.csv", 'a')
+        CSVFile = open("/scratch/work/fetzera1/GRAS/2D/3MatTriangles/3MatSum.csv", 'a')
         List = (str(round(rMin * 100)), "\% " + mat[0] + " &",
                 str(round(gMin * 100)), "\% " + mat[1] + " &",
                 str(round(bMin * 100)), "\% " + mat[2] + " & \\num{", ufloat(Min, MinErr), "} \\\\")
@@ -200,7 +200,7 @@ def plotTernary(path, particle, materials, mat):
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/3MatTriangles/Al-Ti-Ta/Res/"
+    Path = "/scratch/work/fetzera1/GRAS/2D/3MatTriangles/Al-Ti-Ta/Res/"
 
     Materials = ["Aluminium", "Titanium", "Tantalum"]
     Mat = ["Al", "Ti", "Ta"]

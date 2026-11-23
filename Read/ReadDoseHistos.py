@@ -95,8 +95,8 @@ def readDoseHistos(file):
 
 
 if __name__ == "__main__":
-    path = "/l/triton_work/Histograms/Cobalt-60/Res/"
-    file = "Electrons_627965_97150.csv"
+    path = "/scratch/work/fetzera1/GRAS/1Tile/Dose_Histograms/Cobalt-60/Res/"
+    file = "Electrons_359945_55686.csv"
 
     DoseHist, PrimaryHist = readDoseHistos(path + file)
 

@@ -69,7 +69,7 @@ def readSpenvis_gcf(fileName, masses=AtomicMass):
 
 if __name__ == "__main__":
 
-    Path = "/l/triton_work/Spectra/ISS"
+    Path = "/scratch/work/fetzera1/Spectra/OLD/ISS"
 
     DataT = readSpenvis_gcf(Path + "/spenvis_gcf.txt")
     #plt.bar(range(93), DataT[:, 0, 1])

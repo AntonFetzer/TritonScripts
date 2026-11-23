@@ -2,7 +2,7 @@ from Dependencies.TotalDose import totalDose
 import numpy as np
 import matplotlib.pyplot as plt
 
-Path = "/l/triton_work/2LayerOptimisationPhysicsTest10Tiles/Pe-Pb-Electrons/"
+Path = "/scratch/work/fetzera1/GRAS/OLD/2LayerOptimisationPhysicsTest10Tiles/Pe-Pb-Electrons/"
 res_suffix = "/Res/"
 
 

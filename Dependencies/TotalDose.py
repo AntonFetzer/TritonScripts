@@ -207,7 +207,7 @@ def totalDose(path, filename_contains=None, replica_error=False, min_replicas=5)
 
 
 if __name__ == "__main__":
-    Path = "/l/triton_work/2MatThickAl/OLD-GTO/AE9500keV"
+    Path = "/scratch/work/fetzera1/GRAS/2D/2MatThickAl/OLD-GTO/AE9500keV"
     # Optional: python3 -m Dependencies.TotalDose <path> [--replica-error]
     # --replica-error takes the error from the replica scatter (biased GPS sources).
     Args = [a for a in sys.argv[1:] if not a.startswith("--")]

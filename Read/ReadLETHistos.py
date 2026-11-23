@@ -90,7 +90,7 @@ def readLETHistos(file):
 
 
 if __name__ == "__main__":
-    file = "/l/triton_work/LET_Histograms/Carrington/CarringtonElectronINTEGRALPowTabelated/1mm/Res/LET_68171_10546.csv"
+    file = "/scratch/work/fetzera1/GRAS/1Tile/LET_Histograms/Carrington/CarringtonElectronINTEGRALPowTabelated/1mm/Res/LET_121951_18866.csv"
 
     LET, Eff = readLETHistos(file)
 

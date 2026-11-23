@@ -55,7 +55,7 @@ def totalLETHistos(path):
 
 if __name__ == "__main__":
 
-    path = "/l/triton_work/LET_Histograms/Carrington/"
+    path = "/scratch/work/fetzera1/GRAS/1Tile/LET_Histograms/Carrington/"
 
     # Find all subdirectories in the given path that contain a "Res" subfolder
     # and calculate the total LET histos for each of them

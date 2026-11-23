@@ -36,6 +36,6 @@ plt.title("Carrington Electron Spectrum\nDose deposited behind planar aluminium 
 plt.xlabel("Aluminium Shielding Thickness [mm]")
 plt.ylabel("Ionising Dose [krad]")
 plt.legend()
-#plt.savefig("/l/TritonPlots/CarringtonShieldingCurveTlin.eps", format='eps', bbox_inches="tight")
+#plt.savefig("/scratch/work/fetzera1/GRAS/3D/1U/CarringtonShieldingCurveTlin.eps", format='eps', bbox_inches="tight")
 
 plt.show()

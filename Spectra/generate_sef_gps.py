@@ -23,7 +23,7 @@ from generate_sefflare_gps import MASS_NUMBERS, write_macros
 from Read.ReadSpenvis_sef import readSpenvis_sef_Ions
 
 
-DEFAULT_INPUT = Path("/home/anton/triton_work/Spectra/Carrington/GEO/spenvis_sef.txt")
+DEFAULT_INPUT = Path("/scratch/work/fetzera1/Spectra/Carrington/GEO/spenvis_sef.txt")
 
 
 def main() -> int:

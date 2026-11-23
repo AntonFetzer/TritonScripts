@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from uncertainties import ufloat
 import sigfig
-from GRAS.Triangles.CombinedColormaps import create_average_colormap
+from Triangles.CombinedColormaps import create_average_colormap
 
 Names = ["G4_Li", "G4_Be", "G4_B", "G4_C", "G4_Mg", "G4_Al", "G4_Si", "G4_S", "G4_Ca", "G4_Sc", "G4_Ti", "G4_V",
          "G4_Cr", "G4_Mn", "G4_Fe", "G4_Co", "G4_Ni", "G4_Cu", "G4_Zn", "G4_Ge", "G4_As", "G4_Se", "G4_Sr", "G4_Y",
@@ -27,7 +27,7 @@ print(VolumesStr)
 
 
 
-file = "/l/triton_work/Permutations/NIST.txt"
+file = "/scratch/work/fetzera1/GRAS/2D/Permutations/NIST.txt"
 Text = []
 
 with open(file, 'r') as f:

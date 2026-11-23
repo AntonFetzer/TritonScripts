@@ -22,11 +22,11 @@ S["VAP"]["color"] = 'C3'     # Red
 S["GEO"]["color"] = 'C7'     # grey
 
 # File paths
-S["EVT"]["file"] = "/l/triton_work/Spectra/Carrington/Electron/CarringtonElectronDiffPowTabelated.mac"
-S["LEO"]["file"] = "/l/triton_work/Spectra/Carrington/LEO/LEO-electron.mac"
-S["GEO"]["file"] = "/l/triton_work/Spectra/Carrington/GEO/GEO-electron.mac"
-S["VAP"]["file"] = "/l/triton_work/Spectra/Carrington/VAP/VAP-electron.mac"
-S["MEO"]["file"] = "/l/triton_work/Spectra/Carrington/MEO/MEO-electron.mac"
+S["EVT"]["file"] = "/scratch/work/fetzera1/Spectra/Carrington/Electron/CarringtonElectronDiffPowTabelated.mac"
+S["LEO"]["file"] = "/scratch/work/fetzera1/Spectra/Carrington/LEO/LEO-electron.mac"
+S["GEO"]["file"] = "/scratch/work/fetzera1/Spectra/Carrington/GEO/GEO-electron.mac"
+S["VAP"]["file"] = "/scratch/work/fetzera1/Spectra/Carrington/VAP/VAP-electron.mac"
+S["MEO"]["file"] = "/scratch/work/fetzera1/Spectra/Carrington/MEO/MEO-electron.mac"
 
 # Read in the data
 for d in Datasets:

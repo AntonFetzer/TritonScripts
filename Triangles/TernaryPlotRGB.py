@@ -79,4 +79,4 @@ for label in ax.raxis.get_ticklabels():
     label.set_color((0, 1, 0))
 
 #plt.show()
-plt.savefig("/l/TritonPlots/Paper/TernaryRGB.pdf", format='pdf')
+plt.savefig("/scratch/work/fetzera1/TernaryRGB.pdf", format='pdf')

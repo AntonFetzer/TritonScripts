@@ -144,7 +144,7 @@ def readSpenvis_sef_Ions(fileName, masses=AtomicMass):
 
 if __name__ == "__main__":
 
-    File = "/home/anton/triton_work/Spectra/Carrington/GEO/spenvis_sef.txt"
+    File = "/scratch/work/fetzera1/Spectra/Carrington/GEO/spenvis_sef.txt"
 
     # Use integer isotope masses so the MeV/nuc -> MeV conversion matches
     # the isotope specified in the Geant4 GPS macro.

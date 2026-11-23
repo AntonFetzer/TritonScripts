@@ -46,7 +46,7 @@ def readSDQ2(fileName):
 
 
 if __name__ == "__main__":
-    Data = readSDQ2("/l/triton_work/Spectra/OLD/GTO/Shieldose/spenvis_sqo.txt")
+    Data = readSDQ2("/scratch/work/fetzera1/Spectra/OLD/GTO/Shieldose/spenvis_sqo.txt")
 
     print("Aluminium Thicknesses", Data['Thickness'])
     print("Total Dose", Data['Total'])
