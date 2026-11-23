@@ -9,7 +9,7 @@ from Read.ReadSpenvis_tri import readSpenvis_tri
 from Read.ReadGPSMacro import readGPSMacro
 from Dependencies.CarringtonColors import Expected, LEOColor, GEOColor, MEOColor, FlumicColor, GOESColor
 
-Path = r"\\data.triton.aalto.fi\work\fetzera1"
+Path = "/scratch/work/fetzera1"
 
 '''  Deprecated 
 ## Carrington Integral Electron Spectrum Parameters from EVT Analysis of Adnane Osmane

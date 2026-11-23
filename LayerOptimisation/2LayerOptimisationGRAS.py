@@ -10,7 +10,7 @@ from uncertainties import ufloat
 
 
 
-Path = r"\\data.triton.aalto.fi\work\fetzera1\GRAS\2D\2LayerOptimisation"
+Path = "/scratch/work/fetzera1/GRAS/2D/2LayerOptimisation"
 ShieldingDepth = "0.9"  # g/cm2
 
 MatA = "Polyethylene"

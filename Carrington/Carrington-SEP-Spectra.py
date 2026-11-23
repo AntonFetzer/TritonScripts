@@ -13,7 +13,7 @@ from Read.ReadSpenvis_gcf import readSpenvis_gcf
 from Read.ReadSpenvis_sefflare import readSpenvis_sefflare
 from Dependencies.CarringtonColors import Expected, PlusColor, MinusColor, LEOColor, GEOColor, MEOColor, CREME96Color, SAP_PeakColor
 
-Path = r"\\data.triton.aalto.fi\work\fetzera1\Spectra\Carrington"
+Path = "/scratch/work/fetzera1/Spectra/Carrington"
 
 ## Raw Data from Adnanes E-mail on 13/02/2023 15:53
 Energies = np.array([10, 30, 60, 100, 200])      # MeV

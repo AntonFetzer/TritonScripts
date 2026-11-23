@@ -31,7 +31,7 @@ x = np.linspace(0, 10, num=101, dtype=float, endpoint=True)
 CriticalDose1 = [1 for i in x]
 CriticalDose10 = [10 for i in x]
 
-Path = r"\\data.triton.aalto.fi\work\fetzera1\GRAS\2D\Shielding_Curves\Carrington/"
+Path = "/scratch/work/fetzera1/GRAS/2D/Shielding_Curves/Carrington/"
 # The carrington fluxes are per second, but we are interested in the event fluence which corresponds to 1.23 d
 PerStoEvent = 1.23 * 24 * 60 * 60
 # The nominal runs are normalised to the 4015-day mission, but the GCR and the SAPPHIRE Heavy-Ion totals are per second
@@ -193,7 +193,7 @@ for Species in ['Electrons', 'Protons']:
         plt.errorbar(x, LEO_Total['dose'] * 100/11, yerr=LEO_Total['error'] * 100/11, color=LEOColor, 
                     label="LEO 100 year dose", **default_errorbar_style)
 
-        # LEO_SD = readSDQ2(r"\\data.triton.aalto.fi\work\fetzera1\Spectra\Carrington\LEO\spenvis_sqo.txt")
+        # LEO_SD = readSDQ2("/scratch/work/fetzera1/Spectra/Carrington/LEO/spenvis_sqo.txt")
         # plt.plot(LEO_SD['Thickness'], ( LEO_SD['Electrons'] + LEO_SD['Bremsstrahlung'] ), 
         #         label="SHIELDOSE-2Q LEO Electrons + Bremsstrahlung", color='C0')
         # plt.plot(LEO_SD['Thickness'], ( LEO_SD['Trapped Protons'] + LEO_SD['Solar Protons'] )*100/11, 'x', label="LEO 100 year dose\n(SHIELDOSE-2Q)", color=LEOColor)
@@ -240,7 +240,7 @@ for Species in ['Electrons', 'Protons']:
         plt.errorbar(x, MEO_Total['dose']*10/11, yerr=MEO_Total['error']*10/11, color=MEOColor, 
                     label="MEO 10 year dose", **default_errorbar_style)
 
-    MEO_SD = readSDQ2(r"\\data.triton.aalto.fi\work\fetzera1\Spectra\Carrington\MEO\spenvis_sqo.txt")
+    MEO_SD = readSDQ2("/scratch/work/fetzera1/Spectra/Carrington/MEO/spenvis_sqo.txt")
     if Species == 'Electrons':
         plt.plot(MEO_SD['Thickness'], ( MEO_SD['Electrons'] + MEO_SD['Bremsstrahlung'] )/11, '.', label="MEO 1 year dose\n(SHIELDOSE-2Q)", color=MEOColor)
     

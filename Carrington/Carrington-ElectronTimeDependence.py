@@ -58,7 +58,7 @@ ax2.tick_params(axis='y', colors='C1')
 plt.title("Time dependent electron flux and event fluence")
 ax1.set_xlabel("Time [days]")
 
-plt.savefig(r"\\data.triton.aalto.fi\work\fetzera1\Spectra\Carrington\Electron-EVT-2026\Electron-EVT-2026TimeDependence.pdf", format='pdf', bbox_inches="tight")
+plt.savefig("/scratch/work/fetzera1/Spectra/Carrington/Electron-EVT-2026/Electron-EVT-2026TimeDependence.pdf", format='pdf', bbox_inches="tight")
 #plt.show()
 
 
