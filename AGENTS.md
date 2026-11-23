@@ -245,8 +245,17 @@ git diff --check
 python3 -m unittest discover -s Tests -p "Test*.py"
 ```
 
-`Tests/` pins the numerical conventions of the shared readers against small
-committed fixtures, so it runs without GRAS output and takes under a second.
-Extend it when you add a reader or change how results are combined.
+`Tests/` is entirely the agents' to maintain. It pins numerical conventions
+against small committed fixtures or inline text, so it runs without GRAS output
+and takes under a second.
+
+- Write a test only when, in your judgement, it serves a specific purpose, such
+  as protecting a numerical result or a bug that has happened. New code does not
+  need a test by default.
+- Do not just append. First check what `Tests/` already covers, and update,
+  merge or replace existing tests where that does the job.
+- When code elsewhere in the repository changes, update the tests it affects and
+  delete those that no longer serve a purpose, with their fixtures. Do not change
+  a test only to make it pass; first establish that the new behaviour is right.
 
 Also run the narrowest relevant analysis or test when its required input data is available. Report when end-to-end validation cannot be performed because external GRAS or measurement data is unavailable.
