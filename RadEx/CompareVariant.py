@@ -78,7 +78,7 @@ for run, coef in ((rname, dr[fitLayer]), (vname, dv[fitLayer])):
 with open(variant / f"Comparison_{vname}.csv", "w", newline="") as f:
     for line in lines:
         f.write(line + "\n")
-    w = csv.writer(f)
+    w = csv.writer(f, lineterminator="\n")
     header = ["channel", "type", "sample"]
     for layer in layers:
         header += [f"ref_{layer}", f"var_{layer}", f"{layer}_ratio", f"{layer}_ratio_err"]

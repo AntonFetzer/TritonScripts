@@ -248,7 +248,7 @@ def main() -> None:
         with (output_dir / filename).open(
             "w", encoding="utf-8", newline=""
         ) as handle:
-            writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+            writer = csv.DictWriter(handle, fieldnames=list(rows[0]), lineterminator="\n")
             writer.writeheader()
             writer.writerows(rows)
     (output_dir / "scan_cadence_report.json").write_text(

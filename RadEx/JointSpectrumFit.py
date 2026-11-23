@@ -166,7 +166,7 @@ results["fraction_profile"] = prof
 with open(out / f"joint-fit-{tag}.json", "w") as handle:
     json.dump(results, handle, indent=2)
 with open(out / f"joint-fit-{tag}.csv", "w", newline="") as handle:
-    w = csv.writer(handle)
+    w = csv.writer(handle, lineterminator="\n")
     w.writerow(["energy_MeV", "pdd_only_fraction", "joint_fraction"] + [f"forced_below{args.low_mev:g}_{phi:.3f}" for phi in FRACTIONS])
     for i, e in enumerate(grid):
         w.writerow([e, f"{pdd_only['fraction'][i]:.5f}", f"{joint['fraction'][i]:.5f}"] + [f"{p['spectrum'][i]:.5f}" for p in prof])

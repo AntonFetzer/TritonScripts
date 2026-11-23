@@ -43,7 +43,7 @@ def main():
 
     out = run / "dose_results_full_precision.csv"
     with out.open("w", newline="") as f:
-        writer = csv.writer(f)
+        writer = csv.writer(f, lineterminator="\n")
         writer.writerow([
             "energy_mev", "particle", "tile_index", "channel", "radfet_type",
             "shielding_or_location", f"dose_coefficient_kRad_cm2_per_{campaign['particle']}",

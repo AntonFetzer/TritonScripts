@@ -302,7 +302,7 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     csv_path = output_dir / f"{experiment_id}_window_uniformity.csv"
     with csv_path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     report = {

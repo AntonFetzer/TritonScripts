@@ -45,7 +45,7 @@ def main():
                delivered_fluence_stat_error_electrons_cm2=86573*phi_error)
     output = results.parent / ("Calibration_" + args.variant)
     with output.with_suffix(".csv").open("w", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=row.keys())
+        writer = csv.DictWriter(stream, fieldnames=row.keys(), lineterminator="\n")
         writer.writeheader(); writer.writerow(row)
     report = dict(result=row, files=[str(p) for p in files],
                   delivered_MU_evidence="User witnessed machine stop at 86573 MU; photo predates irradiation",

@@ -122,7 +122,7 @@ def main() -> None:
 
     arguments.output.parent.mkdir(parents=True, exist_ok=True)
     with arguments.output.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=FIELDNAMES)
+        writer = csv.DictWriter(handle, fieldnames=FIELDNAMES, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     print(f"Wrote {arguments.output} ({len(rows)} rows)")

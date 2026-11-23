@@ -150,7 +150,7 @@ def write_macros(data, output_dir: Path, prefix: str, source_name: str):
 
     manifest_path = output_dir / f"{prefix}-manifest.csv"
     with manifest_path.open("w", encoding="ascii", newline="") as stream:
-        writer = csv.writer(stream)
+        writer = csv.writer(stream, lineterminator="\n")
         writer.writerow(("Z", "symbol", "A", "integral_flux_cm-2_s-1", "macro"))
         writer.writerows(manifest)
     return manifest, skipped

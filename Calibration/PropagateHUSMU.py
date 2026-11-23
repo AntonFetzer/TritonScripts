@@ -78,10 +78,10 @@ def main():
                      dose_first_irradiation_normalization_stat_error_kRad=c*sigma,
                      dose_first_irradiation_combined_stat_error_kRad=math.hypot(e*phi,c*sigma))
         with path.open("w",newline="") as f:
-            w=csv.DictWriter(f,fieldnames=rows[0].keys());w.writeheader();w.writerows(rows)
+            w=csv.DictWriter(f,fieldnames=rows[0].keys(),lineterminator="\n");w.writeheader();w.writerows(rows)
         if model=="gate_oxide_module":
             with (BASE/"Results"/table).open("w",newline="") as f:
-                w=csv.DictWriter(f,fieldnames=rows[0].keys());w.writeheader();w.writerows(rows)
+                w=csv.DictWriter(f,fieldnames=rows[0].keys(),lineterminator="\n");w.writeheader();w.writerows(rows)
         print(folder,model,[(r["channel"],round(r["dose_first_irradiation_kRad"],3)) for r in rows])
     print(f"Device fluence {phi:.6e} electrons/cm2 = SSD100 {phi100:.6e} x inverse-square {INVERSE_SQUARE:.6f}.")
     print("Reference coefficients and 2e12 columns preserved. Common normalization errors are correlated across channels.")

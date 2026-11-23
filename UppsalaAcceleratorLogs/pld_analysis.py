@@ -315,7 +315,7 @@ def write_spots_csv(path: Path, rows: list[dict[str, object]]) -> None:
     if not rows:
         raise ValueError("No parsed spots to write")
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 

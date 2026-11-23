@@ -154,6 +154,6 @@ for phase, cfg in sorted(campaign["phases"].items(), key=lambda p: p[0] != measu
 with open(out / f"spectrum-fit-{layer}{TAG}-summary.json", "w") as handle:
     json.dump(summary, handle, indent=2)
 with open(out / f"spectrum-fit-{layer}{TAG}-channel-residuals.csv", "w", newline="") as handle:
-    writer = csv.DictWriter(handle, fieldnames=list(residuals[0]))
+    writer = csv.DictWriter(handle, fieldnames=list(residuals[0]), lineterminator="\n")
     writer.writeheader()
     writer.writerows(residuals)

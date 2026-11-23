@@ -960,7 +960,7 @@ def write_time_series_csv(
             ]
         )
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer = csv.DictWriter(handle, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         for second in sorted(time_rows):
             row = time_rows[second]
@@ -1144,7 +1144,7 @@ def write_monitor_comparison_csv(
         "dose_sec_minus_prim_percent_of_prim",
     ]
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer = csv.DictWriter(handle, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         for index, second in enumerate(seconds):
             utc_time = datetime.fromtimestamp(int(second), timezone.utc)
@@ -1852,7 +1852,7 @@ def reduce_results(args: argparse.Namespace) -> None:
     with (aggregate_root / "aggregate_summary.csv").open(
         "w", encoding="utf-8", newline=""
     ) as handle:
-        writer = csv.DictWriter(handle, fieldnames=aggregate_fields)
+        writer = csv.DictWriter(handle, fieldnames=aggregate_fields, lineterminator="\n")
         writer.writeheader()
         writer.writerows(aggregate_summaries)
 
@@ -1860,7 +1860,7 @@ def reduce_results(args: argparse.Namespace) -> None:
     with (output_dir / "calibration_qc.csv").open(
         "w", encoding="utf-8", newline=""
     ) as handle:
-        writer = csv.DictWriter(handle, fieldnames=calibration_fields)
+        writer = csv.DictWriter(handle, fieldnames=calibration_fields, lineterminator="\n")
         writer.writeheader()
         writer.writerows(calibration_rows)
 

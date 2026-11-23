@@ -150,7 +150,7 @@ def analyseScanFile(source, base=None):
     figure_path = base / f"Scans_{stem}.pdf"
 
     with points_path.open("w", newline="") as stream:
-        writer = csv.writer(stream)
+        writer = csv.writer(stream, lineterminator="\n")
         writer.writerow(["curve_type", "depth_mm", "position_mm",
                          "value_arbitrary_units", "reference_arbitrary_units",
                          "normalized_percent"])
@@ -167,7 +167,7 @@ def analyseScanFile(source, base=None):
     rows = [metricsRow(metrics) for metrics in all_metrics]
     fields = list(dict.fromkeys(key for row in rows for key in row))
     with metrics_path.open("w", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=fields, restval="")
+        writer = csv.DictWriter(stream, fieldnames=fields, restval="", lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 

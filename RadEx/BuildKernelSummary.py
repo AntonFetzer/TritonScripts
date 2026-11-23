@@ -41,7 +41,7 @@ def main() -> None:
     rows = sorted(csv.DictReader(open(args.sweep / "energies.csv", newline="")),
                   key=lambda r: float(r["energy_MeV"]))
     with args.output.open("w", newline="") as handle:
-        writer = csv.writer(handle)
+        writer = csv.writer(handle, lineterminator="\n")
         writer.writerow(FIELDNAMES)
         for r in rows:
             res = args.sweep / r["directory"] / "Res"

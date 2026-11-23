@@ -108,7 +108,7 @@ def main() -> None:
     output = args.output
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.with_suffix(".csv").open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=FIELDNAMES)
+        writer = csv.DictWriter(handle, fieldnames=FIELDNAMES, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
