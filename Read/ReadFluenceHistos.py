@@ -14,6 +14,7 @@ def readFluenceHistos(file):
     Returns:
         Tuple (ElectronHistDict, ProtonHistDict) where each is a dict with keys:
             'lower','upper','mean','value','error','entries' (numpy arrays)
+            and 'events' (number of primary events)
     """
     keys = ['lower', 'upper', 'mean', 'value', 'error', 'entries']
 
@@ -26,7 +27,10 @@ def readFluenceHistos(file):
     # 1 = reading electrons until "'End of Block'"
     # 2 = looking for second "'Bin entries'" (start protons)
     # 3 = reading protons until "'End of Block'"
+    # 4 = looking for "'NumOfEvt'" in the 'general' block
+    # 5 = skipping its header lines until the number of primary events
     ReadFlag = 0
+    NumOfEvt = 0.0
 
     with open(file, 'r') as f:
         reader = csv.reader(f)
@@ -77,6 +81,17 @@ def readFluenceHistos(file):
                     for i, key in enumerate(keys):
                         ProtonHist[key].append(float(line[i]))
 
+            elif ReadFlag == 4:
+                if "'NumOfEvt'" in line:
+                    ReadFlag = 5
+
+            elif ReadFlag == 5:
+                # Skip the remaining header lines of the 'general' block; the
+                # first numeric line starts with the number of primary events.
+                if not line[0].strip().startswith("'"):
+                    NumOfEvt = float(line[0])
+                    break
+
     # Check if any data was read
     if not ElectronHist['lower'] and not ProtonHist['lower']:
         raise ValueError("No histogram data found in file: {}".format(file))
@@ -89,6 +104,11 @@ def readFluenceHistos(file):
     for key in ElectronHist:
         ElectronHist[key] = np.array(ElectronHist[key])
         ProtonHist[key] = np.array(ProtonHist[key])
+
+    # Number of simulated primaries; the correct weight when merging jobs
+    # (an empty histogram from a completed run is a valid zero measurement).
+    ElectronHist['events'] = NumOfEvt
+    ProtonHist['events'] = NumOfEvt
 
     return ElectronHist, ProtonHist
 

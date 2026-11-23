@@ -64,6 +64,10 @@ class TestNormaliseToRate(unittest.TestCase):
         for Folder in ("GEO-SolarProton-5minPeakFlux", "GEO-CREME96-Solar-Iron", "LEO-SAPPHIRE-Solar-Iron", "VAP-GCR-Iron", "Carrington-SEP-Expected-EVT2026"):
             self.assertEqual(normaliseToRate(histogram(), Folder)['value'][1], 20.0, msg=Folder)
 
+    def test_mission_duration_is_11_years_of_365_days(self):
+        # Written as a number, so that a changed MISSION_SECONDS is noticed.
+        self.assertAlmostEqual(normaliseToRate(histogram(), "GEO-solar-proton")['value'][1] * 346896000.0, 20.0)
+
 
 class TestFoldAndRate(unittest.TestCase):
 
@@ -81,6 +85,11 @@ class TestFoldAndRate(unittest.TestCase):
         Hist['mean'] = np.array([1.5, 2.5])
         Flat = {"E_pts": np.array([0.1, 1000.0]), "S_pts": np.array([1e-10, 1e-10])}
         self.assertAlmostEqual(seeRate(foldCrossSection(Hist, Flat))[0] / 1e-10, np.sum(Hist['value']))
+
+    def test_errors_are_scaled_like_the_values(self):
+        Flat = {"E_pts": np.array([0.1, 1000.0]), "S_pts": np.array([1e-10, 1e-10])}
+        for Result in (normaliseToRate(histogram(), "GEO-solar-proton"), foldCrossSection(histogram(), Flat)):
+            np.testing.assert_allclose(Result['error'] / Result['value'], [0.1, 0.1])
 
     def test_rate_error_and_contributing_entries(self):
         SEEHist = {'value': np.array([0.0, 1.0, 3.0]), 'error': np.array([0.0, 3.0, 4.0]), 'entries': np.array([10, 20, 30])}

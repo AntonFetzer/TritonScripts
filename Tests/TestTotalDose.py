@@ -9,14 +9,19 @@ gets wrong, which is the reason to call totalDose rather than reimplement it:
   a visibly different answer.
 * The pooled error is sqrt(sum(N_i^2 * sigma_i^2)) / sum(N_i).
 * Entries and non-zero entries are summed across files.
+* Files that differ by more than their random seed are reported (Birge ratio > 2).
 
 Run from the repository root:
 
     python3 -m unittest discover -s Tests -p "Test*.py"
 """
+import contextlib
+import io
 import sys
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
 
@@ -62,6 +67,19 @@ class TestTotalDose(unittest.TestCase):
             self.result["entries"], np.full(3, ENTRIES_A + ENTRIES_B))
         np.testing.assert_array_equal(
             self.result["non-zeros"], NON_ZEROS_A + NON_ZEROS_B)
+
+    def test_inconsistent_files_are_reported_without_prompting(self):
+        """Without a terminal input() could block forever, so totalDose only prints the error."""
+        text = (FIXTURE_DIR / "TID_fixtureA.csv").read_text()
+        with tempfile.TemporaryDirectory() as folder:
+            (Path(folder) / "TID_1.csv").write_text(text)
+            (Path(folder) / "TID_2.csv").write_text(text.replace(" 4e-06,", " 9e-06,"))
+            with mock.patch("sys.stdin") as stdin, mock.patch("builtins.input") as prompt, \
+                 contextlib.redirect_stdout(io.StringIO()) as out:
+                stdin.isatty.return_value = False
+                totalDose(folder)
+        self.assertIn("Inconsistent files", out.getvalue())
+        prompt.assert_not_called()
 
 
 if __name__ == "__main__":
