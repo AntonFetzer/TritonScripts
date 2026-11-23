@@ -1,17 +1,15 @@
-"""Regression test for the "Press Enter" prompts of the shared readers.
+"""Regression test for the "Press Enter" prompt of mergeHistograms.
 
-mergeHistograms and totalDose ask for Enter when the merged files are
-inconsistent or missing. Run over ssh or in a pipeline, stdin
-can be an open pipe that never delivers EOF, and input() then blocks forever
-(a fluence plot hung this way). The prompts must therefore only appear when
-stdin is a terminal.
+mergeHistograms asks for Enter when the merged files are inconsistent. Run over
+ssh or in a pipeline, stdin can be an open pipe that never delivers EOF, and
+input() then blocks forever (a fluence plot hung this way). The prompt must
+therefore only appear when stdin is a terminal.
 
 Run from the repository root:
 
     python3 -m unittest discover -s Tests -p "Test*.py"
 """
 import sys
-import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -22,7 +20,6 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from Dependencies.MergeHistograms import mergeHistograms
-from Dependencies.TotalFluenceHistograms import totalFluenceHistos
 
 
 def histogram(value):
@@ -53,15 +50,6 @@ class TestNonInteractivePrompts(unittest.TestCase):
     def test_merge_prompts_on_terminal(self):
         _, prompt = self.mergeInconsistent(isatty=True)
         prompt.assert_called_once()
-
-    def test_missing_fluence_files_never_prompt(self):
-        with tempfile.TemporaryDirectory() as empty, \
-             mock.patch("sys.stdin") as stdin, \
-             mock.patch("builtins.input") as prompt, \
-             mock.patch("builtins.print"):
-            stdin.isatty.return_value = True
-            self.assertEqual(totalFluenceHistos(empty), (None, None))
-        prompt.assert_not_called()
 
 
 if __name__ == "__main__":

@@ -26,41 +26,26 @@ from math import sqrt
 from Read.ReadNID import readNID
 
 
-def totalNID(path, expectedFiles=None, expectedModules=None, modulePrefix=None):
+def totalNID(path):
     """Pool every NID module in a GRAS result directory.
 
     Args:
         path (str): Directory of GRAS CSV output files.
-        expectedFiles (int or None): If given, refuse a directory that does not
-            hold exactly this many CSV files. A short directory means a job is
-            still running or tasks failed; a long one means output from another
-            run has been mixed in.
-        expectedModules (int or None): If given, refuse a file set that does not
-            carry exactly this many NID modules.
-        modulePrefix (str or None): Optional module-name prefix to retain.
 
     Returns:
         dict: Mapping from module name to a dict with ``nid``, ``error``,
         ``entries``, ``non-zeros``, ``unit``, ``birge_ratio``, ``inconsistent``,
-        ``relative_error_percent``, ``hit_fraction`` and
-        ``particles_for_one_percent``.
+        ``relative_error_percent`` and ``files``.
 
     Raises:
-        ValueError: on a file-count or module-count mismatch, a module or unit
-            mismatch between files, non-finite or negative values, or no NID
+        ValueError: on a module or unit mismatch between files, non-finite or negative values, or no NID
             module at all.
     """
     files = sorted(f for f in os.listdir(path) if f.endswith(".csv"))
     if not files:
         raise ValueError("No csv files found in folder: " + str(path))
-    if expectedFiles is not None and len(files) != expectedFiles:
-        raise ValueError(
-            "Expected {} csv files in {}, found {}. A short directory means the "
-            "job is still running or tasks failed; a long one means another "
-            "run's output has been mixed in.".format(expectedFiles, path, len(files))
-        )
 
-    data = [readNID(os.path.join(path, f), modulePrefix) for f in files]
+    data = [readNID(os.path.join(path, f)) for f in files]
     data = [d for d in data if d]
     if not data:
         raise ValueError(
@@ -71,11 +56,6 @@ def totalNID(path, expectedFiles=None, expectedModules=None, modulePrefix=None):
     names = set(data[0])
     if any(set(d) != names for d in data):
         raise ValueError("NID module names differ between files")
-    if expectedModules is not None and len(names) != expectedModules:
-        raise ValueError(
-            "Expected {} NID modules, found {}: {}".format(
-                expectedModules, len(names), sorted(names))
-        )
 
     results = {}
     for name in sorted(names):
@@ -110,14 +90,6 @@ def totalNID(path, expectedFiles=None, expectedModules=None, modulePrefix=None):
             birge = 0.0 if external == 0 else float("inf")
 
         relative = 100.0 * error / mean if mean else float("inf")
-        # How many primaries a 1% result needs, on the 1/sqrt(N) scaling the
-        # pooled error follows. Reported rather than applied: a tally with few
-        # hits has an unreliable error to extrapolate from in the first place.
-        if mean and error:
-            needed = (relative / 1.0) ** 2 * totalEntries
-        else:
-            needed = float("inf")
-
         results[name] = {
             "nid": mean,
             "error": error,
@@ -127,50 +99,7 @@ def totalNID(path, expectedFiles=None, expectedModules=None, modulePrefix=None):
             "birge_ratio": birge,
             "inconsistent": bool(birge > 2),
             "relative_error_percent": relative,
-            "hit_fraction": sum(nonZeros) / totalEntries,
-            "particles_for_one_percent": needed,
             "files": len(data),
         }
 
     return results
-
-
-def moduleRecords(results, modules):
-    """Flatten totalNID output into one plain dict per tally, in a fixed order.
-
-    Mirrors Dependencies.AggregateRun.tileRecords.
-
-    Args:
-        results (dict): Output of :func:`totalNID`.
-        modules (list): ``(moduleName, volumeName, label)`` triples in the order
-            the detector macro defines them.
-
-    Returns:
-        list: One dict per module, ready for a csv.DictWriter.
-
-    Raises:
-        KeyError: if a named module is absent from the results.
-    """
-    records = []
-    for moduleName, volumeName, label in modules:
-        if moduleName not in results:
-            raise KeyError(
-                "NID module {!r} not in results; present: {}".format(
-                    moduleName, sorted(results))
-            )
-        entry = results[moduleName]
-        records.append({
-            "module": moduleName,
-            "volume": volumeName,
-            "label": label,
-            "nid": entry["nid"],
-            "error": entry["error"],
-            "unit": entry["unit"],
-            "entries": entry["entries"],
-            "nonZeros": entry["non-zeros"],
-            "relativePercent": entry["relative_error_percent"],
-            "hitFraction": entry["hit_fraction"],
-            "particlesForOnePercent": entry["particles_for_one_percent"],
-            "birgeRatio": entry["birge_ratio"],
-        })
-    return records

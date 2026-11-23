@@ -13,26 +13,6 @@ FLATNESS_LEVEL = 90.0
 SYMMETRY_LEVEL = 80.0
 
 
-def cellBounds(depths):
-    """
-    Build scoring-cell boundaries for a depth grid whose first cell starts at the surface.
-
-    Args:
-        depths (np.ndarray): Cell centre depths in mm, ascending.
-
-    Returns:
-        np.ndarray: ``len(depths) + 1`` boundaries in mm.
-    """
-    depths = np.asarray(depths, dtype=float)
-    if len(depths) < 2:
-        raise ValueError("Need at least two depths to derive cell boundaries")
-    boundaries = np.empty(len(depths) + 1)
-    boundaries[0] = 0.0
-    boundaries[1:-1] = (depths[:-1] + depths[1:]) / 2
-    boundaries[-1] = depths[-1] + (depths[-1] - depths[-2]) / 2
-    return boundaries
-
-
 def levelCrossing(position, normalized, level, side):
     """
     Interpolate where a normalised lateral profile crosses ``level`` on one side of the axis.

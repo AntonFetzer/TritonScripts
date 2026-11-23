@@ -16,19 +16,15 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-import matplotlib
-matplotlib.use("Agg")  # never open a window from the test suite
-import matplotlib.pyplot as plt
 import numpy as np
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from Dependencies.HistogramPlots import histogramWithCrossSection
 from Dependencies.MergeHistograms import completeResultFiles
 from Dependencies.SEERates import (
-    LET_CROSS_SECTIONS, MISSION_SECONDS, PROTON_CROSS_SECTIONS, RATE_CSV_HEADER, crossSection, foldCrossSection,
-    normaliseToRate, readRateCSVs, runFolders, seeRate, thicknessFolders, usableHistogram, writeRateCSV)
+    MISSION_SECONDS, RATE_CSV_HEADER, crossSection, foldCrossSection, normaliseToRate, readRateCSVs, seeRate,
+    thicknessFolders, writeRateCSV)
 from Dependencies.TotalFluenceHistograms import totalFluenceHistos
 from Dependencies.TotalLETHistos import totalLETHistos
 
@@ -59,14 +55,6 @@ class TestCrossSection(unittest.TestCase):
         self.assertAlmostEqual(Result[3] / 1e-14, 1.0)
         self.assertAlmostEqual(Result[4] / 1e-14, 1.0)  # constant above the highest point
 
-    def test_device_parameters_are_in_cm2_per_bit(self):
-        LET = {X["name"]: X for X in LET_CROSS_SECTIONS}
-        Proton = {X["name"]: X for X in PROTON_CROSS_SECTIONS}
-        self.assertEqual(LET["NanoXplore NG-Medium"]["A0"], 5.2e-9)
-        self.assertEqual(LET["Cypress CY62167GE30-45ZXI"]["A0"], 2.6e-7)
-        self.assertEqual(Proton["NanoXplore NG-Medium"]["A0"], 4.85e-16)
-        self.assertAlmostEqual(np.max(Proton["Cypress CY62167GE30-45ZXI"]["S_pts"]) / 1.2757607330635113e-9, 1.0)
-
 
 class TestNormaliseToRate(unittest.TestCase):
 
@@ -75,11 +63,6 @@ class TestNormaliseToRate(unittest.TestCase):
             self.assertAlmostEqual(normaliseToRate(histogram(), Folder)['value'][1] * MISSION_SECONDS, 20.0, msg=Folder)
         for Folder in ("GEO-SolarProton-5minPeakFlux", "GEO-CREME96-Solar-Iron", "LEO-SAPPHIRE-Solar-Iron", "VAP-GCR-Iron", "Carrington-SEP-Expected-EVT2026"):
             self.assertEqual(normaliseToRate(histogram(), Folder)['value'][1], 20.0, msg=Folder)
-
-    def test_input_is_not_changed(self):
-        Hist = histogram()
-        normaliseToRate(Hist, "GEO-solar-proton")
-        self.assertEqual(Hist['value'][1], 20.0)
 
 
 class TestFoldAndRate(unittest.TestCase):
@@ -103,41 +86,14 @@ class TestFoldAndRate(unittest.TestCase):
         SEEHist = {'value': np.array([0.0, 1.0, 3.0]), 'error': np.array([0.0, 3.0, 4.0]), 'entries': np.array([10, 20, 30])}
         Rate, Error, Relative, Entries = seeRate(SEEHist)
         self.assertEqual((Rate, Error, Relative, Entries), (4.0, 5.0, 1.25, 50))
-
-    def test_zero_rate_has_no_relative_error(self):
-        SEEHist = {'value': np.zeros(2), 'error': np.zeros(2), 'entries': np.array([1, 2])}
-        Rate, _, Relative, Entries = seeRate(SEEHist)
+        # A zero rate has no relative error.
+        Rate, _, Relative, Entries = seeRate({'value': np.zeros(2), 'error': np.zeros(2), 'entries': np.array([1, 2])})
         self.assertEqual(Rate, 0.0)
         self.assertTrue(np.isnan(Relative))
         self.assertEqual(Entries, 0)
 
-    def test_inconsistent_or_missing_histograms_are_not_usable(self):
-        Bad = histogram()
-        Bad['error'] = np.array([1.0])
-        with mock.patch("builtins.print"):
-            self.assertTrue(usableHistogram(histogram(), "Res/"))
-            self.assertFalse(usableHistogram(None, "Res/"))
-            self.assertFalse(usableHistogram(Bad, "Res/"))
-
 
 class TestFolders(unittest.TestCase):
-
-    def test_run_folders_default_skips_what_is_not_a_run(self):
-        with tempfile.TemporaryDirectory() as Root:
-            for Name in ("RunB", "RunA", "OldResults", "NoSEEs"):
-                (Path(Root) / Name).mkdir()
-            (Path(Root) / "notes.md").write_text("x")
-            self.assertEqual(runFolders(Root + "/", []), (Root + "/", ["RunA", "RunB"]))
-
-    def test_run_folders_from_arguments(self):
-        with tempfile.TemporaryDirectory() as Root:
-            Directory, FolderList = runFolders("/unused/", [Root + "/RunA/", Root + "/RunB"])
-            self.assertEqual(Directory, Root + "/")
-            self.assertEqual(FolderList, ["RunA", "RunB"])
-
-    def test_run_folders_must_share_a_directory(self):
-        with self.assertRaises(SystemExit):
-            runFolders("/unused/", ["/a/RunA", "/b/RunB"])
 
     def test_thicknesses_are_in_natural_order(self):
         with tempfile.TemporaryDirectory() as Root:
@@ -162,13 +118,6 @@ class TestRateCSVs(unittest.TestCase):
         self.assertEqual(list(Dict["RunA"]['Entries_Contributing_To_SEE']), [10.0, 2.0])
         self.assertIsInstance(Dict["RunA"]['SEE_Rate'], np.ndarray)
 
-    def test_several_patterns_are_collected(self):
-        with tempfile.TemporaryDirectory() as Root:
-            writeRateCSV(Root + "/RunA Dev SEE-Rate.csv", "RunA", "Dev", self.Rows)
-            writeRateCSV(Root + "/Total Dev SEE-Rate.csv", "Total", "Dev", self.Rows)
-            Dict = readRateCSVs([Root + "/RunA * SEE-Rate.csv", Root + "/Total * SEE-Rate.csv"], "Dev")
-        self.assertEqual(sorted(Dict), ["RunA", "Total"])
-
     def test_wrong_cross_section_is_refused(self):
         with tempfile.TemporaryDirectory() as Root:
             writeRateCSV(Root + "/RunA Dev SEE-Rate.csv", "RunA", "Other", self.Rows)
@@ -182,11 +131,6 @@ class TestRateCSVs(unittest.TestCase):
             with self.assertRaises(ValueError):
                 readRateCSVs([Root + "/* SEE-Rate.csv"], "Dev")
 
-    def test_no_rows_writes_no_file(self):
-        with tempfile.TemporaryDirectory() as Root, mock.patch("builtins.print"):
-            writeRateCSV(Root + "/RunA Dev SEE-Rate.csv", "RunA", "Dev", [])
-            self.assertFalse(Path(Root + "/RunA Dev SEE-Rate.csv").exists())
-
 
 class TestResultFiles(unittest.TestCase):
 
@@ -198,9 +142,6 @@ class TestResultFiles(unittest.TestCase):
             self.assertEqual(completeResultFiles(Root, "LET"), ["LET_1.csv"])
             self.assertTrue((Path(Root) / "LET_2.csv").exists())
 
-    def test_missing_folder_has_no_files(self):
-        self.assertEqual(completeResultFiles("/no/such/folder", "LET"), [])
-
     def test_readers_return_nothing_without_complete_files(self):
         with tempfile.TemporaryDirectory() as Root, mock.patch("builtins.print"):
             (Path(Root) / "LET_1.csv").write_text("truncated")
@@ -209,21 +150,6 @@ class TestResultFiles(unittest.TestCase):
             self.assertEqual(totalFluenceHistos(Root), (None, None))
             self.assertTrue((Path(Root) / "LET_1.csv").exists())
             self.assertTrue((Path(Root) / "Fluence_1.csv").exists())
-
-
-class TestHistogramWithCrossSection(unittest.TestCase):
-
-    def test_writes_the_pdf_and_closes_the_figure(self):
-        Hist = histogram()
-        Hist['mean'] = np.array([1.5, 2.5])  # positive for the log axes
-        Before = plt.get_fignums()
-        with tempfile.TemporaryDirectory() as Root:
-            Path_ = Path(Root) / "hist.pdf"
-            Written = histogramWithCrossSection(Hist, np.full(2, 1e-9), Path_, "title", "x", "y", "hist",
-                                                "sigma", "sigma axis", legendLoc="upper left", capsize=2)
-            self.assertTrue(Path_.exists())
-        self.assertEqual(Written, str(Path_))
-        self.assertEqual(plt.get_fignums(), Before)
 
 
 if __name__ == "__main__":

@@ -16,7 +16,6 @@ This repository contains Python tools for analysing particle-radiation simulatio
 - `SEE/`: single-event-effect cross sections, fits, and rate calculations.
 - `Plotting/`: reusable plotting and comparison scripts.
 - `Calibration/`, `SolarCells/`, and other study folders: domain-specific analyses.
-- `Obsolete/`: retired implementations kept only for historical reference. Do not import from this directory in active code.
 
 ## Interface index
 
@@ -32,9 +31,6 @@ python3 GenerateInterfaceIndex.py --write
 
 ### Dependencies
 
-- `Dependencies.AggregateRun` -- Pool one GRAS result directory and validate it before a driver reports it.
-  - `aggregateRun(...)` -- Pool one GRAS result directory, validating completeness and sanity.
-  - `tileRecords(...)` -- Flatten aggregateRun output into one plain dict per tally.
 - `Dependencies.CarringtonColors` -- Plot colours of the Carrington study, the one place that defines them.
 - `Dependencies.CombineMeasurements` -- Combine independent measurements: ratios and inverse-variance means.
   - `ratioWithError(...)` -- Ratio of two independent measurements and its absolute error.
@@ -81,7 +77,6 @@ python3 GenerateInterfaceIndex.py --write
   - `writeRateCSV(...)` -- Write the rates of one run and cross section, with one line per thickness.
   - `readRateCSVs(...)` -- Collect SEE-Rate CSVs into {dataset: {'Shielding': ..., 'SEE_Rate': ..., ...}} of numpy arrays.
 - `Dependencies.ScanMetrics` -- Derive depth-dose and lateral-profile metrics from measured or simulated scans.
-  - `cellBounds(...)` -- Build scoring-cell boundaries for a depth grid whose first cell starts at the surface.
   - `levelCrossing(...)` -- Interpolate where a normalised lateral profile crosses ``level`` on one side of the axis.
   - `fallingCrossing(...)` -- Interpolate where a depth-dose curve first falls through ``level`` beyond its peak.
   - `profileMetrics(...)` -- Derive field width, flatness and symmetry metrics from one lateral profile scan.
@@ -97,7 +92,6 @@ python3 GenerateInterfaceIndex.py --write
   - `totalLETHistos(...)` -- Merges GRAS LET histograms from the csv files of identical runs.
 - `Dependencies.TotalNID` -- Pool GRAS non-ionising dose across a result directory.
   - `totalNID(...)` -- Pool every NID module in a GRAS result directory.
-  - `moduleRecords(...)` -- Flatten totalNID output into one plain dict per tally, in a fixed order.
 - `Dependencies.TotalSourceHistograms`
   - `totalSourceHistos(...)` -- Accumulates and processes GRAS Source Histograms from multiple paralel GRAS Result files.
 

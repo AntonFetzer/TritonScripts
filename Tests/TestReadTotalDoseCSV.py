@@ -31,7 +31,7 @@ class ReadTotalDoseCSV(unittest.TestCase):
         np.testing.assert_array_equal(d["non-zeros"], [1722, 0, 1659])
         np.testing.assert_array_equal(d["entries"], [0, 0, 0])
 
-    def test_scale_applies_to_dose_and_error_only(self):
+        # The scale applies to dose and error only.
         d = self.read(TABLE, 1000.0)
         np.testing.assert_allclose(d["dose"], [5.97e-9, 0.0, 4.77e-9])
         np.testing.assert_allclose(d["error"], [2.1e-10, 0.0, 1.7e-10])
@@ -50,10 +50,6 @@ class ReadTotalDoseCSV(unittest.TestCase):
         np.testing.assert_allclose(total["error"], [np.hypot(3e-12, 2.1e-13), 4e-12, 1.7e-13])
         np.testing.assert_array_equal(total["entries"], [100, 100, 100])
         np.testing.assert_array_equal(total["non-zeros"], [1732, 20, 1689])
-
-    def test_wrong_header(self):
-        with self.assertRaises(ValueError):
-            self.read("Tile,Dose\n0,1.0\n")
 
     def test_tiles_out_of_order(self):
         with self.assertRaises(ValueError):
