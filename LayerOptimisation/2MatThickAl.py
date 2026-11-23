@@ -1,33 +1,38 @@
-import sys, os
+import sys, os, re
 # Ensure the package root (the "Python" folder) is on sys.path so "from Read.* import ..." works
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import numpy as np
 from Dependencies.TotalDose import totalDose
 from Read.ReadSD2Q import readSDQ2
 from Dependencies.MergeTotalDose import mergeTotalDose
+from Dependencies.CombineMeasurements import ratioWithError
 import matplotlib.pyplot as plt
 from uncertainties import ufloat, ufloat_fromstr
 from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
-from matplotlib.ticker import FuncFormatter
+from matplotlib.ticker import FuncFormatter, MaxNLocator
 
 
-Path = "/scratch/work/fetzera1/GRAS/2D/2MatThickAl/OLD-GTO"
+Path = "/scratch/work/fetzera1/GRAS/2D/2MatThickAl/MEO-11y-mean"
 
-ElectronFolder = "AE9500keV"
-ProtonFolder = "AP910MeV"
-SolarFolder = None  # None when the study has no solar-proton run
-TotalFolder = "TotalDose_GTO_A9_97thpercentile"
+ElectronFolder = "MEO-AE9-11y-mean"
+ProtonFolder = "MEO-AP9-11y-mean"  # None when the study has no trapped-proton run
+SolarFolder = "MEO-SAPPHIRE-11y-mean"  # None when the study has no solar-proton run
+TotalFolder = "MEO-total-11y-mean"
 
 Datset = "T" #E - Electron, P - Proton, S - Solar, T - Total
 
-sd2q_file = "/scratch/work/fetzera1/Spectra/OLD/GTO/Shieldose/spenvis_sqo.txt"
-HeatmapTitle = "Dose relative to same mass of Al on GTO (OLD-GTO)"
+sd2q_file = "/scratch/work/fetzera1/Spectra/Carrington/MEO/spenvis_sqo.txt"
+HeatmapTitle = "Dose relative to same mass of Al on MEO (11-year mean)"
+# Factor from the run's dose to kRad per month: 30*24*3600 for per-second spectra (OLD-GTO), 1/(11*12) for 11-year fluences, 1/(5*12) for 5-year fluences
+MonthFactor = 1/(11*12)
+# Biased electron source (flat-log GPS bias): GRAS 5 overestimates the quoted errors, so take the electron error from the replica scatter
+ReplicaError = True
 
 print("Calculating total dose for Folder name:", Path)
     
 # Calculate the total dose for the given path and dataset
 if Datset == "E":
-    Results = totalDose(os.path.join(Path, ElectronFolder, "Res"))
+    Results = totalDose(os.path.join(Path, ElectronFolder, "Res"), replica_error=ReplicaError)
     folder = ElectronFolder
 elif Datset == "P":
     Results = totalDose(os.path.join(Path, ProtonFolder, "Res"))
@@ -36,9 +41,10 @@ elif Datset == "S":
     Results = totalDose(os.path.join(Path, SolarFolder, "Res"))
     folder = SolarFolder
 elif Datset == "T":
-    ElectronResults = totalDose(os.path.join(Path, ElectronFolder, "Res"))
-    ProtonResults = totalDose(os.path.join(Path, ProtonFolder, "Res"))
-    Components = [ElectronResults, ProtonResults]
+    ElectronResults = totalDose(os.path.join(Path, ElectronFolder, "Res"), replica_error=ReplicaError)
+    Components = [ElectronResults]
+    if ProtonFolder:
+        Components.append(totalDose(os.path.join(Path, ProtonFolder, "Res")))
     if SolarFolder:
         Components.append(totalDose(os.path.join(Path, SolarFolder, "Res")))
     Results = mergeTotalDose(Components)
@@ -133,10 +139,12 @@ TilesX = 12
 TilesY = 32
 
 Map = np.zeros((TilesY, TilesX))
+ErrorMap = np.zeros((TilesY, TilesX))
 
 for x in range(TilesX):
     for y in range(TilesY):
         Map[y, x] = Results['dose'][x + y * TilesX]
+        ErrorMap[y, x] = Results['error'][x + y * TilesX]
 
 # Save map as CSV file with header and thickness column
 map_csv_file = os.path.join(Path, folder, "Plot/DoseHeatmap_" + folder + ".csv")
@@ -169,7 +177,8 @@ if Datset == "E":
     plt.plot(sd2q_data['Thickness'] * 0.27, sd2q_data['Bremsstrahlung'], '.-', label="Shieldose Bremsstrahlung")
 if Datset == "P" or Datset == "S":
     plt.plot(sd2q_data['Thickness']/2.699, sd2q_data['Trapped Protons'], '.-', label="Shieldose Protons")
-    plt.plot(sd2q_data['Thickness'] * 0.27, sd2q_data['Solar Protons'], '.-', label="Shieldose Solar Protons")
+    if len(sd2q_data['Solar Protons']):  # some SHIELDOSE-2Q files (OLD-GTO) have no solar protons
+        plt.plot(sd2q_data['Thickness'] * 0.27, sd2q_data['Solar Protons'], '.-', label="Shieldose Solar Protons")
 if Datset == "T":
     plt.plot(sd2q_data['Thickness'] * 0.27, sd2q_data['Total'], '.-', label="Shieldose Total Dose")
 
@@ -211,20 +220,41 @@ for RefColumns, RefName, FileSuffix in [([-1], "Al", ""), ([10], "PE", "PE"), ([
         else:
             MapNormalized[row, :] = Map[row, :]
 
-    # Set the normalization to center at 1.0 (100% reference)
-    norm = TwoSlopeNorm(vmin=np.min(MapNormalized), vcenter=1.0, vmax=np.max(MapNormalized))
+    # Set the normalization to center at 1.0 (100% reference); extend the scale just past 1 when all values lie on one side
+    norm = TwoSlopeNorm(vmin=min(np.min(MapNormalized), 0.99), vcenter=1.0, vmax=max(np.max(MapNormalized), 1.01))
 
     plt.figure(figsize=(8, 6))
     im = plt.imshow(MapNormalized, cmap=cmap_diverging, aspect='auto', norm=norm)
-    cbar = plt.colorbar(im, label='Dose relative to same mass of ' + RefName + ' (%)')
-    cbar.ax.yaxis.set_major_formatter(FuncFormatter(lambda x, p: f'{int(x*100)}%'))
+    # Show the dose change against the reference: a dose of 60 % of the reference reads -40 %
+    cbar = plt.colorbar(im, label='Dose change relative to same mass of ' + RefName + ' (%)')
+    cbar.ax.yaxis.set_major_formatter(FuncFormatter(lambda x, p: f'{(x - 1) * 100:+.0f}%' if abs(x - 1) >= 0.005 else '0%'))
+    # Ticks for the green (reduction) and red (increase) halves separately, so both get a similar density
+    Low, High = (norm.vmin - 1) * 100, (norm.vmax - 1) * 100
+    Change = np.union1d(MaxNLocator(nbins=6, integer=True).tick_values(Low, 0), MaxNLocator(nbins=6, integer=True).tick_values(0, High))
+    cbar.set_ticks([1 + c / 100 for c in Change if Low <= c <= High])
 
     # Mark the lowest entry with an X
     min_idx = np.unravel_index(np.argmin(MapNormalized), MapNormalized.shape)
     plt.plot(min_idx[1], min_idx[0], 'x', color='black', markersize=12, markeredgewidth=2)
 
+    # Write the best multilayer point relative to the best single material, with its dose per month
+    if FileSuffix == "Best":
+        row, col = min_idx
+        RefColumn = [c % TilesX for c in RefColumns][np.argmin(Map[row, RefColumns])]
+        if col == RefColumn:
+            Ratio, RatioError = 1.0, 0.0
+        else:
+            Ratio, RatioError = ratioWithError(Map[row, col], ErrorMap[row, col], Map[row, RefColumn], ErrorMap[row, RefColumn])
+        MaterialLabels = [f'{i}% PE' for i in range(0, 110, 10)] + ['Al']
+        RefLabels = {0: "Pb", 10: "PE", TilesX - 1: "Al"}
+        with open(os.path.join(Path, folder, "Plot/BestMultilayer_" + folder + ".csv"), 'w') as f:
+            f.write("Folder,Relative Dose [%],Relative Dose Error [%],Shielding Depth [g/cm2],Material,"
+                    "TID [kRad per month],TID Error [kRad per month],Best Single Material\n")
+            f.write(f"{folder},{100 * Ratio:.4g},{100 * RatioError:.2g},{shielding_depth[row]:.4g},{MaterialLabels[col]},"
+                    f"{Map[row, col] * MonthFactor:.4g},{ErrorMap[row, col] * MonthFactor:.2g},{RefLabels[RefColumn]}\n")
+
     # Label the minimum next to the X; place it on the left when the X is in the right half
-    MinLabel = f"{MapNormalized[min_idx] * 100:.0f}%"
+    MinLabel = f"{(MapNormalized[min_idx] - 1) * 100:+.0f}%" if abs(MapNormalized[min_idx] - 1) >= 0.005 else "0%"
     OnRight = min_idx[1] < TilesX / 2
     plt.annotate(MinLabel, (min_idx[1], min_idx[0]), xytext=(12 if OnRight else -12, 0), textcoords='offset points',
                  ha='left' if OnRight else 'right', va='center',
@@ -239,24 +269,27 @@ for RefColumns, RefName, FileSuffix in [([-1], "Al", ""), ([10], "PE", "PE"), ([
     y_labels = [f'{shielding_depth[i]:.2f}' for i in y_ticks]
     plt.yticks(y_ticks, y_labels)
 
-    plt.title(HeatmapTitle.replace("same mass of Al", "same mass of " + RefName) if HeatmapTitle else 'Dose Heatmap ' + RefName + ' ' + folder)
+    Title = HeatmapTitle.replace("same mass of Al", "same mass of " + RefName) if HeatmapTitle else 'Dose Heatmap ' + RefName + ' ' + folder
+    if FileSuffix == "Best":
+        Title = re.sub(r"\s*\([^)]*\)", "", Title)  # the longest title: drop the bracketed spectrum details
+    plt.title(Title)
     plt.xlabel('Shielding Material (% PE)')
     plt.ylabel('Shielding depth [g/cm²]')
     plt.savefig(Path + "/" + folder + "/Plot/DoseHeatmap" + FileSuffix + "_" + folder + ".pdf", format='pdf', bbox_inches="tight")
     plt.close()
 
 # Heat map of the absolute dose per month of every configuration, centred at 1 kRad per month
-# The OLD-GTO spectrum is per second: multiply by the seconds in 1 month
-MapMonth = Map * 30*24*3600
+MapMonth = Map * MonthFactor
 # Logarithmic colour scale: colour log10 of the dose, so 1 kRad per month sits at 0
 LogMapMonth = np.log10(MapMonth)
-norm = TwoSlopeNorm(vmin=np.min(LogMapMonth), vcenter=0.0, vmax=np.max(LogMapMonth))
+# When all doses lie on one side of 1 kRad per month, extend the scale just past 1 so the centre stays inside it
+norm = TwoSlopeNorm(vmin=min(np.min(LogMapMonth), -0.01), vcenter=0.0, vmax=max(np.max(LogMapMonth), 0.01))
 plt.figure(figsize=(8, 6))
 im = plt.imshow(LogMapMonth, cmap=cmap_diverging, aspect='auto', norm=norm)
 cbar = plt.colorbar(im, label='Dose [kRad per month]')
-cbar.set_ticks(np.log10([t for t in [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]
-                         if np.min(MapMonth) <= t <= np.max(MapMonth)]))
-cbar.ax.yaxis.set_major_formatter(FuncFormatter(lambda x, p: f'{10**x:g}'))
+cbar.set_ticks(np.log10([m * 10.0**e for e in range(-4, 4) for m in (1, 2, 5)
+                         if norm.vmin <= np.log10(m * 10.0**e) <= norm.vmax]))
+cbar.ax.yaxis.set_major_formatter(FuncFormatter(lambda x, p: f'{10**x:.4g}'))
 cbar.ax.yaxis.set_minor_locator(plt.NullLocator())
 plt.xticks(range(TilesX), x_labels, rotation=45, ha='right')
 plt.yticks(y_ticks, y_labels)

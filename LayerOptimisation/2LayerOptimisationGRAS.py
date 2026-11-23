@@ -11,14 +11,14 @@ from uncertainties import ufloat
 
 
 Path = r"\\data.triton.aalto.fi\work\fetzera1\GRAS\2D\2LayerOptimisation"
-ShieldingDepth = "0.564"  # g/cm2
+ShieldingDepth = "0.9"  # g/cm2
 
 MatA = "Polyethylene"
 MatB = "Lead"
 A = "PE"
 B = "Pb"
 Shield = A + "-" + B
-Folder = Shield + "-0.752gcm2-OldGTO"  # Study folder; equal to Shield for the original runs
+Folder = Shield + "-0.9gcm2-FS2-A9-flatlog"  # Study folder; equal to Shield for the original runs
 
 # Biased GPS sources (/gps/hist/type biase): GRAS 5 overestimates the quoted
 # errors, so take the error from the replica scatter instead.
