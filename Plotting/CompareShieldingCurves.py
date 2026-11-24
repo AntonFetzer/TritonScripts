@@ -25,28 +25,32 @@ ShieldoseFile = None  # SHIELDOSE-2Q spenvis_sqo.txt: compare <electron label> <
 Months = None  # Divide all doses by this number of months, e.g. 132 for an 11-year fluence
 Title = None  # Plot title, e.g. --title=TEXT; the default depends on the plot
 ShieldoseName = "SHIELDOSE-2Q"  # Legend name, e.g. --shieldose-name="SHIELDOSE-2Q AE9/AP9" when the models differ
-XLim = None  # (min, max) in mm, e.g. --xlim=0,6
+XLim = None  # (min, max) in the unit of the x-axis, e.g. --xlim=0,6
 YLim = None  # (min, max) in krad, e.g. --ylim=1e-2,1e3
 Output = None  # PDF name in <path>, e.g. --output=ShieldingCurves_Physics.pdf; default depends on the plot
 FigSize = None  # (width, height) in inches, e.g. --figsize=4,6
 Names = None  # Legend names, one per label, separated by ';', e.g. --names="EM3;EM4"; default: the labels
 LegendLoc = "best"  # Matplotlib legend location, e.g. --legend-loc="upper right"
 Days = None  # Multiply dose rates per second by this many days of exposure, e.g. --days=1.23 for an event dose
+GCM2 = False  # --gcm2: x-axis in g/cm2 of aluminium instead of mm
+AlDensity = 2.699  # g/cm3, G4_Al
+Circles = None  # Thicknesses in mm to mark on the GRAS total dose of the --shieldose plot, e.g. --circles=0,1,2,4,6
 ErrorbarStyles = {
     'default': {'capsize': 5, 'linestyle': ''},
-    'compact': {'capsize': 1.5, 'elinewidth': 1.5, 'capthick': 2, 'linestyle': ''},  # --errorbar-style=compact
+    'compact': {'capsize': 2, 'elinewidth': 2, 'capthick': 2, 'linestyle': ''},  # --errorbar-style=compact
 }
 ErrorbarStyle = ErrorbarStyles['default']
 
 # Optional: python3 -m Plotting.CompareShieldingCurves <path> <label> ... [--replica-error] [--min-replicas=N]
 #   [--ylabel=TEXT] [--title=TEXT] [--output=NAME.pdf] [--figsize=W,H] [--names="A;B"] [--errorbar-style=compact]
-#   [--legend-loc="upper right"] [--days=N]
-#   [--xlim=MIN,MAX --ylim=MIN,MAX] [--shieldose=spenvis_sqo.txt --shieldose-name=TEXT --months=N]
+#   [--legend-loc="upper right"] [--days=N] [--gcm2]
+#   [--xlim=MIN,MAX --ylim=MIN,MAX] [--shieldose=spenvis_sqo.txt --shieldose-name=TEXT --months=N --circles=0,1,2,4,6]
 Args = [a for a in sys.argv[1:] if not a.startswith("--")]
 if Args:
     Path = Args[0]
     Labels = Args[1:] or Labels
 ReplicaError = ReplicaError or "--replica-error" in sys.argv[1:]
+GCM2 = GCM2 or "--gcm2" in sys.argv[1:]
 for a in sys.argv[1:]:
     if a.startswith("--ylabel="):
         YLabel = a.split("=", 1)[1]
@@ -72,6 +76,8 @@ for a in sys.argv[1:]:
         LegendLoc = a.split("=", 1)[1]
     elif a.startswith("--days="):
         Days = float(a.split("=", 1)[1])
+    elif a.startswith("--circles="):
+        Circles = [float(v) for v in a.split("=", 1)[1].split(",")]
     elif a.startswith("--names="):
         Names = a.split("=", 1)[1].split(";")
     elif a.startswith("--errorbar-style="):
@@ -91,6 +97,9 @@ for label in Labels:
 NumTiles = np.shape(SC[Labels[0]]['dose'])[0]
 
 x = np.linspace(0, 10, num=NumTiles, endpoint=True)
+XScale = AlDensity / 10 if GCM2 else 1  # mm of aluminium to g/cm2
+XLabel = "Aluminium Shielding Depth [g/cm$^2$]" if GCM2 else "Aluminium Thickness [mm]"
+x = x * XScale
 
 if ShieldoseFile is None:
     ## Plot shielding curves with error bars
@@ -113,7 +122,7 @@ if ShieldoseFile is None:
     plt.yscale("log")
     # plt.xscale("log")
     plt.title(Title or "Ionising Dose behind shielding of varying thickness")
-    plt.xlabel("Aluminium Thickness [mm]")
+    plt.xlabel(XLabel)
     plt.ylabel(YLabel)
     plt.legend(loc=LegendLoc)
     if XLim:
@@ -139,7 +148,7 @@ else:
     # part only (electrons + bremsstrahlung + trapped protons), as simulated in GRAS.
     # Both GRAS tiles and SHIELDOSE-2Q thicknesses are in mm of aluminium.
     SD = readSDQ2(ShieldoseFile)
-    SDx = SD['Thickness']
+    SDx = SD['Thickness'] * XScale
     SDElectrons = SD['Electrons'] + SD['Bremsstrahlung']
     plt.plot(SDx, SDElectrons * Scale, 'C0--', label=ShieldoseName + " Electron Dose")
     plt.plot(SDx, SD['Trapped Protons'] * Scale, 'C1-', label=ShieldoseName + " Proton Dose")
@@ -147,12 +156,16 @@ else:
 
     plt.plot(x, [1] * NumTiles, color='k', linewidth=2, label='1 krad' + PerUnit)
 
-    plt.errorbar(x, Electrons['dose'] * Scale, Electrons['error'] * Scale, fmt='C0 ', capsize=4,
-                 label="GRAS Electron Dose", elinewidth=1, capthick=1)
-    plt.errorbar(x, Protons['dose'] * Scale, Protons['error'] * Scale, fmt='C1 ', capsize=4,
-                 label="GRAS Proton Dose", elinewidth=1, capthick=1)
-    plt.errorbar(x, Total['dose'] * Scale, Total['error'] * Scale, fmt='C2 ', capsize=4,
-                 label="GRAS Total Ionizing Dose", elinewidth=1, capthick=1)
+    plt.errorbar(x, Electrons['dose'] * Scale, Electrons['error'] * Scale, fmt='', color='C0',
+                 label="GRAS Electron Dose", **ErrorbarStyle)
+    plt.errorbar(x, Protons['dose'] * Scale, Protons['error'] * Scale, fmt='', color='C1',
+                 label="GRAS Proton Dose", **ErrorbarStyle)
+    plt.errorbar(x, Total['dose'] * Scale, Total['error'] * Scale, fmt='', color='C2',
+                 label="GRAS Total Ionizing Dose", **ErrorbarStyle)
+    if Circles:
+        CircleIndex = [round(c / 10 * (NumTiles - 1)) for c in Circles]
+        plt.plot(x[CircleIndex], Total['dose'][CircleIndex] * Scale, 'o', markersize=10, markerfacecolor='white',
+                 markeredgecolor='black', zorder=3)
 
     plt.xlim(XLim if XLim else (-0.2, x[-1] + 0.2))
     plt.yscale("log")
@@ -165,7 +178,7 @@ else:
 
     plt.grid(which='both', linestyle='-', linewidth=0.5)
     plt.title(Title or "Ionising dose from trapped particles (AE9/AP9) on GTO", fontsize=14)
-    plt.xlabel("Aluminium Thickness [mm]", fontsize=12)
+    plt.xlabel(XLabel, fontsize=12)
     plt.ylabel("Ionizing dose in silicon [krad" + PerUnit + "]", fontsize=12)
     plt.legend(fontsize=12)
 
