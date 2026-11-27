@@ -163,8 +163,8 @@ else:
     plt.errorbar(x, Total['dose'] * Scale, Total['error'] * Scale, fmt='', color='C2',
                  label="GRAS Total Ionizing Dose", **ErrorbarStyle)
     if Circles:
-        CircleIndex = [round(c / 10 * (NumTiles - 1)) for c in Circles]
-        plt.plot(x[CircleIndex], Total['dose'][CircleIndex] * Scale, 'o', markersize=10, markerfacecolor='white',
+        CircleDose = np.exp(np.interp(Circles, x / XScale, np.log(Total['dose'])))  # log-linear between tiles
+        plt.plot(np.array(Circles) * XScale, CircleDose * Scale, 'o', markersize=10, markerfacecolor='white',
                  markeredgecolor='black', zorder=3)
 
     plt.xlim(XLim if XLim else (-0.2, x[-1] + 0.2))
