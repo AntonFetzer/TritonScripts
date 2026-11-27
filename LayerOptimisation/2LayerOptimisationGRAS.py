@@ -11,14 +11,15 @@ from uncertainties import ufloat
 
 
 Path = "/scratch/work/fetzera1/GRAS/2D/2LayerOptimisation"
-ShieldingDepth = "0.9"  # g/cm2
+ShieldingDepth = "0.8"  # g/cm2
+Spectrum = "FS2-A9-flatlog"  # FS2-A9-flatlog, FS2-A9-flat, FS2-A9-log, FS2-A9, FS2-B1-flatlog, FS2-B1-flat, FS2-B1-log, FS2-B1
 
 MatA = "Polyethylene"
 MatB = "Lead"
 A = "PE"
 B = "Pb"
 Shield = A + "-" + B
-Folder = Shield + "-0.9gcm2-FS2-A9-flatlog"  # Study folder; equal to Shield for the original runs
+Folder = Shield + "-" + ShieldingDepth + "gcm2-" + Spectrum  # Study folder; equal to Shield for the original runs
 
 # Biased GPS sources (/gps/hist/type biase): GRAS 5 overestimates the quoted
 # errors, so take the error from the replica scatter instead.
